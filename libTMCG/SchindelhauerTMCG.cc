@@ -31,7 +31,6 @@
 *******************************************************************************/
 
 #include "SchindelhauerTMCG.hh"
-#include "mpz_srandom.h"
 #include "mpz_sqrtm.h"
 
 void SchindelhauerTMCG::TMCG_CreateKey 

@@ -54,6 +54,8 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
+	
+	#include "mpz_srandom.h"
 
 struct VTMF_Card
 {

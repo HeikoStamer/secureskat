@@ -40,7 +40,7 @@
 	#include <sstream>
 	#include <map>
 	
-	#include "libTMCG/SchindelhauerTMCG.hh"
+	#include <SchindelhauerTMCG.hh>
 	#include "SecureSkat_misc.hh"
 	
 	#ifdef ENABLE_NLS

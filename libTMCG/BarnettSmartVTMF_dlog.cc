@@ -34,7 +34,6 @@
 
 #include "BarnettSmartVTMF_dlog.hh"
 #include "mpz_primes.h"
-#include "mpz_srandom.h"
 #include "mpz_spowm.h"
 #include "mpz_shash.h"
 

@@ -7,6 +7,7 @@ EXTRA_DIST = config.rpath  ABOUT-NLS acinclude.m4 aclocal.m4 config.guess config
 	Makefile.am AUTHORS BUGS COPYING INSTALL NEWS README TODO THANKS ChangeLog
 
 LDADD = libTMCG/libTMCG.la
+INCLUDES = -I./libTMCG
 
 bin_PROGRAMS = SecureSkat SecureSkat_random
 

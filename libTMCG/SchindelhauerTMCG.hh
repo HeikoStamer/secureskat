@@ -54,6 +54,7 @@
 	#include <gmp.h>
 
 	#include "BarnettSmartVTMF_dlog.hh"
+	#include "mpz_srandom.h"
 
 using namespace std;
 typedef unsigned long int		mpz_ui;
