@@ -48,7 +48,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	
 	// Create a finite abelian group G where DDH is hard:
 	// We use the subgroup of quadratic residues modulo p,
-	// such that p = 2q + 1 and p, q are both primes.
+	// such that p = 2q + 1 and p, q are both prime.
 	mpz_init(p), mpz_init(q), mpz_init_set_ui(g, 2L);
 	mpz_sprime2g(p, q, TMCG_DDH_P_SIZE - 1L);
 	
@@ -100,7 +100,7 @@ bool BarnettSmartVTMF_dlog::CheckGroup
 			(mpz_sizeinbase(p, 2L) > (TMCG_DDH_P_SIZE + 4096L)))
 				throw false;
 		
-		// check whether p, q are both primes
+		// check whether p, q are both (probable) prime
 		if (!(mpz_probab_prime_p(p, 25L) && mpz_probab_prime_p(q, 25L)))
 			throw false;
 		
