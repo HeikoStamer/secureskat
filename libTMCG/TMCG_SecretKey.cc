@@ -56,14 +56,12 @@ TMCG_SecretKey::TMCG_SecretKey
 {
 	mpz_t foo, bar;
 	
+	assert(keysize <= TMCG_MAX_KEYBITS);
+	
 	mpz_init(foo), mpz_init(bar);
 	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
 	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
 		mpz_init(pa1d4), mpz_init(qa1d4);
-	
-	// sanity check, adjust keysize
-	if (keysize > TMCG_MAX_KEYBITS)
-		keysize = TMCG_MAX_KEYBITS;
 	
 	// set type of key
 	std::ostringstream t;

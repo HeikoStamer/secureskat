@@ -37,6 +37,10 @@ SchindelhauerTMCG::SchindelhauerTMCG
 	(unsigned long int security, size_t n, size_t m):
 		TMCG_SecurityLevel(security), TMCG_Players(n), TMCG_TypeBits(m)
 {
+	assert(TMCG_Players <= TMCG_MAX_PLAYERS);
+	assert(TMCG_TypeBits <= TMCG_MAX_TYPEBITS);
+	assert(TMCG_DDH_P_SIZE <= TMCG_MAX_KEYBITS);
+	
 	TMCG_MaxCardType = 1;
 	for (unsigned long int i = 0; i < TMCG_TypeBits; i++)
 		TMCG_MaxCardType *= 2;
