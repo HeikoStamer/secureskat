@@ -18,9 +18,7 @@ Stuff that should be done (until first production release):
 - add commands for manually key exchange (export/import)
 - provide nice libpopt commandline interface
 - use GcrySexp for ADTs/ store secrets via subkey in OpenPGP-impl.
-+ create libTMCG from SchindelhauerTMCG (no fixed parameters) for
-  stronger usability in other (secure) card game projects
-- documentation: manpage, texinfo, paper
++ documentation: doc subdir, manpage, texinfo, paper
 
 Further open tasks:
 
