@@ -36,10 +36,30 @@ TMCG_PublicKey::TMCG_PublicKey
 }
 
 TMCG_PublicKey::TMCG_PublicKey
-	(std::string s)
+	(const TMCG_PublicKey &pkey):
+		name(pkey.name), email(pkey.email), type(pkey.type),
+		nizk(pkey.nizk), sig(pkey.sig)
+{
+	mpz_init_set(m, pkey.m);
+	mpz_init_set(y, pkey.y);
+}
+
+TMCG_PublicKey::TMCG_PublicKey
+	(const std::string& s)
 {
 	mpz_init(m), mpz_init(y);
+	
 	import(s);
+}
+
+TMCG_PublicKey& TMCG_PublicKey::operator =
+	(const TMCG_PublicKey& that)
+{
+	name = that.name, email = that.email, type = that.type,
+		nizk = that.nizk, sig = that.sig;
+	mpz_set(m, that.m), mpz_set(y, that.y);
+	
+	return *this;
 }
 
 bool TMCG_PublicKey::check

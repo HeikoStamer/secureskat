@@ -36,6 +36,8 @@ TMCG_SecretKey::TMCG_SecretKey
 	
 	mpz_init(foo), mpz_init(bar);
 	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
+	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
+		mpz_init(pa1d4), mpz_init(qa1d4);
 	
 	// sanity check, adjust keysize
 	if (keysize > TMCG_MAX_KEYBITS)
@@ -122,26 +124,7 @@ TMCG_SecretKey::TMCG_SecretKey
 	while ((mpz_jacobi(y, m) != 1) || mpz_qrmn_p(y, p, q, m));
 	
 	// pre-compute non-persistent values
-	mpz_init(y1);
-	ret = mpz_invert(y1, y, m);
-	assert(ret);
-	mpz_init(m1pq);
-	mpz_sub(foo, m, p);
-	mpz_sub(foo, foo, q);
-	mpz_add_ui(foo, foo, 1L);
-	ret = mpz_invert(m1pq, m, foo);
-	assert(ret);
-	mpz_init(gcdext_up), mpz_init(gcdext_vq);
-	mpz_init(pa1d4), mpz_init(qa1d4);
-	mpz_gcdext(foo, gcdext_up, gcdext_vq, p, q);
-	assert(mpz_cmp_ui(foo, 1L) == 0);
-	mpz_mul(gcdext_up, gcdext_up, p);
-	mpz_mul(gcdext_vq, gcdext_vq, q);
-	mpz_set(pa1d4, p), mpz_set(qa1d4, q);
-	mpz_add_ui(pa1d4, pa1d4, 1L);
-	mpz_add_ui(qa1d4, qa1d4, 1L);
-	mpz_fdiv_q_2exp(pa1d4, pa1d4, 2L);
-	mpz_fdiv_q_2exp(qa1d4, qa1d4, 2L);
+	precompute();
 	
 	// Rosario Gennaro, Daniele Micciancio, Tal Rabin:
 	// 'An Efficient Non-Interactive Statistical Zero-Knowledge
@@ -260,12 +243,67 @@ TMCG_SecretKey::TMCG_SecretKey
 }
 
 TMCG_SecretKey::TMCG_SecretKey
-	(std::string s)
+	(const std::string& s)
 {
 	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
 	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
 		mpz_init(pa1d4), mpz_init(qa1d4);
+	
 	import(s);
+}
+
+TMCG_SecretKey::TMCG_SecretKey
+	(const TMCG_SecretKey& that):
+		name(that.name), email(that.email), type(that.type),
+		nizk(that.nizk), sig(that.sig)
+{
+	mpz_init_set(m, that.m), mpz_init_set(y, that.m),
+		mpz_init_set(p, that.p), mpz_init_set(q, that.q);
+	mpz_init_set(y1, that.y1), mpz_init_set(m1pq, that.m1pq),
+		mpz_init_set(gcdext_up, that.gcdext_up),
+		mpz_init_set(gcdext_vq, that.gcdext_vq),
+		mpz_init_set(pa1d4, that.pa1d4), mpz_init_set(qa1d4, that.qa1d4);
+}
+
+TMCG_SecretKey& TMCG_SecretKey::operator =
+	(const TMCG_SecretKey& that)
+{
+	name = that.name, email = that.email, type = that.type,
+		nizk = that.nizk, sig = that.sig;
+	mpz_set(m, that.m), mpz_set(y, that.y),
+		mpz_set(p, that.p), mpz_set(q, that.q);
+	mpz_set(y1, that.y1), mpz_set(m1pq, that.m1pq),
+		mpz_set(gcdext_up, that.gcdext_up), mpz_set(gcdext_vq, that.gcdext_vq),
+		mpz_set(pa1d4, that.pa1d4), mpz_set(qa1d4, that.qa1d4);
+	
+	return *this;
+}
+
+void TMCG_SecretKey::precompute
+	()
+{
+	// pre-compute non-persistent values
+	mpz_t foo;
+	mpz_init(foo);
+	
+	ret = mpz_invert(y1, y, m);
+	assert(ret);
+	mpz_sub(foo, m, p);
+	mpz_sub(foo, foo, q);
+	mpz_add_ui(foo, foo, 1L);
+	ret = mpz_invert(m1pq, m, foo);
+	assert(ret);
+	mpz_gcdext(foo, gcdext_up, gcdext_vq, p, q);
+	assert(mpz_cmp_ui(foo, 1L) == 0);
+	mpz_mul(gcdext_up, gcdext_up, p);
+	mpz_mul(gcdext_vq, gcdext_vq, q);
+	mpz_set(pa1d4, p), mpz_set(qa1d4, q);
+	mpz_add_ui(pa1d4, pa1d4, 1L);
+	mpz_add_ui(qa1d4, qa1d4, 1L);
+	mpz_fdiv_q_2exp(pa1d4, pa1d4, 2L);
+	mpz_fdiv_q_2exp(qa1d4, qa1d4, 2L);
+	
+	mpz_clear(foo);
 }
 
 bool TMCG_SecretKey::import
@@ -321,27 +359,8 @@ bool TMCG_SecretKey::import
 		sig = s;
 		
 		// pre-compute non-persistent values
-		mpz_t foo;
-		mpz_init(foo);
+		precompute();
 		
-		ret = mpz_invert(y1, y, m);
-		assert(ret);
-		mpz_sub(foo, m, p);
-		mpz_sub(foo, foo, q);
-		mpz_add_ui(foo, foo, 1L);
-		ret = mpz_invert(m1pq, m, foo);
-		assert(ret);
-		mpz_gcdext(foo, gcdext_up, gcdext_vq, p, q);
-		assert(mpz_cmp_ui(foo, 1L) == 0);
-		mpz_mul(gcdext_up, gcdext_up, p);
-		mpz_mul(gcdext_vq, gcdext_vq, q);
-		mpz_set(pa1d4, p), mpz_set(qa1d4, q);
-		mpz_add_ui(pa1d4, pa1d4, 1L);
-		mpz_add_ui(qa1d4, qa1d4, 1L);
-		mpz_fdiv_q_2exp(pa1d4, pa1d4, 2L);
-		mpz_fdiv_q_2exp(qa1d4, qa1d4, 2L);
-		
-		mpz_clear(foo);
 		throw true;
 	}
 	catch (bool return_value)

@@ -50,7 +50,7 @@
 struct TMCG_PublicKey
 {
 	std::string						name, email, type, nizk, sig;
-	mpz_t							m, y;
+	mpz_t									m, y;
 	
 	TMCG_PublicKey
 		();
@@ -59,7 +59,13 @@ struct TMCG_PublicKey
 		(const TMCG_SecretKey &skey);
 	
 	TMCG_PublicKey
-		(std::string s);
+		(const TMCG_PublicKey &pkey);
+	
+	TMCG_PublicKey
+		(const std::string& s);
+	
+	TMCG_PublicKey& operator =
+	(const TMCG_PublicKey& that);
 	
 	bool check
 		() const;

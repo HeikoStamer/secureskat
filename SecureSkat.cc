@@ -1180,7 +1180,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 						TMCG_PublicKey apkey;
 						if (!apkey.import(pki2))
 						{
-							std::cerr << _("TMCG: public key import error") << std::endl;
+							std::cerr << _("TMCG: public key corrupted") << std::endl;
 						}
 						else if (pki1 != apkey.keyid())
 						{
@@ -2895,7 +2895,7 @@ void run_irc()
 							TMCG_PublicKey pkey;
 							if (!pkey.import(public_key))
 							{
-								std::cerr << _("TMCG: public key import error") << std::endl;
+								std::cerr << _("TMCG: public key corrupted") << std::endl;
 								exit(-2);
 							}
 							
@@ -2909,7 +2909,7 @@ void run_irc()
 							// check NIZK
 							if (!pkey.check())
 							{
-								std::cerr << _("TMCG: public key not valid") << std::endl;
+								std::cerr << _("TMCG: invalid public key") << std::endl;
 								exit(-4);
 							}
 							
@@ -3033,7 +3033,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.6 2004/12/21 15:01:42 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.7 2004/12/22 21:07:10 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

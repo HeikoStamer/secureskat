@@ -61,7 +61,16 @@ struct TMCG_SecretKey
 		(unsigned long int keysize, const std::string &n, const std::string &e);
 	
 	TMCG_SecretKey
-		(std::string s);
+		(const std::string& s);
+	
+	TMCG_SecretKey
+		(const TMCG_SecretKey& that);
+	
+	TMCG_SecretKey& operator =
+		(const TMCG_SecretKey& that);
+	
+	void precompute
+		();
 	
 	bool import
 		(std::string s);

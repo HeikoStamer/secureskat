@@ -101,7 +101,7 @@ msgid "start the game."
 msgstr "startet die Skatrunde."
 
 #: SecureSkat.cc:1195 SecureSkat.cc:2910
-msgid "TMCG: public key import error"
+msgid "TMCG: public key corrupted"
 msgstr "TMCG: Import des öffentlichen Schlüssels fehlgeschlagen"
 
 #: SecureSkat.cc:1199 SecureSkat.cc:2917
@@ -438,7 +438,7 @@ msgid "PKI ERROR: out of memory"
 msgstr "PKI FEHLER: kein freier Speicherplatz vorhanden"
 
 #: SecureSkat.cc:2924
-msgid "TMCG: public key not valid"
+msgid "TMCG: invalid public key"
 msgstr "TMCG: öffentlicher Schlüssel ungültig"
 
 #: SecureSkat.cc:3104
@@ -472,7 +472,7 @@ msgid "GDBM ERROR"
 msgstr "GDBM FEHLER"
 
 #: SecureSkat_pki.cc:84
-msgid "PKI ERROR: secret key not importable"
+msgid "PKI ERROR: secret key corrupted"
 msgstr "PKI FEHLER: geheimer Schlüssel nicht importierbar"
 
 #: SecureSkat_pki.cc:91
@@ -480,7 +480,7 @@ msgid "PKI ERROR: identification prefix unknown"
 msgstr "PKI FEHLER: Identifikationsmerkmal unbestimmt"
 
 #: SecureSkat_pki.cc:115
-msgid "PKI ERROR: public key not importable"
+msgid "PKI ERROR: public key corrupted"
 msgstr "PKI FEHLER: öffentlicher Schlüssel nicht importierbar"
 
 #~ msgid "room completely occupied"

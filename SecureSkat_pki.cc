@@ -76,7 +76,12 @@ void get_secret_key
 		exit(-1);
 	}
 	
-	sec = TMCG_SecretKey(ost.str());
+	if (!sec.import(ost.str()))
+	{
+		std::cerr << _("PKI ERROR: secret key corrupted") << std::endl;
+		exit(-1);
+	}
+	
 	prefix = sec.keyid();
 	size_t ei = prefix.find("^", 0);
 	if (ei == prefix.npos)
@@ -104,7 +109,7 @@ void get_public_keys
 			if (pkey.import(data.dptr))
 				keys[key.dptr] = pkey;
 			else
-				std::cerr << _("PKI ERROR: public key not importable") <<
+				std::cerr << _("PKI ERROR: public key corrupted") <<
 					std::endl;
 			nextkey = gdbm_nextkey(pub_db, key);
 			free(data.dptr);
