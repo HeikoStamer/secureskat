@@ -11,8 +11,10 @@ Introduction
 
   `SecureSkat' is a cryptographically secure implementation of the german
   card game Skat for multiple players over IRC (Internet Relay Chat).
+  The included shared library (libTMCG) provides a general interface for
+  secure mental card games.
 
-  The protocols work in the 'honest-but-curious' (or semi-honest)
+  All protocols work in the 'honest-but-curious' (or semi-honest)
   adversary model, thus we do not care about robustness or availability
   (in sense of DoS). Fairness is based on several zero-knowledge-proofs
   from Christian Schindelhauer's research paper "A Toolbox for Mental
