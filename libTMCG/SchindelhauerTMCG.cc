@@ -925,78 +925,70 @@ void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 	
 	mpz_init (foo), mpz_init (bar), mpz_init (lej);
 	mpz_init (t_sqrt);
-	try
+	
+	// compute mpz_sqrtmn of t
+	assert (mpz_qrmn_p (t, key.p, key.q, key.m));
+	mpz_sqrtmn_fast (t_sqrt, t, key.p, key.q, key.m,
+		key.gcdext_up, key.gcdext_vq, key.pa1d4, key.qa1d4);
+	
+	// phase (P2)
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		// compute mpz_sqrtmn of t
-		assert (mpz_qrmn_p (t, key.p, key.q, key.m));
-		mpz_sqrtmn_fast (t_sqrt, t, key.p, key.q, key.m,
-			key.gcdext_up, key.gcdext_vq, key.pa1d4, key.qa1d4);
+		mpz_ptr r = new mpz_t(), s = new mpz_t();
+		mpz_init (r),	mpz_init (s);
 		
-		// phase (P2)
-		for (mpz_ui i = 0; i < security_desire; i++)
+		// choose random number r \in Z*m
+		do
 		{
-			mpz_ptr r = new mpz_t(), s = new mpz_t();
-			mpz_init (r),	mpz_init (s);
-			
-			// choose random number r \in Z*m
-			do
-			{
-				mpz_srandomm (r, NULL, key.m);
-				mpz_gcd (lej, r, key.m);
-			}
-			while (mpz_cmp_ui (lej, 1L) || !mpz_cmp_ui (r, 1L));
-			
-			// compute s = t_sqrt * r_i^{-1} (mod m)
-			ret = mpz_invert (s, r, key.m);
-			assert(ret);
-			mpz_mul (s, s, t_sqrt);
-			mpz_mod (s, s, key.m);
-			assert(mpz_cmp_ui (s, 1L));
-			
-			// compute R_i = r_i^2 (mod m), S_i = s_i^2 (mod m)
-			mpz_mul (foo, r, r);
-			mpz_mod (foo, foo, key.m);
-			mpz_mul (bar, s, s);
-			mpz_mod (bar, bar, key.m);
-			
-			// check congruence R_i * S_i \cong t (mod m)
-			#ifndef NDEBUG
-				mpz_mul (lej, foo, bar);
-				mpz_mod (lej, lej, key.m);
-				assert(mpz_congruent_p (t, lej, key.m));
-			#endif
-			
-			// store r_i, s_i and send R_i, S_i to prover
-			rr.push_back(r), ss.push_back(s);
-			out << foo << endl, out << bar << endl;
+			mpz_srandomm (r, NULL, key.m);
+			mpz_gcd (lej, r, key.m);
 		}
+		while (mpz_cmp_ui (lej, 1L) || !mpz_cmp_ui (r, 1L));
 		
-		// phase (P4)
-		for (mpz_ui i = 0; i < security_desire; i++)
-		{
-			// receive R/S-question from verifier
-			in >> foo;
-			
-			// send proof to verifier
-			if (mpz_get_ui (foo) & 1L)
-				out << rr[i] << endl;
-			else
-				out << ss[i] << endl;
-		}
+		// compute s = t_sqrt * r_i^{-1} (mod m)
+		ret = mpz_invert (s, r, key.m);
+		assert(ret);
+		mpz_mul (s, s, t_sqrt);
+		mpz_mod (s, s, key.m);
+		assert(mpz_cmp_ui (s, 1L));
 		
-		// finish
-		throw true;
+		// compute R_i = r_i^2 (mod m), S_i = s_i^2 (mod m)
+		mpz_mul (foo, r, r);
+		mpz_mod (foo, foo, key.m);
+		mpz_mul (bar, s, s);
+		mpz_mod (bar, bar, key.m);
+		
+		// check congruence R_i * S_i \cong t (mod m)
+		#ifndef NDEBUG
+			mpz_mul (lej, foo, bar);
+			mpz_mod (lej, lej, key.m);
+			assert(mpz_congruent_p (t, lej, key.m));
+		#endif
+		
+		// store r_i, s_i and send R_i, S_i to prover
+		rr.push_back(r), ss.push_back(s);
+		out << foo << endl, out << bar << endl;
 	}
-	catch (bool exception)
+	
+	// phase (P4)
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		mpz_clear (foo), mpz_clear (bar), mpz_clear (lej);
-		mpz_clear (t_sqrt);
-		for (vector<mpz_ptr>::iterator ri = rr.begin(); ri != rr.end(); ri++)
-			mpz_clear(*ri), delete *ri;
-		for (vector<mpz_ptr>::iterator si = ss.begin(); si != ss.end(); si++)
-			mpz_clear(*si), delete *si;
-		return;
+		// receive R/S-question from verifier
+		in >> foo;
+		
+		// send proof to verifier
+		if (mpz_get_ui (foo) & 1L)
+			out << rr[i] << endl;
+		else
+			out << ss[i] << endl;
 	}
+	
+	mpz_clear (foo), mpz_clear (bar), mpz_clear (lej);
+	mpz_clear (t_sqrt);
+	for (vector<mpz_ptr>::iterator ri = rr.begin(); ri != rr.end(); ri++)
+		mpz_clear(*ri), delete *ri;
+	for (vector<mpz_ptr>::iterator si = ss.begin(); si != ss.end(); si++)
+		mpz_clear(*si), delete *si;
 }
 
 bool SchindelhauerTMCG::TMCG_VerifyQuadraticResidue
@@ -1289,118 +1281,110 @@ void SchindelhauerTMCG::TMCG_ProofMaskOne
 	assert (ret);
 	
 	mpz_init (foo), mpz_init (bar);
-	try
+	
+	// phase (P2)
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		// phase (P2)
-		for (mpz_ui i = 0; i < security_desire; i++)
+		mpz_ptr r3 = new mpz_t(), s = new mpz_t(), 
+			b3 = new mpz_t(), c = new mpz_t();
+		mpz_init (r3),	mpz_init (s),	mpz_init (b3),	mpz_init (c);
+		
+		// choose random number r_i \in Z*m and b \in {0,1}
+		do
 		{
-			mpz_ptr r3 = new mpz_t(), s = new mpz_t(), 
-				b3 = new mpz_t(), c = new mpz_t();
-			mpz_init (r3),	mpz_init (s),	mpz_init (b3),	mpz_init (c);
-			
-			// choose random number r_i \in Z*m and b \in {0,1}
-			do
-			{
-				mpz_srandomm (r3, NULL, key.m);
-				mpz_srandomb (b3, NULL, 1L);
-				mpz_gcd (foo, r3, key.m);
-			}
-			while (mpz_cmp_ui (foo, 1L) || !mpz_cmp_ui (r3, 1L));
-			rr.push_back(r3), bb.push_back(b3);
-			
-			// compute c_i
-			if (mpz_cmp (b, b3) == 0)
-				mpz_set_ui (c, 0L);
-			else
-				mpz_set_ui (c, 1L);
-			
-			// compute s_i
-			if ((mpz_cmp_ui (b, 0L) == 0) && (mpz_cmp_ui (b3, 1L) == 0))
-			{
-				ret = mpz_invert (s, r3, key.m);
-				assert (ret);
-				mpz_mul (s, s, y1m);
-				mpz_mod (s, s, key.m);
-				mpz_mul (s, s, r);
-				mpz_mod (s, s, key.m);
-			}
-			else
-			{
-				ret = mpz_invert (s, r3, key.m);
-				assert (ret);
-				mpz_mul (s, s, r);
-				mpz_mod (s, s, key.m);
-			}
-			
-			// store s_i, c_i
-			ss.push_back(s), cc.push_back(c);
-			
-			// compute R_i = {r_i}^2 * y^b (mod m), S_i = {s_i}^2 * y^{c_i} (mod m)
-			mpz_mul (foo, r3, r3);
+			mpz_srandomm (r3, NULL, key.m);
+			mpz_srandomb (b3, NULL, 1L);
+			mpz_gcd (foo, r3, key.m);
+		}
+		while (mpz_cmp_ui (foo, 1L) || !mpz_cmp_ui (r3, 1L));
+		rr.push_back(r3), bb.push_back(b3);
+		
+		// compute c_i
+		if (mpz_cmp (b, b3) == 0)
+			mpz_set_ui (c, 0L);
+		else
+			mpz_set_ui (c, 1L);
+		
+		// compute s_i
+		if ((mpz_cmp_ui (b, 0L) == 0) && (mpz_cmp_ui (b3, 1L) == 0))
+		{
+			ret = mpz_invert (s, r3, key.m);
+			assert (ret);
+			mpz_mul (s, s, y1m);
+			mpz_mod (s, s, key.m);
+			mpz_mul (s, s, r);
+			mpz_mod (s, s, key.m);
+		}
+		else
+		{
+			ret = mpz_invert (s, r3, key.m);
+			assert (ret);
+			mpz_mul (s, s, r);
+			mpz_mod (s, s, key.m);
+		}
+		
+		// store s_i, c_i
+		ss.push_back(s), cc.push_back(c);
+		
+		// compute R_i = {r_i}^2 * y^b (mod m), S_i = {s_i}^2 * y^{c_i} (mod m)
+		mpz_mul (foo, r3, r3);
+		mpz_mod (foo, foo, key.m);
+		if (mpz_get_ui (b3) & 1L)
+		{
+			mpz_mul (foo, foo, key.y);
 			mpz_mod (foo, foo, key.m);
-			if (mpz_get_ui (b3) & 1L)
-			{
-				mpz_mul (foo, foo, key.y);
-				mpz_mod (foo, foo, key.m);
-			}
-			mpz_mul (bar, s, s);
-			mpz_mod (bar, bar, key.m);
-			if (mpz_get_ui (c) & 1L)
-			{
-				mpz_mul (bar, bar, key.y);
-				mpz_mod (bar, bar, key.m);
-			}
-			
-			// check congruence R_i * S_i \cong t (mod m)
-			#ifndef NDEBUG
-				mpz_t lej, t;
-				mpz_init (lej), mpz_init (t);
-				mpz_mul (t, r, r);
-				mpz_mod (t, t, key.m);
-				if (mpz_get_ui (b) & 1L)
-				{
-					mpz_mul (t, t, key.y);
-					mpz_mod (t, t, key.m);
-				}
-				mpz_mul (lej, foo, bar);
-				mpz_mod (lej, lej, key.m);
-				assert (mpz_congruent_p (t, lej, key.m));
-				mpz_clear (lej), mpz_clear (t);
-			#endif
-			
-			// send R_i, S_i to verifier
-			out << foo << endl, out << bar << endl;
 		}
-		
-		// phase (P4)
-		for (mpz_ui i = 0; i < security_desire; i++)
+		mpz_mul (bar, s, s);
+		mpz_mod (bar, bar, key.m);
+		if (mpz_get_ui (c) & 1L)
 		{
-			// receive R/S-question from verifier
-			in >> foo;
-			
-			// send proof to verifier
-			if (mpz_get_ui (foo) & 1L)
-				out << rr[i] << endl, out << bb[i] << endl;
-			else
-				out << ss[i] << endl, out << cc[i] << endl;	
+			mpz_mul (bar, bar, key.y);
+			mpz_mod (bar, bar, key.m);
 		}
 		
-		// finish
-		throw true;
+		// check congruence R_i * S_i \cong t (mod m)
+		#ifndef NDEBUG
+			mpz_t lej, t;
+			mpz_init (lej), mpz_init (t);
+			mpz_mul (t, r, r);
+			mpz_mod (t, t, key.m);
+			if (mpz_get_ui (b) & 1L)
+			{
+				mpz_mul (t, t, key.y);
+				mpz_mod (t, t, key.m);
+			}
+			mpz_mul (lej, foo, bar);
+			mpz_mod (lej, lej, key.m);
+			assert (mpz_congruent_p (t, lej, key.m));
+			mpz_clear (lej), mpz_clear (t);
+		#endif
+		
+		// send R_i, S_i to verifier
+		out << foo << endl, out << bar << endl;
 	}
-	catch (bool exception)
+	
+	// phase (P4)
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		mpz_clear (y1m), mpz_clear (foo), mpz_clear (bar);
-		for (vector<mpz_ptr>::iterator ri = rr.begin(); ri != rr.end(); ri++)
-			mpz_clear(*ri), delete *ri;
-		for (vector<mpz_ptr>::iterator bi = bb.begin(); bi != bb.end(); bi++)
-			mpz_clear(*bi), delete *bi;
-		for (vector<mpz_ptr>::iterator si = ss.begin(); si != ss.end(); si++)
-			mpz_clear(*si), delete *si;
-		for (vector<mpz_ptr>::iterator ci = cc.begin(); ci != cc.end(); ci++)
-			mpz_clear(*ci), delete *ci;
-		return;
+		// receive R/S-question from verifier
+		in >> foo;
+		
+		// send proof to verifier
+		if (mpz_get_ui (foo) & 1L)
+			out << rr[i] << endl, out << bb[i] << endl;
+		else
+			out << ss[i] << endl, out << cc[i] << endl;	
 	}
+	
+	mpz_clear (y1m), mpz_clear (foo), mpz_clear (bar);
+	for (vector<mpz_ptr>::iterator ri = rr.begin(); ri != rr.end(); ri++)
+		mpz_clear(*ri), delete *ri;
+	for (vector<mpz_ptr>::iterator bi = bb.begin(); bi != bb.end(); bi++)
+		mpz_clear(*bi), delete *bi;
+	for (vector<mpz_ptr>::iterator si = ss.begin(); si != ss.end(); si++)
+		mpz_clear(*si), delete *si;
+	for (vector<mpz_ptr>::iterator ci = cc.begin(); ci != cc.end(); ci++)
+		mpz_clear(*ci), delete *ci;
 }
 
 bool SchindelhauerTMCG::TMCG_VerifyMaskOne
@@ -1509,7 +1493,7 @@ void SchindelhauerTMCG::TMCG_ProofNonQuadraticResidue_PerfectZeroKnowledge
 		// finish
 		throw true;
 	}
-	catch (bool exception)
+	catch (bool return_value)
 	{
 		TMCG_ReleaseKey(key2);
 		mpz_clear (foo), mpz_clear (bar);
@@ -2644,41 +2628,31 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	in >> security_desire, in.ignore(1, '\n');
 	
 	mpz_init (foo);
-	try
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		for (mpz_ui i = 0; i < security_desire; i++)
-		{
-			TMCG_Stack s3;
-			TMCG_StackSecret ss2;
-			
-			// create and mix stack
-			TMCG_CreateStackSecret(ss2, cyclic, ring, index, s.size());
-			TMCG_MixStack(s2, s3, ss2, ring);
-			
-			// send stack
-			out << s3 << endl;
-			
-			// receive question
-			in >> foo;
-			
-			// send proof
-			if (!(mpz_get_ui (foo) & 1L))
-				TMCG_GlueStackSecret(ss, ss2, ring);
-			out << ss2 << endl;
-			
-			// release stack
-			TMCG_ReleaseStack(s3);
-			TMCG_ReleaseStackSecret(ss2);
-		}
+		TMCG_Stack s3;
+		TMCG_StackSecret ss2;
 		
-		// finish
-		throw true;
+		// create and mix stack
+		TMCG_CreateStackSecret(ss2, cyclic, ring, index, s.size());
+		TMCG_MixStack(s2, s3, ss2, ring);
+		
+		// send stack
+		out << s3 << endl;
+		
+		// receive question
+		in >> foo;
+		
+		// send proof
+		if (!(mpz_get_ui (foo) & 1L))
+			TMCG_GlueStackSecret(ss, ss2, ring);
+		out << ss2 << endl;
+		
+		// release stack
+		TMCG_ReleaseStack(s3);
+		TMCG_ReleaseStackSecret(ss2);
 	}
-	catch (bool exception)
-	{
-		mpz_clear (foo);
-		return;
-	}
+	mpz_clear (foo);
 }
 
 void SchindelhauerTMCG::TMCG_ProofStackEquality
@@ -2692,41 +2666,31 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	in >> security_desire, in.ignore(1, '\n');
 	
 	mpz_init (foo);
-	try
+	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		for (mpz_ui i = 0; i < security_desire; i++)
-		{
-			VTMF_Stack s3;
-			VTMF_StackSecret ss2;
-			
-			// create and mix stack
-			TMCG_CreateStackSecret(ss2, cyclic, s.size(), vtmf);
-			TMCG_MixStack(s2, s3, ss2, vtmf);
-			
-			// send stack
-			out << s3 << endl;
-			
-			// receive question
-			in >> foo;
-			
-			// send proof
-			if (!(mpz_get_ui(foo) & 1L))
-				TMCG_GlueStackSecret(ss, ss2, vtmf);
-			out << ss2 << endl;
-			
-			// release stack
-			TMCG_ReleaseStack(s3);
-			TMCG_ReleaseStackSecret(ss2);
-		}
+		VTMF_Stack s3;
+		VTMF_StackSecret ss2;
 		
-		// finish
-		throw true;
+		// create and mix stack
+		TMCG_CreateStackSecret(ss2, cyclic, s.size(), vtmf);
+		TMCG_MixStack(s2, s3, ss2, vtmf);
+		
+		// send stack
+		out << s3 << endl;
+		
+		// receive question
+		in >> foo;
+		
+		// send proof
+		if (!(mpz_get_ui(foo) & 1L))
+			TMCG_GlueStackSecret(ss, ss2, vtmf);
+		out << ss2 << endl;
+		
+		// release stack
+		TMCG_ReleaseStack(s3);
+		TMCG_ReleaseStackSecret(ss2);
 	}
-	catch (bool exception)
-	{
-		mpz_clear(foo);
-		return;
-	}
+	mpz_clear(foo);
 }
 
 bool SchindelhauerTMCG::TMCG_VerifyStackEquality

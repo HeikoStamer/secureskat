@@ -1032,7 +1032,7 @@ int skat_child
 	close(connect_handle), close(accept_handle);
 	if (exit_code != 6)
 		*out_pipe << "PART #openSkat_" << nr << endl << flush;
-	delete in_pipe, out_pipe;
+	delete in_pipe, delete out_pipe;
 	delete [] ipipe_readbuf;
 	return exit_code;
 }
@@ -3045,7 +3045,7 @@ int main(int argc, char* argv[], char* envp[])
 	string cmd = argv[0];
 	cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << endl <<
-		" $Id: SecureSkat.cc,v 1.3 2004/11/24 22:08:36 stamer Exp $ " << endl;
+		" $Id: SecureSkat.cc,v 1.4 2004/12/07 14:07:09 stamer Exp $ " << endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

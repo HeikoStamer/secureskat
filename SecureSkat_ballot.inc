@@ -805,7 +805,8 @@ int ballot_child
 	delete vtmf;
 	delete ballot_tmcg;
 	*out_pipe << "PART #openSkat_" << nr << endl << flush;
-	delete in_pipe, out_pipe;
+	delete in_pipe;
+	delete out_pipe;
 	
 	return 0;
 }
