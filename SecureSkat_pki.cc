@@ -44,6 +44,7 @@ void get_secret_key
 			std::getline(std::cin, name);
 			std::cout << _("Your electronic mail address") << ": ";
 			std::getline(std::cin, email);
+			std::cerr << _("Creating your key. Please wait") << std::flush;
 			while (1)
 			{
 				TMCG_SecretKey tmpsec(name, email);
