@@ -60,12 +60,26 @@
 struct VTMF_Card
 {
 	mpz_t c_1, c_2;
-		
-	VTMF_Card()
+	
+	VTMF_Card
+		()
 	{
 		mpz_init(c_1), mpz_init(c_2);
 	}
-		
+	
+	VTMF_Card
+		(const VTMF_Card& that)
+	{
+		mpz_init_set(c_1, that.c_1), mpz_init_set(c_2, that.c_2);
+	}
+	
+	VTMF_Card& operator =
+		(const VTMF_Card& that)
+	{
+		mpz_set(c_1, that.c_1), mpz_set(c_2, that.c_2);
+		return *this;
+	}
+	
 	~VTMF_Card()
 	{
 		mpz_clear(c_1), mpz_clear(c_2);
@@ -75,13 +89,28 @@ struct VTMF_Card
 struct VTMF_CardSecret
 {
 	mpz_t r;
-		
-	VTMF_CardSecret()
+	
+	VTMF_CardSecret
+		()
 	{
 		mpz_init(r);
 	}
-		
-	~VTMF_CardSecret()
+	
+	VTMF_CardSecret
+		(const VTMF_CardSecret& that)
+	{
+		mpz_init_set(r, that.r);
+	}
+	
+	VTMF_CardSecret& operator =
+		(const VTMF_CardSecret& that)
+	{
+		mpz_set(r, that.r);
+		return *this;
+	}
+	
+	~VTMF_CardSecret
+		()
 	{
 		mpz_clear(r);
 	}

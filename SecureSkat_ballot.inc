@@ -360,7 +360,6 @@ int ballot_child
 				}
 				else
 				{
-					ballot_tmcg->TMCG_ReleaseCardSecret(cs);
 					neighbor->getline(challenge_sig, sizeof(challenge_sig));
 					if (ballot_tmcg->TMCG_ImportCardSecret(cs, challenge_sig))
 					{
@@ -511,8 +510,7 @@ int ballot_child
 							// send signature
 							*neighbor << ballot_tmcg->TMCG_SignData(sec, challenge.str()) <<
 								endl << flush;
-							// release old and create new challenge
-							ballot_tmcg->TMCG_ReleaseCardSecret(cs);
+							// create new challenge
 							ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 							// send challenge
 							*neighbor << cs << endl << flush;

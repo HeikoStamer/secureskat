@@ -742,12 +742,12 @@ const char *SchindelhauerTMCG::TMCG_DecryptValue
 		// check keyID
 		if (!cm(value, TMCG_ExportKeyID(key), '|'))
 			throw false;
-					
+		
 		// vdata
 		if ((mpz_set_str (vdata, gs(value, '|'), MPZ_IO_BASE) < 0) || 
 			(!nx(value, '|')))
 				throw false;
-
+		
 		// decrypt value, compute modular square roots
 		if (!mpz_qrmn_p (vdata, key.p, key.q, key.m))
 			throw false;
@@ -761,10 +761,10 @@ const char *SchindelhauerTMCG::TMCG_DecryptValue
 				mpz_export (y, &cnt, -1, rabin_s2 + rabin_s1, 1, 0, vroot[k]);
 				memcpy (Mt, y, rabin_s2), memcpy (r, y + rabin_s2, rabin_s1);
 				g(g12, rabin_s2, r, rabin_s1);
-
+				
 				for (size_t i = 0; i < rabin_s2; i++)
 					Mt[i] ^= g12[i];
-			
+				
 				memset (g12, 0, rabin_s0);
 				if (memcmp (Mt + rabin_s0, g12, rabin_s0) == 0)
 				{
@@ -810,13 +810,13 @@ const char *SchindelhauerTMCG::TMCG_SignData
 		char *Mr = new char[data.length() + rabin_k0];
 		memcpy (Mr, data.c_str(), data.length());
 		memcpy (Mr + data.length(), r, rabin_k0);
-
+		
 		char *w = new char[mdsize];
 		h(w, Mr, data.length() + rabin_k0);
-
+		
 		char *g12 = new char[mnsize];
 		g(g12, mnsize - mdsize, w, mdsize);
-
+		
 		for (size_t i = 0; i < rabin_k0; i++)
 			r[i] ^= g12[i];
 		
@@ -826,22 +826,22 @@ const char *SchindelhauerTMCG::TMCG_SignData
 		memcpy (y + mdsize + rabin_k0,	g12 + rabin_k0,
 			mnsize - mdsize - rabin_k0);
 		mpz_import (foo, 1, -1, mnsize, 1, 0, y);
-
+		
 		delete [] y, delete [] g12, delete [] w, delete [] Mr, delete [] r;
 	}
 	while (!mpz_qrmn_p (foo, key.p, key.q, key.m));
 	mpz_sqrtmn_fast_all (foo_sqrt[0], foo_sqrt[1], foo_sqrt[2], foo_sqrt[3], foo,
 		key.p, key.q, key.m, key.gcdext_up, key.gcdext_vq, key.pa1d4, key.qa1d4);
-
+	
 	// choose square root randomly (one of four)
 	mpz_srandomb (foo, NULL, 2L);
-
+	
 	TMCG_DataStream ost;
 	ost << "sig|" << TMCG_ExportKeyID(key) << 
 		"|" << foo_sqrt[mpz_get_ui (foo) % 4] << "|";
 	mpz_clear (foo), mpz_clear (foo_sqrt[0]), mpz_clear (foo_sqrt[1]),
 		mpz_clear (foo_sqrt[2]), mpz_clear (foo_sqrt[3]);
-
+	
 	str2 = ost.str();
 	return str2.c_str();
 }
@@ -871,14 +871,14 @@ bool SchindelhauerTMCG::TMCG_VerifyData
 		// verify signature
 		size_t mdsize = gcry_md_get_algo_dlen (gcrypt_md_algorithm);
 		size_t mnsize = mpz_sizeinbase (key.m, 2L) / 8;
-
+		
 		// check that y \in Z*m
 		assert (mpz_sizeinbase (key.m, 2L) > (mnsize * 8));
 		assert (mnsize > (mdsize + rabin_k0));
 		
 		mpz_mul (foo, foo, foo);
 		mpz_mod (foo, foo, key.m);
-
+		
 		char *w = new char[mdsize], *r = new char[rabin_k0];
 		char *gamma = new char[mnsize - mdsize - rabin_k0];
 		char *y = new char[mnsize + 1024];
@@ -905,9 +905,9 @@ bool SchindelhauerTMCG::TMCG_VerifyData
 			(memcmp (gamma, g12 + rabin_k0, mnsize - mdsize - rabin_k0) == 0);
 		delete [] y, delete [] w, delete [] r, delete [] gamma, 
 			delete [] g12, delete [] Mr, delete [] w2;
-	
+		
 		throw ok;
-	}		
+	}
 	catch (bool return_value)
 	{
 		mpz_clear (foo);
@@ -922,7 +922,7 @@ void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 	mpz_t foo, bar, lej, t_sqrt;
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
-
+	
 	mpz_init (foo), mpz_init (bar), mpz_init (lej);
 	mpz_init (t_sqrt);
 	try
@@ -931,7 +931,7 @@ void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 		assert (mpz_qrmn_p (t, key.p, key.q, key.m));
 		mpz_sqrtmn_fast (t_sqrt, t, key.p, key.q, key.m,
 			key.gcdext_up, key.gcdext_vq, key.pa1d4, key.qa1d4);
-
+		
 		// phase (P2)
 		for (mpz_ui i = 0; i < security_desire; i++)
 		{
@@ -965,7 +965,7 @@ void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 				mpz_mod (lej, lej, key.m);
 				assert(mpz_congruent_p (t, lej, key.m));
 			#endif
-
+			
 			// store r_i, s_i and send R_i, S_i to prover
 			rr.push_back(r), ss.push_back(s);
 			out << foo << endl, out << bar << endl;
@@ -1584,19 +1584,19 @@ void SchindelhauerTMCG::TMCG_CreateOpenCard
 	{
 		if (type & 1)
 		{
-			mpz_init_set (c.z[0][w], ring.key[0].y);
+			mpz_set(c.z[0][w], ring.key[0].y);
 			--type, type /= 2;
 		}
 		else
 		{
-			mpz_init_set_ui (c.z[0][w], 1L);
+			mpz_set_ui(c.z[0][w], 1L);
 			type /= 2;
 		}
 	}
 	
 	for (size_t k = 1; k < TMCG_Players; k++)
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_init_set_ui (c.z[k][w], 1L);
+			mpz_set_ui(c.z[k][w], 1L);
 }
 
 void SchindelhauerTMCG::TMCG_CreateOpenCard
@@ -1614,7 +1614,6 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	TMCG_CreateOpenCard(oc, ring, type);
 	TMCG_CreateCardSecret(cs, ring, index);
 	TMCG_MaskCard(oc, c, cs, ring);
-	TMCG_ReleaseCard(oc);
 }
 
 void SchindelhauerTMCG::TMCG_CreatePrivateCard
@@ -1629,19 +1628,9 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	mpz_clear(m);
 }
 
-void SchindelhauerTMCG::TMCG_ReleaseCard
-	(TMCG_Card &c)
-{
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_clear(c.z[k][w]);
-}
-
 bool SchindelhauerTMCG::TMCG_ImportCard
-	(TMCG_Card &c, const string &import)
+	(TMCG_Card &c, string s)
 {
-	string s = import;
-	
 	try
 	{
 		// check magic
@@ -1657,7 +1646,7 @@ bool SchindelhauerTMCG::TMCG_ImportCard
 			for (size_t w = 0; w < TMCG_TypeBits; w++)
 			{
 				// z_ij
-				if ((mpz_init_set_str (c.z[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) || 
+				if ((mpz_set_str(c.z[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
 			}
@@ -1672,10 +1661,8 @@ bool SchindelhauerTMCG::TMCG_ImportCard
 }
 
 bool SchindelhauerTMCG::TMCG_ImportCard
-	(VTMF_Card &c, const string &import)
+	(VTMF_Card &c, string s)
 {
-	string s = import;
-	
 	try
 	{
 		// check magic
@@ -1701,49 +1688,47 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 {
 	mpz_t foo;
 	
-	mpz_init (foo);
+	mpz_init(foo);
 	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
 	for (size_t k = 0; k < TMCG_Players; k++)
 	{
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
 		{
-			mpz_init (cs.r[k][w]), mpz_init (cs.b[k][w]);
-			
-			// choose random number r \in Z*m
+			// choose random number r \in Z^*_m
 			do
 			{
-				mpz_srandomm (cs.r[k][w], NULL, ring.key[k].m);
-				mpz_gcd (foo, cs.r[k][w], ring.key[k].m);
+				mpz_srandomm(cs.r[k][w], NULL, ring.key[k].m);
+				mpz_gcd(foo, cs.r[k][w], ring.key[k].m);
 			}
-			while (mpz_cmp_ui (foo, 1L));
+			while (mpz_cmp_ui(foo, 1L));
 			
-			// choose random bit b \in {0,1} or set it initially to zero
+			// choose random bit b \in {0, 1} or set it initially to zero
 			if (k != index)
-				mpz_srandomb (cs.b[k][w], NULL, 1L);
+				mpz_srandomb(cs.b[k][w], NULL, 1L);
 			else
-				mpz_set_ui (cs.b[index][w], 0L);
+				mpz_set_ui(cs.b[index][w], 0L);
 		}
 	}
-	mpz_clear (foo);
+	mpz_clear(foo);
 	
-	// XOR b_ij with i \neq index (keep type of card)
+	// XOR b_{ij} with i \neq index (keep type of this card)
 	for (size_t k = 0; k < TMCG_Players; k++)
 	{
 		for (size_t w = 0; (k != index) && (w < TMCG_TypeBits); w++)
 		{
-			if (mpz_get_ui (cs.b[index][w]) & 1L)
+			if (mpz_get_ui(cs.b[index][w]) & 1L)
 			{
-				if (mpz_get_ui (cs.b[k][w]) & 1L)
-					mpz_set_ui (cs.b[index][w], 0L);
+				if (mpz_get_ui(cs.b[k][w]) & 1L)
+					mpz_set_ui(cs.b[index][w], 0L);
 				else
-					mpz_set_ui (cs.b[index][w], 1L);
+					mpz_set_ui(cs.b[index][w], 1L);
 			}
 			else
 			{
-				if (mpz_get_ui (cs.b[k][w]) & 1L)
-					mpz_set_ui (cs.b[index][w], 1L);
+				if (mpz_get_ui(cs.b[k][w]) & 1L)
+					mpz_set_ui(cs.b[index][w], 1L);
 				else
-					mpz_set_ui (cs.b[index][w], 0L);
+					mpz_set_ui(cs.b[index][w], 0L);
 			}
 		}
 	}
@@ -1761,38 +1746,12 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
 	for (size_t k = 0; k < TMCG_Players; k++)
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_init_set(cs.r[k][w], r), mpz_init_set_ui(cs.b[k][w], b);
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseCardSecret
-	(TMCG_CardSecret &cs)
-{
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_clear(cs.r[k][w]), mpz_clear(cs.b[k][w]);
-}
-
-void SchindelhauerTMCG::TMCG_CopyCardSecret
-	(const TMCG_CardSecret &cs, TMCG_CardSecret &cs2)
-{
-	cs2.Players = TMCG_Players, cs2.TypeBits = TMCG_TypeBits;
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_init_set (cs2.r[k][w], cs.r[k][w]),
-			mpz_init_set (cs2.b[k][w], cs.b[k][w]);
-}
-
-void SchindelhauerTMCG::TMCG_CopyCardSecret
-	(const VTMF_CardSecret &cs, VTMF_CardSecret &cs2)
-{
-	mpz_set(cs2.r, cs.r);
+			mpz_set(cs.r[k][w], r), mpz_set_ui(cs.b[k][w], b);
 }
 
 bool SchindelhauerTMCG::TMCG_ImportCardSecret
-	(TMCG_CardSecret &cs, const string &import)
+	(TMCG_CardSecret &cs, string s)
 {
-	string s = import;
-	
 	try
 	{
 		// check magic
@@ -1808,12 +1767,12 @@ bool SchindelhauerTMCG::TMCG_ImportCardSecret
 			for (size_t w = 0; w < TMCG_TypeBits; w++)
 			{
 				// r_ij
-				if ((mpz_init_set_str (cs.r[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+				if ((mpz_set_str(cs.r[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
 						
 				// b_ij
-				if ((mpz_init_set_str (cs.b[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+				if ((mpz_set_str(cs.b[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
 			}
@@ -1828,10 +1787,8 @@ bool SchindelhauerTMCG::TMCG_ImportCardSecret
 }
 
 bool SchindelhauerTMCG::TMCG_ImportCardSecret
-	(VTMF_CardSecret &cs, const string &import)
+	(VTMF_CardSecret &cs, string s)
 {
-	string s = import;
-	
 	try
 	{
 		// check magic
@@ -1884,21 +1841,6 @@ bool SchindelhauerTMCG::TMCG_EqualCard
 	if ((mpz_cmp(c.c_1, cc.c_1) != 0) || (mpz_cmp(c.c_2, cc.c_2) != 0))
 		return false;
 	return true;
-}
-
-void SchindelhauerTMCG::TMCG_CopyCard
-	(const TMCG_Card &c, TMCG_Card &cc)
-{
-	cc.Players = TMCG_Players, cc.TypeBits = TMCG_TypeBits;
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_init_set(cc.z[k][w], c.z[k][w]);
-}
-
-void SchindelhauerTMCG::TMCG_CopyCard
-	(const VTMF_Card &c, VTMF_Card &cc)
-{
-	mpz_set(cc.c_1, c.c_1), mpz_set(cc.c_2, c.c_2);
 }
 
 void SchindelhauerTMCG::TMCG_ProofMaskCard
@@ -2207,7 +2149,7 @@ void SchindelhauerTMCG::TMCG_ReleaseStackSecret
 	(TMCG_StackSecret &ss)
 {
 	for (TMCG_StackSecret::const_iterator si = ss.begin(); si != ss.end(); si++)
-		TMCG_ReleaseCardSecret(*(si->second)), delete si->second;
+		delete si->second;
 	ss.clear();
 }
 
@@ -2220,9 +2162,8 @@ void SchindelhauerTMCG::TMCG_ReleaseStackSecret
 }
 
 bool SchindelhauerTMCG::TMCG_ImportStackSecret
-	(TMCG_StackSecret &ss, const string &import)
+	(TMCG_StackSecret &ss, string s)
 {
-	string s = import;
 	size_t size = 0;
 	char *ec;
 	
@@ -2272,9 +2213,8 @@ bool SchindelhauerTMCG::TMCG_ImportStackSecret
 }
 
 bool SchindelhauerTMCG::TMCG_ImportStackSecret
-	(VTMF_StackSecret &ss, const string &import)
+	(VTMF_StackSecret &ss, string s)
 {
-	string s = import;
 	size_t size = 0;
 	char *ec;
 	
@@ -2327,78 +2267,58 @@ void SchindelhauerTMCG::TMCG_PushToStack
 	(TMCG_Stack &s, const TMCG_Card &c)
 {
 	if (s.size() < TMCG_MAX_CARDS)
-	{
-		TMCG_Card *c2 = new TMCG_Card();
-		TMCG_CopyCard(c, *c2);
-		s.push_back(c2);
-	}
+		s.push_back(new TMCG_Card(c));
 }
 
 void SchindelhauerTMCG::TMCG_PushToStack
 	(VTMF_Stack &s, const VTMF_Card &c)
 {
 	if (s.size() < TMCG_MAX_CARDS)
-	{
-		VTMF_Card *c2 = new VTMF_Card();
-		TMCG_CopyCard(c, *c2);
-		s.push_back(c2);
-	}
+		s.push_back(new VTMF_Card(c));
 }
 
 void SchindelhauerTMCG::TMCG_PushStackToStack
 	(TMCG_Stack &s, const TMCG_Stack &s2)
 {
 	if ((s.size() + s2.size()) <= TMCG_MAX_CARDS)
-	{
 		for (TMCG_Stack::const_iterator si = s2.begin(); si != s2.end(); si++)
-		{
-			TMCG_Card *c2 = new TMCG_Card();
-			TMCG_CopyCard(*(*si), *c2);
-			s.push_back(c2);
-		}
-	}
+			s.push_back(new TMCG_Card(*(*si)));
 }
 
 void SchindelhauerTMCG::TMCG_PushStackToStack
 	(VTMF_Stack &s, const VTMF_Stack &s2)
 {
 	if ((s.size() + s2.size()) <= TMCG_MAX_CARDS)
-	{
 		for (VTMF_Stack::const_iterator si = s2.begin(); si != s2.end(); si++)
-		{
-			VTMF_Card *c2 = new VTMF_Card();
-			TMCG_CopyCard(*(*si), *c2);
-			s.push_back(c2);
-		}
-	}
+			s.push_back(new VTMF_Card(*(*si)));
 }
 
 bool SchindelhauerTMCG::TMCG_PopFromStack
 	(TMCG_Stack &s, TMCG_Card &c)
 {
-	if (!s.empty())
+	if (s.empty())
+		return false;
+	else
 	{
-		TMCG_CopyCard(*(s.back()), c);
+		c = *(s.back());
 		delete s.back();
 		s.pop_back();
 		return true;
 	}
-	else
-		return false;
 }
 
 bool SchindelhauerTMCG::TMCG_PopFromStack
 	(VTMF_Stack &s, VTMF_Card &c)
 {
-	if (!s.empty())
+	if (s.empty())
+		return false;
+	else
 	{
-		TMCG_CopyCard(*(s.back()), c);
+		c = *(s.back());
 		delete s.back();
 		s.pop_back();
 		return true;
 	}
-	else
-		return false;
 }
 
 bool SchindelhauerTMCG::TMCG_IsInStack
@@ -2424,10 +2344,10 @@ void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
 {
 	for (TMCG_Stack::iterator si = s.begin(); si != s.end(); si++)
 	{
-		// remove first card equal to c from stack s
+		// remove first card (which is equal to c) from stack s
 		if (TMCG_EqualCard(*(*si), c))
 		{
-			TMCG_ReleaseCard(*(*si)),	delete *si;
+			delete *si;
 			s.erase(si);
 			return;
 		}
@@ -2439,7 +2359,7 @@ void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
 {
 	for (VTMF_Stack::iterator si = s.begin(); si != s.end(); si++)
 	{
-		// remove first card equal to c from stack s
+		// remove first card (which is equal to c) from stack s
 		if (TMCG_EqualCard(*(*si), c))
 		{
 			delete *si;
@@ -2455,10 +2375,10 @@ void SchindelhauerTMCG::TMCG_RemoveAllFromStack
 	TMCG_Stack::iterator si = s.begin();
 	while (si != s.end())
 	{
-		// remove all cards equal to c from stack s
+		// remove all cards (that are equal to c) from stack s
 		if (TMCG_EqualCard(*(*si), c))
 		{
-			TMCG_ReleaseCard(*(*si)),	delete *si;
+			delete *si;
 			si = s.erase(si);
 		}
 		else
@@ -2472,7 +2392,7 @@ void SchindelhauerTMCG::TMCG_RemoveAllFromStack
 	VTMF_Stack::iterator si = s.begin();
 	while (si != s.end())
 	{
-		// remove all cards equal to c from stack s
+		// remove all cards (that are equal to c) from stack s
 		if (TMCG_EqualCard(*(*si), c))
 		{
 			delete *si;
@@ -2487,7 +2407,7 @@ void SchindelhauerTMCG::TMCG_ReleaseStack
 	(TMCG_Stack &s)
 {
 	for (TMCG_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		TMCG_ReleaseCard(*(*si)), delete *si;
+		delete *si;
 	s.clear();
 }
 
@@ -2500,9 +2420,8 @@ void SchindelhauerTMCG::TMCG_ReleaseStack
 }
 
 bool SchindelhauerTMCG::TMCG_ImportStack
-	(TMCG_Stack &s2, const string &import)
+	(TMCG_Stack &s2, string s)
 {
-	string s = import;
 	size_t size = 0;
 	char *ec;
 	
@@ -2541,9 +2460,8 @@ bool SchindelhauerTMCG::TMCG_ImportStack
 }
 
 bool SchindelhauerTMCG::TMCG_ImportStack
-	(VTMF_Stack &s2, const string &import)
+	(VTMF_Stack &s2, string s)
 {
-	string s = import;
 	size_t size = 0;
 	char *ec;
 	
@@ -2993,9 +2911,7 @@ void SchindelhauerTMCG::TMCG_PushToOpenStack
 	if (os.size() < TMCG_MAX_CARDS)
 	{
 		pair<size_t, TMCG_Card*> lej;
-		TMCG_Card *c2 = new TMCG_Card();
-		
-		TMCG_CopyCard(c, *c2);
+		TMCG_Card *c2 = new TMCG_Card(c);
 		lej.first = type, lej.second = c2;
 		os.push_back(lej);
 	}
@@ -3007,9 +2923,7 @@ void SchindelhauerTMCG::TMCG_PushToOpenStack
 	if (os.size() < TMCG_MAX_CARDS)
 	{
 		pair<size_t, VTMF_Card*> lej;
-		VTMF_Card *c2 = new VTMF_Card();
-		
-		TMCG_CopyCard(c, *c2);
+		VTMF_Card *c2 = new VTMF_Card(c);
 		lej.first = type, lej.second = c2;
 		os.push_back(lej);
 	}
@@ -3021,9 +2935,7 @@ void SchindelhauerTMCG::TMCG_PushOpenStackToOpenStack
 	for (TMCG_OpenStack::const_iterator oi = os2.begin(); oi != os2.end(); oi++)
 	{
 		pair<size_t, TMCG_Card*> lej;
-		TMCG_Card *c2 = new TMCG_Card();
-		
-		TMCG_CopyCard(*(oi->second), *c2);
+		TMCG_Card *c2 = new TMCG_Card(*(oi->second));
 		lej.first = oi->first, lej.second = c2;
 		os.push_back(lej);
 	}
@@ -3035,9 +2947,7 @@ void SchindelhauerTMCG::TMCG_PushOpenStackToOpenStack
 	for (VTMF_OpenStack::const_iterator oi = os2.begin(); oi != os2.end(); oi++)
 	{
 		pair<size_t, VTMF_Card*> lej;
-		VTMF_Card *c2 = new VTMF_Card();
-		
-		TMCG_CopyCard(*(oi->second), *c2);
+		VTMF_Card *c2 = new VTMF_Card(*(oi->second));
 		lej.first = oi->first, lej.second = c2;
 		os.push_back(lej);
 	}
@@ -3050,7 +2960,7 @@ size_t SchindelhauerTMCG::TMCG_PopFromOpenStack
 	{
 		size_t type = (os.back()).first;
 		
-		TMCG_CopyCard(*((os.back()).second), c);
+		c = *((os.back()).second);
 		delete (os.back()).second;
 		os.pop_back();
 		return type;
@@ -3066,7 +2976,7 @@ size_t SchindelhauerTMCG::TMCG_PopFromOpenStack
 	{
 		size_t type = (os.back()).first;
 		
-		TMCG_CopyCard(*((os.back()).second), c);
+		c = *((os.back()).second);
 		delete (os.back()).second;
 		os.pop_back();
 		return type;
@@ -3101,7 +3011,6 @@ void SchindelhauerTMCG::TMCG_MoveFromOpenStackToStack
 		if (oi->first == check_type)
 		{
 			TMCG_PushToStack(s, *(oi->second));
-			TMCG_ReleaseCard(*(oi->second));
 			delete oi->second;
 			os.erase(oi);
 			return;
@@ -3128,7 +3037,7 @@ void SchindelhauerTMCG::TMCG_ReleaseOpenStack
 	(TMCG_OpenStack &os)
 {
 	for (TMCG_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		TMCG_ReleaseCard(*(oi->second)), delete oi->second;
+		delete oi->second;
 	os.clear();
 }
 

@@ -450,8 +450,8 @@ void skat_connect
 		chlg1 += "<>" + vnicks[pkr_idx];
 		// send signature
 		*neighbor << t->TMCG_SignData(sec, chlg1) << endl << flush;
-		// release old and create new challenge
-		t->TMCG_ReleaseCardSecret(cs), t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
+		// create new challenge
+		t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 		// send challenge
 		*neighbor << cs << endl << flush;
 		// receive signature
@@ -571,7 +571,6 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 					}
 					else
 					{
-						t->TMCG_ReleaseCardSecret(cs);
 						neighbor->getline(tmp, sizeof(tmp));
 						if (t->TMCG_ImportCardSecret(cs, tmp))
 						{
@@ -3046,7 +3045,7 @@ int main(int argc, char* argv[], char* envp[])
 	string cmd = argv[0];
 	cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << endl <<
-		" $Id: SecureSkat.cc,v 1.2 2004/11/19 06:47:13 stamer Exp $ " << endl;
+		" $Id: SecureSkat.cc,v 1.3 2004/11/24 22:08:36 stamer Exp $ " << endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

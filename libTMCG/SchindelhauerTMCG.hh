@@ -99,14 +99,85 @@ struct TMCG_PublicKeyRing
 struct TMCG_Card
 {
 	size_t	Players, TypeBits;
-	mpz_t	z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	mpz_t		z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	
+	TMCG_Card
+		()
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_init(z[k][w]);
+	}
+	
+	TMCG_Card
+		(const TMCG_Card& that) :
+		Players(that.Players), TypeBits(that.TypeBits)
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_init_set(z[k][w], that.z[k][w]);
+	}
+	
+	TMCG_Card& operator =
+		(const TMCG_Card& that)
+	{
+		Players = that.Players, TypeBits = that.TypeBits;
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_set(z[k][w], that.z[k][w]);
+		return *this;
+	}
+	
+	~TMCG_Card
+		()
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_clear(z[k][w]);
+	}
 };
 
 struct TMCG_CardSecret
 {
 	size_t	Players, TypeBits;
-	mpz_t	r[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS],
-		b[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	mpz_t		r[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS],
+					b[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	
+	TMCG_CardSecret
+		()
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_init(r[k][w]), mpz_init(b[k][w]);
+	}
+	
+	TMCG_CardSecret
+		(const TMCG_CardSecret& that) :
+		Players(that.Players), TypeBits(that.TypeBits)
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_init_set(r[k][w], that.r[k][w]),
+				mpz_init_set(b[k][w], that.b[k][w]);
+	}
+	
+	TMCG_CardSecret& operator =
+		(const TMCG_CardSecret& that)
+	{
+		Players = that.Players, TypeBits = that.TypeBits;
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_set(r[k][w], that.r[k][w]), mpz_set(b[k][w], that.b[k][w]);
+		return *this;
+	}
+	
+	~TMCG_CardSecret
+		()
+	{
+		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
+			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+				mpz_clear(r[k][w]), mpz_clear(b[k][w]);
+	}
 };
 
 typedef vector<TMCG_Card*>													TMCG_Stack;
@@ -121,21 +192,21 @@ class SchindelhauerTMCG
 		static const size_t		bcs_size = 1024;			// random bits
 		static const size_t		rabin_k0 = 20;				// SAEP octets
 		static const size_t		rabin_s0 = 20;				// SAEP octets
-
+		
 																								// soundness error
 		static const size_t		nizk_stage1 = 16;			// d^{-nizk_stage1}
 		static const size_t		nizk_stage2 = 128;		// 2^{-nizk_stage2}
 		static const size_t		nizk_stage3 = 128;		// 2^{-nizk_stage3}
-
+		
 		string								str, str2, str3;
 		char									encval[rabin_s0];
 		int										ret;
-
+	
 	public:
 		static const size_t		TMCG_KeyIDSize = 5;			// octets
 		mpz_ui								TMCG_SecurityLevel;			// iterations
 		size_t								TMCG_Players, TMCG_TypeBits, TMCG_MaxCards;
-
+		
 		SchindelhauerTMCG 
 			(mpz_ui security, size_t players, size_t typebits)
 		{
@@ -163,7 +234,7 @@ class SchindelhauerTMCG
 				exit(-1);
 			}
 		}
-
+		
 		// methods for parsing
 		bool cm
 			(string &s, const string &c, char p)
@@ -180,7 +251,7 @@ class SchindelhauerTMCG
 				return false;
 			return true;
 		}
-
+		
 		bool nx
 			(string &s, char p)
 		{	
@@ -224,7 +295,7 @@ class SchindelhauerTMCG
 		{
 			gcry_md_hash_buffer (gcrypt_md_algorithm, output, input, size);
 		}
-
+		
 		void g
 			(char *output, size_t osize, const char *input, size_t isize)
 		{
@@ -325,7 +396,7 @@ class SchindelhauerTMCG
 					out << si->first << "^" << *(si->second) << "^";
 			return out;
 		}
-
+		
 		// methods for key management
 		void TMCG_CreateKey
 			(TMCG_SecretKey &key, mpz_ui keysize, 
@@ -350,7 +421,7 @@ class SchindelhauerTMCG
 			(TMCG_SecretKey &key, const TMCG_KeyString &import);
 		bool TMCG_ImportKey
 			(TMCG_PublicKey &key, const TMCG_KeyString &import);
-	
+		
 		// methods for encryption and authentification
 		const char *TMCG_EncryptValue
 			(const TMCG_PublicKey &key, const TMCG_PlainValue &value);
@@ -361,7 +432,7 @@ class SchindelhauerTMCG
 		bool TMCG_VerifyData
 			(const TMCG_PublicKey &key, const TMCG_DataString &data,
 			const TMCG_Signature &sig);
-
+		
 		// zero-knowledge proofs on values
 		void TMCG_ProofQuadraticResidue
 			(const TMCG_SecretKey &key, mpz_srcptr t, istream &in, ostream &out);
@@ -391,7 +462,7 @@ class SchindelhauerTMCG
 		void TMCG_MaskValue
 			(const TMCG_PublicKey &key, mpz_srcptr z, mpz_ptr zz, 
 			mpz_srcptr r, mpz_srcptr b);
-
+		
 		// operations and proofs on cards
 		void TMCG_CreateOpenCard
 			(TMCG_Card &c, const TMCG_PublicKeyRing &ring, size_t type);
@@ -403,28 +474,20 @@ class SchindelhauerTMCG
 		void TMCG_CreatePrivateCard
 			(VTMF_Card &c, VTMF_CardSecret &cs, BarnettSmartVTMF_dlog *vtmf,
 			size_t type);
-		void TMCG_ReleaseCard
-			(TMCG_Card &c);
 		bool TMCG_ImportCard
-			(TMCG_Card &c, const string &import);
+			(TMCG_Card &c, string s);
 		bool TMCG_ImportCard
-			(VTMF_Card &c, const string &import);
+			(VTMF_Card &c, string s);
 		void TMCG_CreateCardSecret
 			(TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring, size_t index);
 		void TMCG_CreateCardSecret
 			(VTMF_CardSecret &cs, BarnettSmartVTMF_dlog *vtmf);
 		void TMCG_CreateCardSecret
 			(TMCG_CardSecret &cs, mpz_srcptr r, mpz_ui b);
-		void TMCG_ReleaseCardSecret
-			(TMCG_CardSecret &cs);
-		void TMCG_CopyCardSecret
-			(const TMCG_CardSecret &cs, TMCG_CardSecret &cs2);
-		void TMCG_CopyCardSecret
-			(const VTMF_CardSecret &cs, VTMF_CardSecret &cs2);
 		bool TMCG_ImportCardSecret
-			(TMCG_CardSecret &cs, const string &import);
+			(TMCG_CardSecret &cs, string s);
 		bool TMCG_ImportCardSecret
-			(VTMF_CardSecret &cs, const string &import);
+			(VTMF_CardSecret &cs, string s);
 		void TMCG_MaskCard
 			(const TMCG_Card &c, TMCG_Card &cc, const TMCG_CardSecret &cs,
 			const TMCG_PublicKeyRing &ring);
@@ -435,10 +498,6 @@ class SchindelhauerTMCG
 			(const TMCG_Card &c, const TMCG_Card &cc);
 		bool TMCG_EqualCard
 			(const VTMF_Card &c, const VTMF_Card &cc);
-		void TMCG_CopyCard
-			(const TMCG_Card &c, TMCG_Card &cc);
-		void TMCG_CopyCard
-			(const VTMF_Card &c, VTMF_Card &cc);
 		void TMCG_ProofMaskCard
 			(const TMCG_Card &c, const TMCG_Card &cc, const TMCG_CardSecret &cs,
 			const TMCG_PublicKeyRing &ring, istream &in, ostream &out);
@@ -491,9 +550,9 @@ class SchindelhauerTMCG
 		void TMCG_ReleaseStackSecret
 			(VTMF_StackSecret &ss);
 		bool TMCG_ImportStackSecret
-			(TMCG_StackSecret &ss, const string &import);
+			(TMCG_StackSecret &ss, string s);
 		bool TMCG_ImportStackSecret
-			(VTMF_StackSecret &ss, const string &import);
+			(VTMF_StackSecret &ss, string s);
 		void TMCG_PushToStack
 			(TMCG_Stack &s, const TMCG_Card &c);
 		void TMCG_PushToStack
@@ -523,9 +582,9 @@ class SchindelhauerTMCG
 		void TMCG_ReleaseStack
 			(VTMF_Stack &s);
 		bool TMCG_ImportStack
-			(TMCG_Stack &s, const string &import);
+			(TMCG_Stack &s, string s);
 		bool TMCG_ImportStack
-			(VTMF_Stack &s, const string &import);
+			(VTMF_Stack &s, string s);
 		void TMCG_CopyStack
 			(const TMCG_Stack &s, TMCG_Stack &s2);
 		void TMCG_CopyStack
