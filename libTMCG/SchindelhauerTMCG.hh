@@ -198,9 +198,369 @@ struct TMCG_CardSecret
 	}
 };
 
-typedef vector<TMCG_Card*>													TMCG_Stack;
-typedef vector<pair<size_t, TMCG_Card*> >						TMCG_OpenStack;
-typedef vector<pair<size_t, TMCG_CardSecret*> >			TMCG_StackSecret;
+template <typename CardType> struct TMCG_OpenStack;
+
+template <typename CardType> struct TMCG_Stack
+{
+	vector<CardType>	stack;
+	
+	TMCG_Stack
+		()
+	{
+	}
+	
+	TMCG_Stack& operator =
+		(const TMCG_Stack& that)
+	{
+		clear();
+		stack = that.stack;
+	}
+	
+	bool operator ==
+		(const TMCG_Stack& that)
+	{
+		if (stack.size() != that.stack.size())
+			return false;
+		return std::equal(stack.begin(), stack.end(), that.stack.begin());
+	}
+	
+	bool operator !=
+		(const TMCG_Stack& that)
+	{
+		return !(*this == that);
+	}
+	
+	void push
+		(const CardType& c)
+	{
+		stack.push_back(c);
+	}
+	
+	void push
+		(const TMCG_Stack& s)
+	{
+		std::copy(s.stack.begin(), s.stack.end(), back_inserter(stack));
+	}
+	
+	void push
+		(const TMCG_OpenStack<CardType>& s)
+	{
+		for (typename vector<pair<size_t, CardType> >::const_iterator
+			si = s.stack.begin(); si != si.end(); si++)
+				stack.push_back(si->second);
+	}
+	
+	bool pop
+		(CardType& c)
+	{
+		if (stack.empty())
+			return false;
+		
+		c = *(stack.back());
+		stack.pop_back();
+		return true;
+	}
+	
+	void clear
+		()
+	{
+		stack.clear();
+	}
+	
+	bool find
+		(const CardType& c) const
+	{
+		return (std::find(stack.begin(), stack.end(), c) != stack.end());
+	}
+	
+	bool remove
+		(const CardType& c)
+	{
+		typename vector<CardType>::iterator si =
+			std::find(stack.begin(), stack.end(), c);
+		
+		if (si != stack.end())
+		{
+			stack.erase(si);
+			return true;
+		}
+		return false;
+	}
+	
+	size_t removeAll
+		(const CardType& c)
+	{
+		size_t counter = 0;
+		while (remove(c))
+			counter++;
+		return counter;
+	}
+	
+	bool import
+		(string s)
+	{
+		size_t size = 0;
+		char *ec;
+		
+		try
+		{
+			// check magic
+			if (!cm(s, "stk", '^'))
+				throw false;
+			
+			// size of stack
+			if (gs(s, '^') == NULL)
+				throw false;
+			size = strtoul(gs(s, '^'), &ec, 10);
+			if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
+				throw false;
+			
+			// cards on stack
+			for (size_t i = 0; i < size; i++)
+			{
+				CardType c;
+				
+				if (gs(s, '^') == NULL)
+					throw false;
+				if ((!TMCG_ImportCard(c, gs(s, '^'))) || (!nx(s, '^')))
+					throw false;
+				stack.push_back(c);
+			}
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
+	~TMCG_Stack
+		()
+	{
+		stack.clear();
+	}
+};
+
+template <typename CardType> struct TMCG_OpenStack
+{
+	vector<pair<size_t, CardType> >	stack;
+	
+	struct eq_first_component
+	{
+		int operator() 
+			(const pair<size_t, CardType>& p1, const pair<size_t, CardType>& p2)
+		{
+			return (p1.first == p2.first);
+		}
+	};
+	
+	TMCG_OpenStack
+		()
+	{
+	}
+	
+	TMCG_OpenStack& operator =
+		(const TMCG_OpenStack& that)
+	{
+		clear();
+		stack = that.stack;
+	}
+	
+	bool operator ==
+		(const TMCG_OpenStack& that)
+	{
+		if (stack.size() != that.stack.size())
+			return false;
+		return std::equal(stack.begin(), stack.end(), that.stack.begin());
+	}
+	
+	bool operator !=
+		(const TMCG_OpenStack& that)
+	{
+		return !(*this == that);
+	}
+	
+	void push
+		(size_t type, const CardType& c)
+	{
+		stack.push_back(pair(type, c));
+	}
+	
+	void push
+		(const TMCG_OpenStack& s)
+	{
+		std::copy(s.stack.begin(), s.stack.end(), back_inserter(stack));
+	}
+	
+	size_t pop
+		(CardType& c)
+	{
+		size_t type = (1 << TMCG_TypeBits);		// set 'error code'
+		
+		if (stack.empty())
+			return type;
+		
+		type = (stack.back())->first;
+		c = (stack.back())->second;
+		stack.pop_back();
+		return type;
+	}
+	
+	void clear
+		()
+	{
+		stack.clear();
+	}
+	
+	bool find
+		(size_t type) const
+	{
+		return (std::find_if(stack.begin(), stack.end(),
+			std::bind2nd(eq_first_component(), type)) != stack.end());
+	}
+	
+	bool remove
+		(size_t type)
+	{
+		typename vector<pair<size_t, CardType> >::iterator si =
+			std::find_if(stack.begin(), stack.end(),
+				std::bind2nd(eq_first_component(), type));
+		
+		if (si != stack.end())
+		{
+			stack.erase(si);
+			return true;
+		}
+		return false;
+	}
+	
+	size_t removeAll
+		(size_t type)
+	{
+		size_t counter = 0;
+		while (remove(type))
+			counter++;
+		return counter;
+	}
+	
+	bool move
+		(size_t type, TMCG_Stack<CardType>& s)
+	{
+		typename vector<pair<size_t, CardType> >::iterator si =
+			std::find_if(stack.begin(), stack.end(),
+				std::bind2nd(eq_first_component(), type));
+		
+		if (si != stack.end())
+		{
+			s.push(si->second);
+			stack.erase(si);
+			return true;
+		}
+		return false;
+	}
+	
+	~TMCG_OpenStack
+		()
+	{
+		stack.clear();
+	}
+};
+
+template <typename CardSecretType> struct TMCG_StackSecret
+{
+	vector<pair<size_t, CardSecretType> >	stack;
+	
+	struct eq_first_component
+	{
+		int operator() 
+			(const pair<size_t, CardSecretType>& p1,
+			 const pair<size_t, CardSecretType>& p2)
+		{
+			return (p1.first == p2.first);
+		}
+	};
+	
+	TMCG_StackSecret
+		()
+	{
+	}
+	
+	TMCG_StackSecret& operator =
+		(const TMCG_StackSecret<CardSecretType>& that)
+	{
+		clear();
+		stack = that.stack;
+	}
+	
+	void push
+		(size_t index, const CardSecretType& cs)
+	{
+		stack.push_back(pair(index, cs));
+	}
+	
+	bool find
+		(size_t index) const
+	{
+		return (std::find_if(stack.begin(), stack.end(),
+			std::bind2nd(eq_first_component(), index)) != stack.end());
+	}
+	
+	bool import(string s)
+	{
+		size_t size = 0;
+		char *ec;
+		
+		try
+		{
+			// check magic
+			if (!cm(s, "sts", '^'))
+				throw false;
+			
+			// size of stack
+			if (gs(s, '^') == NULL)
+				throw false;
+			size = strtoul(gs(s, '^'), &ec, 10);
+			if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
+				throw false;
+			
+			// cards on stack
+			for (size_t i = 0; i < size; i++)
+			{
+				pair<size_t, CardSecretType> lej;
+				
+				// permutation index
+				if (gs(s, '^') == NULL)
+					throw false;
+				lej.first = (size_t)strtoul(gs(s, '^'), &ec, 10);
+				if ((*ec != '\0') || (lej.first < 0) || (lej.first >= size) ||
+					(!nx(s, '^')))
+						throw false;
+				
+				// card secret
+				if (gs(s, '^') == NULL)
+					throw false;
+				if ((!TMCG_ImportCardSecret(lej.second, gs(s, '^'))) || (!nx(s, '^')))
+					throw false;
+				
+				// store pair
+				stack.push_back(lej);
+			}
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
+	~TMCG_StackSecret
+		()
+	{
+		stack.clear();
+	}
+};
 
 class SchindelhauerTMCG
 {
@@ -559,54 +919,6 @@ class SchindelhauerTMCG
 		size_t TMCG_CreateStackSecret
 			(VTMF_StackSecret &ss, bool cyclic, size_t size,
 			BarnettSmartVTMF_dlog *vtmf);
-		void TMCG_ReleaseStackSecret
-			(TMCG_StackSecret &ss);
-		void TMCG_ReleaseStackSecret
-			(VTMF_StackSecret &ss);
-		bool TMCG_ImportStackSecret
-			(TMCG_StackSecret &ss, string s);
-		bool TMCG_ImportStackSecret
-			(VTMF_StackSecret &ss, string s);
-		void TMCG_PushToStack
-			(TMCG_Stack &s, const TMCG_Card &c);
-		void TMCG_PushToStack
-			(VTMF_Stack &s, const VTMF_Card &c);
-		void TMCG_PushStackToStack
-			(TMCG_Stack &s, const TMCG_Stack &s2);
-		void TMCG_PushStackToStack
-			(VTMF_Stack &s, const VTMF_Stack &s2);
-		bool TMCG_PopFromStack
-			(TMCG_Stack &s, TMCG_Card &c);
-		bool TMCG_PopFromStack
-			(VTMF_Stack &s, VTMF_Card &c);
-		bool TMCG_IsInStack
-			(const TMCG_Stack &s, const TMCG_Card &c);
-		bool TMCG_IsInStack
-			(const VTMF_Stack &s, const VTMF_Card &c);
-		void TMCG_RemoveFirstFromStack
-			(TMCG_Stack &s, const TMCG_Card &c);
-		void TMCG_RemoveFirstFromStack
-			(VTMF_Stack &s, const VTMF_Card &c);
-		void TMCG_RemoveAllFromStack
-			(TMCG_Stack &s, const TMCG_Card &c);
-		void TMCG_RemoveAllFromStack
-			(VTMF_Stack &s, const VTMF_Card &c);
-		void TMCG_ReleaseStack
-			(TMCG_Stack &s);
-		void TMCG_ReleaseStack
-			(VTMF_Stack &s);
-		bool TMCG_ImportStack
-			(TMCG_Stack &s, string s);
-		bool TMCG_ImportStack
-			(VTMF_Stack &s, string s);
-		void TMCG_CopyStack
-			(const TMCG_Stack &s, TMCG_Stack &s2);
-		void TMCG_CopyStack
-			(const VTMF_Stack &s, VTMF_Stack &s2);
-		bool TMCG_EqualStack
-			(const TMCG_Stack &s, const TMCG_Stack &s2);
-		bool TMCG_EqualStack
-			(const VTMF_Stack &s, const VTMF_Stack &s2);
 		void TMCG_MixStack
 			(const TMCG_Stack &s, TMCG_Stack &s2, const TMCG_StackSecret &ss,
 			const TMCG_PublicKeyRing &ring);
@@ -632,44 +944,12 @@ class SchindelhauerTMCG
 		bool TMCG_VerifyStackEquality
 			(const VTMF_Stack &s, const VTMF_Stack &s2, bool cyclic,
 			BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out);
-		void TMCG_PushToOpenStack
-			(TMCG_OpenStack &os, const TMCG_Card &c, size_t type);
-		void TMCG_PushToOpenStack
-			(VTMF_OpenStack &os, const VTMF_Card &c, size_t type);
-		void TMCG_PushOpenStackToOpenStack 
-			(TMCG_OpenStack &os, const TMCG_OpenStack &os2);
-		void TMCG_PushOpenStackToOpenStack 
-			(VTMF_OpenStack &os, const VTMF_OpenStack &os2);
-		size_t TMCG_PopFromOpenStack
-			(TMCG_OpenStack &os, TMCG_Card &c);
-		size_t TMCG_PopFromOpenStack
-			(VTMF_OpenStack &os, VTMF_Card &c);
-		bool TMCG_IsInOpenStack
-			(const TMCG_OpenStack &os, size_t check_type);
-		bool TMCG_IsInOpenStack
-			(const VTMF_OpenStack &os, size_t check_type);
-		void TMCG_MoveFromOpenStackToStack
-			(TMCG_OpenStack &os, TMCG_Stack &s, size_t check_type);
-		void TMCG_MoveFromOpenStackToStack
-			(VTMF_OpenStack &os, VTMF_Stack &s, size_t check_type);
-		void TMCG_ReleaseOpenStack
-			(TMCG_OpenStack &os);
-		void TMCG_ReleaseOpenStack
-			(VTMF_OpenStack &os);
-		void TMCG_CopyOpenStack
-			(const TMCG_OpenStack &os, TMCG_OpenStack &os2);
-		void TMCG_CopyOpenStack
-			(const VTMF_OpenStack &os, VTMF_OpenStack &os2);
 		void TMCG_MixOpenStack
 			(const TMCG_OpenStack &os, TMCG_OpenStack &os2,
 			const TMCG_StackSecret &ss, const TMCG_PublicKeyRing &ring);
 		void TMCG_MixOpenStack
 			(const VTMF_OpenStack &os, VTMF_OpenStack &os2,
 			const VTMF_StackSecret &ss, BarnettSmartVTMF_dlog *vtmf);
-		void TMCG_ExtractStack
-			(const TMCG_OpenStack &os, TMCG_Stack &s);
-		void TMCG_ExtractStack
-			(const VTMF_OpenStack &os, VTMF_Stack &s);
 		~SchindelhauerTMCG 
 			()
 		{

@@ -2007,67 +2007,13 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 // ============================================================================
 
 size_t SchindelhauerTMCG::TMCG_CreateStackSecret
-	(TMCG_StackSecret &ss, bool cyclic, const TMCG_PublicKeyRing &ring,
-	size_t index, size_t size)
+	(TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
+	const TMCG_PublicKeyRing &ring, size_t index, size_t size)
 {
-	if (size > TMCG_MAX_CARDS)
-		return 0;
-	
 	size_t cyc = 0;
 	mpz_t foo, bar;
-	mpz_init (foo),	mpz_init_set_ui (bar, size);
-	if (cyclic)
-	{
-		mpz_t cy;
-		mpz_init (cy);
-		mpz_srandomm (cy, NULL, bar);
-		cyc = (size_t)mpz_get_ui (cy);
-		mpz_clear (cy);
-	}
-	for (size_t i = 0; i < size; i++)
-	{
-		pair<size_t, TMCG_CardSecret*> lej;
-		TMCG_CardSecret *cs = new TMCG_CardSecret();
-		TMCG_CreateCardSecret(*cs, ring, index);
-		
-		// only cyclic shift
-		if (cyclic)
-		{
-			mpz_set_ui (foo, i);
-			mpz_add_ui (foo, foo, (mpz_ui)cyc);
-			mpz_mod (foo, foo, bar);
-		}
-		// full permutation
-		else
-		{
-			bool pi_ok;
-			do
-			{
-				pi_ok = true;
-				mpz_srandomm (foo, NULL, bar);
-				for (TMCG_StackSecret::const_iterator ssi = ss.begin(); 
-					ssi != ss.end(); ssi++)
-						if (ssi->first == (size_t)(mpz_get_ui (foo)))
-							pi_ok = false;
-			}
-			while (!pi_ok);
-		}
-		lej.first = (size_t)mpz_get_ui (foo), lej.second = cs;
-		ss.push_back(lej);
-	}
-	mpz_clear (foo), mpz_clear (bar);
-	return cyc;
-}
-
-size_t SchindelhauerTMCG::TMCG_CreateStackSecret
-	(VTMF_StackSecret &ss, bool cyclic, size_t size, BarnettSmartVTMF_dlog *vtmf)
-{
-	if (size > TMCG_MAX_CARDS)
-		return 0;
-	
-	size_t cyc = 0;
-	mpz_t foo, bar;
-	mpz_init(foo), mpz_init_set_ui(bar, size);
+	mpz_init(foo);
+	mpz_init_set_ui(bar, size);
 	if (cyclic)
 	{
 		mpz_t cy;
@@ -2078,9 +2024,8 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 	}
 	for (size_t i = 0; i < size; i++)
 	{
-		pair<size_t, VTMF_CardSecret*> lej;
-		VTMF_CardSecret *cs = new VTMF_CardSecret();
-		TMCG_CreateCardSecret(*cs, vtmf);
+		TMCG_CardSecret cs;
+		TMCG_CreateCardSecret(cs, ring, index);
 		
 		// only cyclic shift
 		if (cyclic)
@@ -2097,424 +2042,77 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 			{
 				pi_ok = true;
 				mpz_srandomm(foo, NULL, bar);
-				for (VTMF_StackSecret::const_iterator ssi = ss.begin(); 
-					ssi != ss.end(); ssi++)
-						if (ssi->first == (size_t)(mpz_get_ui(foo)))
-							pi_ok = false;
+				if (ss.find((size_t)mpz_get_ui(foo)))
+					pi_ok = false;
 			}
 			while (!pi_ok);
 		}
-		lej.first = (size_t)mpz_get_ui(foo), lej.second = cs;
-		ss.push_back(lej);
+		ss.push((size_t)mpz_get_ui(foo), cs);
 	}
-	mpz_clear(foo), mpz_clear(bar);
+	mpz_clear(foo);
+	mpz_clear(bar);
 	return cyc;
 }
 
-void SchindelhauerTMCG::TMCG_ReleaseStackSecret
-	(TMCG_StackSecret &ss)
+size_t SchindelhauerTMCG::TMCG_CreateStackSecret
+	(TMCG_StackSecret<VTMF_CardSecret> &ss, bool cyclic, size_t size,
+	BarnettSmartVTMF_dlog *vtmf)
 {
-	for (TMCG_StackSecret::const_iterator si = ss.begin(); si != ss.end(); si++)
-		delete si->second;
-	ss.clear();
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseStackSecret
-	(VTMF_StackSecret &ss)
-{
-	for (VTMF_StackSecret::const_iterator si = ss.begin(); si != ss.end(); si++)
-		delete si->second;
-	ss.clear();
-}
-
-bool SchindelhauerTMCG::TMCG_ImportStackSecret
-	(TMCG_StackSecret &ss, string s)
-{
-	size_t size = 0;
-	char *ec;
-	
-	TMCG_ReleaseStackSecret(ss);
-	try
+	size_t cyc = 0;
+	mpz_t foo, bar;
+	mpz_init(foo);
+	mpz_init_set_ui(bar, size);
+	if (cyclic)
 	{
-		// check magic
-		if (!cm(s, "sts", '^'))
-			throw false;
+		mpz_t cy;
+		mpz_init(cy);
+		mpz_srandomm(cy, NULL, bar);
+		cyc = (size_t)mpz_get_ui(cy);
+		mpz_clear(cy);
+	}
+	for (size_t i = 0; i < size; i++)
+	{
+		VTMF_CardSecret cs;
+		TMCG_CreateCardSecret(cs, vtmf);
 		
-		// size of stack
-		if (gs(s, '^') == NULL)
-			throw false;
-		size = strtoul(gs(s, '^'), &ec, 10);
-		if ((*ec != '\0') || (size <= 0) || (size > TMCG_MAX_CARDS) || 
-			(!nx(s, '^')))
-				throw false;
-				
-		// cards on stack
-		for (size_t i = 0; i < size; i++)
+		// only cyclic shift
+		if (cyclic)
 		{
-			// permutation index
-			if (gs(s, '^') == NULL)
-				throw false;
-			size_t pi = (size_t)strtoul(gs(s, '^'), &ec, 10);
-			if ((*ec != '\0') || (pi < 0) || (pi >= size) || (!nx(s, '^')))
-				throw false;
-			
-			// card secret
-			TMCG_CardSecret *cs = new TMCG_CardSecret();
-			if (gs(s, '^') == NULL)
-				throw false;
-			if ((!TMCG_ImportCardSecret(*cs, gs(s, '^'))) || (!nx(s, '^')))
-				throw false;
-			
-			pair<size_t, TMCG_CardSecret*> lej;
-			lej.first = pi, lej.second = cs;
-			ss.push_back(lej);
+			mpz_set_ui(foo, i);
+			mpz_add_ui(foo, foo, (mpz_ui)cyc);
+			mpz_mod(foo, foo, bar);
 		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_ImportStackSecret
-	(VTMF_StackSecret &ss, string s)
-{
-	size_t size = 0;
-	char *ec;
-	
-	TMCG_ReleaseStackSecret(ss);
-	try
-	{
-		// check magic
-		if (!cm(s, "sts", '^'))
-			throw false;
-		
-		// size of stack
-		if (gs(s, '^') == NULL)
-			throw false;
-		size = strtoul(gs(s, '^'), &ec, 10);
-		if ((*ec != '\0') || (size <= 0) || (size > TMCG_MAX_CARDS) || 
-			(!nx(s, '^')))
-				throw false;
-		
-		// cards on stack
-		for (size_t i = 0; i < size; i++)
-		{
-			// permutation index
-			if (gs(s, '^') == NULL)
-				throw false;
-			size_t pi = (size_t)strtoul(gs(s, '^'), &ec, 10);
-			if ((*ec != '\0') || (pi < 0) || (pi >= size) || (!nx(s, '^')))
-				throw false;
-			
-			// card secret
-			VTMF_CardSecret *cs = new VTMF_CardSecret();
-			if (gs(s, '^') == NULL)
-				throw false;
-			if ((!TMCG_ImportCardSecret(*cs, gs(s, '^'))) || (!nx(s, '^')))
-				throw false;
-			
-			pair<size_t, VTMF_CardSecret*> lej;
-			lej.first = pi, lej.second = cs;
-			ss.push_back(lej);
-		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-void SchindelhauerTMCG::TMCG_PushToStack
-	(TMCG_Stack &s, const TMCG_Card &c)
-{
-	if (s.size() < TMCG_MAX_CARDS)
-		s.push_back(new TMCG_Card(c));
-}
-
-void SchindelhauerTMCG::TMCG_PushToStack
-	(VTMF_Stack &s, const VTMF_Card &c)
-{
-	if (s.size() < TMCG_MAX_CARDS)
-		s.push_back(new VTMF_Card(c));
-}
-
-void SchindelhauerTMCG::TMCG_PushStackToStack
-	(TMCG_Stack &s, const TMCG_Stack &s2)
-{
-	if ((s.size() + s2.size()) <= TMCG_MAX_CARDS)
-		for (TMCG_Stack::const_iterator si = s2.begin(); si != s2.end(); si++)
-			s.push_back(new TMCG_Card(*(*si)));
-}
-
-void SchindelhauerTMCG::TMCG_PushStackToStack
-	(VTMF_Stack &s, const VTMF_Stack &s2)
-{
-	if ((s.size() + s2.size()) <= TMCG_MAX_CARDS)
-		for (VTMF_Stack::const_iterator si = s2.begin(); si != s2.end(); si++)
-			s.push_back(new VTMF_Card(*(*si)));
-}
-
-bool SchindelhauerTMCG::TMCG_PopFromStack
-	(TMCG_Stack &s, TMCG_Card &c)
-{
-	if (s.empty())
-		return false;
-	else
-	{
-		c = *(s.back());
-		delete s.back();
-		s.pop_back();
-		return true;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_PopFromStack
-	(VTMF_Stack &s, VTMF_Card &c)
-{
-	if (s.empty())
-		return false;
-	else
-	{
-		c = *(s.back());
-		delete s.back();
-		s.pop_back();
-		return true;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_IsInStack
-	(const TMCG_Stack &s, const TMCG_Card &c)
-{
-	for (TMCG_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		if (*(*si) == c)
-			return true;
-	return false;
-}
-
-bool SchindelhauerTMCG::TMCG_IsInStack
-	(const VTMF_Stack &s, const VTMF_Card &c)
-{
-	for (VTMF_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		if (*(*si) == c)
-			return true;
-	return false;
-}
-
-void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
-	(TMCG_Stack &s, const TMCG_Card &c)
-{
-	for (TMCG_Stack::iterator si = s.begin(); si != s.end(); si++)
-	{
-		// remove first card (which is equal to c) from stack s
-		if (*(*si) == c)
-		{
-			delete *si;
-			s.erase(si);
-			return;
-		}
-	}
-}
-
-void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
-	(VTMF_Stack &s, const VTMF_Card &c)
-{
-	for (VTMF_Stack::iterator si = s.begin(); si != s.end(); si++)
-	{
-		// remove first card (which is equal to c) from stack s
-		if (*(*si) == c)
-		{
-			delete *si;
-			s.erase(si);
-			return;
-		}
-	}
-}
-
-void SchindelhauerTMCG::TMCG_RemoveAllFromStack
-	(TMCG_Stack &s, const TMCG_Card &c)
-{
-	TMCG_Stack::iterator si = s.begin();
-	while (si != s.end())
-	{
-		// remove all cards (that are equal to c) from stack s
-		if (*(*si) == c)
-		{
-			delete *si;
-			si = s.erase(si);
-		}
+		// full permutation
 		else
-			si++;
-	}
-}
-
-void SchindelhauerTMCG::TMCG_RemoveAllFromStack
-	(VTMF_Stack &s, const VTMF_Card &c)
-{
-	VTMF_Stack::iterator si = s.begin();
-	while (si != s.end())
-	{
-		// remove all cards (that are equal to c) from stack s
-		if (*(*si) == c)
 		{
-			delete *si;
-			si = s.erase(si);
+			bool pi_ok;
+			do
+			{
+				pi_ok = true;
+				mpz_srandomm(foo, NULL, bar);
+				if (ss.find((size_t)mpz_get_ui(foo)))
+					pi_ok = false;
+			}
+			while (!pi_ok);
 		}
-		else
-			si++;
+		ss.push((size_t)mpz_get_ui(foo), cs);
 	}
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseStack
-	(TMCG_Stack &s)
-{
-	for (TMCG_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		delete *si;
-	s.clear();
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseStack
-	(VTMF_Stack &s)
-{
-	for (VTMF_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		delete *si;
-	s.clear();
-}
-
-bool SchindelhauerTMCG::TMCG_ImportStack
-	(TMCG_Stack &s2, string s)
-{
-	size_t size = 0;
-	char *ec;
-	
-	TMCG_ReleaseStack(s2);
-	try
-	{
-		// check magic
-		if (!cm(s, "stk", '^'))
-			throw false;
-		
-		// size of stack
-		if (gs(s, '^') == NULL)
-			throw false;
-		size = strtoul(gs(s, '^'), &ec, 10);
-		if ((*ec != '\0') || (size <= 0) || (size > TMCG_MAX_CARDS) || 
-			(!nx(s, '^')))
-				throw false;
-				
-		// cards on stack
-		for (size_t i = 0; i < size; i++)
-		{
-			TMCG_Card *c = new TMCG_Card();
-			if (gs(s, '^') == NULL)
-				throw false;
-			if ((!TMCG_ImportCard(*c, gs(s, '^'))) || (!nx(s, '^')))
-				throw false;
-			s2.push_back(c);
-		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_ImportStack
-	(VTMF_Stack &s2, string s)
-{
-	size_t size = 0;
-	char *ec;
-	
-	TMCG_ReleaseStack(s2);
-	try
-	{
-		// check magic
-		if (!cm(s, "stk", '^'))
-			throw false;
-		
-		// size of stack
-		if (gs(s, '^') == NULL)
-			throw false;
-		size = strtoul(gs(s, '^'), &ec, 10);
-		if ((*ec != '\0') || (size <= 0) || (size > TMCG_MAX_CARDS) || 
-			(!nx(s, '^')))
-				throw false;
-		
-		// cards on stack
-		for (size_t i = 0; i < size; i++)
-		{
-			VTMF_Card *c = new VTMF_Card();
-			if (gs(s, '^') == NULL)
-				throw false;
-			if ((!TMCG_ImportCard(*c, gs(s, '^'))) || (!nx(s, '^')))
-				throw false;
-			s2.push_back(c);
-		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-void SchindelhauerTMCG::TMCG_CopyStack 
-	(const TMCG_Stack &s, TMCG_Stack &s2)
-{
-	TMCG_ReleaseStack(s2);
-	for (TMCG_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		TMCG_PushToStack(s2, *(*si));
-}
-
-void SchindelhauerTMCG::TMCG_CopyStack 
-	(const VTMF_Stack &s, VTMF_Stack &s2)
-{
-	TMCG_ReleaseStack(s2);
-	for (VTMF_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		TMCG_PushToStack(s2, *(*si));
-}
-
-bool SchindelhauerTMCG::TMCG_EqualStack
-	(const TMCG_Stack &s, const TMCG_Stack &s2)
-{
-	if (s.size() != s2.size())
-		return false;
-	for (size_t i = 0; i < s.size(); i++)
-		if (*(s[i]) != *(s2[i]))
-			return false;
-	return true;
-}
-
-bool SchindelhauerTMCG::TMCG_EqualStack
-	(const VTMF_Stack &s, const VTMF_Stack &s2)
-{
-	if (s.size() != s2.size())
-		return false;
-	for (size_t i = 0; i < s.size(); i++)
-		if (*(s[i]) != *(s2[i]))
-			return false;
-	return true;
+	mpz_clear(foo);
+	mpz_clear(bar);
+	return cyc;
 }
 
 void SchindelhauerTMCG::TMCG_MixStack
-	(const TMCG_Stack &s, TMCG_Stack &s2, const TMCG_StackSecret &ss,
-	const TMCG_PublicKeyRing &ring)
+	(const TMCG_Stack<TMCG_Card> &s, TMCG_Stack<TMCG_Card> &s2,
+	const TMCG_StackSecret<TMCG_Card> &ss, const TMCG_PublicKeyRing &ring)
 {
 	assert (s.size() != 0), assert (s.size() == ss.size());
 	
 	// mask all cards, mix and build new stack
-	TMCG_ReleaseStack(s2);
 	for (size_t i = 0; i < s.size(); i++)
 	{
-		TMCG_Card *c = new TMCG_Card();
-		TMCG_MaskCard(*(s[ss[i].first]), *c, *(ss[ss[i].first].second), ring);
+		TMCG_Card c;
+		TMCG_MaskCard(*(s[ss[i].first]), c, *(ss[ss[i].first].second), ring);
 		s2.push_back(c);
 	}
 }
@@ -2644,13 +2242,9 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 		in >> foo;
 		
 		// send proof
-		if (!(mpz_get_ui (foo) & 1L))
+		if (!(mpz_get_ui(foo) & 1L))
 			TMCG_GlueStackSecret(ss, ss2, ring);
 		out << ss2 << endl;
-		
-		// release stack
-		TMCG_ReleaseStack(s3);
-		TMCG_ReleaseStackSecret(ss2);
 	}
 	mpz_clear (foo);
 }
@@ -2685,10 +2279,6 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 		if (!(mpz_get_ui(foo) & 1L))
 			TMCG_GlueStackSecret(ss, ss2, vtmf);
 		out << ss2 << endl;
-		
-		// release stack
-		TMCG_ReleaseStack(s3);
-		TMCG_ReleaseStackSecret(ss2);
 	}
 	mpz_clear(foo);
 }
@@ -2705,47 +2295,35 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 		return false;
 	
 	char *tmp = new char[TMCG_MAX_STACK_CHARS];
-	mpz_init (foo);
+	mpz_init(foo);
 	try
 	{
 		for (mpz_ui i = 0; i < TMCG_SecurityLevel; i++)
 		{
 			TMCG_Stack s3, s4;
 			TMCG_StackSecret ss;
-			mpz_srandomb (foo, NULL, 1L);
+			mpz_srandomb(foo, NULL, 1L);
 			
 			// receive stack
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!TMCG_ImportStack(s3, tmp))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (!s3.import(tmp))
 				throw false;
-			}
 			
 			// send R/S-question to prover
 			out << foo << endl;
 			
 			// receive proof
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!TMCG_ImportStackSecret(ss, tmp))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (!ss.import(tmp))
 				throw false;
-			}
 			
 			// verify equality proof
 			if (mpz_get_ui (foo) & 1L)
 				TMCG_MixStack(s2, s4, ss, ring);
 			else
 				TMCG_MixStack(s, s4, ss, ring);
-			if (!TMCG_EqualStack(s3, s4))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (s3 != s4)
 				throw false;
-			}
 			
 			// verify cyclic shift
 			if (cyclic)
@@ -2755,10 +2333,6 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 					if (((++cy) % ss.size()) != ss[j].first)
 						throw false;
 			}
-			
-			// free
-			TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-			TMCG_ReleaseStackSecret(ss);
 		}
 		
 		// finish
@@ -2766,7 +2340,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	}
 	catch (bool return_value)
 	{
-		mpz_clear (foo);
+		mpz_clear(foo);
 		delete [] tmp;
 		return return_value;
 	}
@@ -2851,166 +2425,6 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	}
 }
 
-void SchindelhauerTMCG::TMCG_PushToOpenStack
-	(TMCG_OpenStack &os, const TMCG_Card &c, size_t type)
-{
-	if (os.size() < TMCG_MAX_CARDS)
-	{
-		pair<size_t, TMCG_Card*> lej;
-		TMCG_Card *c2 = new TMCG_Card(c);
-		lej.first = type, lej.second = c2;
-		os.push_back(lej);
-	}
-}
-
-void SchindelhauerTMCG::TMCG_PushToOpenStack
-	(VTMF_OpenStack &os, const VTMF_Card &c, size_t type)
-{
-	if (os.size() < TMCG_MAX_CARDS)
-	{
-		pair<size_t, VTMF_Card*> lej;
-		VTMF_Card *c2 = new VTMF_Card(c);
-		lej.first = type, lej.second = c2;
-		os.push_back(lej);
-	}
-}
-
-void SchindelhauerTMCG::TMCG_PushOpenStackToOpenStack
-	(TMCG_OpenStack &os, const TMCG_OpenStack &os2)
-{
-	for (TMCG_OpenStack::const_iterator oi = os2.begin(); oi != os2.end(); oi++)
-	{
-		pair<size_t, TMCG_Card*> lej;
-		TMCG_Card *c2 = new TMCG_Card(*(oi->second));
-		lej.first = oi->first, lej.second = c2;
-		os.push_back(lej);
-	}
-}
-
-void SchindelhauerTMCG::TMCG_PushOpenStackToOpenStack
-	(VTMF_OpenStack &os, const VTMF_OpenStack &os2)
-{
-	for (VTMF_OpenStack::const_iterator oi = os2.begin(); oi != os2.end(); oi++)
-	{
-		pair<size_t, VTMF_Card*> lej;
-		VTMF_Card *c2 = new VTMF_Card(*(oi->second));
-		lej.first = oi->first, lej.second = c2;
-		os.push_back(lej);
-	}
-}
-
-size_t SchindelhauerTMCG::TMCG_PopFromOpenStack
-	(TMCG_OpenStack &os, TMCG_Card &c)
-{
-	if (!os.empty())
-	{
-		size_t type = (os.back()).first;
-		
-		c = *((os.back()).second);
-		delete (os.back()).second;
-		os.pop_back();
-		return type;
-	}
-	// return 'error code'
-	return (1 << TMCG_TypeBits);
-}
-
-size_t SchindelhauerTMCG::TMCG_PopFromOpenStack
-	(VTMF_OpenStack &os, VTMF_Card &c)
-{
-	if (!os.empty())
-	{
-		size_t type = (os.back()).first;
-		
-		c = *((os.back()).second);
-		delete (os.back()).second;
-		os.pop_back();
-		return type;
-	}
-	// return 'error code'
-	return (1 << TMCG_TypeBits);
-}
-
-bool SchindelhauerTMCG::TMCG_IsInOpenStack
-	(const TMCG_OpenStack &os, size_t check_type)
-{
-	for (TMCG_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		if (oi->first == check_type)
-			return true;
-	return false;
-}
-
-bool SchindelhauerTMCG::TMCG_IsInOpenStack
-	(const VTMF_OpenStack &os, size_t check_type)
-{
-	for (VTMF_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		if (oi->first == check_type)
-			return true;
-	return false;
-}
-
-void SchindelhauerTMCG::TMCG_MoveFromOpenStackToStack
-	(TMCG_OpenStack &os, TMCG_Stack &s, size_t check_type)
-{
-	for (TMCG_OpenStack::iterator oi = os.begin(); oi != os.end(); oi++)
-	{
-		if (oi->first == check_type)
-		{
-			TMCG_PushToStack(s, *(oi->second));
-			delete oi->second;
-			os.erase(oi);
-			return;
-		}
-	}
-}
-
-void SchindelhauerTMCG::TMCG_MoveFromOpenStackToStack
-	(VTMF_OpenStack &os, VTMF_Stack &s, size_t check_type)
-{
-	for (VTMF_OpenStack::iterator oi = os.begin(); oi != os.end(); oi++)
-	{
-		if (oi->first == check_type)
-		{
-			TMCG_PushToStack(s, *(oi->second));
-			delete oi->second;
-			os.erase(oi);
-			return;
-		}
-	}
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseOpenStack
-	(TMCG_OpenStack &os)
-{
-	for (TMCG_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		delete oi->second;
-	os.clear();
-}
-
-void SchindelhauerTMCG::TMCG_ReleaseOpenStack
-	(VTMF_OpenStack &os)
-{
-	for (VTMF_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		delete oi->second;
-	os.clear();
-}
-
-void SchindelhauerTMCG::TMCG_CopyOpenStack 
-	(const TMCG_OpenStack &os, TMCG_OpenStack &os2)
-{
-	TMCG_ReleaseOpenStack(os2);
-	for (TMCG_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		TMCG_PushToOpenStack(os2, *(oi->second), oi->first);
-}
-
-void SchindelhauerTMCG::TMCG_CopyOpenStack 
-	(const VTMF_OpenStack &os, VTMF_OpenStack &os2)
-{
-	TMCG_ReleaseOpenStack(os2);
-	for (VTMF_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		TMCG_PushToOpenStack(os2, *(oi->second), oi->first);
-}
-
 void SchindelhauerTMCG::TMCG_MixOpenStack
 	(const TMCG_OpenStack &os, TMCG_OpenStack &os2,
 	const TMCG_StackSecret &ss, const TMCG_PublicKeyRing &ring)
@@ -3049,20 +2463,4 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 		lej.first = os[ss[i].first].first, lej.second = c;
 		os2.push_back(lej);
 	}
-}
-
-void SchindelhauerTMCG::TMCG_ExtractStack
-	(const TMCG_OpenStack &os, TMCG_Stack &s)
-{
-	TMCG_ReleaseStack(s);
-	for (TMCG_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		TMCG_PushToStack(s, *(oi->second));
-}
-
-void SchindelhauerTMCG::TMCG_ExtractStack
-	(const VTMF_OpenStack &os, VTMF_Stack &s)
-{
-	TMCG_ReleaseStack(s);
-	for (VTMF_OpenStack::const_iterator oi = os.begin(); oi != os.end(); oi++)
-		TMCG_PushToStack(s, *(oi->second));
 }

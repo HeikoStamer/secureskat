@@ -130,10 +130,6 @@ struct VTMF_CardSecret
 	}
 };
 
-typedef std::vector<VTMF_Card*>															VTMF_Stack;
-typedef std::vector<std::pair<size_t, VTMF_Card*> >					VTMF_OpenStack;
-typedef std::vector<std::pair<size_t, VTMF_CardSecret*> >		VTMF_StackSecret;
-
 class BarnettSmartVTMF_dlog
 {
 	private:
