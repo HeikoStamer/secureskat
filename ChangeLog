@@ -1,2 +1,10 @@
 SecureSkat 2.3:
-    initial GNU/Savannah release (no new features, but included libTMCG)
+		- initial GNU/Savannah release (no new features, but included libTMCG)
+SecureSkat 2.4:
+		- libTMCG is now separated from this package
+		  (http://savannah.nongnu.org/projects/libtmcg/)
+		- URGENT security fix: our implementation of a proof of knowledge
+		  (equality of discrete logarithms) was not sound, i.e. the missing
+		  instantiation of mpz_shash on the verifier side permits cheating.
+		  These problems are issues of the library libTMCG. We announce them
+		  here to reach all possible users of SecureSkat.
