@@ -26,7 +26,9 @@
 		#include "config.h"
 	#endif
 	
+	#include <cstdio>
 	#include <string>
+	#include <vector>
 	
 	// GNU crypto library
 	#include <gcrypt.h> 
