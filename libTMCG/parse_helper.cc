@@ -55,5 +55,5 @@ std::string gs
 	if ((ei = s.find(p, 0)) != s.npos)
 		return s.substr(0, ei);
 	else
-		return NULL;
+		return std::string("ERROR");
 }
