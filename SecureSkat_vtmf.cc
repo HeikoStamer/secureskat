@@ -387,7 +387,7 @@ int skat_vkarte
 				throw -1;
 			
 			if ((pkr_self == 0) && (pkr_who == 1))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *right, *right);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 			if ((pkr_self == 1) && (pkr_who == 2))
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 					throw -1;
@@ -398,9 +398,9 @@ int skat_vkarte
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 					throw -1;
 			if ((pkr_self == 1) && (pkr_who == 2))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *right, *right);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 			if ((pkr_self == 2) && (pkr_who == 0))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *right, *right);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 			
 			type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
@@ -421,9 +421,9 @@ int skat_vkarte
 				throw -1;
 			
 			if ((pkr_self == 0) && (pkr_who == 2))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *left, *left);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 			if ((pkr_self == 1) && (pkr_who == 0))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *left, *left);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 			if ((pkr_self == 2) && (pkr_who == 1))
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 					throw -1;
@@ -434,7 +434,7 @@ int skat_vkarte
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 					throw -1;
 			if ((pkr_self == 2) && (pkr_who == 1))
-				tmcg->TMCG_ProofCardSecret(c, vtmf, *left, *left);
+				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 			
 			type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
@@ -457,9 +457,9 @@ void skat_okarte
 	)
 {
 	*right << c << std::endl << std::flush;
-	tmcg->TMCG_ProofCardSecret(c, vtmf, *right, *right);
+	tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 	*left << c << std::endl << std::flush;
-	tmcg->TMCG_ProofCardSecret(c, vtmf, *left, *left);
+	tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 }
 
 const char *skat_spiel2string
@@ -544,7 +544,7 @@ void skat_szeigen
 	)
 {
 	for (size_t i = 0; i < sk.size(); i++)
-		tmcg->TMCG_ProofCardSecret(sk[i], vtmf, *rls, *rls);
+		tmcg->TMCG_ProveCardSecret(sk[i], vtmf, *rls, *rls);
 }
 
 bool skat_ssehen
@@ -725,14 +725,14 @@ bool skat_sehen
 			os.push(tmcg->TMCG_TypeOfCard(s0[i], vtmf), s0[i]);
 		}
 		for (size_t i = 0; i < s1.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s1[i], vtmf, *left, *left);
+			tmcg->TMCG_ProveCardSecret(s1[i], vtmf, *left, *left);
 		for (size_t i = 0; i < s2.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s2[i], vtmf, *right, *right);
+			tmcg->TMCG_ProveCardSecret(s2[i], vtmf, *right, *right);
 	}
 	if (pkr_self == 1)
 	{
 		for (size_t i = 0; i < s0.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s0[i], vtmf, *right, *right);
+			tmcg->TMCG_ProveCardSecret(s0[i], vtmf, *right, *right);
 		for (size_t i = 0; i < s1.size(); i++)
 		{
 			tmcg->TMCG_SelfCardSecret(s1[i], vtmf);
@@ -743,14 +743,14 @@ bool skat_sehen
 			os.push(tmcg->TMCG_TypeOfCard(s1[i], vtmf), s1[i]);
 		}
 		for (size_t i = 0; i < s2.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s2[i], vtmf, *left, *left);
+			tmcg->TMCG_ProveCardSecret(s2[i], vtmf, *left, *left);
 	}
 	if (pkr_self == 2)
 	{
 		for (size_t i = 0; i < s0.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s0[i], vtmf, *left, *left);
+			tmcg->TMCG_ProveCardSecret(s0[i], vtmf, *left, *left);
 		for (size_t i = 0; i < s1.size(); i++)
-			tmcg->TMCG_ProofCardSecret(s1[i], vtmf, *right, *right);
+			tmcg->TMCG_ProveCardSecret(s1[i], vtmf, *right, *right);
 		for (size_t i = 0; i < s2.size(); i++)
 		{
 			tmcg->TMCG_SelfCardSecret(s2[i], vtmf);
@@ -846,8 +846,8 @@ bool skat_mischen_beweis
 {
 	if (pkr_self == 0)
 	{
-		tmcg->TMCG_ProofStackEquality(d, d0, ss, false, vtmf, *left, *left);
-		tmcg->TMCG_ProofStackEquality(d, d0, ss, false, vtmf, *right, *right);
+		tmcg->TMCG_ProveStackEquality(d, d0, ss, false, vtmf, *left, *left);
+		tmcg->TMCG_ProveStackEquality(d, d0, ss, false, vtmf, *right, *right);
 		if (!tmcg->TMCG_VerifyStackEquality(d0, d1, false, vtmf, *left, *left))
 			return false;
 		if (!tmcg->TMCG_VerifyStackEquality(d1, d2, false, vtmf, *right, *right))
@@ -857,8 +857,8 @@ bool skat_mischen_beweis
 	{
 		if (!tmcg->TMCG_VerifyStackEquality(d, d0, false, vtmf, *right, *right))
 			return false;
-		tmcg->TMCG_ProofStackEquality(d0, d1, ss, false, vtmf, *right, *right);
-		tmcg->TMCG_ProofStackEquality(d0, d1, ss, false, vtmf, *left, *left);
+		tmcg->TMCG_ProveStackEquality(d0, d1, ss, false, vtmf, *right, *right);
+		tmcg->TMCG_ProveStackEquality(d0, d1, ss, false, vtmf, *left, *left);
 		if (!tmcg->TMCG_VerifyStackEquality(d1, d2, false, vtmf, *left, *left))
 			return false;
 	}
@@ -868,8 +868,8 @@ bool skat_mischen_beweis
 			return false;
 		if (!tmcg->TMCG_VerifyStackEquality(d0, d1, false, vtmf, *right, *right))
 			return false;
-		tmcg->TMCG_ProofStackEquality(d1, d2, ss, false, vtmf, *left, *left);
-		tmcg->TMCG_ProofStackEquality(d1, d2, ss, false, vtmf, *right, *right);
+		tmcg->TMCG_ProveStackEquality(d1, d2, ss, false, vtmf, *left, *left);
+		tmcg->TMCG_ProveStackEquality(d1, d2, ss, false, vtmf, *right, *right);
 	}
 	return true;
 }
@@ -1107,9 +1107,9 @@ int skat_game
 				tmcg->TMCG_MixStack(d_mix[2], d_end, ab, vtmf);
 				*left << d_end << std::endl << std::flush;
 				*right << d_end << std::endl << std::flush;
-				tmcg->TMCG_ProofStackEquality(d_mix[2], d_end, ab, true, vtmf,
+				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
 					*left, *left);
-				tmcg->TMCG_ProofStackEquality(d_mix[2], d_end, ab, true, vtmf,
+				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
 					*right, *right);
 			}
 			else

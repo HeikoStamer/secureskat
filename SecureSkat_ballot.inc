@@ -719,7 +719,7 @@ int ballot_child
 				if (j != pkr_self)
 				{
 					*(ios_out[vnicks[j]]) << s2 << std::endl << std::flush;
-					ballot_tmcg->TMCG_ProofStackEquality(s, s2, ss, false, vtmf,
+					ballot_tmcg->TMCG_ProveStackEquality(s, s2, ss, false, vtmf,
 						*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
 				}
 			}
@@ -753,7 +753,7 @@ int ballot_child
 				{
 					if (j != pkr_self)
 					{
-						ballot_tmcg->TMCG_ProofCardSecret(s[k], vtmf,
+						ballot_tmcg->TMCG_ProveCardSecret(s[k], vtmf,
 							*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
 					}
 				}
