@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of libTMCG.
 
- Copyright (C) 2002-2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2002, 2004 Heiko Stamer, <stamer@gaos.org>
 
    libTMCG is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 
     (mpz_sqrtmp_r)     1. square roots mod p, with p prime
-    [algorithm of Adleman, Manders, and Miller, 1977]
+                          [algorithm of Adleman, Manders, and Miller, 1977]
 
     (mpz_sqrtmp_fast)     faster version, needed some pre-computations
 
