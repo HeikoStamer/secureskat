@@ -30,3 +30,5 @@ libTMCG_la_SOURCES = mpz_srandom.c mpz_srandom.h\
 	TMCG_SecretKey.cc TMCG_SecretKey.hh\
 	TMCG_PublicKey.cc TMCG_PublicKey.hh\
 	TMCG_PublicKeyRing.hh libTMCG.hh
+
+EXTRA_DIST = TMCG.def
