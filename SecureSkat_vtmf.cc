@@ -22,9 +22,6 @@
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
-// global variable for return strings
-string wstr;
-
 // values for biding
 size_t reiz_wert[] =
 	{ 
@@ -209,7 +206,8 @@ void init_co
 
 size_t skat_spitzen
 	(
-		size_t spiel, SchindelhauerTMCG *tmcg, const VTMF_OpenStack &os
+		size_t spiel, SchindelhauerTMCG *tmcg,
+		const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
 	size_t co[5][18], sz_cnt = 0;
@@ -218,13 +216,13 @@ size_t skat_spitzen
 	// Null Spiel? Keine Spitzen!
 	if (skat_spiel2gwert(spiel) == 23)
 		return 0;
-
+	
 	// mit oder ohne Spitzen z?len
-	if (tmcg->TMCG_IsInOpenStack(os, 0))
+	if (os.find(0))
 	{
 		for (size_t sz = 0; sz < 11; sz++)
 		{
-			if (tmcg->TMCG_IsInOpenStack(os, co[4][sz]))
+			if (os.find(co[4][sz]))
 					sz_cnt++;
 			else
 				break;
@@ -234,7 +232,7 @@ size_t skat_spitzen
 	{
 		for (size_t sz = 0; sz < 11; sz++)
 		{
-			if (!tmcg->TMCG_IsInOpenStack(os, co[4][sz]))
+			if (!os.find(co[4][sz]))
 				sz_cnt++;
 			else
 				break;
@@ -245,27 +243,25 @@ size_t skat_spitzen
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel, const vector<size_t> &cv
+		size_t t, size_t tt, size_t spiel, const std::vector<size_t> &cv
 	)
 {
-	VTMF_OpenStack os;
-	pair<short int, VTMF_Card*> os_p;
+	TMCG_OpenStack<VTMF_Card> os;
+	VTMF_Card c;
 	for (size_t j = 0; j < cv.size(); j++)
-	{
-		os_p.first = cv[j], os_p.second = NULL;
-		os.push_back(os_p);
-	}	
+		os.push(std::pair<size_t, VTMF_Card>(cv[j], c));
 	return skat_rulectl(t, tt, spiel, os);
 }
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel, const VTMF_OpenStack &os
+		size_t t, size_t tt, size_t spiel,
+		const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
 	size_t co[5][18], to = 0;
 	init_co(spiel, co);
-
+	
 	if (skat_spiel2gwert(spiel) == 23)
 		to = 0;	// Null: kein Trumpf
 	else if (skat_spiel2gwert(spiel) == 24)
@@ -309,7 +305,7 @@ bool skat_rulectl
 	
 int skat_bstich
 	(
-		const VTMF_OpenStack &os, size_t spiel
+		const TMCG_OpenStack<VTMF_Card> &os, size_t spiel
 	)
 {
 	size_t co[5][18];
@@ -364,7 +360,7 @@ int skat_bstich
 int skat_vkarte
 	(
 		size_t pkr_self, size_t pkr_who, SchindelhauerTMCG *tmcg,
-		BarnettSmartVTMF_dlog *vtmf, VTMF_Stack &s,
+		BarnettSmartVTMF_dlog *vtmf, TMCG_Stack<VTMF_Card> &s,
 		iosecuresocketstream *right, iosecuresocketstream *left, bool rmv
 	)
 {
@@ -542,7 +538,7 @@ int skat_wort2spiel
 void skat_szeigen
 	(
 		SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &sk, iosecuresocketstream *rls
+		const TMCG_Stack<VTMF_Card> &sk, iosecuresocketstream *rls
 	)
 {
 	for (size_t i = 0; i < sk.size(); i++)
@@ -552,7 +548,7 @@ void skat_szeigen
 bool skat_ssehen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		VTMF_OpenStack &os, const VTMF_Stack &sk,
+		TMCG_OpenStack<VTMF_Card> &os, const TMCG_Stack<VTMF_Card> &sk,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -684,7 +680,7 @@ const char *skat_type2string
 
 void skat_blatt
 	( 
-		size_t p, const VTMF_OpenStack &os
+		size_t p, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
 	list<int> w;
@@ -711,8 +707,8 @@ void skat_blatt
 bool skat_sehen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		VTMF_OpenStack &os,
-		const VTMF_Stack &s0, const VTMF_Stack &s1, const VTMF_Stack &s2,
+		TMCG_OpenStack<VTMF_Card> &os,
+		const TMCG_Stack<VTMF_Card> &s0, const TMCG_Stack<VTMF_Card> &s1, const TMCG_Stack<VTMF_Card> &s2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -772,8 +768,8 @@ bool skat_sehen
 
 bool skat_geben
 	(
-		SchindelhauerTMCG *tmcg, VTMF_Stack &d_mix,
-		VTMF_Stack &s0, VTMF_Stack &s1, VTMF_Stack &s2, VTMF_Stack &sk
+		SchindelhauerTMCG *tmcg, TMCG_Stack<VTMF_Card> &d_mix,
+		TMCG_Stack<VTMF_Card> &s0, TMCG_Stack<VTMF_Card> &s1, TMCG_Stack<VTMF_Card> &s2, TMCG_Stack<VTMF_Card> &sk
 	)
 {
 	VTMF_Card c;
@@ -846,8 +842,8 @@ bool skat_geben
 bool skat_mischen_beweis
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &d, const VTMF_StackSecret &ss,
-		const VTMF_Stack &d0, const VTMF_Stack &d1, const VTMF_Stack &d2,
+		const TMCG_Stack<VTMF_Card> &d, const TMCG_StackSecret<VTMF_CardSecret> &ss,
+		const TMCG_Stack<VTMF_Card> &d0, const TMCG_Stack<VTMF_Card> &d1, const TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -884,8 +880,8 @@ bool skat_mischen_beweis
 bool skat_mischen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &d, const VTMF_StackSecret &ss,
-		VTMF_Stack &d0, VTMF_Stack &d1, VTMF_Stack &d2,
+		const TMCG_Stack<VTMF_Card> &d, const TMCG_StackSecret<VTMF_CardSecret> &ss,
+		TMCG_Stack<VTMF_Card> &d0, TMCG_Stack<VTMF_Card> &d1, TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -1058,7 +1054,7 @@ int skat_game
 		for (size_t p = 0; p < 3; p++)
 		{
 			// Skatblatt mit 32 (verschiedenen) Karten erstellen
-			VTMF_OpenStack d;
+			TMCG_OpenStack<VTMF_Card> d;
 			for (int i = 0; i < 32; i++)
 			{
 				VTMF_Card c;
@@ -1066,8 +1062,8 @@ int skat_game
 				tmcg->TMCG_PushToOpenStack(d, c, i);
 			}
 			// Mischen
-			VTMF_Stack d2, d_mix[3], d_end;
-			VTMF_StackSecret ss, ab;
+			TMCG_Stack<VTMF_Card> d2, d_mix[3], d_end;
+			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
 			tmcg->TMCG_ExtractStack(d, d2);
 			tmcg->TMCG_CreateStackSecret(ss, false, d2.size(), vtmf);
 			cout << "><>< Mische Karten. Bitte warten ..." << flush;
@@ -1171,13 +1167,13 @@ int skat_game
 				ost << nicks[pkr_self] << " GEBEN" << endl;
 				*out_ctl << ost.str() << flush;
 			}
-			VTMF_Stack s[3], sk;
+			TMCG_Stack<VTMF_Card> s[3], sk;
 			if (!skat_geben(tmcg, d_end, s[0], s[1], s[2], sk))
 			{
 				cout << ">< Fehler beim Geben: zu wenig Spielkarten" << endl;
 				return 3;
 			}
-			VTMF_OpenStack os, os_ov, os_sp, os_st, os_pkt[3], os_rc[3];
+			TMCG_OpenStack<VTMF_Card> os, os_ov, os_sp, os_st, os_pkt[3], os_rc[3];
 			if (!skat_sehen(pkr_self, tmcg, vtmf, os,
 				s[0], s[1], s[2], right, left))
 			{
@@ -1916,7 +1912,7 @@ int skat_game
 							// Ouvert Spiele -- Karte vom Sichtstapel entfernen
 							if ((spiel_status - (hand_spiel ? 1000 : 0)) > 300)
 							{
-								VTMF_Stack st;
+								TMCG_Stack<VTMF_Card> st;
 								tmcg->TMCG_MoveFromOpenStackToStack(os_ov, st, type);
 								tmcg->TMCG_ReleaseStack(st);
 							}
@@ -1983,7 +1979,7 @@ int skat_game
 							cout << "><><>< gelegt wurde: ";
 							for (size_t i = 0; i < os_sp.size(); i++)
 							{
-								VTMF_OpenStack os_sp2;
+								TMCG_OpenStack<VTMF_Card> os_sp2;
 								tmcg->TMCG_PushToOpenStack(os_sp2, 
 									*(os_sp[i].second), os_sp[i].first);
 								skat_blatt(99, os_sp2);
@@ -2541,7 +2537,7 @@ int skat_game
 											ost << nicks[pkr_self] << " LEGE " << tt << endl;
 											*out_ctl << ost.str() << flush;
 										}
-										VTMF_Stack st;
+										TMCG_Stack<VTMF_Card> st;
 										VTMF_Card c;
 										tmcg->TMCG_MoveFromOpenStackToStack(os, st, tt);
 										skat_okarte(tmcg, vtmf, *(st[0]), right, left);
@@ -2648,7 +2644,7 @@ int skat_game
 				assert (os_st.size() == 10);
 				for (size_t i = 0; i < 3; i++)
 				{
-					VTMF_OpenStack gps;
+					TMCG_OpenStack<VTMF_Card> gps;
 					assert (os_rc[i].size() == 10);
 					tmcg->TMCG_PushOpenStackToOpenStack(gps, os_rc[i]);
 					rules_ok[i] = true;
@@ -2657,7 +2653,7 @@ int skat_game
 						if (!skat_rulectl(os_st[j].first, os_rc[i][j].first, 
 							spiel_status, gps))
 								rules_ok[i] = false;
-						VTMF_Stack tst;
+						TMCG_Stack<VTMF_Card> tst;
 						tmcg->TMCG_MoveFromOpenStackToStack(gps, tst, os_rc[i][j].first);
 						tmcg->TMCG_ReleaseStack(tst);
 					}

@@ -52,30 +52,30 @@
  * @return size in bytes of the putback area (input buffer), used by unget
  */
 
-struct securesocketbuf_traits 
+struct securesocketbuf_traits
 {
-	static inline bool buffer_output() 
-	{ 
-		return true; 
+	static inline bool buffer_output()
+	{
+		return true;
 	}
 	static inline size_t o_write_sz()
 	{
 		return 1024;
 	}
-	static inline size_t o_buffer_sz() 
-	{ 
-		return 512; 
+	static inline size_t o_buffer_sz()
+	{
+		return 512;
 	}
 	static inline size_t i_read_sz()
 	{
 		return 512;
 	}
-	static inline size_t i_buffer_sz() 
-	{ 
-		return 8192; 
+	static inline size_t i_buffer_sz()
+	{
+		return 8192;
 	}
-	static inline size_t putback_sz() 
-	{ 
+	static inline size_t putback_sz()
+	{
 		return 4;
 	}
 };
@@ -96,7 +96,7 @@ template <class traits = securesocketbuf_traits>
 	class basic_securesocketbuf : public std::streambuf 
 {
 	protected:
-		int mSocket;					/*! @member mSocket the socket to operate on */
+		int mSocket;				/*! @member mSocket the socket to operate on */
 		char *mRBuffer;				/*! @member mRBuffer the read buffer */
 		char *mWBuffer;				/*! @member mWBuffer the write buffer */
 		gcry_cipher_hd_t chd_in;	/*! @member chd_in cipher handle for reading */
@@ -104,10 +104,10 @@ template <class traits = securesocketbuf_traits>
 		gcry_error_t err;			/*! @member err the gcry error return code */
 		z_stream zs_out;			/*! @member zs_out zlib compression stream */
 		z_stream zs_in;				/*! @member zs_in zlib uncompression stream */
-		int zerr;							/*! @member zerr the zlib error return code */
+		int zerr;					/*! @member zerr the zlib error return code */
 
 	public:
-		typedef traits traits_type; /*! @typedef traits_type for clients */
+		typedef traits traits_type;	/*! @typedef traits_type for clients */
 
 		/*! @method basic_securesocketbuf
 		 * The primary constructor, which takes an open socket as first argument
@@ -121,16 +121,16 @@ template <class traits = securesocketbuf_traits>
 				GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_open() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_open() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
-
+			
 			err = gcry_cipher_setkey(chd_in, key_in, size_in);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_setkey() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_setkey() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
 			
@@ -138,27 +138,27 @@ template <class traits = securesocketbuf_traits>
 				GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_open() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_open() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
 			
 			err = gcry_cipher_setkey(chd_out, key_out, size_out);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_setkey() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_setkey() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
 			
 			static const char* myZlibVersion = ZLIB_VERSION;
 			if (zlibVersion()[0] != myZlibVersion[0])
 			{
-				cerr << "zlib: incompatible zlib version" << endl;
+				std::cerr << "zlib: incompatible zlib version" << std::endl;
 				exit(-1);
 			}
 			else if (std::strcmp(zlibVersion(), ZLIB_VERSION) != 0)
-				cerr << "zlib: WARNING -- different zlib version" << endl;
+				std::cerr << "zlib: WARNING -- different zlib version" << std::endl;
 			
 			zs_in.zalloc = (alloc_func)0, zs_out.zalloc = (alloc_func)0;
 			zs_in.zfree = (free_func)0, zs_out.zfree = (free_func)0;
@@ -167,17 +167,19 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflateInit(&zs_out, Z_DEFAULT_COMPRESSION);
 			if (zerr)
 			{
-				cerr << "zlib: deflateInit() failed with error " << zerr << endl;
+				std::cerr << "zlib: deflateInit() failed with error " << zerr
+					<< std::endl;
 				exit(-1);
 			}
 			
 			zerr = inflateInit(&zs_in);
 			if (zerr)
 			{
-				cerr << "zlib: inflateInit() failed with error " << zerr << endl;
+				std::cerr << "zlib: inflateInit() failed with error " << zerr
+					<< std::endl;
 				exit(-1);
 			}
-
+			
 			mRBuffer = new char[traits_type::i_buffer_sz()];
 			mWBuffer = new char[traits_type::o_buffer_sz()];
 			if(traits_type::buffer_output()) 
@@ -185,7 +187,7 @@ template <class traits = securesocketbuf_traits>
 			char *pos = mRBuffer + traits_type::putback_sz();
 			setg(pos, pos, pos);
 		}
-
+		
 		/*! @method ~basic_securesocketbuf()
 		 * The destructor
 		 */
@@ -193,7 +195,7 @@ template <class traits = securesocketbuf_traits>
 		{
 		  deflateEnd(&zs_out), inflateEnd(&zs_in);
 			gcry_cipher_close(chd_in), gcry_cipher_close(chd_out);
-			delete [] mRBuffer,	delete [] mWBuffer;
+			delete [] mRBuffer, delete [] mWBuffer;
 			sync();
 		}
 	
@@ -206,10 +208,10 @@ template <class traits = securesocketbuf_traits>
 		int flushOutput() 
 		{
 			int num = pptr() - pbase();
-
+			
 			if (num == 0)
 				return 0;
-
+			
 			Byte *cbuf = new Byte[traits_type::o_write_sz()];
 			uLong clen = zs_out.total_out;
 			zs_out.next_in  = (Bytef*)mWBuffer;
@@ -219,19 +221,20 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflate(&zs_out, Z_SYNC_FLUSH);
 			if (zerr || (zs_out.avail_in != 0) || (zs_out.avail_out == 0))
 			{
-				cerr << "zlib: deflate() failed with error " << zerr << endl;
+				std::cerr << "zlib: deflate() failed with error " << zerr
+					<< std::endl;
 				exit(-1);
 			}
 			clen = zs_out.total_out - clen;
-
+			
 			err = gcry_cipher_encrypt(chd_out, (unsigned char*)cbuf, clen, NULL, 0);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_encrypt() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_encrypt() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
-
+			
 			int ret = send(mSocket, (unsigned char*)cbuf, clen, 0);
 			delete [] cbuf;
 			if ((unsigned int)ret != clen)
@@ -239,15 +242,15 @@ template <class traits = securesocketbuf_traits>
 			pbump(-num);
 			return num;
 		}
-
+		
 		/*! @method overflow
 		 * called by std::streambuf when the write buffer is full
 		 * @param c the character that overflowed the write buffer
 		 * @return the character that overflowed the write buffer
 		 */
-		virtual int_type overflow(int_type c) 
+		virtual int_type overflow(int_type c)
 		{
-			if (traits_type::buffer_output()) 
+			if (traits_type::buffer_output())
 			{
 				*pptr() = c;
 				pbump(1);
@@ -258,18 +261,18 @@ template <class traits = securesocketbuf_traits>
 			else 
 				return EOF;
 		}
-
+		
 		/*! @method sync
 		 * called by std::strambuf when the endl or flush operators are used
 		 * @return -1 if the write buffer flush failed
 		 */
-		virtual int sync() 
+		virtual int sync()
 		{
-			if (flushOutput() == EOF) 
+			if (flushOutput() == EOF)
 				return -1;
 			return 0;
 		}
-
+		
 		/*! @method xsputn
 		 * called by std::streambuf to write a buffer to the output device
 		 * @param s the buffer to be written
@@ -280,7 +283,7 @@ template <class traits = securesocketbuf_traits>
 		{
 			if (num <= 0)
 				return 0;
-
+			
 			size_t bufsiz = traits_type::o_write_sz();
 			if ((size_t)(num + 12) >= traits_type::o_write_sz())
 				bufsiz += num;
@@ -293,35 +296,36 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflate(&zs_out, Z_SYNC_FLUSH);
 			if (zerr || (zs_out.avail_in != 0) || (zs_out.avail_out == 0))
 			{
-				cerr << "zlib: deflate() failed with error " << zerr << endl;
+				std::cerr << "zlib: deflate() failed with error " << zerr
+					<< std::endl;
 				exit(-1);
 			}
 			clen = zs_out.total_out - clen;
-
+			
 			err = gcry_cipher_encrypt(chd_out, (unsigned char*)cbuf, clen, NULL, 0);
 			if (err)
 			{
-				cerr << "libgcrypt: gcry_cipher_encrypt() failed" << endl;
-				cerr << gcry_strerror(err) << endl;
+				std::cerr << "libgcrypt: gcry_cipher_encrypt() failed" << std::endl;
+				std::cerr << gcry_strerror(err) << std::endl;
 				exit(-1);
 			}
-
+			
 			int ret = send(mSocket, (unsigned char*)cbuf, clen, 0);
 			delete [] cbuf;
 			if ((unsigned int)ret != clen)
 				return ret;
 			return num;
 		}
-
+		
 		/*! @method underflow
 		 * called by std::streambuf when the read buffer is empty
 		 * @return the next character to be read or EOF on failure
 		 */
-		virtual int_type underflow() 
+		virtual int_type underflow()
 		{
 			if (gptr() < egptr())
 				return *gptr();
-
+			
 			size_t numPutBack = gptr() - eback();
 			if (numPutBack > traits_type::putback_sz())
 				numPutBack = traits_type::putback_sz();
@@ -329,7 +333,7 @@ template <class traits = securesocketbuf_traits>
 				gptr() - numPutBack, numPutBack);
 			
 			int count = 0;
-			while (1) 
+			while (1)
 			{
 				Byte *cbuf = new Byte[traits_type::i_read_sz()];
 				count = recv(mSocket, 
@@ -342,14 +346,14 @@ template <class traits = securesocketbuf_traits>
 						continue;
 					return EOF;
 				}
-				else 
+				else
 				{
-					err = gcry_cipher_decrypt(chd_in, 
+					err = gcry_cipher_decrypt(chd_in,
 						(unsigned char*)cbuf, count, NULL, 0);
 					if (err)
 					{
-						cerr << "libgcrypt: gcry_cipher_decrypt() failed" << endl;
-						cerr << gcry_strerror(err) << endl;
+						std::cerr << "libgcrypt: gcry_cipher_decrypt() failed"
+							<< std::endl << gcry_strerror(err) << std::endl;
 						exit(-1);
 					}
 					
@@ -362,7 +366,8 @@ template <class traits = securesocketbuf_traits>
 					zerr = inflate(&zs_in, Z_SYNC_FLUSH);
 					if (zerr)
 					{
-						cerr << "zlib: inflate() failed with error " << zerr << endl;
+						std::cerr << "zlib: inflate() failed with error " << zerr
+							<< std::endl;
 						exit(-1);
 					}
 					count = zs_in.total_out - clen;
@@ -378,7 +383,7 @@ template <class traits = securesocketbuf_traits>
 				mRBuffer + traits_type::putback_sz(), 
 				mRBuffer + traits_type::putback_sz() + count);
 			return *gptr();
-		} 
+		}
 };
 
 /*! @typedef socketbuf
@@ -401,7 +406,7 @@ class isecuresocketstream : public std::istream
 		 * @param iSocket an open and connected socket
 		 */
 		isecuresocketstream(int iSocket,
-			const char *key_in, size_t size_in,	const char *key_out, size_t size_out
+			const char *key_in, size_t size_in, const char *key_out, size_t size_out
 		) : std::istream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}

@@ -69,7 +69,6 @@
 #else
 	#define _(String) String
 #endif
-using namespace std;
 
 size_t skat_idx
 	(
@@ -83,28 +82,30 @@ size_t skat_spiel2gwert
 
 size_t skat_spitzen
 	(
-		size_t spiel, SchindelhauerTMCG *tmcg, const VTMF_OpenStack &os
+		size_t spiel, SchindelhauerTMCG *tmcg,
+		const TMCG_OpenStack<VTMF_Card> &os
 	);
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel, const vector<size_t> &cv
+		size_t t, size_t tt, size_t spiel, const std::vector<size_t> &cv
 	);
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel, const VTMF_OpenStack &os
+		size_t t, size_t tt, size_t spiel,
+		const TMCG_OpenStack<VTMF_Card> &os
 	);
 
 int skat_bstich
 	(
-		const VTMF_OpenStack &os, size_t spiel
+		const TMCG_OpenStack<VTMF_Card> &os, size_t spiel
 	);
 
 int skat_vkarte
 	(
 		size_t pkr_self, size_t pkr_who, SchindelhauerTMCG *tmcg,
-		BarnettSmartVTMF_dlog *vtmf, VTMF_Stack &s,
+		BarnettSmartVTMF_dlog *vtmf, TMCG_Stack<VTMF_Card> &s,
 		iosecuresocketstream *right, iosecuresocketstream *left, bool rmv
 	);
 
@@ -121,25 +122,25 @@ const char *skat_spiel2string
 
 int skat_wort2spiel
 	(
-		const string &wort
+		const std::string &wort
 	);
 
 void skat_szeigen
 	(
 		SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &sk, iosecuresocketstream *rls
+		const TMCG_Stack<VTMF_Card> &sk, iosecuresocketstream *rls
 	);
 
 bool skat_ssehen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		VTMF_OpenStack &os, const VTMF_Stack &sk,
+		TMCG_OpenStack<VTMF_Card> &os, const TMCG_Stack<VTMF_Card> &sk,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	);
 
 int skat_wort2type
 	(
-		const string &wort
+		const std::string &wort
 	);
 
 const char *skat_type2string
@@ -149,43 +150,50 @@ const char *skat_type2string
 
 void skat_blatt
 	( 
-		size_t p, const VTMF_OpenStack &os
+		size_t p, const TMCG_OpenStack<VTMF_Card> &os
 	);
 
 bool skat_sehen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		VTMF_OpenStack &os,
-		const VTMF_Stack &s0, const VTMF_Stack &s1, const VTMF_Stack &s2,
+		TMCG_OpenStack<VTMF_Card> &os, const TMCG_Stack<VTMF_Card> &s0,
+		const TMCG_Stack<VTMF_Card> &s1, const TMCG_Stack<VTMF_Card> &s2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	);
 
 bool skat_geben
 	(
-		SchindelhauerTMCG *tmcg, VTMF_Stack &d_mix,
-		VTMF_Stack &s0, VTMF_Stack &s1, VTMF_Stack &s2, VTMF_Stack &sk
+		SchindelhauerTMCG *tmcg, TMCG_Stack<VTMF_Card> &d_mix,
+		TMCG_Stack<VTMF_Card> &s0, TMCG_Stack<VTMF_Card> &s1,
+		TMCG_Stack<VTMF_Card> &s2, TMCG_Stack<VTMF_Card> &sk
 	);
 
 bool skat_mischen_beweis
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &d, const VTMF_StackSecret &ss,
-		const VTMF_Stack &d0, const VTMF_Stack &d1, const VTMF_Stack &d2,
+		const TMCG_Stack<VTMF_Card> &d,
+		const TMCG_StackSecret<VTMF_CardSecret> &ss,
+		const TMCG_Stack<VTMF_Card> &d0, const TMCG_Stack<VTMF_Card> &d1,
+		const TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	);
 
 bool skat_mischen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const VTMF_Stack &d, const VTMF_StackSecret &ss,
-		VTMF_Stack &d0, VTMF_Stack &d1, VTMF_Stack &d2,
+		const TMCG_Stack<VTMF_Card> &d,
+		const TMCG_StackSecret<VTMF_CardSecret> &ss,
+		TMCG_Stack<VTMF_Card> &d0, TMCG_Stack<VTMF_Card> &d1,
+		TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	);
 
 int skat_game
 	(
-		string nr, size_t rounds, size_t pkr_self, bool master, int opipe, int ipipe,
-		int ctl_o, int ctl_i, SchindelhauerTMCG *tmcg, const TMCG_PublicKeyRing &pkr,
-		const TMCG_SecretKey &sec, iosecuresocketstream *right, iosecuresocketstream *left,
-		const vector<string> &nicks, int hpipe, bool pctl, char *ireadbuf, int &ireaded
+		std::string nr, size_t rounds, size_t pkr_self, bool master, int opipe,
+		int ipipe, int ctl_o, int ctl_i, SchindelhauerTMCG *tmcg,
+		const TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
+		iosecuresocketstream *right, iosecuresocketstream *left,
+		const std::vector<std::string> &nicks, int hpipe, bool pctl,
+		char *ireadbuf, int &ireaded
 	);
