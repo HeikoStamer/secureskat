@@ -155,13 +155,13 @@ struct TMCG_SecretKey
 		
 		// STAGE1/2: m = p^i * q^j, p and q prime
 		// STAGE3: y \in NQR^\circ_m
-		std::ostringstream nizk, input;
-		input << m << "^" << y, nizk << "nzk^";
+		std::ostringstream nizk2, input;
+		input << m << "^" << y, nizk2 << "nzk^";
 		size_t mnsize = mpz_sizeinbase(m, 2L) / 8;
 		char *mn = new char[mnsize];
 		
 		// STAGE1: m Square Free, soundness error probability = d^{-nizk_stage1}
-		nizk << nizk_stage1 << "^";
+		nizk2 << nizk_stage1 << "^";
 		for (size_t stage1 = 0; stage1 < nizk_stage1; stage1++)
 		{
 			// common random number foo \in Z^*_m (build from hash function g)
@@ -179,11 +179,11 @@ struct TMCG_SecretKey
 			mpz_powm(bar, foo, m1pq, m);
 			
 			// update NIZK-proof stream
-			nizk << bar << "^"; 
+			nizk2 << bar << "^"; 
 		}
 		
 		// STAGE2: m Prime Power Product, soundness error prob. = 2^{-nizk_stage2}
-		nizk << nizk_stage2 << "^";
+		nizk2 << nizk_stage2 << "^";
 		for (size_t stage2 = 0; stage2 < nizk_stage2; stage2++)
 		{
 			// common random number foo \in Z^*_m (build from hash function g)
@@ -222,11 +222,11 @@ struct TMCG_SecretKey
 			}
 			
 			// update NIZK-proof stream
-			nizk << bar << "^";
+			nizk2 << bar << "^";
 		}
 		
 		// STAGE3: y \in NQR^\circ_m, soundness error probability = 2^{-nizk_stage3}
-		nizk << nizk_stage3 << "^";
+		nizk2 << nizk_stage3 << "^";
 		for (size_t stage3 = 0; stage3 < nizk_stage3; stage3++)
 		{
 			// common random number foo \in Z^\circ_m (build from hash function g)
@@ -248,10 +248,10 @@ struct TMCG_SecretKey
 			mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
 			
 			// update NIZK-proof stream
-			nizk << bar << "^";
+			nizk2 << bar << "^";
 		}
 		
-		nizk = nizk.str();
+		nizk = nizk2.str();
 		delete [] mn, mpz_clear(foo), mpz_clear(bar);
 		
 		// compute self-signature
@@ -384,10 +384,10 @@ struct TMCG_SecretKey
 	{
 		// check magic
 		if (!cm(s, "sig", '|'))
-			return string("ERROR");
+			return std::string("ERROR");
 		
 		// get the keyID
-		return string(gs(s, '|'));
+		return std::string(gs(s, '|'));
 	}
 	
 	std::string decrypt
@@ -531,7 +531,7 @@ struct TMCG_SecretKey
 	}
 };
 
-friend std::ostream& operator<< 
+std::ostream& operator<< 
 	(std::ostream &out, const TMCG_SecretKey &key)
 {
 	return out << "sec|" << key.name << "|" << key.email << "|" << key.type <<

@@ -1,0 +1,26 @@
+	#define					TMCG_MAX_PLAYERS			32L
+	#define					TMCG_MAX_CARDS				64L
+	#define					TMCG_MAX_TYPEBITS			8L
+	#define					TMCG_MAX_KEYBITS			2048L
+
+	#define					TMCG_MAX_VALUE_CHARS		\
+		(TMCG_MAX_KEYBITS / 2L)
+	#define					TMCG_MAX_CARD_CHARS			\
+		(TMCG_MAX_PLAYERS * TMCG_MAX_TYPEBITS * TMCG_MAX_VALUE_CHARS)
+	#define					TMCG_MAX_STACK_CHARS		\
+		(TMCG_MAX_CARDS * TMCG_MAX_CARD_CHARS)
+
+	#define					TMCG_KeyIDSize				5
+	
+	// SAEP octets
+	#define rabin_k0 20
+	#define rabin_s0 20
+	
+	// soundness error of NIZK
+		
+		// d^{-nizk_stage1}
+		#define nizk_stage1 16
+		// 2^{-nizk_stage2}
+		#define nizk_stage2 128
+		// 2^{-nizk_stage3}
+		#define nizk_stage3 128

@@ -43,7 +43,7 @@
 
 struct TMCG_PublicKey
 {
-	string							name, email, type, nizk, sig;
+	std::string						name, email, type, nizk, sig;
 	mpz_t							m, y;
 	
 	TMCG_PublicKey
@@ -65,7 +65,7 @@ struct TMCG_PublicKey
 		()
 	{
 		mpz_t foo, bar;
-		string s = nizk;
+		std::string s = nizk;
 		size_t stage1_size = 0, stage2_size = 0, stage3_size = 0;
 		size_t mnsize = mpz_sizeinbase(m, 2L) / 8;
 		char *ec, *mn = new char[mnsize];
@@ -88,7 +88,7 @@ struct TMCG_PublicKey
 				throw false;
 			
 			// check self-signature
-			ostringstream data;
+			std::ostringstream data;
 			data << name << "|" << email << "|" << type << "|" << m << "|" <<
 				y << "|" << nizk << "|";
 			if (!verify(data.str(), sig))
@@ -129,7 +129,7 @@ struct TMCG_PublicKey
 				throw false;
 			
 			// initalize NIZK proof input
-			ostringstream input;
+			std::ostringstream input;
 			input << m << "^" << y;
 			
 			// get security parameter of STAGE1
@@ -272,32 +272,32 @@ struct TMCG_PublicKey
 		}
 	}
 	
-	string selfid
+	std::string selfid
 		()
 	{
-		string s = sig;
+		std::string s = sig;
 		
 		// maybe a self signature
 		if (s == "")
-			return string("SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG");
+			return std::string("SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG");
 		
 		// check magic
 		if (!cm(s, "sig", '|'))
-			return string("NULL");
+			return std::string("ERROR");
 		
 		// skip the keyID
 		if (!nx(s, '|'))
-			return string("NULL");
+			return std::string("ERROR");
 		
 		// get the sigID
-		return string(gs(s, '|'));
+		return std::string(gs(s, '|'));
 	}
 	
-	string keyid
+	std::string keyid
 		()
 	{
-		ostringstream data;
-		string tmp = selfid();
+		std::ostringstream data;
+		std::string tmp = selfid();
 		
 		data << "ID" << TMCG_KeyIDSize << "^" << tmp.substr(tmp.length() -
 			((TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length()),
@@ -305,19 +305,19 @@ struct TMCG_PublicKey
 		return data.str();
 	}
 	
-	string sigid
-		(string s)
+	std::string sigid
+		(std::string s)
 	{
 		// check magic
 		if (!cm(s, "sig", '|'))
-			return string("NULL");
+			return std::string("ERROR");
 		
 		// get the keyID
-		return string(gs(s, '|'));
+		return std::string(gs(s, '|'));
 	}
 	
 	bool import
-		(string s)
+		(std::string s)
 	{
 		try
 		{
@@ -349,7 +349,7 @@ struct TMCG_PublicKey
 				throw false;
 			
 			// NIZK
-			key.nizk = gs(s, '|');
+			nizk = gs(s, '|');
 			if ((gs(s, '|') == NULL) || (!nx(s, '|')))
 				throw false;
 			
@@ -364,22 +364,23 @@ struct TMCG_PublicKey
 		}
 	}
 	
-	string encrypt
-		(const string &value)
+	std::string encrypt
+		(const std::string &value)
 	{
 		mpz_t vdata;
 		size_t rabin_s2 = 2 * rabin_s0;
-		size_t rabin_s1 = (mpz_sizeinbase(key.m, 2L) / 8) - rabin_s2;
+		size_t rabin_s1 = (mpz_sizeinbase(m, 2L) / 8) - rabin_s2;
 		
-		assert(rabin_s2 < (mpz_sizeinbase(key.m, 2L) / 16));
+		assert(rabin_s2 < (mpz_sizeinbase(m, 2L) / 16));
 		assert(rabin_s2 < rabin_s1);
-		assert(rabin_s0 < (mpz_sizeinbase(key.m, 2L) / 32));
+		assert(rabin_s0 < (mpz_sizeinbase(m, 2L) / 32));
 		
 		char *r = new char[rabin_s1];
 		gcry_randomize((unsigned char*)r, rabin_s1, GCRY_STRONG_RANDOM);
 		
 		char *Mt = new char[rabin_s2], *g12 = new char[rabin_s2];
-		memcpy(Mt, value, rabin_s0), memset(Mt + rabin_s0, 0, rabin_s0);
+		std::memcpy(Mt, value.c_str(), rabin_s0);
+		std::memset(Mt + rabin_s0, 0, rabin_s0);
 		g(g12, rabin_s2, r, rabin_s1);
 		
 		for (size_t i = 0; i < rabin_s2; i++)
@@ -395,7 +396,7 @@ struct TMCG_PublicKey
 		mpz_mul(vdata, vdata, vdata);
 		mpz_mod(vdata, vdata, m);
 		
-		ostringstream ost;
+		std::ostringstream ost;
 		ost << "enc|" << keyid() << "|" << vdata << "|";
 		mpz_clear(vdata);
 		
@@ -403,7 +404,7 @@ struct TMCG_PublicKey
 	}
 	
 	bool verify
-		(const string &data, string s)
+		(const std::string &data, std::string s)
 	{
 		mpz_t foo;
 		
@@ -475,8 +476,8 @@ struct TMCG_PublicKey
 	}
 };
 
-friend ostream& operator<< 
-	(ostream &out, const TMCG_PublicKey &key)
+std::ostream& operator<< 
+	(std::ostream &out, const TMCG_PublicKey &key)
 {
 	return out << "pub|" << key.name << "|" << key.email << "|" << key.type <<
 		"|" << key.m << "|" << key.y << "|" << key.nizk << "|" << key.sig;

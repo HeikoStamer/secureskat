@@ -92,8 +92,8 @@ struct VTMF_CardSecret
 	}
 };
 
-friend ostream& operator<<
-	(ostream &out, const VTMF_CardSecret &cardsecret)
+std::ostream& operator<<
+	(std::ostream &out, const VTMF_CardSecret &cardsecret)
 {
 	return out << "crs|" << cardsecret.r << "|";
 }

@@ -94,7 +94,7 @@ struct TMCG_Card
 	}
 	
 	bool import
-		(string s)
+		(std::string s)
 	{
 		char *ec;
 		
@@ -146,8 +146,8 @@ struct TMCG_Card
 	}
 };
 
-friend ostream& operator<< 
-	(ostream &out, const TMCG_Card &card)
+std::ostream& operator<< 
+	(std::ostream &out, const TMCG_Card &card)
 {
 	out << "crd|" << card.Players << "|" << card.TypeBits << "|";
 	for (size_t k = 0; k < card.Players; k++)

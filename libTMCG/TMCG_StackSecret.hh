@@ -45,14 +45,15 @@
 
 template <typename CardSecretType> struct TMCG_StackSecret
 {
-	vector<pair<size_t, CardSecretType> >	stack;
+	std::vector<std::pair<size_t, CardSecretType> >	stack;
 	
-	struct eq_first_component : public binary_function<
-		pair<size_t, CardSecretType>, pair<size_t, CardSecretType>, bool>
+	struct eq_first_component : public std::binary_function<
+		std::pair<size_t, CardSecretType>,
+		std::pair<size_t, CardSecretType>, bool>
 	{
 		bool operator() 
-			(const pair<size_t, CardSecretType>& p1,
-			 const pair<size_t, CardSecretType>& p2) const
+			(const std::pair<size_t, CardSecretType>& p1,
+			 const std::pair<size_t, CardSecretType>& p2) const
 		{
 			return (p1.first == p2.first);
 		}
@@ -70,13 +71,13 @@ template <typename CardSecretType> struct TMCG_StackSecret
 		stack = that.stack;
 	}
 	
-	const pair<size_t, CardSecretType>& operator []
+	const std::pair<size_t, CardSecretType>& operator []
 		(size_t n) const
 	{
 		return stack[n];
 	}
 	
-	pair<size_t, CardSecretType>& operator []
+	std::pair<size_t, CardSecretType>& operator []
 		(size_t n)
 	{
 		return stack[n];
@@ -91,7 +92,7 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	void push
 		(size_t index, const CardSecretType& cs)
 	{
-		stack.push_back(pair<size_t, CardSecretType>(index, cs));
+		stack.push_back(std::pair<size_t, CardSecretType>(index, cs));
 	}
 	
 	void clear
@@ -105,11 +106,12 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	{
 		return (std::find_if(stack.begin(), stack.end(),
 			std::bind2nd(eq_first_component(),
-				pair<size_t, CardSecretType>(index, CardSecretType()))) != stack.end());
+				std::pair<size_t, CardSecretType>(index, CardSecretType())))
+					!= stack.end());
 	}
 	
 	bool import
-		(string s)
+		(std::string s)
 	{
 		size_t size = 0;
 		char *ec;
@@ -130,7 +132,7 @@ template <typename CardSecretType> struct TMCG_StackSecret
 			// cards on stack
 			for (size_t i = 0; i < size; i++)
 			{
-				pair<size_t, CardSecretType> lej;
+				std::pair<size_t, CardSecretType> lej;
 				
 				// permutation index
 				if (gs(s, '^') == NULL)
@@ -165,8 +167,8 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	}
 };
 
-template<typename CardSecretType> friend ostream& operator<<
-	(ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
+template<typename CardSecretType> std::ostream& operator<<
+	(std::ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
 {
 	out << "sts^" << ss.size() << "^";
 	for (size_t i = 0; i < ss.size(); i++)

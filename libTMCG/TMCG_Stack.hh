@@ -45,7 +45,7 @@
 
 template <typename CardType> struct TMCG_Stack
 {
-	vector<CardType>	stack;
+	std::vector<CardType>	stack;
 	
 	TMCG_Stack
 		()
@@ -106,7 +106,7 @@ template <typename CardType> struct TMCG_Stack
 	void push
 		(const TMCG_OpenStack<CardType>& s)
 	{
-		for (typename vector<pair<size_t, CardType> >::const_iterator
+		for (typename std::vector<std::pair<size_t, CardType> >::const_iterator
 			si = s.stack.begin(); si != si.end(); si++)
 				stack.push_back(si->second);
 	}
@@ -137,7 +137,7 @@ template <typename CardType> struct TMCG_Stack
 	bool remove
 		(const CardType& c)
 	{
-		typename vector<CardType>::iterator si =
+		typename std::vector<CardType>::iterator si =
 			std::find(stack.begin(), stack.end(), c);
 		
 		if (si != stack.end())
@@ -158,7 +158,7 @@ template <typename CardType> struct TMCG_Stack
 	}
 	
 	bool import
-		(string s)
+		(std::string s)
 	{
 		size_t size = 0;
 		char *ec;
@@ -203,8 +203,8 @@ template <typename CardType> struct TMCG_Stack
 	}
 };
 
-template<typename CardType> friend ostream& operator<<
-	(ostream &out, const TMCG_Stack<CardType> &s)
+template<typename CardType> std::ostream& operator<<
+	(std::ostream &out, const TMCG_Stack<CardType> &s)
 {
 	out << "stk^" << s.size() << "^";
 	for (size_t i = 0; i < s.size(); i++)

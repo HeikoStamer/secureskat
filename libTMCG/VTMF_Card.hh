@@ -105,8 +105,8 @@ struct VTMF_Card
 	}
 };
 
-friend ostream& operator<< 
-	(ostream &out, const VTMF_Card &card)
+std::ostream& operator<< 
+	(std::ostream &out, const VTMF_Card &card)
 {
 	out << "crd|" << card.c_1 << "|" << card.c_2 << "|";
 	return out;

@@ -45,13 +45,14 @@
 
 template <typename CardType> struct TMCG_OpenStack
 {
-	vector<pair<size_t, CardType> >	stack;
+	std::vector<std::pair<size_t, CardType> >	stack;
 	
-	struct eq_first_component : public binary_function<
-		pair<size_t, CardType>, pair<size_t, CardType>, bool>
+	struct eq_first_component : public std::binary_function<
+		std::pair<size_t, CardType>, std::pair<size_t, CardType>, bool>
 	{
 		bool operator() 
-			(const pair<size_t, CardType>& p1, const pair<size_t, CardType>& p2)
+			(const std::pair<size_t, CardType>& p1, 
+			const std::pair<size_t, CardType>& p2)
 		{
 			return (p1.first == p2.first);
 		}
@@ -83,13 +84,13 @@ template <typename CardType> struct TMCG_OpenStack
 		return !(*this == that);
 	}
 	
-	const pair<size_t, CardType>& operator []
+	const std::pair<size_t, CardType>& operator []
 		(size_t n) const
 	{
 		return stack[n];
 	}
 	
-	pair<size_t, CardType>& operator []
+	std::pair<size_t, CardType>& operator []
 		(size_t n)
 	{
 		return stack[n];
@@ -104,13 +105,13 @@ template <typename CardType> struct TMCG_OpenStack
 	void push
 		(size_t type, const CardType& c)
 	{
-		stack.push_back(pair<size_t, CardType>(type, c));
+		stack.push_back(std::pair<size_t, CardType>(type, c));
 	}
 	
 	void push
 		(const TMCG_OpenStack& s)
 	{
-		std::copy(s.stack.begin(), s.stack.end(), back_inserter(stack));
+		std::copy(s.stack.begin(), s.stack.end(), std::back_inserter(stack));
 	}
 	
 	size_t pop
@@ -137,16 +138,16 @@ template <typename CardType> struct TMCG_OpenStack
 		(size_t type) const
 	{
 		return (std::find_if(stack.begin(), stack.end(),
-			std::bind2nd(eq_first_component(), pair<size_t, CardType>
+			std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
 				(type, CardType()))) != stack.end());
 	}
 	
 	bool remove
 		(size_t type)
 	{
-		typename vector<pair<size_t, CardType> >::iterator si =
+		typename std::vector<std::pair<size_t, CardType> >::iterator si =
 			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), pair<size_t, CardType>
+				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
 					(type, CardType())));
 		
 		if (si != stack.end())
@@ -169,9 +170,9 @@ template <typename CardType> struct TMCG_OpenStack
 	bool move
 		(size_t type, TMCG_Stack<CardType>& s)
 	{
-		typename vector<pair<size_t, CardType> >::iterator si =
+		typename std::vector<std::pair<size_t, CardType> >::iterator si =
 			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), pair<size_t, CardType>
+				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
 					(type, CardType())));
 		
 		if (si != stack.end())
