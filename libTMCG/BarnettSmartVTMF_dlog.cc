@@ -170,7 +170,7 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	// generate random private key x_i \in Z_q
 	mpz_srandomm(x_i, q);
 	
-	// compute h_i = g^{x_i} \bmod p (by blinded exponentiation)
+	// compute h_i = g^{x_i} \bmod p (with blinding techniques)
 	mpz_sspowm(h_i, g, x_i, p);
 	
 	// set public key h
