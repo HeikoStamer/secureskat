@@ -1143,7 +1143,7 @@ void SchindelhauerTMCG::TMCG_ProofMaskValue
 	mpz_t foo, bar;
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
-
+	
 	mpz_init (foo), mpz_init (bar);
 	try
 	{
@@ -1152,7 +1152,7 @@ void SchindelhauerTMCG::TMCG_ProofMaskValue
 		{
 			mpz_ptr r2 = new mpz_t(), b2 = new mpz_t();
 			mpz_init (r2), mpz_init (b2);
-	
+			
 			// choose random number r_i \in Z*m and b_i \in {0,1}
 			do
 			{
@@ -1177,7 +1177,7 @@ void SchindelhauerTMCG::TMCG_ProofMaskValue
 			// send foo to verifier
 			out << foo << endl;
 		}
-
+		
 		// phase (P4)
 		for (mpz_ui i = 0; i < security_desire; i++)
 		{
@@ -1242,14 +1242,14 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskValue
 			in >> t;
 			T.push_back(t);
 		}
-
+		
 		// phase (V4)
 		for (mpz_ui i = 0; i < TMCG_SecurityLevel; i++)
 		{
 			// send Z/Z'-question to prover
 			mpz_srandomb (foo, NULL, 1L);
 			out << foo << endl;
-
+			
 			// receive proof (r, b)
 			in >> bar, in >> lej;
 			
@@ -1377,7 +1377,7 @@ void SchindelhauerTMCG::TMCG_ProofMaskOne
 		{
 			// receive R/S-question from verifier
 			in >> foo;
-
+			
 			// send proof to verifier
 			if (mpz_get_ui (foo) & 1L)
 				out << rr[i] << endl, out << bb[i] << endl;
@@ -1408,7 +1408,7 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskOne
 {
 	vector<mpz_ptr> RR, SS;
 	mpz_t foo, bar, lej;
-
+	
 	// send security parameter
 	out << TMCG_SecurityLevel << endl;
 	
@@ -1424,7 +1424,7 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskOne
 			// receive R_i, S_i from prover and store values
 			in >> R, in >> S;
 			RR.push_back(R), SS.push_back(S);
-
+			
 			// check congruence R_i * S_i \cong t (mod m)
 			mpz_mul (foo, R, S);
 			mpz_mod (foo, foo, key.m);
@@ -1481,7 +1481,7 @@ void SchindelhauerTMCG::TMCG_ProofNonQuadraticResidue_PerfectZeroKnowledge
 	
 	// extract public key
 	TMCG_CreateKey(key2, key);
-
+	
 	mpz_init (foo), mpz_init (bar);
 	try
 	{
@@ -1519,7 +1519,7 @@ void SchindelhauerTMCG::TMCG_ProofNonQuadraticResidue_PerfectZeroKnowledge
 
 bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue_PerfectZeroKnowledge
 	(const TMCG_PublicKey &key, istream &in, ostream &out)
-{	
+{
 	mpz_t foo, bar, r, b;
 	
 	// send security parameter
@@ -1551,10 +1551,10 @@ bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue_PerfectZeroKnowledge
 			
 			// send question to prover
 			out << foo << endl;
-		
+			
 			// proof of mask knowledge 1->foo
 			TMCG_ProofMaskOne(key, r, b, in, out);
-
+			
 			// receive proof
 			in >> bar;
 			
@@ -1572,7 +1572,7 @@ bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue_PerfectZeroKnowledge
 		mpz_clear (foo), mpz_clear (bar),	mpz_clear (r), mpz_clear (b);
 		return return_value;
 	}
-}	
+}
 
 // ============================================================================
 
@@ -1604,9 +1604,6 @@ void SchindelhauerTMCG::TMCG_CreateOpenCard
 {
 	mpz_set_ui(c.c_1, 1L);
 	vtmf->IndexElement(c.c_2, type);
-cerr << c.c_2 << endl;
-cerr << "type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
-	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 }
 
 void SchindelhauerTMCG::TMCG_CreatePrivateCard
@@ -1625,13 +1622,10 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	size_t type)
 {
 	mpz_t m;
-
+	
 	mpz_init(m);
 	vtmf->IndexElement(m, type);
-cerr << m << endl;
 	vtmf->VerifiableMaskingProtocol_Mask(m, c.c_1, c.c_2, cs.r);
-cerr << "after mask -- type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
-	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 	mpz_clear(m);
 }
 
@@ -1647,16 +1641,16 @@ bool SchindelhauerTMCG::TMCG_ImportCard
 	(TMCG_Card &c, const string &import)
 {
 	string s = import;
-
+	
 	try
 	{
 		// check magic
 		if (!cm(s, "crd", '|'))
 			throw false;
-
+		
 		// card description
 		c.Players = TMCG_Players, c.TypeBits = TMCG_TypeBits;
-
+		
 		// card data
 		for (size_t k = 0; k < TMCG_Players; k++)
 		{
@@ -1681,7 +1675,7 @@ bool SchindelhauerTMCG::TMCG_ImportCard
 	(VTMF_Card &c, const string &import)
 {
 	string s = import;
-
+	
 	try
 	{
 		// check magic
@@ -1706,7 +1700,7 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	(TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring, size_t index)
 {
 	mpz_t foo;
-
+	
 	mpz_init (foo);
 	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
 	for (size_t k = 0; k < TMCG_Players; k++)
@@ -1731,7 +1725,7 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 		}
 	}
 	mpz_clear (foo);
-
+	
 	// XOR b_ij with i \neq index (keep type of card)
 	for (size_t k = 0; k < TMCG_Players; k++)
 	{
@@ -1798,7 +1792,7 @@ bool SchindelhauerTMCG::TMCG_ImportCardSecret
 	(TMCG_CardSecret &cs, const string &import)
 {
 	string s = import;
-
+	
 	try
 	{
 		// check magic
@@ -1822,7 +1816,7 @@ bool SchindelhauerTMCG::TMCG_ImportCardSecret
 				if ((mpz_init_set_str (cs.b[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
-			}	
+			}
 		}
 		
 		throw true;
@@ -1837,7 +1831,7 @@ bool SchindelhauerTMCG::TMCG_ImportCardSecret
 	(VTMF_CardSecret &cs, const string &import)
 {
 	string s = import;
-
+	
 	try
 	{
 		// check magic
@@ -1872,8 +1866,6 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	BarnettSmartVTMF_dlog *vtmf)
 {
 	vtmf->VerifiableRemaskingProtocol_Remask(c.c_1, c.c_2, cc.c_1, cc.c_2, cs.r);
-cerr << "mask3 -- type = ? mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
-	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 }
 
 bool SchindelhauerTMCG::TMCG_EqualCard
@@ -1962,7 +1954,7 @@ void SchindelhauerTMCG::TMCG_ProofPrivateCard
 bool SchindelhauerTMCG::TMCG_VerifyPrivateCard
 	(const TMCG_Card &c, const TMCG_PublicKeyRing &ring,
 	istream &in, ostream &out)
-{	
+{
 	for (size_t k = 0; k < TMCG_Players; k++)
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
 			if (!TMCG_VerifyMaskOne(ring.key[k], c.z[k][w], in, out))
@@ -1975,18 +1967,20 @@ void SchindelhauerTMCG::TMCG_ProofCardSecret
 	istream &in, ostream &out)
 {
 	mpz_t foo;
-
+	
 	mpz_init (foo);
 	for (size_t w = 0; w < TMCG_TypeBits; w++)
 	{
 		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
 		{
-			mpz_set_ui(foo, 0L),	out << foo << endl;
+			mpz_set_ui(foo, 0L);
+			out << foo << endl;
 			TMCG_ProofQuadraticResidue(key, c.z[index][w], in, out);
 		}
 		else
 		{
-			mpz_set_ui(foo, 1L),	out << foo << endl;
+			mpz_set_ui(foo, 1L);
+			out << foo << endl;
 			TMCG_ProofNonQuadraticResidue(key, c.z[index][w], in, out);
 		}
 	}
@@ -2086,7 +2080,7 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 {
 	size_t type = TMCG_MaxCards;
 	mpz_t m, a;
-
+	
 	mpz_init_set_ui(m, 0L), mpz_init(a);
 	vtmf->VerifiableDecryptionProtocol_Verify_Finalize(c.c_2, m);
 	for (size_t t = 0; t < TMCG_MaxCards; t++)
@@ -2099,10 +2093,6 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 		}	
 	}
 	mpz_clear(m), mpz_clear(a);
-
-cerr << "TOC -- type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
-	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
-
 	return type;
 }
 
@@ -2114,7 +2104,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 {
 	if (size > TMCG_MAX_CARDS)
 		return 0;
-
+	
 	size_t cyc = 0;
 	mpz_t foo, bar;
 	mpz_init (foo),	mpz_init_set_ui (bar, size);
@@ -2166,7 +2156,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 {
 	if (size > TMCG_MAX_CARDS)
 		return 0;
-
+	
 	size_t cyc = 0;
 	mpz_t foo, bar;
 	mpz_init(foo), mpz_init_set_ui(bar, size);
@@ -2242,7 +2232,7 @@ bool SchindelhauerTMCG::TMCG_ImportStackSecret
 		// check magic
 		if (!cm(s, "sts", '^'))
 			throw false;
-	
+		
 		// size of stack
 		if (gs(s, '^') == NULL)
 			throw false;
@@ -2666,7 +2656,7 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 	const TMCG_PublicKeyRing &ring)
 {
 	assert (sigma.size() == pi.size());
-
+	
 	TMCG_StackSecret ss3;
 	for (size_t i = 0; i < sigma.size(); i++)
 	{
@@ -2708,10 +2698,10 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 						mpz_set_ui (cs->b[k][w], 0L);
 				}
 			}
-		}	
+		}
 		lej.first = sigma[pi[i].first].first,	lej.second = cs;
 		ss3.push_back(lej);
-	}	
+	}
 	TMCG_ReleaseStackSecret(pi);
 	for (size_t i = 0; i < ss3.size(); i++)
 		pi.push_back(ss3[i]);
@@ -2722,7 +2712,7 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 	BarnettSmartVTMF_dlog *vtmf)
 {
 	assert(sigma.size() == pi.size());
-
+	
 	VTMF_StackSecret ss3;
 	for (size_t i = 0; i < sigma.size(); i++)
 	{
@@ -2748,7 +2738,7 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	istream &in, ostream &out)
 {
 	assert (s.size() == s2.size()),	assert (s.size() == ss.size());
-
+	
 	mpz_t foo;
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
@@ -2796,7 +2786,7 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	bool cyclic, BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out)
 {
 	assert(s.size() == s2.size()), assert(s.size() == ss.size());
-
+	
 	mpz_t foo;
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
@@ -2844,12 +2834,12 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	const TMCG_PublicKeyRing &ring, istream &in, ostream &out)
 {
 	mpz_t foo;
-
+	
 	out << TMCG_SecurityLevel << endl;
-
+	
 	if (s.size() != s2.size())
 		return false;
-		
+	
 	char *tmp = new char[TMCG_MAX_STACK_CHARS];
 	mpz_init (foo);
 	try
@@ -2923,7 +2913,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out)
 {
 	mpz_t foo;
-
+	
 	out << TMCG_SecurityLevel << endl;
 	
 	if (s.size() != s2.size())
@@ -3171,7 +3161,7 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 	const TMCG_StackSecret &ss, const TMCG_PublicKeyRing &ring)
 {
 	assert (os.size() != 0), assert (os.size() == ss.size());
-
+	
 	// mask all cards, mix and build new open stack
 	TMCG_ReleaseOpenStack(os2);
 	for (size_t i = 0; i < os.size(); i++)
@@ -3191,7 +3181,7 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 	const VTMF_StackSecret &ss, BarnettSmartVTMF_dlog *vtmf)
 {
 	assert(os.size() != 0), assert(os.size() == ss.size());
-
+	
 	// mask all cards, mix and build new open stack
 	TMCG_ReleaseOpenStack(os2);
 	for (size_t i = 0; i < os.size(); i++)

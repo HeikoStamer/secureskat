@@ -43,11 +43,11 @@ Requirements
   + GNU/Linux (Debian 2.2)      i686        gcc 2.95.2
   + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
   + GNU/Linux (Debian testing)  sparc       gcc 3.3.4
-  + GNU/Linux (Debian unstable) i686        gcc 3.3.5
-  + FreeBSD 4.0                 i386 / SMP  gcc 2.95.2
+  + GNU/Linux (Debian unstable) i686        gcc 3.4.x
+  + FreeBSD 4.0                 i386 (SMP)  gcc 2.95.2
   + FreeBSD 5.0 RC1             i686        gcc 3.2.1
-  - SunOS 5.8, Solaris 2.7      sparc       gcc 3.3.4          (--disable-nls)
-  + GNU/Linux (Sharp Zaurus)    arm         zgcc 2.95.2
+  + SunOS 5.8, Solaris 2.7      sparc       gcc 3.3.4
+  - GNU/Linux (Sharp Zaurus)    arm         zgcc 2.95.2     (--disable-shared)
   + Darwin 7.5.0                powerpc     gcc 3.3 (Apple Computer, Inc. build 1666)
 
 Build & Install
@@ -66,7 +66,7 @@ Playing `SecureSkat' over IRC
   where
     <IRC_SERVER> is the hostname of an RFC1459 conform IRC server,
     <IRC_PORT> is the TCP port number of this server, e.g. 6667,
-    <SECURTIY> is your security parameter t, e.g. 16,
+    <SECURTIY> is your security parameter t, e.g. 16, (see introduction)
     <INTERFACE> is a interface control program, e.g. SecureSkat_random.
     (Please give the full path to the binary file!)
 
@@ -102,7 +102,7 @@ Playing `SecureSkat' over IRC
     /aus          /off       turns output of IRC channel #openSkat off
     /spieler      /player    shows list of possible participants
     /tische       /tables    shows list of existing game tables
-    /räume        /rooms     shows list of existing ballot rooms
+    /r?me        /rooms     shows list of existing ballot rooms
     /rang         /rank      shows your current rank (Extended Seeger System)
     /skat <nr> <r>           creates new table <nr> to play <r> rounds
     /skat <nr>               start playing on table <nr>
@@ -167,7 +167,7 @@ References
 ----------
 
 [1] Christian Schindelhauer: 'A Toolbox for Mental Card Games',
-    Medizinische Universität Lübeck, 17. September 1998
+    Medizinische Universit? L?eck, 17. September 1998
 
 [2] Rosario Gennaro, Daniele Micciancio, Tal Rabin:
     'An Efficient Non-Interactive Statistical Zero-Knowledge 

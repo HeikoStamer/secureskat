@@ -219,7 +219,7 @@ size_t skat_spitzen
 	if (skat_spiel2gwert(spiel) == 23)
 		return 0;
 
-	// mit oder ohne Spitzen zählen
+	// mit oder ohne Spitzen z?len
 	if (tmcg->TMCG_IsInOpenStack(os, 0))
 	{
 		for (size_t sz = 0; sz < 11; sz++)
@@ -269,9 +269,9 @@ bool skat_rulectl
 	if (skat_spiel2gwert(spiel) == 23)
 		to = 0;	// Null: kein Trumpf
 	else if (skat_spiel2gwert(spiel) == 24)
-		to = 4;	// Grand: 4 Trümpfe
+		to = 4;	// Grand: 4 Tr?pfe
 	else
-		to = 11;	// Farbspiele: 11 Trümpfe
+		to = 11;	// Farbspiele: 11 Tr?pfe
 
 	if (skat_idx(co, 4, t, 0) != 99)
 	{
@@ -475,7 +475,7 @@ const char *skat_spiel2string
 	else if (skat_spiel2gwert(spiel) == 10)
 		wstr += "Rot (Ro)";
 	else if (skat_spiel2gwert(spiel) == 11)
-		wstr += "Grün (Gr)";
+		wstr += "Gr? (Gr)";
 	else if (skat_spiel2gwert(spiel) == 12)
 		wstr += "Eicheln (Ei)";
 	else if (skat_spiel2gwert(spiel) == 23)
@@ -1062,7 +1062,7 @@ int skat_game
 			for (int i = 0; i < 32; i++)
 			{
 				VTMF_Card c;
-				tmcg->TMCG_CreateOpenCard(c, i);
+				tmcg->TMCG_CreateOpenCard(c, vtmf, i);
 				tmcg->TMCG_PushToOpenStack(d, c, i);
 			}
 			// Mischen
@@ -1369,7 +1369,7 @@ int skat_game
 						cmd.length() - cmd.find(" ", 4) - 1);
 					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0))
 					{
-						// VH passt (am Schluß)
+						// VH passt (am Schlu?
 						if (reiz_status == 10)
 						{
 							if (nick == nicks[vh])
@@ -1862,7 +1862,7 @@ int skat_game
 											return 11;
 										}
 										VTMF_Card c;
-										tmcg->TMCG_CreateOpenCard(c, 0);
+										tmcg->TMCG_CreateOpenCard(c, vtmf, 0);
 										tmcg->TMCG_PushToOpenStack(os_ov, c, type);
 										if (pctl)
 										{
@@ -1911,7 +1911,7 @@ int skat_game
 								*out_ctl << ost.str() << flush;
 							}	
 							VTMF_Card c;
-							tmcg->TMCG_CreateOpenCard(c, type);
+							tmcg->TMCG_CreateOpenCard(c, vtmf, type);
 							tmcg->TMCG_PushToOpenStack(os_sp, c, type);
 							// Ouvert Spiele -- Karte vom Sichtstapel entfernen
 							if ((spiel_status - (hand_spiel ? 1000 : 0)) > 300)
@@ -2546,7 +2546,7 @@ int skat_game
 										tmcg->TMCG_MoveFromOpenStackToStack(os, st, tt);
 										skat_okarte(tmcg, vtmf, *(st[0]), right, left);
 										tmcg->TMCG_RemoveFirstFromStack(s[pkr_self], *(st[0]));
-										tmcg->TMCG_CreateOpenCard(c, tt);
+										tmcg->TMCG_CreateOpenCard(c, vtmf, tt);
 										tmcg->TMCG_PushToOpenStack(os_sp, c, tt);
 										tmcg->TMCG_ReleaseStack(st);
 										if (os_sp.size() == 3)
@@ -2643,7 +2643,7 @@ int skat_game
 				else
 					spiel_gewonnen = false;
 				
-				// nachträgliche Regelkontrolle
+				// nachtr?liche Regelkontrolle
 				bool rules_ok[3];
 				assert (os_st.size() == 10);
 				for (size_t i = 0; i < 3; i++)
@@ -2663,7 +2663,7 @@ int skat_game
 					}
 				}
 				
-				// Stapel des Alleinspielers um Skat vervollständigen
+				// Stapel des Alleinspielers um Skat vervollst?digen
 				for (size_t t = 0; t < 32; t++)
 				{
 					if (!tmcg->TMCG_IsInOpenStack(os_rc[0], t)
@@ -2671,7 +2671,7 @@ int skat_game
 						&& !tmcg->TMCG_IsInOpenStack(os_rc[2], t))
 					{
 						VTMF_Card c;
-						tmcg->TMCG_CreateOpenCard(c, t);
+						tmcg->TMCG_CreateOpenCard(c, vtmf, t);
 						tmcg->TMCG_PushToOpenStack(os_rc[spiel_allein], c, t);
 					}
 				}
