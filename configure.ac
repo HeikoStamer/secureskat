@@ -51,8 +51,10 @@ if test "$use_commongroup" = yes ; then
 	[safe prime p (1024 bit) of the common DDH-hard group G])
 fi
 
-AC_DEFINE(TMCG_DDH_P_SIZE, 1024L, [security parameter of the DDH-hard group G])
-AC_DEFINE(TMCG_KEY_SIZE, 1024L, [security parameter of the TMCG public key])
+AC_DEFINE(TMCG_DDH_P_SIZE, 1024L,
+	[security parameter of the DDH-hard group G; assumptions: DDH, CDH, DLOG])
+AC_DEFINE(TMCG_KEY_SIZE, 1024L,
+	[security parameter of the TMCG public key; assumptions: QRA, FAKTOR])
 
 # Checks for programs.
 AC_PROG_CC

@@ -34,7 +34,7 @@ Requirements
 
   * GNU MP Library (libgmp), version >= 4.1, http://www.swox.com/gmp/
     (compilied WITHOUT C++ support: ./configure --enable-cxx=no)
-  * GNU Crypto Library (libgcrypt), version >= 1.1.90, ftp://ftp.gnupg.org/
+  * GNU Crypto Library (libgcrypt), version >= 1.2.0, ftp://ftp.gnupg.org/
   * GNU Readline Library (libreadline), version >= 4.1, http://www.gnu.org/
   * GNU Database Manager (libgdbm), version >= 1.8.0, http://www.gnu.org/
   * ncurses Library (-lncurses)
@@ -42,7 +42,7 @@ Requirements
 
   `SecureSkat' was tested (+ successful, - with errors) on this platforms:
 
-  + GNU/Linux (Debian 2.2)      i686        gcc 2.95.2
+  - GNU/Linux (Debian 2.2)      i686        gcc 2.95.2      (<sstream> missing)
   + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
   + GNU/Linux (Debian testing)  sparc       gcc 3.3.4
   + GNU/Linux (Debian unstable) i686        gcc 3.4.x
@@ -163,7 +163,7 @@ Copyright and License of this software
   (c) 2002, 2003, 2004 Heiko Stamer <stamer@gaos.org>
       under GNU General Public License version 2
 
-  Please have a look at file 'COPYING' and http://www.fsf.org/
+  Please have a look at file 'COPYING' and http://www.fsf.org/.
 
 References
 ----------
