@@ -9,37 +9,45 @@ Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer, <stamer@gaos.org>
 Introduction
 ------------
 
-  `SecureSkat' is a cryptographically secure implementation of the german
-  card game Skat for multiple players over IRC (Internet Relay Chat).
+  SecureSkat is a network implementation of the german card game Skat
+  for multiple players over IRC (Internet Relay Chat). It uses the free
+  library libTMCG to ensure the fairness between participants.
 
   All protocols work in the 'honest-but-curious' (or semi-honest)
-  adversary model, thus we do not care about robustness or availability
-  (in sense of DoS). Fairness is based on several zero-knowledge-proofs
-  from Christian Schindelhauer's research paper "A Toolbox for Mental
-  Card Games" [1]. The success of an cheating participant can be bound by
-  a security parameter t, such that this probability is less or equal
-  than 2^{-t}. However, the original card encoding upon quadratic residues
-  was very communication-complex, e.g. if t = 8 the network traffic for
-  each player had amounted to 10 megabyte per game. Further the computational
-  complexity was not negligible. Now a better solution from Adam Barnett's
-  and Nigel P. Smart's "Mental Poker Revisited" [8] has been implemented.
+  adversary model, thus we do not care about robustness or availability.
+  The success of cheating players can be bound by a security parameter t,
+  such that this probability is less or equal than 2^{-t}.
 
 Requirements
 ------------
 
-  You need the following libraries and appropriate header files to
-  compile (gcc version 3.4.x is recommended) `SecureSkat' successfully:
+  You need the following libraries and appropriate header files to build
+  (gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
 
-  * libTMCG, version >= 1.0.0, http://savannah.nongnu.org/projects/libtmcg/
-  * GNU MP Library (libgmp), version >= 4.1, http://www.swox.com/gmp/
-    (compilied WITHOUT C++ support: ./configure --enable-cxx=no)
-  * GNU Crypto Library (libgcrypt), version >= 1.2.0, ftp://ftp.gnupg.org/
-  * GNU Readline Library (libreadline), version >= 4.3, http://www.gnu.org/
-  * GNU Database Manager (libgdbm), version >= 1.8.0, http://www.gnu.org/
+  * libTMCG, version >= 1.0.0
+    http://savannah.nongnu.org/projects/libtmcg/
+
+  * GNU MP Library (libgmp), version >= 4.1
+    http://www.swox.com/gmp/
+    (built WITHOUT C++ support: ./configure --enable-cxx=no)
+
+  * GNU Crypto Library (libgcrypt), version >= 1.2.0
+    ftp://ftp.gnupg.org/gcrypt/libgcrypt/
+
+  * GNU Transport Layer Security Library (gnutls), version >= 1.2.0
+    http://www.gnu.org/software/gnutls/
+
+  * GNU Readline Library (libreadline), version >= 4.3
+    http://www.gnu.org/
+
+  * GNU Database Manager (libgdbm), version >= 1.8.0
+    http://www.gnu.org/
+
   * ncurses Library (-lncurses)
+
   * zlib Library (-lz)
 
-  `SecureSkat' was tested (+ successful, - with errors) on this platforms:
+  SecureSkat was tested (+ successful, - with errors) on following platforms:
 
   - GNU/Linux (Debian 2.2)      i686        gcc 2.95.2      (<sstream> missing)
   + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
@@ -159,7 +167,7 @@ Bugs, Contribution, CVS
 Copyright and License of this software
 --------------------------------------
 
-  (C) 2002, 2003, 2004, 2005  Heiko Stamer, <stamer@gaos.org>
+  (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
       GNU General Public License version 2
 
   Please have a look at file 'COPYING' and http://www.fsf.org/.
@@ -167,31 +175,9 @@ Copyright and License of this software
 References
 ----------
 
-[1] Christian Schindelhauer: 'A Toolbox for Mental Card Games',
-    Medizinische Universität Lübeck, 17. September 1998
-
-[2] Rosario Gennaro, Daniele Micciancio, Tal Rabin:
-    'An Efficient Non-Interactive Statistical Zero-Knowledge 
-    Proof System for Quasi-Safe Prime Products', 1997
-
-[3] Mihir Bellare, Phillip Rogaway: 'The Exact Security of Digital
-    Signatures -- How to Sign with RSA and Rabin', 1996
-
-[4] Dan Boneh: 'Simplified OAEP for the RSA and Rabin Functions', 2002
-
-[5] Anton Stiglic: 'Computations with a deck of cards',
-    Theoretical Computer Science, 259 (1-2), 2001, pp. 671-678
-
-[6] Bruce Schneier: 'Applied Cryptography', 1996
-
-[7] A. Menezes, P. v. Oorschot, S. Vanstone:
-    'Handbook of Applied Cryptography' (online)
-
-[8] Adam Barnett, Nigel P. Smart: 'Mental Poker Revisited',
-    Cryptography and Coding 2003, LNCS 2898, pp. 370--383, 2003
-
-[9] David Chaum, Torben P. Pedersen: 'Wallet databases with observers',
-    Proceedings CRYPTO '92, LNCS 740, pp. 89--105, 1993
+[1] Heiko Stamer: "Kryptographische Skatrunde",
+    Offene Systeme, Issue 4, pp. 10--30, 2004, ISSN 1619-0114.
+    http://gaos.org/~stamer/OS-4-2004-openskat.pdf
 
 GNU Free Documentation License
 ------------------------------

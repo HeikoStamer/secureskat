@@ -1,7 +1,7 @@
 /*******************************************************************************
    SecureSkat.cc, secure multiplayer implementation of german card game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 	#include "config.h"
 #endif
 
-// C/C++ header
+// C and C++ header
 #include <stdio.h>
 #include <cstdlib>
 #include <cstdarg>
@@ -60,6 +60,9 @@
 
 // libTMCG
 #include <libTMCG.hh>
+
+// libgnutls
+#include <gnutls/gnutls.h>
 
 #include "socketstream.hh"
 #include "securesocketstream.hh"
@@ -3033,7 +3036,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.11 2005/03/01 19:22:46 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.12 2005/03/15 20:35:02 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

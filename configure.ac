@@ -81,6 +81,8 @@ fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
 
+AM_PATH_LIBGNUTLS("1.2.0")
+
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([libz is needed]))
