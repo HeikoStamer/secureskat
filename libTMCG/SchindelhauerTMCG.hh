@@ -4,15 +4,6 @@
      Christian Schindelhauer: 'A Toolbox for Mental Card Games',
      Medizinische Universit\"at L\"ubeck, 17. September 1998
 
-     Rosario Gennaro, Daniele Micciancio, Tal Rabin: 
-     'An Efficient Non-Interactive Statistical Zero-Knowledge 
-     Proof System for Quasi-Safe Prime Products', 1997
-
-     Mihir Bellare, Phillip Rogaway: 'The Exact Security of Digital
-     Signatures -- How to Sign with RSA and Rabin', 1996
-
-     Dan Boneh: 'Simplified OAEP for the RSA and Rabin Functions', 2002
-
  Copyright (C) 2002, 2003, 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -75,14 +66,11 @@ class SchindelhauerTMCG
 	
 	public:
 		unsigned long int		TMCG_SecurityLevel;			// iterations
-		size_t					TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
+		size_t							TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
 		
 		SchindelhauerTMCG 
 			(unsigned long int security, size_t players, size_t typebits)
 		{
-			assert(players <= TMCG_MAX_PLAYERS);
-			assert(typebits <= TMCG_MAX_TYPEBITS);
-			
 			TMCG_SecurityLevel = security;
 			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCardType = 1;
 			for (unsigned long int i = 0; i < TMCG_TypeBits; i++)

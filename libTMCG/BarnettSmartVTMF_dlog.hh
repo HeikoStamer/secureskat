@@ -7,10 +7,6 @@
      [CaS97] Jan Camenisch, Markus Stadler: 'Proof Systems for General
              Statements about Discrete Logarithms', technical report, 1997
 
-     [BJN00] Dan Boneh, Antoine Joux, and Phong Q. Nguyen: 'Why Textbook
-             ElGamal and RSA Encryption are Insecure', Proceedings of
-             Asiacrypt '00, LNCS 1976, pp. 30--44, 2000
-
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -41,7 +37,6 @@
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	#include <vector>
 
@@ -50,8 +45,6 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-	
-	#include "TMCG.def"
 	
 	#include "mpz_srandom.h"
 	#include "mpz_spowm.h"
@@ -66,11 +59,11 @@ class BarnettSmartVTMF_dlog
 		mpz_t								x_i, h_i, h, d;
 		
 		BarnettSmartVTMF_dlog
-			(unsigned long int group_size);
+			();
 		BarnettSmartVTMF_dlog
 			(std::istream &in);
 		bool CheckGroup
-			(unsigned long int group_size);
+			();
 		void PublishGroup
 			(std::ostream &out);
 		void RandomElement

@@ -7,10 +7,6 @@
      [CaS97] Jan Camenisch, Markus Stadler: 'Proof Systems for General
              Statements about Discrete Logarithms', Technical Report, 1997
 
-     [BJN00] Dan Boneh, Antoine Joux, and Phong Q. Nguyen: 'Why Textbook
-             ElGamal and RSA Encryption are Insecure', Proceedings of
-             Asiacrypt '00, LNCS 1976, pp. 30--44, 2000
-
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -31,7 +27,7 @@
 #include "BarnettSmartVTMF_dlog.hh"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
-	(unsigned long int group_size)
+	()
 {
 	// initalize libgcrypt
 	if (!gcry_check_version(LIBGCRYPT_VERSION))
@@ -51,13 +47,12 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	}
 	
 	// Create a finite abelian group G where DDH is hard:
-	// We use the subgroup of quadratic residues in Z*p
-	// where p = 2q + 1 and p, q are both prime.
-	
+	// We use the subgroup of quadratic residues modulo p,
+	// such that p = 2q + 1 and p, q are both primes.
 	mpz_init(p), mpz_init(q), mpz_init_set_ui(g, 2L);
-	mpz_sprime2g(p, q, group_size - 1);
+	mpz_sprime2g(p, q, TMCG_DDH_P_SIZE - 1L);
 	
-	// initalize key
+	// initalize the key
 	mpz_init(x_i), mpz_init(h_i), mpz_init(h), mpz_init(d);
 }
 
@@ -81,18 +76,18 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 		exit(-1);
 	}
 	
-	// initalize finite abelian group G and set generator to 2
+	// initalize the finite abelian group G and set the generator to 2
 	mpz_init(q);
 	in >> q;
 	mpz_init(p), mpz_init_set_ui(g, 2L);
 	mpz_mul_2exp(p, q, 1L), mpz_add_ui(p, p, 1L);
 	
-	// initalize key
+	// initalize the key
 	mpz_init(x_i), mpz_init(h_i), mpz_init(h), mpz_init(d);
 }
 
 bool BarnettSmartVTMF_dlog::CheckGroup
-	(unsigned long int group_size)
+	()
 {
 	mpz_t foo;
 	
@@ -101,12 +96,12 @@ bool BarnettSmartVTMF_dlog::CheckGroup
 	try
 	{
 		// check whether q has appropriate length
-		if ((mpz_sizeinbase(q, 2L) < (group_size - 16)) ||
-			(mpz_sizeinbase(q, 2L) > (group_size + 16)))
+		if ((mpz_sizeinbase(p, 2L) < TMCG_DDH_P_SIZE) ||
+			(mpz_sizeinbase(p, 2L) > (TMCG_DDH_P_SIZE + 4096L)))
 				throw false;
 		
-		// check whether p, q are both probable prime
-		if (!(mpz_probab_prime_p(p, 25) && mpz_probab_prime_p(q, 25)))
+		// check whether p, q are both primes
+		if (!(mpz_probab_prime_p(p, 25L) && mpz_probab_prime_p(q, 25L)))
 			throw false;
 		
 		// check whether p is congruent 7 modulo 8
@@ -114,8 +109,8 @@ bool BarnettSmartVTMF_dlog::CheckGroup
 			throw false;
 		
 		// check whether g = 2 is a generator of the group G
-		// it is sufficient to assert that g is a quadratic residue
-		// modulo p, i.e. check g^{(p-1)/2} \equiv 1 \pmod{p}
+		// It is sufficient to assert that g is a quadratic residue
+		// modulo p, i.e. we check g^{(p-1)/2} \equiv 1 \pmod{p}.
 		mpz_powm(foo, g, q, p);
 		if (mpz_cmp_ui(foo, 1L))
 			throw false;
@@ -139,20 +134,21 @@ void BarnettSmartVTMF_dlog::PublishGroup
 void BarnettSmartVTMF_dlog::RandomElement
 	(mpz_ptr a)
 {
-	// choose a random element of G (quadratic residue)
+	// choose a random element of G (it has to be a quadratic residue)
 	do
 		mpz_srandomm(a, p);
-	while (mpz_cmp_ui(a, 0) == 0);
-	mpz_powm_ui(a, a, 2, p);
-	assert(mpz_jacobi(a, p) == 1);
+	while (mpz_cmp_ui(a, 0L) == 0L);
+	mpz_powm_ui(a, a, 2L, p);
+	
+	assert(mpz_jacobi(a, p) == 1L);
 }
 
 void BarnettSmartVTMF_dlog::IndexElement
 	(mpz_ptr a, std::size_t index)
 {
 	// choose the index-th element of G (quadratic residue)
-	// Notice that IndexElement(a, 0) returns the identity of G,
-	// because 1 is the smallest quadratic residue mod p.
+	// Notice that a call to IndexElement(a, 0) returns the identity
+	// of G, because 1 is the smallest quadratic residue mod p.
 	mpz_set_ui(a, 0L);
 	do
 	{
@@ -161,13 +157,14 @@ void BarnettSmartVTMF_dlog::IndexElement
 		while (mpz_jacobi(a, p) != 1);
 	}
 	while (index--);
+	
 	assert(mpz_jacobi(a, p) == 1);
 }
 
 void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	()
 {
-	// generate random private key x_i \in Z_q
+	// generate the random private key x_i \in Z_q
 	mpz_srandomm(x_i, q);
 	
 	// compute h_i = g^{x_i} \bmod p (with blinding techniques)
@@ -189,8 +186,10 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 		mpz_srandomm(v, q);
 		mpz_sspowm(t, g, v, p);
 		// challenge
-		// We use the "Fiat-Shamir heuristic" to make
-		// this part of the PK non-interactive.
+		// Here we use the well-known "Fiat-Shamir heuristic" to make
+		// this part of the PK non-interactive, i.e. we turn it
+		// into a statistically zero-knowledge (signature scheme style)
+		// proof of knowledge (SPK) in the random oracle model.
 		mpz_shash(c, g, h_i, t);
 		// response
 		mpz_mul(r, c, x_i);
@@ -241,7 +240,7 @@ void BarnettSmartVTMF_dlog::CP_Prove
 {
 	mpz_t a, b, omega, c, r;
 	
-	// proof of knowledge (equality of discrete logarithms)
+	// proof of knowledge (equality of discrete logarithms) [CaS97]
 	mpz_init(c), mpz_init(r), mpz_init(a), mpz_init(b), mpz_init(omega);
 		
 		// commitment
@@ -250,8 +249,10 @@ void BarnettSmartVTMF_dlog::CP_Prove
 		mpz_sspowm(b, hh, omega, p);
 		
 		// challenge
-		// We use the "Fiat-Shamir heuristic" to make
-		// this part of the PK non-interactive.
+		// Here we use the well-known "Fiat-Shamir heuristic" to make
+		// this part of the PK non-interactive, i.e. we turn it
+		// into a statistically zero-knowledge (signature scheme style)
+		// proof of knowledge (SPK) in the random oracle model.
 		mpz_shash(c, a, b, x, y, gg, hh);
 		
 		// response
@@ -275,7 +276,7 @@ bool BarnettSmartVTMF_dlog::CP_Verify
 	
 	try
 	{
-		// verify proof of knowledge (equality of discrete logarithms)
+		// verify proof of knowledge (equality of discrete logarithms) [CaS97]
 		mpz_powm(foo, x, c, p);
 		mpz_powm(bar, gg, r, p);
 		mpz_mul(foo, foo, bar);
@@ -303,7 +304,7 @@ bool BarnettSmartVTMF_dlog::CP_Verify
 void BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Mask
 	(mpz_srcptr m, mpz_ptr c_1, mpz_ptr c_2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_q
+	// generate the random masking value r \in Z_q
 	mpz_srandomm(r, q);
 	
 	// compute c_1 = g^r \bmod p
@@ -360,7 +361,7 @@ bool BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Verify
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 	(mpz_srcptr c_1, mpz_srcptr c_2, mpz_ptr c__1, mpz_ptr c__2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_q
+	// generate the random masking value r \in Z_q
 	mpz_srandomm(r, q);
 	
 	// compute c'_1 = c_1 \cdot g^r \bmod p
@@ -474,7 +475,7 @@ void BarnettSmartVTMF_dlog::VerifiableDecryptionProtocol_Verify_Initalize
 	// compute d_i = {c_1}^{x_i} \bmod p
 	mpz_sspowm(d_i, c_1, x_i, p);
 	
-	// set value d
+	// set the value of d to the above result
 	mpz_set(d, d_i);
 	
 	mpz_clear(d_i);
@@ -494,7 +495,7 @@ bool BarnettSmartVTMF_dlog::VerifiableDecryptionProtocol_Verify_Update
 		if (!CP_Verify(d_j, h_j, c_1, g, in))
 			throw false;
 		
-		// update value d
+		// update the value of d
 		mpz_mul(d, d, d_j);
 		mpz_mod(d, d, p);
 		

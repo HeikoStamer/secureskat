@@ -27,20 +27,13 @@
 	#endif
 
 	// C++/STL header
-	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	#include <vector>
 	#include <algorithm>
 	#include <functional>
-	
-	// GNU multiple precision library
-	#include <gmp.h>
-	
-	#include "TMCG.def"
 	
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
@@ -120,7 +113,7 @@ template <typename CardType> struct TMCG_OpenStack
 	size_t pop
 		(CardType& c)
 	{
-		size_t type = (1 << TMCG_MAX_TYPEBITS);		// set 'error code'
+		size_t type = 100000000L;		// set 'error code' to 100000000L
 		
 		if (stack.empty())
 			return type;

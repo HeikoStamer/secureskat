@@ -27,38 +27,36 @@
 	#endif
 
 	// C++/STL header
-	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	#include <vector>
-	#include <algorithm>
-	#include <functional>
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-	
-	#include "TMCG.def"
 	
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
 
 struct TMCG_CardSecret
 {
-	size_t		Players, TypeBits;
-	mpz_t		r[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS],
-				b[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	vector< vector<mpz_ptr> >			r, b;
 	
 	TMCG_CardSecret
 		();
+	
+	TMCG_CardSecret
+		(size_t n, size_t m);
 	
 	TMCG_CardSecret
 		(const TMCG_CardSecret& that);
 	
 	TMCG_CardSecret& operator =
 		(const TMCG_CardSecret& that);
+	
+	void resize
+		(size_t n, size_t m);
 	
 	bool import
 		(std::string s);

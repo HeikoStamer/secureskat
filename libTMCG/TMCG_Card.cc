@@ -23,46 +23,79 @@
 TMCG_Card::TMCG_Card
 	()
 {
-	for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-		for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+	z.push_back(vector<mpz_ptr>(1));
+	mpz_init(z[0][0]);
+}
+
+TMCG_Card::TMCG_Card
+	(size_t n, size_t m)
+{
+	assert((n > 0) && (m > 0));
+	
+	for (size_t k = 0; k < n; k++)
+		z.push_back(vector<mpz_ptr>(m));
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
 			mpz_init(z[k][w]);
 }
 
 TMCG_Card::TMCG_Card
-	(const TMCG_Card& that) :
-	Players(that.Players), TypeBits(that.TypeBits)
+	(const TMCG_Card& that)
 {
-	for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-		for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+	for (size_t k = 0; k < that.z.size(); k++)
+		z.push_back(vector<mpz_ptr>(that.z[k].size()));
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
 			mpz_init_set(z[k][w], that.z[k][w]);
 }
 
 TMCG_Card& TMCG_Card::operator =
 	(const TMCG_Card& that)
 {
-	Players = that.Players, TypeBits = that.TypeBits;
-	for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-		for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+	resize(that.z.size(), that.z[0].size());
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
 			mpz_set(z[k][w], that.z[k][w]);
 	return *this;
 }
 
 bool TMCG_Card::operator ==
-	(const TMCG_Card& that)
+	(const TMCG_Card& that) const
 {
-	if ((Players != that.Players) || (TypeBits != that.TypeBits))
+	if ((z.size() != that.z.size()) || (z[0].size() != that.z[0].size()))
 		return false;
-	for (size_t k = 0; k < Players; k++)
-		for (size_t w = 0; w < TypeBits; w++)
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
 			if (mpz_cmp(z[k][w], that.z[k][w]))
 				return false;
 	return true;
 }
 
 bool TMCG_Card::operator !=
-	(const TMCG_Card& that)
+	(const TMCG_Card& that) const
 {
 	return !(*this == that);
+}
+
+void TMCG_Card::resize
+	(size_t n, size_t m)
+{
+	assert((n > 0) && (m > 0));
+	
+	// FIXME: should be done more efficiently
+	for (size_t k = 0; k < z.size(); k++)
+	{
+		for (size_t w = 0; w < z[k].size(); w++)
+			mpz_clear(z[k][w]);
+		z[k].clear();
+	}
+	z.clear();
+	
+	for (size_t k = 0; k < n; k++)
+		z.push_back(vector<mpz_ptr>(m));
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
+			mpz_init(z[k][w]);
 }
 
 bool TMCG_Card::import
@@ -79,21 +112,22 @@ bool TMCG_Card::import
 		// card description
 		if (gs(s, '|').length() == 0)
 			throw false;
-		Players = strtoul(gs(s, '|').c_str(), &ec, 10);
-		if ((*ec != '\0') || (Players <= 0) ||
-			(Players > TMCG_MAX_PLAYERS) || (!nx(s, '|')))
-				throw false;
+		size_t n = strtoul(gs(s, '|').c_str(), &ec, 10);
+		if ((*ec != '\0') || (n < 1) || (!nx(s, '|')))
+			throw false;
 		if (gs(s, '|').length() == 0)
 			throw false;
-		TypeBits = strtoul(gs(s, '|').c_str(), &ec, 10);
-		if ((*ec != '\0') || (TypeBits <= 0) ||
-			(TypeBits > TMCG_MAX_TYPEBITS) || (!nx(s, '|')))
-				throw false;
+		size_t m = strtoul(gs(s, '|').c_str(), &ec, 10);
+		if ((*ec != '\0') || (m < 1) || (!nx(s, '|')))
+			throw false;
+		
+		// resize this
+		resize(n, m);
 		
 		// card data
-		for (size_t k = 0; k < Players; k++)
+		for (size_t k = 0; k < z.size(); k++)
 		{
-			for (size_t w = 0; w < TypeBits; w++)
+			for (size_t w = 0; w < z[k].size(); w++)
 			{
 				// z_ij
 				if ((mpz_set_str(z[k][w], gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
@@ -112,17 +146,17 @@ bool TMCG_Card::import
 TMCG_Card::~TMCG_Card
 	()
 {
-	for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-		for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
+	for (size_t k = 0; k < z.size(); k++)
+		for (size_t w = 0; w < z[k].size(); w++)
 			mpz_clear(z[k][w]);
 }
 
 std::ostream& operator<< 
 	(std::ostream &out, const TMCG_Card &card)
 {
-	out << "crd|" << card.Players << "|" << card.TypeBits << "|";
-	for (size_t k = 0; k < card.Players; k++)
-		for (size_t w = 0; w < card.TypeBits; w++)
+	out << "crd|" << card.z.size() << "|" << card.z[0].size() << "|";
+	for (size_t k = 0; k < card.z.size(); k++)
+		for (size_t w = 0; w < card.z[k].size(); w++)
 			out << card.z[k][w] << "|";
 	return out;
 }

@@ -22,14 +22,17 @@
 
 /* Kocher's efficient blinding technique for modular exponentiation */
 
-mpz_t	bvi, bvf, bx, bp;
+mpz_t		bvi, bvf, bx, bp;
 
 void mpz_spowm_init
 	(mpz_srcptr x, mpz_srcptr p)
 {
 	int ret;
 	
+	/* initalize the seed variables */
 	mpz_init(bvi), mpz_init(bvf), mpz_init_set(bx, x), mpz_init_set(bp, p);
+	
+	/* choose a random blinding value and compute the seed */
 	do
 	{
 		mpz_srandomm(bvi, bp);
@@ -42,14 +45,14 @@ void mpz_spowm_init
 void mpz_spowm
 	(mpz_ptr res, mpz_srcptr m)
 {
-	/* blinded exponentiation (res = m^x mod p) */
+	/* modular exponentiation (res = m^x mod p) */
 	mpz_mul(res, m, bvi);
 	mpz_mod(res, res, bp);
 	mpz_powm(res, res, bx, bp);
 	mpz_mul(res, res, bvf);
 	mpz_mod(res, res, bp);
 	
-	/* computing new seeds */
+	/* compute the new seed */
 	mpz_powm_ui(bvi, bvi, 2L, bp);
 	mpz_powm_ui(bvf, bvf, 2L, bp);
 }
@@ -68,8 +71,9 @@ void mpz_sspowm
 	int ret;
 	mpz_t r, r1;
 	
-	/* choose random blinding value */
 	mpz_init(r), mpz_init(r1);
+	
+	/* choose random blinding value */
 	do
 	{
 		mpz_srandomm(r, p);
@@ -78,14 +82,14 @@ void mpz_sspowm
 	while (!ret);
 	mpz_powm(r1, r1, x, p);
 	
-	/* blind message */
+	/* blind the message */
 	mpz_mul(res, m, r);
 	mpz_mod(res, res, p);
 	
 	/* modular exponentiation (res = m^x mod p) */
 	mpz_powm(res, res, x, p);
-	
-	/* unblind result */
+
+	/* unblind the result */
 	mpz_mul(res, res, r1);
 	mpz_mod(res, res, p);
 	

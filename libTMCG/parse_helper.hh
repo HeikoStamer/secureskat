@@ -26,8 +26,6 @@
 		#include "config.h"
 	#endif
 
-	#include <cstdio>
-	#include <cstdlib>
 	#include <string>
 
 	// simple methods for parsing

@@ -27,11 +27,8 @@
 	#endif
 
 	// C and STL header
-	#include <cstdio>
-	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	
 	// GNU multiple precision library

@@ -27,20 +27,13 @@
 	#endif
 
 	// C++/STL header
-	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	#include <vector>
 	#include <algorithm>
 	#include <functional>
-	
-	// GNU multiple precision library
-	#include <gmp.h>
-	
-	#include "TMCG.def"
 	
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"

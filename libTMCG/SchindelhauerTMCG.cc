@@ -677,8 +677,7 @@ bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue_PerfectZeroKnowledge
 void SchindelhauerTMCG::TMCG_CreateOpenCard
 	(TMCG_Card &c, const TMCG_PublicKeyRing &ring, size_t type)
 {
-	c.Players = TMCG_Players, c.TypeBits = TMCG_TypeBits;
-	for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t w = 0; w < c.z[0].size(); w++)
 	{
 		if (type & 1)
 		{
@@ -692,8 +691,8 @@ void SchindelhauerTMCG::TMCG_CreateOpenCard
 		}
 	}
 	
-	for (size_t k = 1; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t k = 1; k < c.z.size(); k++)
+		for (size_t w = 0; w < c.z[k].size(); w++)
 			mpz_set_ui(c.z[k][w], 1L);
 }
 
@@ -708,7 +707,7 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	(TMCG_Card &c, TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring,
 	size_t index, size_t type)
 {
-	TMCG_Card oc;
+	TMCG_Card oc(TMCG_Players, TMCG_TypeBits);
 	TMCG_CreateOpenCard(oc, ring, type);
 	TMCG_CreateCardSecret(cs, ring, index);
 	TMCG_MaskCard(oc, c, cs, ring);
@@ -732,10 +731,9 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	mpz_t foo;
 	
 	mpz_init(foo);
-	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
-	for (size_t k = 0; k < TMCG_Players; k++)
+	for (size_t k = 0; k < cs.r.size(); k++)
 	{
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+		for (size_t w = 0; w < cs.r[k].size(); w++)
 		{
 			// choose random number r \in Z^*_m
 			do
@@ -755,9 +753,9 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	mpz_clear(foo);
 	
 	// XOR b_{ij} with i \neq index (keep type of this card)
-	for (size_t k = 0; k < TMCG_Players; k++)
+	for (size_t k = 0; k < cs.r.size(); k++)
 	{
-		for (size_t w = 0; (k != index) && (w < TMCG_TypeBits); w++)
+		for (size_t w = 0; (k != index) && (w < cs.r[k].size()); w++)
 		{
 			if (mpz_get_ui(cs.b[index][w]) & 1L)
 			{
@@ -786,9 +784,8 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 void SchindelhauerTMCG::TMCG_CreateCardSecret
 	(TMCG_CardSecret &cs, mpz_srcptr r, unsigned long int b)
 {
-	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t k = 0; k < cs.r.size(); k++)
+		for (size_t w = 0; w < cs.r[k].size(); w++)
 			mpz_set(cs.r[k][w], r), mpz_set_ui(cs.b[k][w], b);
 }
 
@@ -796,9 +793,11 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	(const TMCG_Card &c, TMCG_Card &cc, const TMCG_CardSecret &cs,
 	const TMCG_PublicKeyRing &ring)
 {
-	cc.Players = TMCG_Players, cc.TypeBits = TMCG_TypeBits;
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	assert((c.z.size() == cc.z.size()) && (c.z[0].size() == cc.z[0].size()));
+	assert((c.z.size() == cs.r.size()) && (c.z[0].size() == cs.r[0].size()));
+	
+	for (size_t k = 0; k < c.z.size(); k++)
+		for (size_t w = 0; w < c.z[k].size(); w++)
 			TMCG_MaskValue(ring.key[k], c.z[k][w], cc.z[k][w],
 				cs.r[k][w], cs.b[k][w]);
 }
@@ -815,8 +814,11 @@ void SchindelhauerTMCG::TMCG_ProofMaskCard
 	const TMCG_PublicKeyRing &ring,
 	std::istream &in, std::ostream &out)
 {
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	assert((c.z.size() == cc.z.size()) && (c.z[0].size() == cc.z[0].size()));
+	assert((c.z.size() == cs.r.size()) && (c.z[0].size() == cs.r[0].size()));
+	
+	for (size_t k = 0; k < c.z.size(); k++)
+		for (size_t w = 0; w < c.z[k].size(); w++)
 			TMCG_ProofMaskValue(ring.key[k], c.z[k][w], cc.z[k][w],
 				cs.r[k][w], cs.b[k][w], in, out);
 }
@@ -833,8 +835,10 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskCard
 	(const TMCG_Card &c, const TMCG_Card &cc, const TMCG_PublicKeyRing &ring,
 	std::istream &in, std::ostream &out)
 {
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	assert((c.z.size() == cc.z.size()) && (c.z[0].size() == cc.z[0].size()));
+	
+	for (size_t k = 0; k < c.z.size(); k++)
+		for (size_t w = 0; w < c.z[k].size(); w++)
 			if (!TMCG_VerifyMaskValue(ring.key[k], c.z[k][w], cc.z[k][w], in, out))
 				return false;
 	return true;
@@ -854,8 +858,8 @@ void SchindelhauerTMCG::TMCG_ProofPrivateCard
 	(const TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring,
 	std::istream &in, std::ostream &out)
 {
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t k = 0; k < cs.r.size(); k++)
+		for (size_t w = 0; w < cs.r[k].size(); w++)
 			TMCG_ProofMaskOne(ring.key[k], cs.r[k][w], cs.b[k][w], in, out);
 	return;
 }
@@ -864,8 +868,8 @@ bool SchindelhauerTMCG::TMCG_VerifyPrivateCard
 	(const TMCG_Card &c, const TMCG_PublicKeyRing &ring,
 	std::istream &in, std::ostream &out)
 {
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t k = 0; k < c.z.size(); k++)
+		for (size_t w = 0; w < c.z[k].size(); w++)
 			if (!TMCG_VerifyMaskOne(ring.key[k], c.z[k][w], in, out))
 				return false;
 	return true;
@@ -875,7 +879,9 @@ void SchindelhauerTMCG::TMCG_ProofCardSecret
 	(const TMCG_Card &c, const TMCG_SecretKey &key, size_t index,
 	std::istream &in, std::ostream &out)
 {
-	for (size_t w = 0; w < TMCG_TypeBits; w++)
+	assert(c.z.size() > index);
+	
+	for (size_t w = 0; w < c.z[0].size(); w++)
 	{
 		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
 		{
@@ -901,10 +907,12 @@ bool SchindelhauerTMCG::TMCG_VerifyCardSecret
 	(const TMCG_Card &c, TMCG_CardSecret &cs, const TMCG_PublicKey &key,
 	size_t index, std::istream &in, std::ostream &out)
 {
-	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
+	assert((c.z.size() == cs.r.size()) && (c.z[0].size() == cs.r[0].size()));
+	assert(c.z.size() > index);
+	
 	try
 	{
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
+		for (size_t w = 0; w < c.z[0].size(); w++)
 		{
 			in >> cs.b[index][w];
 			mpz_set_ui(cs.r[index][w], 0L);
@@ -942,8 +950,10 @@ void SchindelhauerTMCG::TMCG_SelfCardSecret
 	(const TMCG_Card &c, TMCG_CardSecret &cs, const TMCG_SecretKey &key,
 	size_t index)
 {
-	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
-	for (size_t w = 0; w < TMCG_TypeBits; w++)
+	assert((c.z.size() == cs.r.size()) && (c.z[0].size() == cs.r[0].size()));
+	assert(c.z.size() > index);
+	
+	for (size_t w = 0; w < c.z[0].size(); w++)
 	{
 		mpz_set_ui(cs.r[index][w], 0L);
 		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
@@ -963,10 +973,10 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 	(const TMCG_CardSecret &cs)
 {
 	size_t type = 0, p2 = 1;
-	for (size_t w = 0; w < TMCG_TypeBits; w++)
+	for (size_t w = 0; w < cs.r[0].size(); w++)
 	{
 		bool bit = false;
-		for (size_t k = 0; k < TMCG_Players; k++)
+		for (size_t k = 0; k < cs.r.size(); k++)
 		{
 			if (mpz_get_ui(cs.b[k][w]) & 1L)
 				bit = !bit;
@@ -1020,7 +1030,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 	ss.clear();
 	for (size_t i = 0; i < size; i++)
 	{
-		TMCG_CardSecret cs;
+		TMCG_CardSecret cs(TMCG_Players, TMCG_TypeBits);
 		TMCG_CreateCardSecret(cs, ring, index);
 		
 		// only cyclic shift
@@ -1103,14 +1113,13 @@ void SchindelhauerTMCG::TMCG_MixStack
 	(const TMCG_Stack<TMCG_Card> &s, TMCG_Stack<TMCG_Card> &s2,
 	const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring)
 {
-	assert(s.size() != 0);
-	assert(s.size() == ss.size());
+	assert((s.size() != 0) && (s.size() == ss.size()));
 	
 	// mask all cards, mix and build new stack
 	s2.clear();
 	for (size_t i = 0; i < s.size(); i++)
 	{
-		TMCG_Card c;
+		TMCG_Card c(TMCG_Players, TMCG_TypeBits);
 		TMCG_MaskCard(s[ss[i].first], c, ss[ss[i].first].second, ring);
 		s2.push(c);
 	}
@@ -1120,7 +1129,7 @@ void SchindelhauerTMCG::TMCG_MixStack
 	(const TMCG_Stack<VTMF_Card> &s, TMCG_Stack<VTMF_Card> &s2,
 	const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf)
 {
-	assert(s.size() != 0), assert(s.size() == ss.size());
+	assert((s.size() != 0) && (s.size() == ss.size()));
 	
 	// mask all cards, mix and build new stack
 	s2.clear();
@@ -1141,7 +1150,7 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 	TMCG_StackSecret<TMCG_CardSecret> ss3;
 	for (size_t i = 0; i < sigma.size(); i++)
 	{
-		TMCG_CardSecret cs;
+		TMCG_CardSecret cs(TMCG_Players, TMCG_TypeBits);
 		TMCG_CreateCardSecret(cs, ring, 0);
 		size_t sigma_idx = i, pi_idx = 0;
 		for (size_t j = 0; j < pi.size(); j++)
@@ -1212,9 +1221,10 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 void SchindelhauerTMCG::TMCG_ProofStackEquality
 	(const TMCG_Stack<TMCG_Card> &s, const TMCG_Stack<TMCG_Card> &s2,
 	const TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
-	const TMCG_PublicKeyRing &ring, size_t index, std::istream &in, std::ostream &out)
+	const TMCG_PublicKeyRing &ring, size_t index,
+	std::istream &in, std::ostream &out)
 {
-	assert(s.size() == s2.size()), assert(s.size() == ss.size());
+	assert((s.size() == s2.size()) && (s.size() == ss.size()));
 	
 	mpz_t foo;
 	unsigned long int security_desire = 0;
@@ -1249,7 +1259,7 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	const TMCG_StackSecret<VTMF_CardSecret> &ss, bool cyclic,
 	BarnettSmartVTMF_dlog *vtmf, std::istream &in, std::ostream &out)
 {
-	assert(s.size() == s2.size()), assert(s.size() == ss.size());
+	assert((s.size() == s2.size()) && (s.size() == ss.size()));
 	
 	mpz_t foo;
 	unsigned long int security_desire = 0;
@@ -1409,13 +1419,13 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 	(const TMCG_OpenStack<TMCG_Card> &os, TMCG_OpenStack<TMCG_Card> &os2,
 	const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring)
 {
-	assert(os.size() != 0), assert(os.size() == ss.size());
+	assert((os.size() != 0) && (os.size() == ss.size()));
 	
 	// mask all cards, mix and build new open stack
 	os2.clear();
 	for (size_t i = 0; i < os.size(); i++)
 	{
-		TMCG_Card c;
+		TMCG_Card c(TMCG_Players, TMCG_TypeBits);
 		TMCG_MaskCard((os[ss[i].first].second), c, (ss[ss[i].first].second), ring);
 		os2.push(os[ss[i].first].first, c);
 	}
@@ -1425,7 +1435,7 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 	(const TMCG_OpenStack<VTMF_Card> &os, TMCG_OpenStack<VTMF_Card> &os2,
 	const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf)
 {
-	assert(os.size() != 0), assert(os.size() == ss.size());
+	assert((os.size() != 0) && (os.size() == ss.size()));
 	
 	// mask all cards, mix and build new open stack
 	os2.clear();

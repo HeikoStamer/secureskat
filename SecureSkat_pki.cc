@@ -46,7 +46,7 @@ void get_secret_key
 			std::getline(std::cin, email);
 			while (1)
 			{
-				TMCG_SecretKey tmpsec(KEY_SIZE, name, email);
+				TMCG_SecretKey tmpsec(TMCG_KEY_SIZE, name, email);
 				if (tmpsec.check())
 				{
 					sec = tmpsec;

@@ -27,31 +27,27 @@
 	#endif
 
 	// C++/STL header
-	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
-	#include <sstream>
 	#include <iostream>
 	#include <vector>
-	#include <algorithm>
-	#include <functional>
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-	
-	#include "TMCG.def"
 	
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
 	
 struct TMCG_Card
 {
-	size_t					Players, TypeBits;
-	mpz_t					z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	vector< vector<mpz_ptr> >			z;
 	
 	TMCG_Card
 		();
+	
+	TMCG_Card
+		(size_t n, size_t m);
 	
 	TMCG_Card
 		(const TMCG_Card& that);
@@ -60,10 +56,13 @@ struct TMCG_Card
 		(const TMCG_Card& that);
 	
 	bool operator ==
-		(const TMCG_Card& that);
+		(const TMCG_Card& that) const;
 	
 	bool operator !=
-		(const TMCG_Card& that);
+		(const TMCG_Card& that) const;
+	
+	void resize
+		(size_t n, size_t m);
 	
 	bool import
 		(std::string s);

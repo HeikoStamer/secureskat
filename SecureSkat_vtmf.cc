@@ -963,11 +963,11 @@ int skat_game
 		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog(KEY_SIZE);
+		vtmf = new BarnettSmartVTMF_dlog();
 		vtmf->PublishGroup(*left), vtmf->PublishGroup(*right);
 #endif
 		
-		if (!vtmf->CheckGroup(KEY_SIZE))
+		if (!vtmf->CheckGroup())
 		{
 			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return 2;
@@ -1002,7 +1002,7 @@ int skat_game
 			vtmf = new BarnettSmartVTMF_dlog(*left);
 #endif
 		
-		if (!vtmf->CheckGroup(KEY_SIZE))
+		if (!vtmf->CheckGroup())
 		{
 			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return 2;

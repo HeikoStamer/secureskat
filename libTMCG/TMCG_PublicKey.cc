@@ -1,6 +1,15 @@
 /*******************************************************************************
    This file is part of libTMCG.
 
+     Rosario Gennaro, Daniele Micciancio, Tal Rabin: 
+     'An Efficient Non-Interactive Statistical Zero-Knowledge 
+     Proof System for Quasi-Safe Prime Products', 1997
+
+     Mihir Bellare, Phillip Rogaway: 'The Exact Security of Digital
+     Signatures -- How to Sign with RSA and Rabin', 1996
+
+     Dan Boneh: 'Simplified OAEP for the RSA and Rabin Functions', 2002
+
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify

@@ -48,10 +48,11 @@ AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
 	AC_DEFINE(COMMON_DDH_GROUP,
 	"143ftcwitk0hm5db6g2f4ltt0ln2k3khqfwy67mlw55lywuho9vlyqr4wzclztgy5d08649y20f8c24vntpupkmekxa0swsyjoppqvcc1ym3mqjwo0u498hy1kuytxxhyy2z4zq05ljdr0d27of35az8p8kjfnc1rb8wmd3t93gb64rpxiwfs8r9066ymm91kzjmk6b",
-	[common DDH group])
+	[safe prime p (1024 bit) of the common DDH-hard group G])
 fi
 
-AC_DEFINE(KEY_SIZE, 1024L, [cryptographic key and group size])
+AC_DEFINE(TMCG_DDH_P_SIZE, 1024L, [security parameter of the DDH-hard group G])
+AC_DEFINE(TMCG_KEY_SIZE, 1024L, [security parameter of the TMCG public key])
 
 # Checks for programs.
 AC_PROG_CC
