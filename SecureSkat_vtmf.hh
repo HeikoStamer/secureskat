@@ -52,7 +52,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <list>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -60,6 +59,7 @@
 // GNU crypto library
 #include <gcrypt.h> 
 
+// libTMCG
 #include <libTMCG.hh>
 #include "securesocketstream.hh"
 #include "pipestream.hh"

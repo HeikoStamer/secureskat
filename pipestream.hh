@@ -85,7 +85,7 @@ argument
     basic_pipebuf(int iPipe) : mPipe(iPipe) {
         mRBuffer = new char[traits_type::i_buffer_sz()];
         mWBuffer = new char[traits_type::o_buffer_sz()];
-        if(traits_type::buffer_output()) {
+        if (traits_type::buffer_output()) {
             setp(mWBuffer, mWBuffer+(traits_type::o_buffer_sz()-1));
         }
         char *pos = mRBuffer+traits_type::putback_sz();

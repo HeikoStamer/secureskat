@@ -63,7 +63,7 @@ struct VTMF_Card
 	}
 	
 	bool operator ==
-		(const VTMF_Card& that)
+		(const VTMF_Card& that) const
 	{
 		if (mpz_cmp(c_1, that.c_1) || mpz_cmp(c_2, that.c_2))
 			return false;
@@ -71,7 +71,7 @@ struct VTMF_Card
 	}
 	
 	bool operator !=
-		(const VTMF_Card& that)
+		(const VTMF_Card& that) const
 	{
 		return !(*this == that);
 	}

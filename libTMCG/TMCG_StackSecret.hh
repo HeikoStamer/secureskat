@@ -45,7 +45,7 @@
 
 template <typename CardSecretType> struct TMCG_StackSecret
 {
-	std::vector<std::pair<size_t, CardSecretType> >	stack;
+	std::vector<std::pair<size_t, CardSecretType> > stack;
 	
 	struct eq_first_component : public std::binary_function<
 		std::pair<size_t, CardSecretType>,
@@ -69,6 +69,7 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	{
 		stack.clear();
 		stack = that.stack;
+		return *this;
 	}
 	
 	const std::pair<size_t, CardSecretType>& operator []

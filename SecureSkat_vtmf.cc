@@ -22,6 +22,9 @@
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
+// global return string
+std::string wstr;
+
 // values for biding
 size_t reiz_wert[] =
 	{ 
@@ -247,9 +250,8 @@ bool skat_rulectl
 	)
 {
 	TMCG_OpenStack<VTMF_Card> os;
-	VTMF_Card c;
 	for (size_t j = 0; j < cv.size(); j++)
-		os.push(std::pair<size_t, VTMF_Card>(cv[j], c));
+		os.push(cv[j], VTMF_Card());
 	return skat_rulectl(t, tt, spiel, os);
 }
 
@@ -376,9 +378,9 @@ int skat_vkarte
 			((pkr_self == 2) && (pkr_who == 0)))
 		{
 			left->getline(tmp, TMCG_MAX_CARD_CHARS);
-			if (!tmcg->TMCG_ImportCard(c, tmp))
+			if (!c.import(tmp))
 				throw -1;
-			if (!tmcg->TMCG_IsInStack(s, c))
+			if (!s.find(c))
 				throw -1;
 			tmcg->TMCG_SelfCardSecret(c, vtmf);
 			if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
@@ -402,7 +404,7 @@ int skat_vkarte
 			
 			type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
-				tmcg->TMCG_RemoveFirstFromStack(s, c);
+				s.remove(c);
 			throw type;
 		}
 		if (((pkr_self == 0) && (pkr_who == 2)) || 
@@ -410,9 +412,9 @@ int skat_vkarte
 			((pkr_self == 2) && (pkr_who == 1)))
 		{
 			right->getline(tmp, TMCG_MAX_CARD_CHARS);
-			if (!tmcg->TMCG_ImportCard(c, tmp))
+			if (!c.import(tmp))
 				throw -1;
-			if (!tmcg->TMCG_IsInStack(s, c))
+			if (!s.find(c))
 				throw -1;
 			tmcg->TMCG_SelfCardSecret(c, vtmf);
 			if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
@@ -436,7 +438,7 @@ int skat_vkarte
 			
 			type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
-				tmcg->TMCG_RemoveFirstFromStack(s, c);
+				s.remove(c);
 			throw type;
 		}
 		throw -1;
@@ -542,7 +544,7 @@ void skat_szeigen
 	)
 {
 	for (size_t i = 0; i < sk.size(); i++)
-		tmcg->TMCG_ProofCardSecret(*(sk[i]), vtmf, *rls, *rls);
+		tmcg->TMCG_ProofCardSecret(sk[i], vtmf, *rls, *rls);
 }
 
 bool skat_ssehen
@@ -554,30 +556,29 @@ bool skat_ssehen
 {
 	for (size_t i = 0; i < sk.size(); i++)
 	{
-		tmcg->TMCG_SelfCardSecret(*(sk[i]), vtmf);
+		tmcg->TMCG_SelfCardSecret(sk[i], vtmf);
 		if (pkr_self == 0)
 		{
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *left, *left))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *left, *left))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *right, *right))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *right, *right))
 				return false;
 		}
 		else if (pkr_self == 1)
 		{
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *left, *left))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *left, *left))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *right, *right))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *right, *right))
 				return false;
 		}
 		else if (pkr_self == 2)
 		{
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *left, *left))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *left, *left))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(sk[i]), vtmf, *right, *right))
+			if (!tmcg->TMCG_VerifyCardSecret(sk[i], vtmf, *right, *right))
 				return false;
 		}
-		tmcg->TMCG_PushToOpenStack(os, *(sk[i]),
-			tmcg->TMCG_TypeOfCard(*(sk[i]), vtmf));
+		os.push(tmcg->TMCG_TypeOfCard(sk[i], vtmf), sk[i]);
 	}
 	return true;
 }
@@ -683,11 +684,11 @@ void skat_blatt
 		size_t p, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
-	list<int> w;
+	vector<int> w;
 	for (size_t i = 0; i < os.size(); i++)
 		w.push_back(os[i].first);
 	if (p != 99)
-		w.sort();
+		std::sort(w.begin(), w.end());
 	if (p != 99)
 		cout << "><><>< ";
 	if (p == 0)
@@ -698,7 +699,7 @@ void skat_blatt
 		cout << "HH: ";
 	if (p == 10)
 		cout << "offengelegte Karten: ";
-	for (list<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
+	for (vector<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
 		cout << skat_type2string(*wi);
 	if (p != 99)
 		cout << endl;
@@ -707,8 +708,8 @@ void skat_blatt
 bool skat_sehen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		TMCG_OpenStack<VTMF_Card> &os,
-		const TMCG_Stack<VTMF_Card> &s0, const TMCG_Stack<VTMF_Card> &s1, const TMCG_Stack<VTMF_Card> &s2,
+		TMCG_OpenStack<VTMF_Card> &os, const TMCG_Stack<VTMF_Card> &s0,
+		const TMCG_Stack<VTMF_Card> &s1, const TMCG_Stack<VTMF_Card> &s2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -716,51 +717,48 @@ bool skat_sehen
 	{
 		for (size_t i = 0; i < s0.size(); i++)
 		{
-			tmcg->TMCG_SelfCardSecret(*(s0[i]), vtmf);
-			if (!tmcg->TMCG_VerifyCardSecret(*(s0[i]), vtmf, *left, *left))
+			tmcg->TMCG_SelfCardSecret(s0[i], vtmf);
+			if (!tmcg->TMCG_VerifyCardSecret(s0[i], vtmf, *left, *left))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(s0[i]), vtmf, *right, *right))
+			if (!tmcg->TMCG_VerifyCardSecret(s0[i], vtmf, *right, *right))
 				return false;
-			tmcg->TMCG_PushToOpenStack(os, *(s0[i]), 
-				tmcg->TMCG_TypeOfCard(*(s0[i]), vtmf));
+			os.push(tmcg->TMCG_TypeOfCard(s0[i], vtmf), s0[i]);
 		}
 		for (size_t i = 0; i < s1.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s1[i]), vtmf, *left, *left);
+			tmcg->TMCG_ProofCardSecret(s1[i], vtmf, *left, *left);
 		for (size_t i = 0; i < s2.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s2[i]), vtmf, *right, *right);
+			tmcg->TMCG_ProofCardSecret(s2[i], vtmf, *right, *right);
 	}
 	if (pkr_self == 1)
 	{
 		for (size_t i = 0; i < s0.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s0[i]), vtmf, *right, *right);
+			tmcg->TMCG_ProofCardSecret(s0[i], vtmf, *right, *right);
 		for (size_t i = 0; i < s1.size(); i++)
 		{
-			tmcg->TMCG_SelfCardSecret(*(s1[i]), vtmf);
-			if (!tmcg->TMCG_VerifyCardSecret(*(s1[i]), vtmf, *right, *right))
+			tmcg->TMCG_SelfCardSecret(s1[i], vtmf);
+			if (!tmcg->TMCG_VerifyCardSecret(s1[i], vtmf, *right, *right))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(s1[i]), vtmf, *left, *left))
+			if (!tmcg->TMCG_VerifyCardSecret(s1[i], vtmf, *left, *left))
 				return false;
-			tmcg->TMCG_PushToOpenStack(os, *(s1[i]),
-				tmcg->TMCG_TypeOfCard(*(s1[i]), vtmf));
+			os.push(tmcg->TMCG_TypeOfCard(s1[i], vtmf), s1[i]);
 		}
 		for (size_t i = 0; i < s2.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s2[i]), vtmf, *left, *left);
+			tmcg->TMCG_ProofCardSecret(s2[i], vtmf, *left, *left);
 	}
 	if (pkr_self == 2)
 	{
 		for (size_t i = 0; i < s0.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s0[i]), vtmf, *left, *left);
+			tmcg->TMCG_ProofCardSecret(s0[i], vtmf, *left, *left);
 		for (size_t i = 0; i < s1.size(); i++)
-			tmcg->TMCG_ProofCardSecret(*(s1[i]), vtmf, *right, *right);
+			tmcg->TMCG_ProofCardSecret(s1[i], vtmf, *right, *right);
 		for (size_t i = 0; i < s2.size(); i++)
 		{
-			tmcg->TMCG_SelfCardSecret(*(s2[i]), vtmf);
-			if (!tmcg->TMCG_VerifyCardSecret(*(s2[i]), vtmf, *left, *left))
+			tmcg->TMCG_SelfCardSecret(s2[i], vtmf);
+			if (!tmcg->TMCG_VerifyCardSecret(s2[i], vtmf, *left, *left))
 				return false;
-			if (!tmcg->TMCG_VerifyCardSecret(*(s2[i]), vtmf, *right, *right))
+			if (!tmcg->TMCG_VerifyCardSecret(s2[i], vtmf, *right, *right))
 				return false;
-			tmcg->TMCG_PushToOpenStack(os, *(s2[i]),
-				tmcg->TMCG_TypeOfCard(*(s2[i]), vtmf));
+			os.push(tmcg->TMCG_TypeOfCard(s2[i], vtmf), s2[i]);
 		}
 	}
 	return true;
@@ -769,74 +767,73 @@ bool skat_sehen
 bool skat_geben
 	(
 		SchindelhauerTMCG *tmcg, TMCG_Stack<VTMF_Card> &d_mix,
-		TMCG_Stack<VTMF_Card> &s0, TMCG_Stack<VTMF_Card> &s1, TMCG_Stack<VTMF_Card> &s2, TMCG_Stack<VTMF_Card> &sk
+		TMCG_Stack<VTMF_Card> &s0, TMCG_Stack<VTMF_Card> &s1,
+		TMCG_Stack<VTMF_Card> &s2, TMCG_Stack<VTMF_Card> &sk
 	)
 {
 	VTMF_Card c;
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s0, c);
+		s0.push(c);
 	}
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s1, c);
+		s1.push(c);
 	}
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s2, c);
+		s2.push(c);
 	}
 	for (size_t i = 0; i < 2; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(sk, c);
+		sk.push(c);
 	}
 	for (size_t i = 0; i < 4; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s0, c);
+		s0.push(c);
 	}
 	for (size_t i = 0; i < 4; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s1, c);
+		s1.push(c);
 	}
 	for (size_t i = 0; i < 4; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s2, c);
+		s2.push(c);
 	}
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s0, c);
+		s0.push(c);
 	}
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s1, c);
+		s1.push(c);
 	}
 	for (size_t i = 0; i < 3; i++)
 	{
-		if (!tmcg->TMCG_PopFromStack(d_mix, c))
+		if (!d_mix.pop(c))
 			return false;
-		tmcg->TMCG_PushToStack(s2, c);
+		s2.push(c);
 	}
-	if (d_mix.size() != 0)
-		return false;
-	else
-		return true;
+	assert(d_mix.size() == 0);
+	return true;
 }
 
 bool skat_mischen_beweis
@@ -895,31 +892,31 @@ bool skat_mischen
 			*right << d0 << endl << flush;
 			*left << d0 << endl << flush;
 			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d1, tmp))
+			if (!d1.import(tmp))
 				throw false;
 			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d2, tmp))
+			if (!d2.import(tmp))
 				throw false;
 		}
 		if (pkr_self == 1)
 		{
 			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d0, tmp))
+			if (!d0.import(tmp))
 				throw false;
 			tmcg->TMCG_MixStack(d0, d1, ss, vtmf);
 			*right << d1 << endl << flush;
 			*left << d1 << endl << flush;
 			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d2, tmp))
+			if (!d2.import(tmp))
 				throw false;
 		}
 		if (pkr_self == 2)
 		{
 			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d0, tmp))
+			if (!d0.import(tmp))
 				throw false;
 			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!tmcg->TMCG_ImportStack(d1, tmp))
+			if (!d1.import(tmp))
 				throw false;
 			tmcg->TMCG_MixStack(d1, d2, ss, vtmf);
 			*right << d2 << endl << flush;
@@ -1059,12 +1056,12 @@ int skat_game
 			{
 				VTMF_Card c;
 				tmcg->TMCG_CreateOpenCard(c, vtmf, i);
-				tmcg->TMCG_PushToOpenStack(d, c, i);
+				d.push(i, c);
 			}
 			// Mischen
 			TMCG_Stack<VTMF_Card> d2, d_mix[3], d_end;
 			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
-			tmcg->TMCG_ExtractStack(d, d2);
+			d2.push(d);
 			tmcg->TMCG_CreateStackSecret(ss, false, d2.size(), vtmf);
 			cout << "><>< Mische Karten. Bitte warten ..." << flush;
 			if (pctl)
@@ -1095,14 +1092,14 @@ int skat_game
 				size_t cyc = 0;
 				do
 				{
-					tmcg->TMCG_ReleaseStackSecret(ab);
+					ab.clear();
 					cyc = tmcg->TMCG_CreateStackSecret(ab, true, vtmf, d_mix[2].size());
 				}
 				while ((cyc <= 3) || (cyc >= 29));
 				cout << "[" << cyc << " Karten abgehoben]..." << flush;
 				tmcg->TMCG_MixStack(d_mix[2], d_end, ab, vtmf);
-				*left << tmcg->TMCG_ExportStack(d_end) << endl << flush;
-				*right << tmcg->TMCG_ExportStack(d_end) << endl << flush;
+				*left << d_end << std::endl << std::flush;
+				*right << d_end << std::endl << std::flush;
 				tmcg->TMCG_ProofStackEquality(d_mix[2], d_end, ab, true, vtmf,
 					*left, *left);
 				tmcg->TMCG_ProofStackEquality(d_mix[2], d_end, ab, true, vtmf,
@@ -1127,12 +1124,12 @@ int skat_game
 				else
 					hhs = NULL;
 				hhs->getline(tmp, TMCG_MAX_STACK_CHARS);
-				if (!tmcg->TMCG_ImportStack(d_end, tmp))
+				if (!d_end.import(tmp))
 				{
 					cout << ">< Fehler beim Abheben: falsches Stapelformat" << endl;
 					delete [] tmp, return 1;
 				}
-				if (!tmcg->TMCG_VerifyStackEquality(d_mix[2], d_end, 
+				if (!tmcg->TMCG_VerifyStackEquality(d_mix[2], d_end,
 					true, vtmf, *hhs, *hhs))
 				{
 					cout << ">< Fehler beim Abheben: Betrugsversuch im ZNP" << endl;
@@ -1142,20 +1139,20 @@ int skat_game
 			}
 			cout << "Fertig!" << endl;
 #else
-			tmcg->TMCG_CopyStack(d_mix[2], d_end);
+			d_end = d_mix[2];
 #endif
 			
 			// compute unique game ID (aka hex_game_digest)
-			ostringstream game_stream;
-			game_stream << d_end << endl << flush;
-			string osttmp = game_stream.str();
-			assert(gcry_md_get_algo_dlen(GCRY_MD_RMD160));
-			char *game_digest = new char[gcry_md_get_algo_dlen(GCRY_MD_RMD160)];
-			gcry_md_hash_buffer(GCRY_MD_RMD160, game_digest,
+			std::ostringstream game_stream;
+			game_stream << d_end << std::endl << std::flush;
+			std::string osttmp = game_stream.str();
+			assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+			char *game_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, game_digest,
 				osttmp.c_str(), osttmp.length());
 			char *hex_game_digest =
-				new char[2 * gcry_md_get_algo_dlen(GCRY_MD_RMD160) + 1];
-			for (size_t i = 0; i < gcry_md_get_algo_dlen(GCRY_MD_RMD160); i++)
+				new char[2 * gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) + 1];
+			for (size_t i = 0; i < gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO); i++)
 				snprintf(hex_game_digest + (2 * i), 3, "%02x",
 					(unsigned char)game_digest[i]);
 			
@@ -1718,9 +1715,8 @@ int skat_game
 								cout << "><><>< Skatfreund \"" << 
 									pkr.key[spiel_allein].name << 
 									"\" nimmt den Skat auf" << endl;
-								assert (sk.size() == 2);
-								tmcg->TMCG_PushToStack(s[spiel_allein], *(sk[0]));
-								tmcg->TMCG_PushToStack(s[spiel_allein], *(sk[1]));
+								assert(sk.size() == 2);
+								s[spiel_allein].push(sk);
 								if (pkr_self == 0)
 								{
 									if (spiel_allein == 1)
@@ -1788,27 +1784,27 @@ int skat_game
 									}
 									
 									// check and store pushed cards
-									if (!tmcg->TMCG_ImportCard(c1, tmp1))
+									if (!c1.import(tmp1))
 									{
 										delete [] tmp1, delete [] tmp2;
 										return 9;
 									}
-									if (!tmcg->TMCG_ImportCard(c2, tmp2))
+									if (!c2.import(tmp2))
 									{
 										delete [] tmp1, delete [] tmp2;
 										return 9;
 									}
-									if ((!tmcg->TMCG_IsInStack(s[spiel_allein], c1)) ||
-										(!tmcg->TMCG_IsInStack(s[spiel_allein], c2)))
+									if ((!s[spiel_allein].find(c1)) ||
+										(!s[spiel_allein].find(c2)))
 									{
 										delete [] tmp1, delete [] tmp2;
 										return 10;
 									}
-									tmcg->TMCG_ReleaseStack(sk);
-									tmcg->TMCG_RemoveFirstFromStack(s[spiel_allein], c1);
-									tmcg->TMCG_PushToStack(sk, c1);
-									tmcg->TMCG_RemoveFirstFromStack(s[spiel_allein], c2);
-									tmcg->TMCG_PushToStack(sk, c2);
+									sk.clear();
+									s[spiel_allein].remove(c1);
+									sk.push(c1);
+									s[spiel_allein].remove(c2);
+									sk.push(c2);
 									delete [] tmp1, delete [] tmp2;
 								}
 							}
@@ -1857,9 +1853,7 @@ int skat_game
 												"Betrugsversuch im ZNP" << endl;
 											return 11;
 										}
-										VTMF_Card c;
-										tmcg->TMCG_CreateOpenCard(c, vtmf, 0);
-										tmcg->TMCG_PushToOpenStack(os_ov, c, type);
+										os_ov.push(type, VTMF_Card());
 										if (pctl)
 										{
 											ostringstream ost;
@@ -1908,14 +1902,10 @@ int skat_game
 							}	
 							VTMF_Card c;
 							tmcg->TMCG_CreateOpenCard(c, vtmf, type);
-							tmcg->TMCG_PushToOpenStack(os_sp, c, type);
+							os_sp.push(type, c);
 							// Ouvert Spiele -- Karte vom Sichtstapel entfernen
 							if ((spiel_status - (hand_spiel ? 1000 : 0)) > 300)
-							{
-								TMCG_Stack<VTMF_Card> st;
-								tmcg->TMCG_MoveFromOpenStackToStack(os_ov, st, type);
-								tmcg->TMCG_ReleaseStack(st);
-							}
+								os_ov.remove(type);
 							if (os_sp.size() == 3)
 							{
 								int bk = skat_bstich(os_sp, spiel_status);
@@ -1931,16 +1921,13 @@ int skat_game
 									*out_ctl << nicks[spiel_who[bk]] << " BSTICH" << 
 										endl << flush;
 								// Stichstapel erste Karte (Regelkontrolle)
-								tmcg->TMCG_PushToOpenStack(os_st, 
-									*(os_sp[0].second), os_sp[0].first);
+								os_st.push(os_sp[0].first, os_sp[0].second);
 								// Stichstapel jedes Spielers
-								tmcg->TMCG_PushOpenStackToOpenStack(
-									os_pkt[spiel_who[bk]], os_sp);
+								os_pkt[spiel_who[bk]].push(os_sp);
 								// Kartenstapel jedes Spielers (Regelkontrolle)
 								for (size_t i = 0; i < os_sp.size(); i++)
-									tmcg->TMCG_PushToOpenStack(os_rc[spiel_who[i]], 
-									*(os_sp[i].second), os_sp[i].first);
-								tmcg->TMCG_ReleaseOpenStack(os_sp);
+									os_rc[spiel_who[i]].push(os_sp[i].first, os_sp[i].second);
+								os_sp.clear();
 								spiel_who[0] = spiel_who[bk];
 								spiel_who[1] = (spiel_who[0] + 1) % 3;
 								spiel_who[2] = (spiel_who[0] + 2) % 3;
@@ -1980,8 +1967,7 @@ int skat_game
 							for (size_t i = 0; i < os_sp.size(); i++)
 							{
 								TMCG_OpenStack<VTMF_Card> os_sp2;
-								tmcg->TMCG_PushToOpenStack(os_sp2, 
-									*(os_sp[i].second), os_sp[i].first);
+								os_sp2.push(os_sp[i].first, os_sp[i].second);
 								skat_blatt(99, os_sp2);
 								cout << "(" << pkr.key[spiel_who[i]].name << ") ";
 							}
@@ -2373,56 +2359,56 @@ int skat_game
 									}
 									if ((ei != par.npos) && (par.length() > ei))
 									{
-										string cc1 = par.substr(0, ei);
-										string cc2 = par.substr(ei + 1, par.length() - ei - 1);
+										std::string cc1 = par.substr(0, ei);
+										std::string cc2 = par.substr(ei + 1, par.length() - ei - 1);
 										
 										int tt1 = skat_wort2type(cc1), tt2 = skat_wort2type(cc2);
 										if ((tt1 != -1) && (tt2 != -1))
 										{
-											if (tmcg->TMCG_IsInOpenStack(os, tt1) &&
-												tmcg->TMCG_IsInOpenStack(os, tt2))
+											if (os.find(tt1) && os.find(tt2))
 											{
-												tmcg->TMCG_ReleaseStack(sk);
-												tmcg->TMCG_MoveFromOpenStackToStack(os, sk, tt1);
-												tmcg->TMCG_MoveFromOpenStackToStack(os, sk, tt2);
+												sk.clear();
+												os.move(tt1, sk), os.move(tt2, sk);
 												assert(sk.size() == 2);
-												tmcg->TMCG_ReleaseStack(s[pkr_self]);
-												tmcg->TMCG_ExtractStack(os, s[pkr_self]);
+												s[pkr_self].clear();
+												s[pkr_self].push(os);
 												cout << "><><>< Skatfreund \"" << 
 													pkr.key[pkr_self].name << 
 													"\" drueckt: " << skat_type2string(tt1) <<
-													skat_type2string(tt2) << endl;
-												*out_pipe << "PRIVMSG #openSkat_" << nr << 
-													" :DRUECKE " << hex_game_digest << endl << flush;
+													skat_type2string(tt2) << std::endl;
+												*out_pipe << "PRIVMSG #openSkat_" << nr <<
+													" :DRUECKE " << hex_game_digest <<
+													std::endl << std::flush;
 												reiz_status += 100;
-												*right << *(sk[0]) << endl << flush;
-												*right << *(sk[1]) << endl << flush;
-												*left << *(sk[0]) << endl << flush;
-												*left << *(sk[1]) << endl << flush;
+												*right << sk[0] << std::endl << std::flush;
+												*right << sk[1] << std::endl << std::flush;
+												*left << sk[0] << std::endl << std::flush;
+												*left << sk[1] << std::endl << std::flush;
 												if (pctl)
-													*out_ctl << nicks[pkr_self] << " DRUECKE" << 
-														endl << flush;
+													*out_ctl << nicks[pkr_self] << " DRUECKE" <<
+														std::endl << std::flush;
 												skat_blatt((pkr_self + p) % 3, os);
 											}
 											else
-												cout << ">< Karten \"" << cc1 << "\" oder \"" << 
-													cc2 << "\" nicht im Blatt" << endl;
+												std::cout << ">< Karten \"" << cc1 << "\" oder \"" <<
+													cc2 << "\" nicht im Blatt" << std::endl;
 										}
 										else
-											cout << ">< falsche Kartenbezeichnung: \"" <<
-												cc1 << "\" oder \"" << cc2 << "\"" << endl;
+											std::cout << ">< falsche Kartenbezeichnung: \"" <<
+												cc1 << "\" oder \"" << cc2 << "\"" << std::endl;
 									}
 									else
-										cout << ">< unzureichende Parameteranzahl" << endl;
+										std::cout << ">< unzureichende Parameteranzahl" <<
+											std::endl;
 								}
 								else
-									cout << ">< es wird aus der Hand gespielt" << endl;
+									std::cout << ">< es wird aus der Hand gespielt" << std::endl;
 							}
 							else
-								cout << ">< es spielt eine andere Partei" << endl;
+								std::cout << ">< es spielt eine andere Partei" << std::endl;
 						}
 						else
-							cout << ">< Skatablage z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Skatablage z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("SAGEAN", 0) == 0) || 
 						(msg.find("sagean", 0) == 0))
@@ -2432,7 +2418,7 @@ int skat_game
 						{
 							if (pkr_self == spiel_allein)
 							{
-								string par = ""; 
+								std::string par = ""; 
 								size_t ei = msg.find(" ", 0), zi = par.npos;
 								if ((ei == 6) && (msg.length() > 7))
 								{
@@ -2441,7 +2427,7 @@ int skat_game
 								}
 								if ((ei != par.npos) && (par != ""))
 								{
-									string spiel = "", zusatz = "";
+									std::string spiel = "", zusatz = "";
 									if (zi != par.npos)
 									{
 										spiel = par.substr(0, zi);
@@ -2462,11 +2448,11 @@ int skat_game
 											spiel_status = sz;
 											*out_pipe << "PRIVMSG #openSkat_" << nr <<
 												" :SAGEAN " << skat_spiel2string(spiel_status) <<
-												" " << hex_game_digest << endl << flush;
-											ostringstream ost;
-											ost << spiel_status << endl;
-											*left << ost.str() << flush;
-											*right << ost.str() << flush;
+												" " << hex_game_digest << std::endl << std::flush;
+											std::ostringstream ost;
+											ost << spiel_status << std::endl;
+											*left << ost.str() << std::flush;
+											*right << ost.str() << std::flush;
 											// Ouvert Spiele -- Karten oeffnen
 											if ((spiel_status - (hand_spiel ? 1000 : 0)) > 300)
 											{
@@ -2474,103 +2460,104 @@ int skat_game
 												{
 													*out_pipe << "PRIVMSG #openSkat_" << nr <<
 														" :OUVERT " << skat_type2string(os[i].first) <<
-														" " << hex_game_digest << endl << flush;
-													skat_okarte(tmcg, vtmf, *(os[i].second), right, left);
+														" " << hex_game_digest << std::endl << std::flush;
+													skat_okarte(tmcg, vtmf, os[i].second, right, left);
 												}
 											}
-											cout << "><><>< Skatfreund \"" << 
+											std::cout << "><><>< Skatfreund \"" << 
 												pkr.key[pkr_self].name << "\" spielt: " <<
-												skat_spiel2string(spiel_status) << endl;
+												skat_spiel2string(spiel_status) << std::endl;
 											if (pctl)
 												*out_ctl << nicks[pkr_self] << " SAGEAN " <<
-													ost.str() << endl << flush;
+													ost.str() << std::endl << std::flush;
 											spiel_dran = 0;
 											spiel_who[0] = vh, spiel_who[1] = mh, spiel_who[2] = hh;
 										}
 										else
-											cout << ">< ungueltige Spielansage: " << sz << endl;
+											std::cout << ">< ungueltige Spielansage: " << sz <<
+												std::endl;
 									}
 									else
-										cout << ">< falsche Spiel- oder Zusatzbezeichnung: \"" <<
-												spiel << "\" oder \"" << zusatz << "\"" << endl;
+										std::cout << ">< falsche Spiel- oder Zusatzbezeichnung:" <<
+											" \"" << spiel << "\" oder \"" << zusatz << "\"" <<
+											std::endl;
 								}
 								else
-									cout << ">< unzureichende Parameteranzahl" << endl;
+									std::cout << ">< unzureichende Parameteranzahl" << std::endl;
 							}
 							else
-								cout << ">< es spielt eine andere Partei" << endl;
+								std::cout << ">< es spielt eine andere Partei" << std::endl;
 						}
 						else
-							cout << ">< Spielansage z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Spielansage z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("LEGE", 0) == 0) || 
 						(msg.find("lege", 0) == 0))
 					{
 						if ((spiel_status > 0) && (pkr_self == spiel_who[spiel_dran]))
 						{
-							string par = 
+							std::string par = 
 								(msg.length() > 5) ? msg.substr(5, msg.length() - 5) : "";
 							if (par.length() > 0)
 							{
 								int tt = skat_wort2type(par);
 								if (tt != -1)
 								{
-									if (tmcg->TMCG_IsInOpenStack(os, tt))
+									if (os.find(tt))
 									{
 										// Regelkontrolle, falls schon Karten gespielt sind
 										if ((os_sp.size() > 0) &&
 											(!skat_rulectl(os_sp[0].first, tt, spiel_status, os)))
 										{
-											cout << ">< Ausspiel von Karte \"" << par << 
-												"\" ist nicht regelkonform" << endl;
+											std::cout << ">< Ausspiel von Karte \"" << par <<
+												"\" war nicht regelkonform" << std::endl;
 											continue;
 										}
-										cout << "><><>< Skatfreund \"" << 
+										std::cout << "><><>< Skatfreund \"" << 
 											pkr.key[pkr_self].name << "\" legt die Karte: " <<
-											skat_type2string(tt) << endl;
+											skat_type2string(tt) << std::endl;
 										*out_pipe << "PRIVMSG #openSkat_" << nr << " :LEGE " <<
-											skat_type2string(tt) << " " << hex_game_digest << 
-											endl << flush;
+											skat_type2string(tt) << " " << hex_game_digest <<
+											std::endl << std::flush;
 										if (pctl)
 										{
-											ostringstream ost;
-											ost << nicks[pkr_self] << " LEGE " << tt << endl;
-											*out_ctl << ost.str() << flush;
+											std::ostringstream ost;
+											ost << nicks[pkr_self] << " LEGE " << tt << std::endl;
+											*out_ctl << ost.str() << std::flush;
 										}
 										TMCG_Stack<VTMF_Card> st;
 										VTMF_Card c;
-										tmcg->TMCG_MoveFromOpenStackToStack(os, st, tt);
-										skat_okarte(tmcg, vtmf, *(st[0]), right, left);
-										tmcg->TMCG_RemoveFirstFromStack(s[pkr_self], *(st[0]));
+										os.move(tt, st);
+										assert(st.size() == 1);
+										skat_okarte(tmcg, vtmf, st[0], right, left);
+										s[pkr_self].remove(st[0]);
 										tmcg->TMCG_CreateOpenCard(c, vtmf, tt);
-										tmcg->TMCG_PushToOpenStack(os_sp, c, tt);
-										tmcg->TMCG_ReleaseStack(st);
+										os_sp.push(tt, c);
+										st.clear();
 										if (os_sp.size() == 3)
 										{
 											int bk = skat_bstich(os_sp, spiel_status);
-											assert (bk != -1);
-											cout << "><><>< Skatfreund \"" << 
+											assert(bk != -1);
+											std::cout << "><><>< Skatfreund \"" << 
 												pkr.key[spiel_who[bk]].name << 
 												"\" bekommt den Stich: ";
 											for (size_t i = 0; i < os_sp.size(); i++)
-												cout << skat_type2string(os_sp[i].first);
-											cout << endl;
+												std::cout << skat_type2string(os_sp[i].first);
+											std::cout << std::endl;
 											if (os.size() > 0)
 												skat_blatt((pkr_self + p) % 3, os);
 											if (pctl)
 												*out_ctl << nicks[spiel_who[bk]] << " BSTICH" <<
-													endl << flush;
+													std::endl << std::flush;
 											// Stichstapel erste Karte (Regelkontrolle)
-											tmcg->TMCG_PushToOpenStack(os_st, 
-												*(os_sp[0].second), os_sp[0].first);
+											os_st.push(os_sp[0].first, os_sp[0].second);
 											// Stichstapel jedes Spielers
-											tmcg->TMCG_PushOpenStackToOpenStack(
-												os_pkt[spiel_who[bk]], os_sp);
+											os_pkt[spiel_who[bk]].push(os_sp);
 											// Kartenstapel jedes Spielers (Regelkontrolle)
 											for (size_t i = 0; i < os_sp.size(); i++)
-												tmcg->TMCG_PushToOpenStack(os_rc[spiel_who[i]], 
-													*(os_sp[i].second), os_sp[i].first);
-											tmcg->TMCG_ReleaseOpenStack(os_sp);
+												os_rc[spiel_who[i]].push(os_sp[i].first,
+													os_sp[i].second);
+											os_sp.clear();
 											spiel_who[0] = spiel_who[bk];
 											spiel_who[1] = (spiel_who[0] + 1) % 3;
 											spiel_who[2] = (spiel_who[0] + 2) % 3;
@@ -2580,23 +2567,23 @@ int skat_game
 											spiel_dran += 1;
 									}
 									else
-										cout << ">< Karte \"" << par << "\" nicht im Blatt" << 
-											endl;
+										std::cout << ">< Karte \"" << par << "\" nicht im Blatt" <<
+											std::endl;
 								}
 								else
-									cout << ">< falsche Kartenbezeichnung: \"" <<
-										par << "\"" << endl;
+									std::cout << ">< falsche Kartenbezeichnung: \"" <<
+										par << "\"" << std::endl;
 							}
 							else
-								cout << ">< unzureichende Parameteranzahl" << endl;
+								std::cout << ">< unzureichende Parameteranzahl" << std::endl;
 						}
 						else
-							cout << ">< Ausspielen z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Ausspielen z.Z. nicht erlaubt" << std::endl;
 					}
 					else
 					{
-						cout << ">< unbekanntes Tischkommando \"/" << nr << 
-							" " << msg << "\"" << endl;
+						std::cout << ">< unbekanntes Tischkommando \"/" << nr << 
+							" " << msg << "\"" << std::endl;
 					}
 				}
 							// ----------------------------------------------------------------
@@ -2639,36 +2626,32 @@ int skat_game
 				else
 					spiel_gewonnen = false;
 				
-				// nachtr?liche Regelkontrolle
+				// nachtraegliche Regelkontrolle
 				bool rules_ok[3];
-				assert (os_st.size() == 10);
+				assert(os_st.size() == 10);
 				for (size_t i = 0; i < 3; i++)
 				{
 					TMCG_OpenStack<VTMF_Card> gps;
-					assert (os_rc[i].size() == 10);
-					tmcg->TMCG_PushOpenStackToOpenStack(gps, os_rc[i]);
+					assert(os_rc[i].size() == 10);
+					gps.push(os_rc[i]);
 					rules_ok[i] = true;
 					for (size_t j = 0; j < os_st.size(); j++)
 					{
-						if (!skat_rulectl(os_st[j].first, os_rc[i][j].first, 
-							spiel_status, gps))
+						if (!skat_rulectl(os_st[j].first,
+							os_rc[i][j].first, spiel_status, gps))
 								rules_ok[i] = false;
-						TMCG_Stack<VTMF_Card> tst;
-						tmcg->TMCG_MoveFromOpenStackToStack(gps, tst, os_rc[i][j].first);
-						tmcg->TMCG_ReleaseStack(tst);
+						gps.remove(os_rc[i][j].first);
 					}
 				}
 				
 				// Stapel des Alleinspielers um Skat vervollst?digen
 				for (size_t t = 0; t < 32; t++)
 				{
-					if (!tmcg->TMCG_IsInOpenStack(os_rc[0], t)
-						&& !tmcg->TMCG_IsInOpenStack(os_rc[1], t)
-						&& !tmcg->TMCG_IsInOpenStack(os_rc[2], t))
+					if (!os_rc[0].find(t) && !os_rc[1].find(t) && !os_rc[2].find(t))
 					{
 						VTMF_Card c;
 						tmcg->TMCG_CreateOpenCard(c, vtmf, t);
-						tmcg->TMCG_PushToOpenStack(os_rc[spiel_allein], c, t);
+						os_rc[spiel_allein].push(t, c);
 					}
 				}
 				
@@ -2783,13 +2766,13 @@ int skat_game
 				}
 				pkt_sum[spiel_allein] += spiel_wert;
 				
-				ostringstream einzel_protokoll;
+				std::ostringstream einzel_protokoll;
 				einzel_protokoll << nicks[spiel_allein] << "~" << spiel_wert <<
 					"~" << spiel_status << "~" << pkt_allein << "~" <<
 					reiz_wert[reiz_counter] << "~" << hex_game_digest << "~";
 				spiel_protokoll << einzel_protokoll.str() << "#";
 				if (pctl)
-					*out_ctl << nicks[spiel_allein] << " PROTO " << 
+					*out_ctl << nicks[spiel_allein] << " PROTO " <<
 						einzel_protokoll.str() << endl << flush;
 			}
 			else
@@ -2800,24 +2783,23 @@ int skat_game
 			}
 			
 			delete [] game_digest, delete [] hex_game_digest;
-			tmcg->TMCG_ReleaseOpenStack(os);
-			tmcg->TMCG_ReleaseOpenStack(os_ov);
-			tmcg->TMCG_ReleaseOpenStack(os_sp);
-			tmcg->TMCG_ReleaseOpenStack(os_st);
+			os.clear();
+			os_ov.clear();
+			os_sp.clear();
+			os_st.clear();
 			for (size_t i = 0; i < 3; i++)
-				tmcg->TMCG_ReleaseOpenStack(os_pkt[i]);
-			for (size_t i = 0; i < 3; i++)
-				tmcg->TMCG_ReleaseOpenStack(os_rc[i]);
-			for (size_t i = 0; i < 3; i++)
-				tmcg->TMCG_ReleaseStack(s[i]);
-			tmcg->TMCG_ReleaseStack(sk);
-			tmcg->TMCG_ReleaseStack(d_end);
-			tmcg->TMCG_ReleaseStackSecret(ab);
-			tmcg->TMCG_ReleaseStackSecret(ss);
-			for (size_t i = 0; i < 3; i++)
-				tmcg->TMCG_ReleaseStack(d_mix[i]);
-			tmcg->TMCG_ReleaseStack(d2);
-			tmcg->TMCG_ReleaseOpenStack(d);
+			{
+				os_pkt[i].clear();
+				os_rc[i].clear();
+				s[i].clear();
+				d_mix[i].clear();
+			}
+			sk.clear();
+			d_end.clear();
+			ab.clear();
+			ss.clear();
+			d2.clear();
+			d.clear();
 			
 			cout << "><><>< Spielstand <><><> ";
 			for (size_t i = 0; i < 3; i++)
@@ -2825,19 +2807,18 @@ int skat_game
 			cout << endl;
 		}
 		
-		TMCG_Signature sig;
-		TMCG_DataString sig_data = spiel_protokoll.str();
-		ostringstream sig_protokoll;
+		std::string sig;
+		std::string sig_data = spiel_protokoll.str();
+		std::ostringstream sig_protokoll;
 		char stmp[10000];
 		if (pkr_self == 0)
 		{
-			sig = tmcg->TMCG_SignData(sec, sig_data);
+			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
 			*left << sig << endl << flush;
 			*right << sig << endl << flush;
 			left->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[1], sig_data, sig))
+			if (!pkr.key[1].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[1].name << "\" ungueltig" << endl;
@@ -2845,8 +2826,7 @@ int skat_game
 			}
 			sig_protokoll << sig << "#";
 			right->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[2], sig_data, sig))
+			if (!pkr.key[2].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[2].name << "\" ungueltig" << endl;
@@ -2857,21 +2837,19 @@ int skat_game
 		else if (pkr_self == 1)
 		{
 			right->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[0], sig_data, sig))
+			if (!pkr.key[0].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[0].name << "\" ungueltig" << endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
-			sig = tmcg->TMCG_SignData(sec, sig_data);
+			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
 			*left << sig << endl << flush;
 			*right << sig << endl << flush;
 			left->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[2], sig_data, sig))
+			if (!pkr.key[2].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[2].name << "\" ungueltig" << endl;
@@ -2882,8 +2860,7 @@ int skat_game
 		else if (pkr_self == 2)
 		{
 			left->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[0], sig_data, sig))
+			if (!pkr.key[0].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[0].name << "\" ungueltig" << endl;
@@ -2891,15 +2868,14 @@ int skat_game
 			}
 			sig_protokoll << sig << "#";
 			right->getline(stmp, sizeof(stmp));
-			sig = stmp;
-			if (!tmcg->TMCG_VerifyData(pkr.key[1], sig_data, sig))
+			if (!pkr.key[1].verify(sig_data, stmp))
 			{
 				cout << "><>< Unterschrift von Skatfreund \"" << 
 					pkr.key[1].name << "\" ungueltig" << endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
-			sig = tmcg->TMCG_SignData(sec, sig_data);
+			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
 			*left << sig << endl << flush;
 			*right << sig << endl << flush;
@@ -2908,13 +2884,13 @@ int skat_game
 		
 		// compute rnk_id aka hex_rnk_digest
 		string osttmp = spiel_protokoll.str();
-		assert(gcry_md_get_algo_dlen(GCRY_MD_RMD160));
-		char *rnk_digest = new char[gcry_md_get_algo_dlen(GCRY_MD_RMD160)];
-		gcry_md_hash_buffer(GCRY_MD_RMD160, rnk_digest,
+		assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+		char *rnk_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest,
 			osttmp.c_str(), osttmp.length());
 		char *hex_rnk_digest = 
-			new char[2 * gcry_md_get_algo_dlen(GCRY_MD_RMD160) + 1];
-		for (size_t i = 0; i < gcry_md_get_algo_dlen(GCRY_MD_RMD160); i++)
+			new char[2 * gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) + 1];
+		for (size_t i = 0; i < gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO); i++)
 			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", 
 				(unsigned char)rnk_digest[i]);
 		opipestream *npipe = new opipestream(hpipe);

@@ -62,7 +62,7 @@ struct TMCG_PublicKey
 	}
 	
 	bool check
-		()
+		() const
 	{
 		mpz_t foo, bar;
 		std::string s = nizk;
@@ -273,7 +273,7 @@ struct TMCG_PublicKey
 	}
 	
 	std::string selfid
-		()
+		() const
 	{
 		std::string s = sig;
 		
@@ -294,7 +294,7 @@ struct TMCG_PublicKey
 	}
 	
 	std::string keyid
-		()
+		() const
 	{
 		std::ostringstream data;
 		std::string tmp = selfid();
@@ -306,7 +306,7 @@ struct TMCG_PublicKey
 	}
 	
 	std::string sigid
-		(std::string s)
+		(std::string s) const
 	{
 		// check magic
 		if (!cm(s, "sig", '|'))
@@ -365,7 +365,7 @@ struct TMCG_PublicKey
 	}
 	
 	std::string encrypt
-		(const std::string &value)
+		(const std::string &value) const
 	{
 		mpz_t vdata;
 		size_t rabin_s2 = 2 * rabin_s0;
@@ -404,7 +404,7 @@ struct TMCG_PublicKey
 	}
 	
 	bool verify
-		(const std::string &data, std::string s)
+		(const std::string &data, std::string s) const
 	{
 		mpz_t foo;
 		

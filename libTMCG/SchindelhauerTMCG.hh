@@ -73,7 +73,6 @@ template <typename CardType> struct TMCG_OpenStack;
 class SchindelhauerTMCG
 {
 	private:
-		std::string								str, str2, str3;
 		int										ret;
 	
 	public:

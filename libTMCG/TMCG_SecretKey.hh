@@ -365,7 +365,7 @@ struct TMCG_SecretKey
 	}
 	
 	bool check
-		()
+		() const
 	{
 		mpz_t foo, bar;
 		std::string s = nizk;
@@ -576,7 +576,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string selfid
-		()
+		() const
 	{
 		std::string s = sig;
 		
@@ -597,7 +597,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string keyid
-		()
+		() const
 	{
 		std::ostringstream data;
 		std::string tmp = selfid();
@@ -609,7 +609,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string sigid
-		(std::string s)
+		(std::string s) const
 	{
 		// check magic
 		if (!cm(s, "sig", '|'))
@@ -620,7 +620,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string decrypt
-		(std::string value)
+		(std::string value) const
 	{
 		mpz_t vdata, vroot[4];
 		size_t rabin_s2 = 2 * rabin_s0;
@@ -696,7 +696,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string sign
-		(const std::string &data)
+		(const std::string &data) const
 	{
 		size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 		size_t mnsize = mpz_sizeinbase(m, 2L) / 8;
@@ -751,7 +751,7 @@ struct TMCG_SecretKey
 	}
 	
 	std::string encrypt
-		(const std::string &value)
+		(const std::string &value) const
 	{
 		mpz_t vdata;
 		size_t rabin_s2 = 2 * rabin_s0;
@@ -790,7 +790,7 @@ struct TMCG_SecretKey
 	}
 	
 	bool verify
-		(const std::string &data, std::string s)
+		(const std::string &data, std::string s) const
 	{
 		mpz_t foo;
 		

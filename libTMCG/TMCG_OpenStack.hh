@@ -52,7 +52,7 @@ template <typename CardType> struct TMCG_OpenStack
 	{
 		bool operator() 
 			(const std::pair<size_t, CardType>& p1, 
-			const std::pair<size_t, CardType>& p2)
+			const std::pair<size_t, CardType>& p2) const
 		{
 			return (p1.first == p2.first);
 		}
@@ -68,6 +68,7 @@ template <typename CardType> struct TMCG_OpenStack
 	{
 		clear();
 		stack = that.stack;
+		return *this;
 	}
 	
 	bool operator ==

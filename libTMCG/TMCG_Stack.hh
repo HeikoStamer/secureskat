@@ -57,6 +57,7 @@ template <typename CardType> struct TMCG_Stack
 	{
 		clear();
 		stack = that.stack;
+		return *this;
 	}
 	
 	bool operator ==
@@ -107,7 +108,7 @@ template <typename CardType> struct TMCG_Stack
 		(const TMCG_OpenStack<CardType>& s)
 	{
 		for (typename std::vector<std::pair<size_t, CardType> >::const_iterator
-			si = s.stack.begin(); si != si.end(); si++)
+			si = s.stack.begin(); si != s.stack.end(); si++)
 				stack.push_back(si->second);
 	}
 	
@@ -117,7 +118,7 @@ template <typename CardType> struct TMCG_Stack
 		if (stack.empty())
 			return false;
 		
-		c = *(stack.back());
+		c = stack.back();
 		stack.pop_back();
 		return true;
 	}

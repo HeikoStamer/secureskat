@@ -46,7 +46,7 @@
 	#include <VTMF_CardSecret.hh>
 	#include <TMCG_Card.hh>
 	#include <TMCG_CardSecret.hh>
-	template <typename CardType> struct TMCG_OpenStack;
+	template <typename CardType> struct TMCG_OpenStack;			// forward
 	#include <TMCG_Stack.hh>
 	#include <TMCG_OpenStack.hh>
 	#include <TMCG_StackSecret.hh>
