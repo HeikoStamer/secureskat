@@ -1,5 +1,5 @@
 /*******************************************************************************
-   libTMCG.hh, general header for the |T|oolbox for |M|ental |C|ard |G|ames
+   libTMCG.hh, general header of the |T|oolbox for |M|ental |C|ard |G|ames
 
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
@@ -33,7 +33,7 @@
 	
 	#ifndef TMCG_GCRY_MD_ALGO
 		/* Define message digest algorithm for signatures and FS-heuristic
-		 * Underlying assumptions: Random Oracle Model
+		 * Underlying assumptions: g behaves like a Random Oracle
 		 */
 		#define TMCG_GCRY_MD_ALGO GCRY_MD_RMD160
 	#endif
