@@ -120,7 +120,7 @@ fi
 CXXFLAGS="-Wall -Werror -g3 -pedantic $LIBGCRYPT_CFLAGS"
 ##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
 
-AC_CONFIG_FILES([Makefile intl/Makefile po/Makefile.in])
+AC_CONFIG_FILES([Makefile intl/Makefile po/Makefile.in libTMCG/Makefile])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install openSkat."
