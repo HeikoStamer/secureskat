@@ -2,7 +2,7 @@ dnl AM_PATH_LIBGCRYPT([MINIMUM-VERSION,
 dnl                   [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND ]]])
 dnl Test for libgcrypt and define LIBGCRYPT_CFLAGS and LIBGCRYPT_LIBS
 dnl
-AC_DEFUN(AM_PATH_LIBGCRYPT,
+AC_DEFUN([AM_PATH_LIBGCRYPT],
 [	AC_ARG_WITH(libgcrypt-prefix,
 		AC_HELP_STRING([--with-libgcrypt-prefix=PFX],
 			[prefix where LIBGCRYPT is installed (optional)]),

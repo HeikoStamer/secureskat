@@ -56,11 +56,11 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 AC_PROG_LN_S
 
 # Checks for internationalization support
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
 #AM_GNU_GETTEXT_VERSION(0.11.1)
 
 # Checks for libraries.
@@ -120,7 +120,7 @@ fi
 CXXFLAGS="-Wall -Werror -g3 -pedantic $LIBGCRYPT_CFLAGS"
 ##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
 
-AC_CONFIG_FILES([Makefile intl/Makefile po/Makefile.in libTMCG/Makefile])
+AC_CONFIG_FILES([Makefile po/Makefile.in libTMCG/Makefile])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install openSkat."

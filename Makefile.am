@@ -1,12 +1,12 @@
-SUBDIRS = intl po libTMCG
+SUBDIRS = po libTMCG
 
-DIST_SUBDIRS = intl po libTMCG
+DIST_SUBDIRS = po libTMCG
 
-EXTRA_DIST = ABOUT-NLS acinclude.m4 aclocal.m4 config.guess config.h.in config.status\
+EXTRA_DIST = config.rpath  ABOUT-NLS acinclude.m4 aclocal.m4 config.guess config.h.in config.status\
 	config.sub configure configure.ac install-sh missing mkinstalldirs\
 	Makefile.am AUTHORS BUGS COPYING INSTALL NEWS README TODO THANKS ChangeLog
 
-LDADD = libTMCG/libTMCG.a
+LDADD = libTMCG/libTMCG.la
 
 bin_PROGRAMS = SecureSkat SecureSkat_random
 
