@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat-2.2\n"
-"POT-Creation-Date: 2004-11-10 22:36+0100\n"
+"POT-Creation-Date: 2004-11-17 00:57+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "MIME-Version: 1.0\n"
@@ -207,11 +207,13 @@ msgid "/on"
 msgstr "/an"
 
 #: SecureSkat.cc:1786
-msgid "turn output of IRC channel #SecureSkat on"
+#, fuzzy
+msgid "turn output of IRC channel #openSkat on"
 msgstr "schalte Ausgabe des IRC-Kanals #SecureSkat ab"
 
 #: SecureSkat.cc:1788
-msgid "turn output of IRC channel #SecureSkat off"
+#, fuzzy
+msgid "turn output of IRC channel #openSkat off"
 msgstr "schalte Ausgabe des IRC-Kanals #SecureSkat an"
 
 #: SecureSkat.cc:1790
@@ -223,7 +225,8 @@ msgid "show list of existing game tables"
 msgstr "zeige Liste der existierenden Spieltische"
 
 #: SecureSkat.cc:1794
-msgid "show list of existing ballot rooms"
+#, fuzzy
+msgid "show list of existing voting rooms"
 msgstr "zeige Liste der existierenden Wahlräume"
 
 #: SecureSkat.cc:1795
@@ -243,7 +246,8 @@ msgid "create room <nr> for voting between 2^<bits> values"
 msgstr "lege Raum <nr> für geheime Wahl (2^<bits> Werte) an"
 
 #: SecureSkat.cc:1800
-msgid "join the ballot in room <nr>"
+#, fuzzy
+msgid "join the voting in room <nr>"
 msgstr "nehme im Raum <nr> an der geheimen Wahl teil"
 
 #: SecureSkat.cc:1802
