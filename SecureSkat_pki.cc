@@ -22,9 +22,8 @@
 
 void get_secret_key
 	(const std::string &filename, SchindelhauerTMCG *tmcg,
-	TMCG_SecretKey &sec, std::string &prefix) 
+	TMCG_SecretKey *sec, std::string &prefix) 
 {
-	TMCG_PublicKey pub;
 	std::ostringstream ost;
 	datum key, data;
 	GDBM_FILE sec_db = 
@@ -48,17 +47,15 @@ void get_secret_key
 			std::getline(std::cin, email);
 			while (1)
 			{
-				tmcg->TMCG_CreateKey(sec, 1024L, name, email);
-				tmcg->TMCG_CreateKey(pub, sec);
-				if (!tmcg->TMCG_CheckKey(pub))
-					tmcg->TMCG_ReleaseKey(pub),	tmcg->TMCG_ReleaseKey(sec);
-				else
+				sec = new TMCG_SecretKey(1024L, name, email);
+				if (sec->check())
 					break;
+				else
+					delete sec;
 				std::cerr << "." << std::flush;
 			}
-			tmcg->TMCG_ReleaseKey(pub);
 			ost << sec;
-			keyid = tmcg->TMCG_ExportKeyID(sec);
+			keyid = sec->keyid();
 			key.dptr = (char*)keyid.c_str();
 			key.dsize = keyid.length() + 1;
 			osttmp = ost.str();
@@ -67,7 +64,7 @@ void get_secret_key
 			gdbm_store(sec_db, key, data, GDBM_INSERT);
 			std::cout << _("PKI: cryptographic key") << " \"" << keyid <<
 				"\" " << _("created and stored") << std::endl;
-			tmcg->TMCG_ReleaseKey(sec);
+			delete sec;
 		}
 		gdbm_close(sec_db);
 	}
@@ -79,12 +76,8 @@ void get_secret_key
 		exit(-1);
 	}
 	
-	if (!tmcg->TMCG_ImportKey(sec, ost.str()))
-	{
-		std::cerr << _("PKI ERROR: secret key not importable") << std::endl;
-		exit(-1);
-	}
-	prefix = tmcg->TMCG_ExportKeyID(sec);
+	sec = new TMCG_SecretKey(ost.str());
+	prefix = sec->keyid();
 	size_t ei = prefix.find("^", 0);
 	if (ei == prefix.npos)
 	{
@@ -109,7 +102,7 @@ void get_public_keys
 		{
 			TMCG_PublicKey pkey;
 			data = gdbm_fetch(pub_db, key);
-			if (tmcg->TMCG_ImportKey(pkey, data.dptr))
+			if (pkey.import(data.dptr))
 				keys[key.dptr] = pkey;
 			else
 				std::cerr << _("PKI ERROR: public key not importable") <<

@@ -40,7 +40,7 @@
 	#include <sstream>
 	#include <map>
 	
-	#include <SchindelhauerTMCG.hh>
+	#include <libTMCG.hh>
 	#include "SecureSkat_misc.hh"
 	
 	#ifdef ENABLE_NLS
@@ -51,7 +51,7 @@
 	
 	void get_secret_key
 		(const std::string &filename, SchindelhauerTMCG *tmcg,
-		TMCG_SecretKey &sec, std::string &prefix);
+		TMCG_SecretKey *sec, std::string &prefix);
 	void get_public_keys
 		(const std::string &filename, SchindelhauerTMCG *tmcg,
 		map<string, TMCG_PublicKey> &keys);

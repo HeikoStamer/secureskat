@@ -60,7 +60,7 @@
 // GNU crypto library
 #include <gcrypt.h> 
 
-#include <SchindelhauerTMCG.hh>
+#include <libTMCG.hh>
 #include "securesocketstream.hh"
 #include "pipestream.hh"
 

@@ -58,7 +58,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <SchindelhauerTMCG.hh>
+#include <libTMCG.hh>
 #include "socketstream.hh"
 #include "securesocketstream.hh"
 #include "pipestream.hh"
@@ -3045,7 +3045,7 @@ int main(int argc, char* argv[], char* envp[])
 	string cmd = argv[0];
 	cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << endl <<
-		" $Id: SecureSkat.cc,v 1.4 2004/12/07 14:07:09 stamer Exp $ " << endl;
+		" $Id: SecureSkat.cc,v 1.5 2004/12/16 21:33:07 stamer Exp $ " << endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
