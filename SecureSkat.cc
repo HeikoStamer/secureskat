@@ -430,7 +430,7 @@ void skat_connect
 	(opipestream *out_pipe, const std::string &nr, SchindelhauerTMCG *t,
 	size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
-	TMCG_PublicKeyRing pkr)
+	const TMCG_PublicKeyRing &pkr)
 {
 	// create TCP/IP connection
 	handle = ConnectToHost(
@@ -829,7 +829,7 @@ int skat_child
 		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		return -2;
 	}
-	TMCG_PublicKeyRing pkr;
+	TMCG_PublicKeyRing pkr(gp_nick.size());
 	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
@@ -3033,7 +3033,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.8 2005/01/05 22:18:11 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.9 2005/01/06 20:00:21 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

@@ -27,19 +27,19 @@
 	#endif
 
 	// C++/STL header
-	#include <cstdio>
-	#include <cstdlib>
 	#include <cassert>
-	#include <string>
-	#include <sstream>
-	#include <iostream>
 	#include <vector>
-	
-	#include "TMCG.def"
 
 struct TMCG_PublicKeyRing
 {
-	TMCG_PublicKey					key[TMCG_MAX_PLAYERS];
+	vector<TMCG_PublicKey>			key;
+	
+	TMCG_PublicKeyRing
+		(size_t n):
+			key(n)
+	{
+		assert(n > 0);
+	}
 };
 
 #endif

@@ -19,7 +19,8 @@
 *******************************************************************************/
 
 int ballot_child
-	(const std::string &nr, int b, bool neu, int ipipe, int opipe, const std::string &master)
+	(const std::string &nr, int b, bool neu, int ipipe, int opipe,
+	const std::string &master)
 {
 	// install old signal handlers
 	signal(SIGINT, sig_handler_ballot_quit);
@@ -155,7 +156,7 @@ int ballot_child
 	assert(b <= TMCG_MAX_TYPEBITS);
 	SchindelhauerTMCG *ballot_tmcg = 							// n players, 2^b cards
 		new SchindelhauerTMCG(security_level, gp_nick.size(), b);
-	TMCG_PublicKeyRing pkr;
+	TMCG_PublicKeyRing pkr(gp_nick.size());
 	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
