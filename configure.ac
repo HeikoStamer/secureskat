@@ -51,6 +51,8 @@ if test "$use_commongroup" = yes ; then
 	[common DDH group])
 fi
 
+AC_DEFINE(KEY_SIZE, 1024L, [cryptographic key and group size])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -118,7 +120,7 @@ if test x$ac_try_nsl = x1; then
     fi
 fi
 
-CXXFLAGS="-Wall -g3 -pedantic $LIBGCRYPT_CFLAGS"
+CXXFLAGS="-Wall -g3 -pedantic -O $LIBGCRYPT_CFLAGS"
 ##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in libTMCG/Makefile])

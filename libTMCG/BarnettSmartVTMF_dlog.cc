@@ -5,7 +5,11 @@
      Cryptography and Coding 2003, LNCS 2898, pp. 370--383, 2003
 
      [CaS97] Jan Camenisch, Markus Stadler: 'Proof Systems for General
-             Statements about Discrete Logarithms', technical report, 1997
+             Statements about Discrete Logarithms', Technical Report, 1997
+
+     [BJN00] Dan Boneh, Antoine Joux, and Phong Q. Nguyen: 'Why Textbook
+             ElGamal and RSA Encryption are Insecure', Proceedings of
+             Asiacrypt '00, LNCS 1976, pp. 30--44, 2000
 
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
@@ -27,7 +31,7 @@
 #include "BarnettSmartVTMF_dlog.hh"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
-	()
+	(unsigned long int group_size)
 {
 	// initalize libgcrypt
 	if (!gcry_check_version(LIBGCRYPT_VERSION))
@@ -51,7 +55,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	// where p = 2q + 1 and p, q are both prime.
 	
 	mpz_init(p), mpz_init(q), mpz_init_set_ui(g, 2L);
-	mpz_sprime2g(p, q, group_size);
+	mpz_sprime2g(p, q, group_size - 1);
 	
 	// initalize key
 	mpz_init(x_i), mpz_init(h_i), mpz_init(h), mpz_init(d);
@@ -88,7 +92,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 }
 
 bool BarnettSmartVTMF_dlog::CheckGroup
-	()
+	(unsigned long int group_size)
 {
 	mpz_t foo;
 	
@@ -163,8 +167,8 @@ void BarnettSmartVTMF_dlog::IndexElement
 void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	()
 {
-	// generate random private key x_i \in Z_[q]
-	mpz_srandomb(x_i, exponent_size);
+	// generate random private key x_i \in Z_q
+	mpz_srandomm(x_i, q);
 	
 	// compute h_i = g^{x_i} \bmod p (by blinded exponentiation)
 	mpz_sspowm(h_i, g, x_i, p);
@@ -182,7 +186,7 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 	mpz_init(v), mpz_init(t), mpz_init(c), mpz_init(r);
 		
 		// commitment
-		mpz_srandomb(v, exponent_size);
+		mpz_srandomm(v, q);
 		mpz_sspowm(t, g, v, p);
 		// challenge
 		// We use the "Fiat-Shamir heuristic" to make
@@ -241,7 +245,7 @@ void BarnettSmartVTMF_dlog::CP_Prove
 	mpz_init(c), mpz_init(r), mpz_init(a), mpz_init(b), mpz_init(omega);
 		
 		// commitment
-		mpz_srandomb(omega, exponent_size);
+		mpz_srandomm(omega, q);
 		mpz_sspowm(a, gg, omega, p);
 		mpz_sspowm(b, hh, omega, p);
 		
@@ -299,8 +303,8 @@ bool BarnettSmartVTMF_dlog::CP_Verify
 void BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Mask
 	(mpz_srcptr m, mpz_ptr c_1, mpz_ptr c_2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, exponent_size);
+	// generate random masking value r \in Z_q
+	mpz_srandomm(r, q);
 	
 	// compute c_1 = g^r \bmod p
 	mpz_sspowm(c_1, g, r, p);
@@ -356,8 +360,8 @@ bool BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Verify
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 	(mpz_srcptr c_1, mpz_srcptr c_2, mpz_ptr c__1, mpz_ptr c__2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, exponent_size);
+	// generate random masking value r \in Z_q
+	mpz_srandomm(r, q);
 	
 	// compute c'_1 = c_1 \cdot g^r \bmod p
 	mpz_sspowm(c__1, g, r, p);
@@ -373,8 +377,8 @@ void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_RemaskValue
 	(mpz_ptr r)
 {
-	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, exponent_size);
+	// generate random masking value r \in Z_q
+	mpz_srandomm(r, q);
 }
 
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Remask

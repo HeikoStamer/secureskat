@@ -568,14 +568,14 @@ int ballot_child
 		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog();
+		vtmf = new BarnettSmartVTMF_dlog(KEY_SIZE);
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
 				vtmf->PublishGroup(*ios_out[vnicks[i]]);
 		}
 #endif
-		if (!vtmf->CheckGroup())
+		if (!vtmf->CheckGroup(KEY_SIZE))
 		{
 			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return -90;
@@ -611,7 +611,7 @@ int ballot_child
 #else
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
 #endif
-		if (!vtmf->CheckGroup())
+		if (!vtmf->CheckGroup(KEY_SIZE))
 		{
 			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return -90;
