@@ -18,8 +18,7 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
-#ifndef INCLUDED_mpz_shash_H
-	#define INCLUDED_mpz_shash_H
+#include "mpz_shash.hh"
 
 void mpz_shash
 	(mpz_ptr r, mpz_srcptr a1, mpz_srcptr a2, mpz_srcptr a3)
@@ -99,4 +98,27 @@ void mpz_shash
 	delete [] vtmp, delete [] digest, delete [] hex_digest;
 }
 
-#endif
+/* hash functions h() and g() [Random Oracles are practical] */
+void h
+	(char *output, const char *input, size_t size)
+{
+	gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, output, input, size);
+}
+
+void g
+	(char *output, size_t osize, const char *input, size_t isize)
+{
+	size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
+	size_t times = (osize / mdsize) + 1;
+	char *out = new char[times * mdsize];
+	for (size_t i = 0; i < times; i++)
+	{
+		char *data = new char[6 + isize];
+		snprintf(data, 6 + isize, "TMCG%02x", (unsigned int)i);
+		memcpy(data + 6, input, isize);
+		h(out + (i * mdsize), data, 6 + isize);
+		delete [] data;
+	}
+	memcpy(output, out, osize);
+	delete [] out;
+}

@@ -18,33 +18,34 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
-#ifndef INCLUDED_mpz_spowm_H
-	#define INCLUDED_mpz_spowm_H
+#ifndef INCLUDED_mpz_shash_HH
+	#define INCLUDED_mpz_shash_HH
+	
+	// config.h
+	#if HAVE_CONFIG_H
+		#include "config.h"
+	#endif
+	
+	#include <string>
+	
+	// GNU crypto library
+	#include <gcrypt.h> 
 	
 	// GNU multiple precision library
 	#include <gmp.h>
 	
-	#include "mpz_srandom.h"
+	/* Fiat-Shamir heuristic */
+	void mpz_shash
+		(mpz_ptr r, mpz_srcptr a1, mpz_srcptr a2, mpz_srcptr a3);
 	
-	#if defined (__cplusplus)
-		extern "C"
-		{
-	#endif
-			/* Kocher's efficient blinding technique for modexp */
-			void mpz_spowm_init
-				(mpz_srcptr x, mpz_srcptr p);
-			
-			void mpz_spowm
-				(mpz_ptr res, mpz_srcptr m);
-			
-			void mpz_spowm_done
-				();
-			
-			/* Chaum's blinding technique for modular exponentiation */
-			void mpz_sspowm
-				(mpz_ptr res, mpz_srcptr m, mpz_srcptr x, mpz_srcptr p);
-			
-	#if defined(__cplusplus)
-		}
-	#endif
+	void mpz_shash
+		(mpz_ptr r, mpz_srcptr a1, mpz_srcptr a2, mpz_srcptr a3,
+		mpz_srcptr a4, mpz_srcptr a5, mpz_srcptr a6);
+	
+	/* hash functions h() and g() [Random Oracles are practical] */
+	void h
+		(char *output, const char *input, size_t size);
+	
+	void g
+		(char *output, size_t osize, const char *input, size_t isize);
 #endif

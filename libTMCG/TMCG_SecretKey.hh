@@ -41,17 +41,18 @@
 	#include "mpz_sqrtm.h"
 	#include "mpz_helper.hh"
 	#include "parse_helper.hh"
+	#include "mpz_shash.hh"
 
 struct TMCG_SecretKey
 {
-	string						name, email, type, nizk, sig;
+	std::string						name, email, type, nizk, sig;
 	mpz_t							m, y, p, q;
 	// below this line are non-persistent values (pre-computation)
 	mpz_t							y1, m1pq, gcdext_up, gcdext_vq, pa1d4, qa1d4;
 	int								ret;
 	
 	TMCG_SecretKey
-		(unsigned long int keysize, const string &n, const string &e):
+		(unsigned long int keysize, const std::string &n, const std::string &e):
 			name(n), email(e)
 	{
 		mpz_t foo, bar;
@@ -64,7 +65,7 @@ struct TMCG_SecretKey
 			keysize = TMCG_MAX_KEYBITS;
 		
 		// set type of key
-		ostringstream t;
+		std::ostringstream t;
 		t << "TMCG/RABIN_" << keysize << "_NIZK";
 		type = t.str();
 		
@@ -154,7 +155,7 @@ struct TMCG_SecretKey
 		
 		// STAGE1/2: m = p^i * q^j, p and q prime
 		// STAGE3: y \in NQR^\circ_m
-		ostringstream nizk, input;
+		std::ostringstream nizk, input;
 		input << m << "^" << y, nizk << "nzk^";
 		size_t mnsize = mpz_sizeinbase(m, 2L) / 8;
 		char *mn = new char[mnsize];
@@ -254,7 +255,7 @@ struct TMCG_SecretKey
 		delete [] mn, mpz_clear(foo), mpz_clear(bar);
 		
 		// compute self-signature
-		ostringstream data, repl;
+		std::ostringstream data, repl;
 		data << name << "|" << email << "|" << type << "|" <<
 			m << "|" << y << "|" << nizk << "|";
 		sig = sign(data.str());
@@ -264,7 +265,7 @@ struct TMCG_SecretKey
 	}
 	
 	TMCG_SecretKey
-		(string s)
+		(std::string s)
 	{
 		mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
 		mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
@@ -345,32 +346,32 @@ struct TMCG_SecretKey
 		}
 	}
 	
-	string selfid
+	std::string selfid
 		()
 	{
-		string s = sig;
+		std::string s = sig;
 		
 		// maybe a self signature
 		if (s == "")
-			return string("SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG");
+			return std::string("SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG-SELFSIG");
 		
 		// check magic
 		if (!cm(s, "sig", '|'))
-			return NULL
+			return std::string("ERROR");
 		
 		// skip the keyID
 		if (!nx(s, '|'))
-			return NULL
+			return std::string("ERROR");
 		
 		// get the sigID
-		return string(gs(s, '|'));
+		return std::string(gs(s, '|'));
 	}
 	
-	string keyid
+	std::string keyid
 		()
 	{
-		ostringstream data;
-		string tmp = selfid();
+		std::ostringstream data;
+		std::string tmp = selfid();
 		
 		data << "ID" << TMCG_KeyIDSize << "^" << tmp.substr(tmp.length() -
 			((TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length()),
@@ -378,19 +379,19 @@ struct TMCG_SecretKey
 		return data.str();
 	}
 	
-	string sigid
-		(string s)
+	std::string sigid
+		(std::string s)
 	{
 		// check magic
 		if (!cm(s, "sig", '|'))
-			return string("NULL");
+			return string("ERROR");
 		
 		// get the keyID
 		return string(gs(s, '|'));
 	}
 	
-	string decrypt
-		(string value)
+	std::string decrypt
+		(std::string value)
 	{
 		mpz_t vdata, vroot[4];
 		size_t rabin_s2 = 2 * rabin_s0;
@@ -456,17 +457,17 @@ struct TMCG_SecretKey
 				mpz_clear(vroot[2]), mpz_clear(vroot[3]);
 			if (success)
 			{
-				string tmp = string(encval);
+				std::string tmp = std::string(encval);
 				delete [] encval;
 				return tmp;
 			}
 			else
-				return NULL;
+				return std::string("ERROR");
 		}
 	}
 	
-	string sign
-		(const string &data)
+	std::string sign
+		(const std::string &data)
 	{
 		size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 		size_t mnsize = mpz_sizeinbase(m, 2L) / 8;
@@ -512,7 +513,7 @@ struct TMCG_SecretKey
 		// choose square root randomly (one of four)
 		mpz_srandomb(foo, NULL, 2L);
 		
-		ostringstream ost;
+		std::ostringstream ost;
 		ost << "sig|" << keyid() << "|" << foo_sqrt[mpz_get_ui(foo) % 4] << "|";
 		mpz_clear(foo), mpz_clear(foo_sqrt[0]), mpz_clear(foo_sqrt[1]),
 			mpz_clear(foo_sqrt[2]), mpz_clear(foo_sqrt[3]);
@@ -530,8 +531,8 @@ struct TMCG_SecretKey
 	}
 };
 
-friend ostream& operator<< 
-	(ostream &out, const TMCG_SecretKey &key)
+friend std::ostream& operator<< 
+	(std::ostream &out, const TMCG_SecretKey &key)
 {
 	return out << "sec|" << key.name << "|" << key.email << "|" << key.type <<
 		"|" << key.m << "|" << key.y << "|" << key.p << "|" << key.q << "|" <<

@@ -86,15 +86,12 @@ template <typename CardType> struct TMCG_OpenStack;
 class SchindelhauerTMCG
 {
 	private:
-	
-		
-		string								str, str2, str3;
-		char									encval[rabin_s0];
+		std::string								str, str2, str3;
 		int										ret;
 	
 	public:
-		static const size_t		TMCG_KeyIDSize = 5;			// octets
-		mpz_ui					TMCG_SecurityLevel;			// iterations
+		static const size_t			TMCG_KeyIDSize = 5;			// octets
+		unsigned long int			TMCG_SecurityLevel;			// iterations
 		size_t					TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
 		
 		SchindelhauerTMCG 
@@ -123,31 +120,6 @@ class SchindelhauerTMCG
 					"] not available" << endl;
 				exit(-1);
 			}
-		}
-		
-		// hash functions h() and g() [Random Oracles are practical]
-		void h
-			(char *output, const char *input, size_t size)
-		{
-			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, output, input, size);
-		}
-		
-		void g
-			(char *output, size_t osize, const char *input, size_t isize)
-		{
-			size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
-			size_t times = (osize / mdsize) + 1;
-			char *out = new char[times * mdsize];
-			for (size_t i = 0; i < times; i++)
-			{
-				char *data = new char[6 + isize];
-				snprintf(data, 6 + isize, "TMCG%02x", (unsigned int)i);
-				memcpy(data + 6, input, isize);
-				h(out + (i * mdsize), data, 6 + isize);
-				delete [] data;
-			}
-			memcpy(output, out, osize);
-			delete [] out;
 		}
 		
 		// zero-knowledge proofs on values
@@ -242,7 +214,7 @@ class SchindelhauerTMCG
 			(const TMCG_CardSecret &cs);
 		size_t TMCG_TypeOfCard
 			(const VTMF_Card &c, BarnettSmartVTMF_dlog *vtmf);
-
+		
 		// operations and proofs on stacks
 		size_t TMCG_CreateStackSecret
 			(TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
@@ -282,6 +254,7 @@ class SchindelhauerTMCG
 		void TMCG_MixOpenStack
 			(const TMCG_OpenStack<VTMF_Card> &os, TMCG_OpenStack<VTMF_Card> &os2,
 			const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf);
+		
 		~SchindelhauerTMCG 
 			()
 		{

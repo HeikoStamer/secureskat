@@ -56,7 +56,9 @@
 	#include <gmp.h>
 	
 	#include "mpz_srandom.h"
+	#include "mpz_spowm.h"
 	#include "mpz_helper.hh"
+	#include "mpz_shash.hh"
 
 class BarnettSmartVTMF_dlog
 {

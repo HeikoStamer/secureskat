@@ -34,8 +34,6 @@
 
 #include "BarnettSmartVTMF_dlog.hh"
 #include "mpz_primes.h"
-#include "mpz_spowm.h"
-#include "mpz_shash.h"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	()
