@@ -26,7 +26,7 @@ void mpz_shash
 {
 	std::string c_tmp;
 	char *vtmp = NULL, *digest = NULL, *hex_digest = NULL;
-	unsigned int hash_size = gcry_md_get_algo_dlen(GCRY_MD_RMD160);
+	unsigned int hash_size = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 	size_t max_size = mpz_sizeinbase(a1, 16);
 	max_size = std::max(max_size, mpz_sizeinbase(a2, 16));
 	max_size = std::max(max_size, mpz_sizeinbase(a3, 16));
@@ -43,7 +43,7 @@ void mpz_shash
 	c_tmp += "|";
 	
 	/* hash arguments */
-	gcry_md_hash_buffer(GCRY_MD_RMD160, digest, c_tmp.c_str(), c_tmp.length());
+	gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, digest, c_tmp.c_str(), c_tmp.length());
 	
 	/* convert digest to hex */
 	for (unsigned int i = 0; i < hash_size; i++)
@@ -61,7 +61,7 @@ void mpz_shash
 {
 	std::string c_tmp;
 	char *vtmp = NULL, *digest = NULL, *hex_digest = NULL;
-	unsigned int hash_size = gcry_md_get_algo_dlen(GCRY_MD_RMD160);
+	unsigned int hash_size = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 	size_t max_size = mpz_sizeinbase(a1, 16);
 	max_size = std::max(max_size, mpz_sizeinbase(a2, 16));
 	max_size = std::max(max_size, mpz_sizeinbase(a3, 16));
@@ -87,7 +87,7 @@ void mpz_shash
 	c_tmp += "|";
 	
 	/* hash arguments */
-	gcry_md_hash_buffer(GCRY_MD_RMD160, digest, c_tmp.c_str(), c_tmp.length());
+	gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, digest, c_tmp.c_str(), c_tmp.length());
 	
 	/* convert digest to hex */
 	for (unsigned int i = 0; i < hash_size; i++)

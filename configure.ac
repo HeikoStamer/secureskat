@@ -68,14 +68,15 @@ AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 ##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
-AC_DEFINE(MPZ_IO_BASE, 36, [Define input/ouput base encoding of iostream operators])
+AC_DEFINE(TMCG_MPZ_IO_BASE, 36, [Define input/ouput base encoding of iostream operators])
+AC_DEFINE(TMCG_GCRY_MD_ALGO, GCRY_MD_RMD160, [Define message digest algorithm for signatures and FS-heuristic])
 
-AM_PATH_LIBGCRYPT("1.1.90")
+AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
   AC_MSG_ERROR([libgcrypt is needed])
 fi
 LIBS="$LIBS $LIBGCRYPT_LIBS"
-AC_DEFINE(LIBGCRYPT_VERSION, "1.1.90", [Define appropriate version number of libgcrypt])
+AC_DEFINE(LIBGCRYPT_VERSION, "1.2.0", [Define appropriate version number of libgcrypt])
 
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))

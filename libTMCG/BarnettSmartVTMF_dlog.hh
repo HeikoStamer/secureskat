@@ -60,8 +60,6 @@
 class BarnettSmartVTMF_dlog
 {
 	private:
-		static const int		gcrypt_md_algorithm = GCRY_MD_RMD160;
-		
 		static const unsigned long int		group_size = 1024;
 		static const unsigned long int		exponent_size = 160;
 		
@@ -129,7 +127,7 @@ class BarnettSmartVTMF_dlog
 			(std::ostream &out, mpz_srcptr value)
 		{
 			char *tmp = new char[10000];
-			out << mpz_get_str(tmp, MPZ_IO_BASE, value);
+			out << mpz_get_str(tmp, TMCG_MPZ_IO_BASE, value);
 			delete [] tmp;
 			return out;
 		}
@@ -139,7 +137,7 @@ class BarnettSmartVTMF_dlog
 		{
 			char *tmp = new char[10000];
 			in.getline(tmp, 10000);
-			if (mpz_set_str(value, tmp, MPZ_IO_BASE) < 0)
+			if (mpz_set_str(value, tmp, TMCG_MPZ_IO_BASE) < 0)
 				mpz_set_ui(value, 0L);
 			delete [] tmp;
 			return in;

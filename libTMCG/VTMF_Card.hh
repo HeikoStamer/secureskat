@@ -88,9 +88,9 @@ struct VTMF_Card
 				throw false;
 			
 			// card data
-			if ((mpz_set_str(c_1, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+			if ((mpz_set_str(c_1, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 				throw false;
-			if ((mpz_set_str(c_2, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+			if ((mpz_set_str(c_2, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 				throw false;
 			
 			throw true;

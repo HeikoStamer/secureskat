@@ -23,12 +23,17 @@
 
 	#ifndef LIBGCRYPT_VERSION
 		/* Define appropriate version number of libgcrypt */
-		#define LIBGCRYPT_VERSION "1.1.90"
+		#define LIBGCRYPT_VERSION "1.2.0"
 	#endif
 
-	#ifndef MPZ_IO_BASE
+	#ifndef TMCG_MPZ_IO_BASE
 		/* Define input/ouput base encoding of iostream operators */
-		#define MPZ_IO_BASE 36
+		#define TMCG_MPZ_IO_BASE 36
+	#endif
+	
+	#ifndef TMCG_GCRY_MD_ALGO
+		/* Define message digest algorithm for signatures and FS-heuristic */
+		#define TMCG_GCRY_MD_ALGO GCRY_MD_RMD160
 	#endif
 
 	#include <VTMF_Card.hh>

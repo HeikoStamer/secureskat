@@ -112,7 +112,7 @@ struct TMCG_Card
 				for (size_t w = 0; w < TypeBits; w++)
 				{
 					// z_ij
-					if ((mpz_set_str(z[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+					if ((mpz_set_str(z[k][w], gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) ||
 						(!nx(s, '|')))
 							throw false;
 				}

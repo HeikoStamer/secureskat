@@ -76,7 +76,7 @@ struct VTMF_CardSecret
 				throw false;
 			
 			// secret card data
-			if ((mpz_set_str(r, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+			if ((mpz_set_str(r, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 				throw false;
 			
 			throw true;

@@ -354,7 +354,7 @@ bool SchindelhauerTMCG::TMCG_CheckKey
 			// read NIZK proof
 			if (gs(s, '^') == NULL)
 				throw false;
-			if ((mpz_set_str(bar, gs(s, '^'), MPZ_IO_BASE) < 0) || (!nx(s, '^')))
+			if ((mpz_set_str(bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
 				throw false;
 			
 			// check, if bar^m = foo mod m
@@ -391,7 +391,7 @@ bool SchindelhauerTMCG::TMCG_CheckKey
 			// read NIZK proof
 			if (gs(s, '^') == NULL)
 				throw false;
-			if ((mpz_set_str (bar, gs(s, '^'), MPZ_IO_BASE) < 0) || (!nx(s, '^')))
+			if ((mpz_set_str (bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
 				throw false;
 			
 			// check, if bar^2 = +-foo or +-2foo mod m
@@ -440,7 +440,7 @@ bool SchindelhauerTMCG::TMCG_CheckKey
 			// read NIZK proof
 			if (gs(s, '^') == NULL)
 				throw false;
-			if ((mpz_set_str (bar, gs(s, '^'), MPZ_IO_BASE) < 0) || (!nx(s, '^')))
+			if ((mpz_set_str (bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
 				throw false;
 			
 			// check congruence [Goldwasser-Micali NIZK proof for NQR]
@@ -571,19 +571,19 @@ bool SchindelhauerTMCG::TMCG_ImportKey
 			throw false;
 		
 		// m
-		if ((mpz_set_str (key.m, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.m, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// y
-		if ((mpz_set_str (key.y, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.y, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// p
-		if ((mpz_set_str (key.p, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.p, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// q
-		if ((mpz_set_str (key.q, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.q, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// NIZK
@@ -656,11 +656,11 @@ bool SchindelhauerTMCG::TMCG_ImportKey
 			throw false;
 		
 		// m
-		if ((mpz_set_str (key.m, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.m, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// y
-		if ((mpz_set_str (key.y, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (key.y, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// NIZK
@@ -744,7 +744,7 @@ const char *SchindelhauerTMCG::TMCG_DecryptValue
 			throw false;
 		
 		// vdata
-		if ((mpz_set_str (vdata, gs(value, '|'), MPZ_IO_BASE) < 0) || 
+		if ((mpz_set_str (vdata, gs(value, '|'), TMCG_MPZ_IO_BASE) < 0) || 
 			(!nx(value, '|')))
 				throw false;
 		
@@ -790,7 +790,7 @@ const char *SchindelhauerTMCG::TMCG_DecryptValue
 const char *SchindelhauerTMCG::TMCG_SignData
 	(const TMCG_SecretKey &key, const TMCG_DataString &data)
 {
-	size_t mdsize = gcry_md_get_algo_dlen (gcrypt_md_algorithm);
+	size_t mdsize = gcry_md_get_algo_dlen (TMCG_GCRY_MD_ALGO);
 	size_t mnsize = mpz_sizeinbase (key.m, 2L) / 8;
 	mpz_t foo, foo_sqrt[4];
 	mpz_init (foo), mpz_init (foo_sqrt[0]), mpz_init (foo_sqrt[1]),
@@ -865,11 +865,11 @@ bool SchindelhauerTMCG::TMCG_VerifyData
 			throw false;
 		
 		// value
-		if ((mpz_set_str (foo, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+		if ((mpz_set_str (foo, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
 			throw false;
 		
 		// verify signature
-		size_t mdsize = gcry_md_get_algo_dlen (gcrypt_md_algorithm);
+		size_t mdsize = gcry_md_get_algo_dlen (TMCG_GCRY_MD_ALGO);
 		size_t mnsize = mpz_sizeinbase (key.m, 2L) / 8;
 		
 		// check that y \in Z*m

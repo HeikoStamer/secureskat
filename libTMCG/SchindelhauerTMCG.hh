@@ -108,8 +108,6 @@ template <typename CardType> struct TMCG_OpenStack;
 class SchindelhauerTMCG
 {
 	private:
-		static const int			gcrypt_md_algorithm = GCRY_MD_RMD160;
-		
 		static const size_t		bcs_size = 1024;			// random bits
 		static const size_t		rabin_k0 = 20;				// SAEP octets
 		static const size_t		rabin_s0 = 20;				// SAEP octets
@@ -147,10 +145,10 @@ class SchindelhauerTMCG
 			}
 			gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
 			gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
-			if (gcry_md_test_algo (gcrypt_md_algorithm))
+			if (gcry_md_test_algo (TMCG_GCRY_MD_ALGO))
 			{
-				cerr << "libgcrypt: hash algorithm " << gcrypt_md_algorithm << 
-					" [" << gcry_md_algo_name (gcrypt_md_algorithm) << 
+				cerr << "libgcrypt: algorithm " << TMCG_GCRY_MD_ALGO << 
+					" [" << gcry_md_algo_name (TMCG_GCRY_MD_ALGO) << 
 					"] not available" << endl;
 				exit(-1);
 			}
@@ -160,13 +158,13 @@ class SchindelhauerTMCG
 		void h
 			(char *output, const char *input, size_t size)
 		{
-			gcry_md_hash_buffer (gcrypt_md_algorithm, output, input, size);
+			gcry_md_hash_buffer (TMCG_GCRY_MD_ALGO, output, input, size);
 		}
 		
 		void g
 			(char *output, size_t osize, const char *input, size_t isize)
 		{
-			size_t mdsize = gcry_md_get_algo_dlen (gcrypt_md_algorithm);
+			size_t mdsize = gcry_md_get_algo_dlen (TMCG_GCRY_MD_ALGO);
 			size_t times = (osize / mdsize) + 1;
 			char *out = new char[times * mdsize];
 			for (size_t i = 0; i < times; i++)
