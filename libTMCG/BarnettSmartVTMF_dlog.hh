@@ -56,6 +56,7 @@
 	#include <gmp.h>
 	
 	#include "mpz_srandom.h"
+	#include "parse_helper.hh"
 
 struct VTMF_Card
 {
@@ -94,6 +95,29 @@ struct VTMF_Card
 		return !(*this == that);
 	}
 	
+	bool import
+		(std::string s)
+	{
+		try
+		{
+			// check magic
+			if (!cm(s, "crd", '|'))
+				throw false;
+			
+			// card data
+			if ((mpz_set_str(c_1, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+				throw false;
+			if ((mpz_set_str(c_2, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+				throw false;
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
 	~VTMF_Card()
 	{
 		mpz_clear(c_1), mpz_clear(c_2);
@@ -121,6 +145,27 @@ struct VTMF_CardSecret
 	{
 		mpz_set(r, that.r);
 		return *this;
+	}
+	
+	bool import
+		(std::string s)
+	{
+		try
+		{
+			// check magic
+			if (!cm(s, "crs", '|'))
+				throw false;
+			
+			// secret card data
+			if ((mpz_set_str(r, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+				throw false;
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
 	}
 	
 	~VTMF_CardSecret

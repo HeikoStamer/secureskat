@@ -46,6 +46,7 @@
 	#include <sstream>
 	#include <iostream>
 	#include <vector>
+	#include <functional>
 	
 	// GNU crypto library
 	#include <gcrypt.h> 
@@ -146,6 +147,38 @@ struct TMCG_Card
 		return !(*this == that);
 	}
 	
+	bool import
+		(string s)
+	{
+		try
+		{
+			// check magic
+			if (!cm(s, "crd", '|'))
+				throw false;
+			
+			// card description
+// FIXME: read from string
+			Players = 0, TypeBits = 0;
+			
+			// card data
+			for (size_t k = 0; k < Players; k++)
+			{
+				for (size_t w = 0; w < TypeBits; w++)
+				{
+					// z_ij
+					if ((mpz_set_str(z[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+						(!nx(s, '|')))
+							throw false;
+				}
+			}
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
 	~TMCG_Card
 		()
 	{
@@ -189,6 +222,44 @@ struct TMCG_CardSecret
 		return *this;
 	}
 	
+	bool import
+		(string s)
+	{
+		try
+		{
+			// check magic
+			if (!cm(s, "crs", '|'))
+				throw false;
+			
+			// public card data
+// FIXME: read from string
+			Players = 0, TypeBits = 0;
+			
+			// secret card data
+			for (size_t k = 0; k < Players; k++)
+			{
+				for (size_t w = 0; w < TypeBits; w++)
+				{
+					// r_ij
+					if ((mpz_set_str(r[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+						(!nx(s, '|')))
+							throw false;
+							
+					// b_ij
+					if ((mpz_set_str(b[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
+						(!nx(s, '|')))
+							throw false;
+				}
+			}
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
 	~TMCG_CardSecret
 		()
 	{
@@ -228,6 +299,24 @@ template <typename CardType> struct TMCG_Stack
 		(const TMCG_Stack& that)
 	{
 		return !(*this == that);
+	}
+	
+	const CardType& operator []
+		(size_t n) const
+	{
+		return stack[n];
+	}
+	
+	CardType& operator []
+		(size_t n)
+	{
+		return stack[n];
+	}
+	
+	size_t size
+		() const
+	{
+		return stack.size();
 	}
 	
 	void push
@@ -322,7 +411,7 @@ template <typename CardType> struct TMCG_Stack
 				
 				if (gs(s, '^') == NULL)
 					throw false;
-				if ((!TMCG_ImportCard(c, gs(s, '^'))) || (!nx(s, '^')))
+				if ((!c.import(gs(s, '^'))) || (!nx(s, '^')))
 					throw false;
 				stack.push_back(c);
 			}
@@ -346,9 +435,10 @@ template <typename CardType> struct TMCG_OpenStack
 {
 	vector<pair<size_t, CardType> >	stack;
 	
-	struct eq_first_component
+	struct eq_first_component : public binary_function<
+		pair<size_t, CardType>, pair<size_t, CardType>, bool>
 	{
-		int operator() 
+		bool operator() 
 			(const pair<size_t, CardType>& p1, const pair<size_t, CardType>& p2)
 		{
 			return (p1.first == p2.first);
@@ -381,10 +471,28 @@ template <typename CardType> struct TMCG_OpenStack
 		return !(*this == that);
 	}
 	
+	const pair<size_t, CardType>& operator []
+		(size_t n) const
+	{
+		return stack[n];
+	}
+	
+	pair<size_t, CardType>& operator []
+		(size_t n)
+	{
+		return stack[n];
+	}
+	
+	size_t size
+		() const
+	{
+		return stack.size();
+	}
+	
 	void push
 		(size_t type, const CardType& c)
 	{
-		stack.push_back(pair(type, c));
+		stack.push_back(pair<size_t, CardType>(type, c));
 	}
 	
 	void push
@@ -396,7 +504,7 @@ template <typename CardType> struct TMCG_OpenStack
 	size_t pop
 		(CardType& c)
 	{
-		size_t type = (1 << TMCG_TypeBits);		// set 'error code'
+		size_t type = (1 << TMCG_MAX_TYPEBITS);		// set 'error code'
 		
 		if (stack.empty())
 			return type;
@@ -417,7 +525,8 @@ template <typename CardType> struct TMCG_OpenStack
 		(size_t type) const
 	{
 		return (std::find_if(stack.begin(), stack.end(),
-			std::bind2nd(eq_first_component(), type)) != stack.end());
+			std::bind2nd(eq_first_component(), pair<size_t, CardType>
+				(type, CardType()))) != stack.end());
 	}
 	
 	bool remove
@@ -425,7 +534,8 @@ template <typename CardType> struct TMCG_OpenStack
 	{
 		typename vector<pair<size_t, CardType> >::iterator si =
 			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), type));
+				std::bind2nd(eq_first_component(), pair<size_t, CardType>
+					(type, CardType())));
 		
 		if (si != stack.end())
 		{
@@ -449,7 +559,8 @@ template <typename CardType> struct TMCG_OpenStack
 	{
 		typename vector<pair<size_t, CardType> >::iterator si =
 			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), type));
+				std::bind2nd(eq_first_component(), pair<size_t, CardType>
+					(type, CardType())));
 		
 		if (si != stack.end())
 		{
@@ -471,11 +582,12 @@ template <typename CardSecretType> struct TMCG_StackSecret
 {
 	vector<pair<size_t, CardSecretType> >	stack;
 	
-	struct eq_first_component
+	struct eq_first_component : public binary_function<
+		pair<size_t, CardSecretType>, pair<size_t, CardSecretType>, bool>
 	{
-		int operator() 
+		bool operator() 
 			(const pair<size_t, CardSecretType>& p1,
-			 const pair<size_t, CardSecretType>& p2)
+			 const pair<size_t, CardSecretType>& p2) const
 		{
 			return (p1.first == p2.first);
 		}
@@ -489,24 +601,50 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	TMCG_StackSecret& operator =
 		(const TMCG_StackSecret<CardSecretType>& that)
 	{
-		clear();
+		stack.clear();
 		stack = that.stack;
+	}
+	
+	const pair<size_t, CardSecretType>& operator []
+		(size_t n) const
+	{
+		return stack[n];
+	}
+	
+	pair<size_t, CardSecretType>& operator []
+		(size_t n)
+	{
+		return stack[n];
+	}
+	
+	size_t size
+		() const
+	{
+		return stack.size();
 	}
 	
 	void push
 		(size_t index, const CardSecretType& cs)
 	{
-		stack.push_back(pair(index, cs));
+		stack.push_back(pair<size_t, CardSecretType>(index, cs));
+	}
+	
+	void clear
+		()
+	{
+		stack.clear();
 	}
 	
 	bool find
-		(size_t index) const
+		(size_t index)
 	{
 		return (std::find_if(stack.begin(), stack.end(),
-			std::bind2nd(eq_first_component(), index)) != stack.end());
+			std::bind2nd(eq_first_component(),
+				pair<size_t, CardSecretType>(index, CardSecretType()))) != stack.end());
 	}
 	
-	bool import(string s)
+	bool import
+		(string s)
 	{
 		size_t size = 0;
 		char *ec;
@@ -540,7 +678,7 @@ template <typename CardSecretType> struct TMCG_StackSecret
 				// card secret
 				if (gs(s, '^') == NULL)
 					throw false;
-				if ((!TMCG_ImportCardSecret(lej.second, gs(s, '^'))) || (!nx(s, '^')))
+				if ((!lej.second.import(gs(s, '^'))) || (!nx(s, '^')))
 					throw false;
 				
 				// store pair
@@ -571,7 +709,7 @@ class SchindelhauerTMCG
 		static const size_t		rabin_k0 = 20;				// SAEP octets
 		static const size_t		rabin_s0 = 20;				// SAEP octets
 		
-																								// soundness error
+															// soundness error
 		static const size_t		nizk_stage1 = 16;			// d^{-nizk_stage1}
 		static const size_t		nizk_stage2 = 128;		// 2^{-nizk_stage2}
 		static const size_t		nizk_stage3 = 128;		// 2^{-nizk_stage3}
@@ -611,60 +749,6 @@ class SchindelhauerTMCG
 					"] not available" << endl;
 				exit(-1);
 			}
-		}
-		
-		// methods for parsing
-		bool cm
-			(string &s, const string &c, char p)
-		{
-			size_t ei;
-			if ((ei = s.find(p, 0)) != s.npos)
-			{
-				if (s.substr(0, ei) != c)
-					return false;
-				else
-					s = s.substr(ei + 1, s.length() - ei - 1);
-			}
-			else
-				return false;
-			return true;
-		}
-		
-		bool nx
-			(string &s, char p)
-		{	
-			size_t ei;
-			if ((ei = s.find(p, 0)) != s.npos)
-				s = s.substr(ei + 1, s.length() - ei - 1);
-			else
-				return false;
-			return true;
-		}		
-		
-		const char *gs
-			(const string &s, char p)
-		{
-			size_t ei;
-			if ((ei = s.find(p, 0)) != s.npos)
-			{
-				if (p == '|')
-				{
-					str = s.substr(0, ei);
-					return str.c_str();
-				}
-				else if (p == '^')
-				{
-					str2 = s.substr(0, ei);
-					return str2.c_str();
-				}
-				else
-				{
-					str3 = s.substr(0, ei);
-					return str3.c_str();
-				}
-			}
-			else
-				return NULL;
 		}
 		
 		// hash functions h() and g() [Random Oracles are practical]
@@ -732,46 +816,26 @@ class SchindelhauerTMCG
 					out << cardsecret.r[k][w] << "|" << cardsecret.b[k][w] << "|";
 			return out;
 		}
-		friend ostream& operator<< 
+		friend ostream& operator<<
 			(ostream &out, const VTMF_CardSecret &cardsecret)
 		{
 			out << "crs|" << cardsecret.r << "|";
 			return out;
 		}
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_Stack &stack)
+		template<typename CardType> friend ostream& operator<<
+			(ostream &out, const TMCG_Stack<CardType> &s)
 		{
-			out << "stk^" << stack.size() << "^";
-			for (TMCG_Stack::const_iterator si = stack.begin(); 
-				si != stack.end(); si++)
-					out << *(*si) << "^";
+			out << "stk^" << s.size() << "^";
+			for (size_t i = 0; i < s.size(); i++)
+				out << s[i] << "^";
 			return out;
 		}
-		friend ostream& operator<< 
-			(ostream &out, const VTMF_Stack &stack)
+		template<typename CardSecretType> friend ostream& operator<<
+			(ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
 		{
-			out << "stk^" << stack.size() << "^";
-			for (VTMF_Stack::const_iterator si = stack.begin(); 
-				si != stack.end(); si++)
-					out << *(*si) << "^";
-			return out;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_StackSecret &stacksecret)
-		{
-			out << "sts^" << stacksecret.size() << "^";
-			for (TMCG_StackSecret::const_iterator si = stacksecret.begin(); 
-				si != stacksecret.end(); si++)
-					out << si->first << "^" << *(si->second) << "^";
-			return out;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const VTMF_StackSecret &stacksecret)
-		{
-			out << "sts^" << stacksecret.size() << "^";
-			for (VTMF_StackSecret::const_iterator si = stacksecret.begin(); 
-				si != stacksecret.end(); si++)
-					out << si->first << "^" << *(si->second) << "^";
+			out << "sts^" << ss.size() << "^";
+			for (size_t i = 0; i < ss.size(); i++)
+				out << ss[i].first << "^" << ss[i].second << "^";
 			return out;
 		}
 		
@@ -852,20 +916,12 @@ class SchindelhauerTMCG
 		void TMCG_CreatePrivateCard
 			(VTMF_Card &c, VTMF_CardSecret &cs, BarnettSmartVTMF_dlog *vtmf,
 			size_t type);
-		bool TMCG_ImportCard
-			(TMCG_Card &c, string s);
-		bool TMCG_ImportCard
-			(VTMF_Card &c, string s);
 		void TMCG_CreateCardSecret
 			(TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring, size_t index);
 		void TMCG_CreateCardSecret
 			(VTMF_CardSecret &cs, BarnettSmartVTMF_dlog *vtmf);
 		void TMCG_CreateCardSecret
 			(TMCG_CardSecret &cs, mpz_srcptr r, mpz_ui b);
-		bool TMCG_ImportCardSecret
-			(TMCG_CardSecret &cs, string s);
-		bool TMCG_ImportCardSecret
-			(VTMF_CardSecret &cs, string s);
 		void TMCG_MaskCard
 			(const TMCG_Card &c, TMCG_Card &cc, const TMCG_CardSecret &cs,
 			const TMCG_PublicKeyRing &ring);
@@ -914,42 +970,43 @@ class SchindelhauerTMCG
 
 		// operations and proofs on stacks
 		size_t TMCG_CreateStackSecret
-			(TMCG_StackSecret &ss, bool cyclic, const TMCG_PublicKeyRing &ring,
-			size_t index, size_t size);
+			(TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
+			const TMCG_PublicKeyRing &ring, size_t index, size_t size);
 		size_t TMCG_CreateStackSecret
-			(VTMF_StackSecret &ss, bool cyclic, size_t size,
+			(TMCG_StackSecret<VTMF_CardSecret> &ss, bool cyclic, size_t size,
 			BarnettSmartVTMF_dlog *vtmf);
 		void TMCG_MixStack
-			(const TMCG_Stack &s, TMCG_Stack &s2, const TMCG_StackSecret &ss,
-			const TMCG_PublicKeyRing &ring);
+			(const TMCG_Stack<TMCG_Card> &s, TMCG_Stack<TMCG_Card> &s2,
+			const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring);
 		void TMCG_MixStack
-			(const VTMF_Stack &s, VTMF_Stack &s2, const VTMF_StackSecret &ss,
-			BarnettSmartVTMF_dlog *vtmf);
+			(const TMCG_Stack<VTMF_Card> &s, TMCG_Stack<VTMF_Card> &s2,
+			const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf);
 		void TMCG_GlueStackSecret
-			(const TMCG_StackSecret &sigma, TMCG_StackSecret &pi,
-			const TMCG_PublicKeyRing &ring);
+			(const TMCG_StackSecret<TMCG_CardSecret> &sigma,
+			TMCG_StackSecret<TMCG_CardSecret> &pi, const TMCG_PublicKeyRing &ring);
 		void TMCG_GlueStackSecret
-			(const VTMF_StackSecret &sigma, VTMF_StackSecret &pi,
-			BarnettSmartVTMF_dlog *vtmf);
+			(const TMCG_StackSecret<VTMF_CardSecret> &sigma,
+			TMCG_StackSecret<VTMF_CardSecret> &pi, BarnettSmartVTMF_dlog *vtmf);
 		void TMCG_ProofStackEquality
-			(const TMCG_Stack &s, const TMCG_Stack &s2, const TMCG_StackSecret &ss,
-			bool cyclic, const TMCG_PublicKeyRing &ring, size_t index,
-			istream &in, ostream &out);
+			(const TMCG_Stack<TMCG_Card> &s, const TMCG_Stack<TMCG_Card> &s2,
+			const TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
+			const TMCG_PublicKeyRing &ring, size_t index, istream &in, ostream &out);
 		void TMCG_ProofStackEquality
-			(const VTMF_Stack &s, const VTMF_Stack &s2, const VTMF_StackSecret &ss,
-			bool cyclic, BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out);
+			(const TMCG_Stack<VTMF_Card> &s, const TMCG_Stack<VTMF_Card> &s2,
+			const TMCG_StackSecret<VTMF_CardSecret> &ss, bool cyclic,
+			BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out);
 		bool TMCG_VerifyStackEquality
-			(const TMCG_Stack &s, const TMCG_Stack &s2, bool cyclic,
+			(const TMCG_Stack<TMCG_Card> &s, const TMCG_Stack<TMCG_Card> &s2, bool cyclic,
 			const TMCG_PublicKeyRing &ring, istream &in, ostream &out);
 		bool TMCG_VerifyStackEquality
-			(const VTMF_Stack &s, const VTMF_Stack &s2, bool cyclic,
+			(const TMCG_Stack<VTMF_Card> &s, const TMCG_Stack<VTMF_Card> &s2, bool cyclic,
 			BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out);
 		void TMCG_MixOpenStack
-			(const TMCG_OpenStack &os, TMCG_OpenStack &os2,
-			const TMCG_StackSecret &ss, const TMCG_PublicKeyRing &ring);
+			(const TMCG_OpenStack<TMCG_Card> &os, TMCG_OpenStack<TMCG_Card> &os2,
+			const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring);
 		void TMCG_MixOpenStack
-			(const VTMF_OpenStack &os, VTMF_OpenStack &os2,
-			const VTMF_StackSecret &ss, BarnettSmartVTMF_dlog *vtmf);
+			(const TMCG_OpenStack<VTMF_Card> &os, TMCG_OpenStack<VTMF_Card> &os2,
+			const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf);
 		~SchindelhauerTMCG 
 			()
 		{

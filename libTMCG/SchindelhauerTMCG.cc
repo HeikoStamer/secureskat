@@ -1612,61 +1612,6 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	mpz_clear(m);
 }
 
-bool SchindelhauerTMCG::TMCG_ImportCard
-	(TMCG_Card &c, string s)
-{
-	try
-	{
-		// check magic
-		if (!cm(s, "crd", '|'))
-			throw false;
-		
-		// card description
-		c.Players = TMCG_Players, c.TypeBits = TMCG_TypeBits;
-		
-		// card data
-		for (size_t k = 0; k < TMCG_Players; k++)
-		{
-			for (size_t w = 0; w < TMCG_TypeBits; w++)
-			{
-				// z_ij
-				if ((mpz_set_str(c.z[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
-					(!nx(s, '|')))
-						throw false;
-			}
-		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_ImportCard
-	(VTMF_Card &c, string s)
-{
-	try
-	{
-		// check magic
-		if (!cm(s, "crd", '|'))
-			throw false;
-		
-		// card data
-		if ((mpz_set_str(c.c_1, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
-		if ((mpz_set_str(c.c_2, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
 void SchindelhauerTMCG::TMCG_CreateCardSecret
 	(TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring, size_t index)
 {
@@ -1731,64 +1676,6 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	for (size_t k = 0; k < TMCG_Players; k++)
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
 			mpz_set(cs.r[k][w], r), mpz_set_ui(cs.b[k][w], b);
-}
-
-bool SchindelhauerTMCG::TMCG_ImportCardSecret
-	(TMCG_CardSecret &cs, string s)
-{
-	try
-	{
-		// check magic
-		if (!cm(s, "crs", '|'))
-			throw false;
-		
-		// public card data
-		cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
-		
-		// secret card data
-		for (size_t k = 0; k < TMCG_Players; k++)
-		{
-			for (size_t w = 0; w < TMCG_TypeBits; w++)
-			{
-				// r_ij
-				if ((mpz_set_str(cs.r[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
-					(!nx(s, '|')))
-						throw false;
-						
-				// b_ij
-				if ((mpz_set_str(cs.b[k][w], gs(s, '|'), MPZ_IO_BASE) < 0) ||
-					(!nx(s, '|')))
-						throw false;
-			}
-		}
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
-}
-
-bool SchindelhauerTMCG::TMCG_ImportCardSecret
-	(VTMF_CardSecret &cs, string s)
-{
-	try
-	{
-		// check magic
-		if (!cm(s, "crs", '|'))
-			throw false;
-		
-		// secret card data
-		if ((mpz_set_str(cs.r, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
-		
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		return return_value;
-	}
 }
 
 void SchindelhauerTMCG::TMCG_MaskCard
@@ -1998,7 +1885,7 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 		{
 			type = t;
 			break;
-		}	
+		}
 	}
 	mpz_clear(m), mpz_clear(a);
 	return type;
@@ -2022,6 +1909,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 		cyc = (size_t)mpz_get_ui(cy);
 		mpz_clear(cy);
 	}
+	ss.clear();
 	for (size_t i = 0; i < size; i++)
 	{
 		TMCG_CardSecret cs;
@@ -2070,6 +1958,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 		cyc = (size_t)mpz_get_ui(cy);
 		mpz_clear(cy);
 	}
+	ss.clear();
 	for (size_t i = 0; i < size; i++)
 	{
 		VTMF_CardSecret cs;
@@ -2104,47 +1993,48 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 
 void SchindelhauerTMCG::TMCG_MixStack
 	(const TMCG_Stack<TMCG_Card> &s, TMCG_Stack<TMCG_Card> &s2,
-	const TMCG_StackSecret<TMCG_Card> &ss, const TMCG_PublicKeyRing &ring)
+	const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring)
 {
-	assert (s.size() != 0), assert (s.size() == ss.size());
+	assert(s.size() != 0);
+	assert(s.size() == ss.size());
 	
 	// mask all cards, mix and build new stack
+	s2.clear();
 	for (size_t i = 0; i < s.size(); i++)
 	{
 		TMCG_Card c;
-		TMCG_MaskCard(*(s[ss[i].first]), c, *(ss[ss[i].first].second), ring);
-		s2.push_back(c);
+		TMCG_MaskCard(s[ss[i].first], c, ss[ss[i].first].second, ring);
+		s2.push(c);
 	}
 }
 
 void SchindelhauerTMCG::TMCG_MixStack
-	(const VTMF_Stack &s, VTMF_Stack &s2, const VTMF_StackSecret &ss,
-	BarnettSmartVTMF_dlog *vtmf)
+	(const TMCG_Stack<VTMF_Card> &s, TMCG_Stack<VTMF_Card> &s2,
+	const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf)
 {
 	assert(s.size() != 0), assert(s.size() == ss.size());
 	
 	// mask all cards, mix and build new stack
-	TMCG_ReleaseStack(s2);
+	s2.clear();
 	for (size_t i = 0; i < s.size(); i++)
 	{
-		VTMF_Card *c = new VTMF_Card();
-		TMCG_MaskCard(*(s[ss[i].first]), *c, *(ss[ss[i].first].second), vtmf);
-		s2.push_back(c);
+		VTMF_Card c;
+		TMCG_MaskCard(s[ss[i].first], c, ss[ss[i].first].second, vtmf);
+		s2.push(c);
 	}
 }
 
 void SchindelhauerTMCG::TMCG_GlueStackSecret
-	(const TMCG_StackSecret &sigma, TMCG_StackSecret &pi,
-	const TMCG_PublicKeyRing &ring)
+	(const TMCG_StackSecret<TMCG_CardSecret> &sigma,
+	TMCG_StackSecret<TMCG_CardSecret> &pi, const TMCG_PublicKeyRing &ring)
 {
-	assert (sigma.size() == pi.size());
+	assert(sigma.size() == pi.size());
 	
-	TMCG_StackSecret ss3;
+	TMCG_StackSecret<TMCG_CardSecret> ss3;
 	for (size_t i = 0; i < sigma.size(); i++)
 	{
-		pair<size_t, TMCG_CardSecret*> lej;
-		TMCG_CardSecret *cs = new TMCG_CardSecret();
-		TMCG_CreateCardSecret(*cs, ring, 0);
+		TMCG_CardSecret cs;
+		TMCG_CreateCardSecret(cs, ring, 0);
 		size_t sigma_idx = i, pi_idx = 0;
 		for (size_t j = 0; j < pi.size(); j++)
 			if (sigma[j].first == i)
@@ -2154,82 +2044,79 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 			for (size_t w = 0; w < TMCG_TypeBits; w++)
 			{
 				// compute r
-				mpz_mul (cs->r[k][w], (sigma[sigma_idx].second)->r[k][w], 
-					(pi[pi_idx].second)->r[k][w]);
-				mpz_mod (cs->r[k][w], cs->r[k][w], ring.key[k].m);
-				if ((mpz_get_ui((sigma[sigma_idx].second)->b[k][w]) & 1L) &&
-					(mpz_get_ui((pi[pi_idx].second)->b[k][w]) & 1L))
+				mpz_mul (cs.r[k][w], (sigma[sigma_idx].second).r[k][w],
+					(pi[pi_idx].second).r[k][w]);
+				mpz_mod (cs.r[k][w], cs.r[k][w], ring.key[k].m);
+				if ((mpz_get_ui((sigma[sigma_idx].second).b[k][w]) & 1L) &&
+					(mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L))
 				{
-					mpz_mul (cs->r[k][w], cs->r[k][w], ring.key[k].y);
-					mpz_mod (cs->r[k][w], cs->r[k][w], ring.key[k].m);
+					mpz_mul (cs.r[k][w], cs.r[k][w], ring.key[k].y);
+					mpz_mod (cs.r[k][w], cs.r[k][w], ring.key[k].m);
 				}
 				
 				// XOR
-				if (mpz_get_ui((sigma[sigma_idx].second)->b[k][w]) & 1L)
+				if (mpz_get_ui((sigma[sigma_idx].second).b[k][w]) & 1L)
 				{
-					if (mpz_get_ui((pi[pi_idx].second)->b[k][w]) & 1L)
-						mpz_set_ui (cs->b[k][w], 0L);
+					if (mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L)
+						mpz_set_ui (cs.b[k][w], 0L);
 					else
-						mpz_set_ui (cs->b[k][w], 1L);
+						mpz_set_ui (cs.b[k][w], 1L);
 				}
 				else
 				{
-					if (mpz_get_ui((pi[pi_idx].second)->b[k][w]) & 1L)
-						mpz_set_ui (cs->b[k][w], 1L);
+					if (mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L)
+						mpz_set_ui (cs.b[k][w], 1L);
 					else
-						mpz_set_ui (cs->b[k][w], 0L);
+						mpz_set_ui (cs.b[k][w], 0L);
 				}
 			}
 		}
-		lej.first = sigma[pi[i].first].first,	lej.second = cs;
-		ss3.push_back(lej);
+		ss3.push(sigma[pi[i].first].first, cs);
 	}
-	TMCG_ReleaseStackSecret(pi);
+	pi.clear();
 	for (size_t i = 0; i < ss3.size(); i++)
-		pi.push_back(ss3[i]);
+		pi.push(ss3[i].first, ss3[i].second);
 }
 
 void SchindelhauerTMCG::TMCG_GlueStackSecret
-	(const VTMF_StackSecret &sigma, VTMF_StackSecret &pi,
-	BarnettSmartVTMF_dlog *vtmf)
+	(const TMCG_StackSecret<VTMF_CardSecret> &sigma,
+	TMCG_StackSecret<VTMF_CardSecret> &pi, BarnettSmartVTMF_dlog *vtmf)
 {
 	assert(sigma.size() == pi.size());
 	
-	VTMF_StackSecret ss3;
+	TMCG_StackSecret<VTMF_CardSecret> ss3;
 	for (size_t i = 0; i < sigma.size(); i++)
 	{
-		pair<size_t, VTMF_CardSecret*> lej;
-		VTMF_CardSecret *cs = new VTMF_CardSecret();
+		VTMF_CardSecret cs;
 		size_t sigma_idx = i, pi_idx = 0;
 		for (size_t j = 0; j < pi.size(); j++)
 			if (sigma[j].first == i)
 				pi_idx = j;
-		mpz_add(cs->r, (sigma[sigma_idx].second)->r, (pi[pi_idx].second)->r);
-		mpz_mod(cs->r, cs->r, vtmf->q);
-		lej.first = sigma[pi[i].first].first,	lej.second = cs;
-		ss3.push_back(lej);
-	}	
-	TMCG_ReleaseStackSecret(pi);
+		mpz_add(cs.r, (sigma[sigma_idx].second).r, (pi[pi_idx].second).r);
+		mpz_mod(cs.r, cs.r, vtmf->q);
+		ss3.push(sigma[pi[i].first].first, cs);
+	}
+	pi.clear();
 	for (size_t i = 0; i < ss3.size(); i++)
-		pi.push_back(ss3[i]);
+		pi.push(ss3[i].first, ss3[i].second);
 }
 
 void SchindelhauerTMCG::TMCG_ProofStackEquality
-	(const TMCG_Stack &s, const TMCG_Stack &s2, const TMCG_StackSecret &ss,
-	bool cyclic, const TMCG_PublicKeyRing &ring, size_t index,
-	istream &in, ostream &out)
+	(const TMCG_Stack<TMCG_Card> &s, const TMCG_Stack<TMCG_Card> &s2,
+	const TMCG_StackSecret<TMCG_CardSecret> &ss, bool cyclic,
+	const TMCG_PublicKeyRing &ring, size_t index, istream &in, ostream &out)
 {
-	assert (s.size() == s2.size()),	assert (s.size() == ss.size());
+	assert(s.size() == s2.size()), assert(s.size() == ss.size());
 	
 	mpz_t foo;
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
 	
-	mpz_init (foo);
+	mpz_init(foo);
 	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		TMCG_Stack s3;
-		TMCG_StackSecret ss2;
+		TMCG_Stack<TMCG_Card> s3;
+		TMCG_StackSecret<TMCG_CardSecret> ss2;
 		
 		// create and mix stack
 		TMCG_CreateStackSecret(ss2, cyclic, ring, index, s.size());
@@ -2246,12 +2133,13 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 			TMCG_GlueStackSecret(ss, ss2, ring);
 		out << ss2 << endl;
 	}
-	mpz_clear (foo);
+	mpz_clear(foo);
 }
 
 void SchindelhauerTMCG::TMCG_ProofStackEquality
-	(const VTMF_Stack &s, const VTMF_Stack &s2, const VTMF_StackSecret &ss,
-	bool cyclic, BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out)
+	(const TMCG_Stack<VTMF_Card> &s, const TMCG_Stack<VTMF_Card> &s2,
+	const TMCG_StackSecret<VTMF_CardSecret> &ss, bool cyclic,
+	BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out)
 {
 	assert(s.size() == s2.size()), assert(s.size() == ss.size());
 	
@@ -2259,11 +2147,11 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 	mpz_ui security_desire = 0;
 	in >> security_desire, in.ignore(1, '\n');
 	
-	mpz_init (foo);
+	mpz_init(foo);
 	for (mpz_ui i = 0; i < security_desire; i++)
 	{
-		VTMF_Stack s3;
-		VTMF_StackSecret ss2;
+		TMCG_Stack<VTMF_Card> s3;
+		TMCG_StackSecret<VTMF_CardSecret> ss2;
 		
 		// create and mix stack
 		TMCG_CreateStackSecret(ss2, cyclic, s.size(), vtmf);
@@ -2284,7 +2172,7 @@ void SchindelhauerTMCG::TMCG_ProofStackEquality
 }
 
 bool SchindelhauerTMCG::TMCG_VerifyStackEquality
-	(const TMCG_Stack &s, const TMCG_Stack &s2, bool cyclic,
+	(const TMCG_Stack<TMCG_Card> &s, const TMCG_Stack<TMCG_Card> &s2, bool cyclic,
 	const TMCG_PublicKeyRing &ring, istream &in, ostream &out)
 {
 	mpz_t foo;
@@ -2300,8 +2188,8 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	{
 		for (mpz_ui i = 0; i < TMCG_SecurityLevel; i++)
 		{
-			TMCG_Stack s3, s4;
-			TMCG_StackSecret ss;
+			TMCG_Stack<TMCG_Card> s3, s4;
+			TMCG_StackSecret<TMCG_CardSecret> ss;
 			mpz_srandomb(foo, NULL, 1L);
 			
 			// receive stack
@@ -2318,7 +2206,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 				throw false;
 			
 			// verify equality proof
-			if (mpz_get_ui (foo) & 1L)
+			if (mpz_get_ui(foo) & 1L)
 				TMCG_MixStack(s2, s4, ss, ring);
 			else
 				TMCG_MixStack(s, s4, ss, ring);
@@ -2347,7 +2235,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 }
 
 bool SchindelhauerTMCG::TMCG_VerifyStackEquality
-	(const VTMF_Stack &s, const VTMF_Stack &s2, bool cyclic,
+	(const TMCG_Stack<VTMF_Card> &s, const TMCG_Stack<VTMF_Card> &s2, bool cyclic,
 	BarnettSmartVTMF_dlog *vtmf, istream &in, ostream &out)
 {
 	mpz_t foo;
@@ -2363,42 +2251,30 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 	{
 		for (mpz_ui i = 0; i < TMCG_SecurityLevel; i++)
 		{
-			VTMF_Stack s3, s4;
-			VTMF_StackSecret ss;
+			TMCG_Stack<VTMF_Card> s3, s4;
+			TMCG_StackSecret<VTMF_CardSecret> ss;
 			mpz_srandomb(foo, NULL, 1L);
 			
 			// receive stack (commitment)
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!TMCG_ImportStack(s3, tmp))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (!s3.import(tmp))
 				throw false;
-			}
 			
 			// send R/S-question to prover (challenge)
 			out << foo << endl;
 			
 			// receive proof (response)
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!TMCG_ImportStackSecret(ss, tmp))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (!ss.import(tmp))
 				throw false;
-			}
 			
 			// verify equality proof
 			if (mpz_get_ui(foo) & 1L)
 				TMCG_MixStack(s2, s4, ss, vtmf);
 			else
 				TMCG_MixStack(s, s4, ss, vtmf);
-			if (!TMCG_EqualStack(s3, s4))
-			{
-				TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-				TMCG_ReleaseStackSecret(ss);
+			if (s3 != s4)
 				throw false;
-			}
 			
 			// verify cyclic shift
 			if (cyclic)
@@ -2408,10 +2284,6 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 					if (((++cy) % ss.size()) != ss[j].first)
 						throw false;
 			}
-			
-			// release stacks
-			TMCG_ReleaseStack(s4), TMCG_ReleaseStack(s3);
-			TMCG_ReleaseStackSecret(ss);
 		}
 		
 		// finish
@@ -2426,41 +2298,33 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 }
 
 void SchindelhauerTMCG::TMCG_MixOpenStack
-	(const TMCG_OpenStack &os, TMCG_OpenStack &os2,
-	const TMCG_StackSecret &ss, const TMCG_PublicKeyRing &ring)
-{
-	assert (os.size() != 0), assert (os.size() == ss.size());
-	
-	// mask all cards, mix and build new open stack
-	TMCG_ReleaseOpenStack(os2);
-	for (size_t i = 0; i < os.size(); i++)
-	{
-		pair<size_t, TMCG_Card*> lej;
-		TMCG_Card *c = new TMCG_Card();
-		
-		TMCG_MaskCard(*(os[ss[i].first].second), *c, 
-			*(ss[ss[i].first].second), ring);
-		lej.first = os[ss[i].first].first, lej.second = c;
-		os2.push_back(lej);
-	}
-}
-
-void SchindelhauerTMCG::TMCG_MixOpenStack
-	(const VTMF_OpenStack &os, VTMF_OpenStack &os2,
-	const VTMF_StackSecret &ss, BarnettSmartVTMF_dlog *vtmf)
+	(const TMCG_OpenStack<TMCG_Card> &os, TMCG_OpenStack<TMCG_Card> &os2,
+	const TMCG_StackSecret<TMCG_CardSecret> &ss, const TMCG_PublicKeyRing &ring)
 {
 	assert(os.size() != 0), assert(os.size() == ss.size());
 	
 	// mask all cards, mix and build new open stack
-	TMCG_ReleaseOpenStack(os2);
+	os2.clear();
 	for (size_t i = 0; i < os.size(); i++)
 	{
-		pair<size_t, VTMF_Card*> lej;
-		VTMF_Card *c = new VTMF_Card();
-		
-		TMCG_MaskCard(*(os[ss[i].first].second), *c, 
-			*(ss[ss[i].first].second), vtmf);
-		lej.first = os[ss[i].first].first, lej.second = c;
-		os2.push_back(lej);
+		TMCG_Card c;
+		TMCG_MaskCard((os[ss[i].first].second), c, (ss[ss[i].first].second), ring);
+		os2.push(os[ss[i].first].first, c);
+	}
+}
+
+void SchindelhauerTMCG::TMCG_MixOpenStack
+	(const TMCG_OpenStack<VTMF_Card> &os, TMCG_OpenStack<VTMF_Card> &os2,
+	const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf)
+{
+	assert(os.size() != 0), assert(os.size() == ss.size());
+	
+	// mask all cards, mix and build new open stack
+	os2.clear();
+	for (size_t i = 0; i < os.size(); i++)
+	{
+		VTMF_Card c;
+		TMCG_MaskCard((os[ss[i].first].second), c, (ss[ss[i].first].second), vtmf);
+		os2.push(os[ss[i].first].first, c);
 	}
 }
