@@ -1028,7 +1028,7 @@ bool SchindelhauerTMCG::TMCG_VerifyQuadraticResidue
 			// send R/S-question to prover
 			mpz_srandomb (foo, NULL, 1L);
 			out << foo << endl;
-
+			
 			// receive proof
 			in >> bar;
 			
@@ -1063,7 +1063,7 @@ void SchindelhauerTMCG::TMCG_ProofNonQuadraticResidue
 {
 	mpz_t bar;
 	mpz_init (bar);
-
+	
 	// compute bar = t * y^{-1} (mod m) and send it to verifier
 	mpz_set (bar, t);
 	mpz_mul (bar, bar, key.y1);
@@ -1094,7 +1094,7 @@ bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue
 		mpz_mod (foo, foo, key.m); 
 		if (!mpz_congruent_p (t, foo, key.m))
 			throw false;
-
+		
 		// verify QR-proof
 		if (!TMCG_VerifyQuadraticResidue(key, bar, in, out))
 			throw false;

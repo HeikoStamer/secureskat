@@ -80,7 +80,7 @@ struct TMCG_SecretKey
 };
 
 #define							TMCG_MAX_PLAYERS			32L
-#define							TMCG_MAX_CARDS				32L
+#define							TMCG_MAX_CARDS				64L
 #define							TMCG_MAX_TYPEBITS			8L
 #define							TMCG_MAX_KEYBITS			2048L
 
