@@ -21,7 +21,7 @@
 #include "mpz_srandom.h"
 
 void mpz_ssrandomb
-	(mpz_ptr r, gmp_randstate_t rnd, unsigned long int size)
+	(mpz_ptr r, unsigned long int size)
 {
 	unsigned char *rtmp;
 	gcry_mpi_t rr = gcry_mpi_new((unsigned int)size);
@@ -35,7 +35,7 @@ void mpz_ssrandomb
 }
 
 void mpz_srandomb
-	(mpz_ptr r, gmp_randstate_t rnd, unsigned long int size)
+	(mpz_ptr r, unsigned long int size)
 {
 	unsigned char *rtmp;
 	gcry_mpi_t rr = gcry_mpi_new((unsigned int)size);
@@ -49,7 +49,7 @@ void mpz_srandomb
 }
 
 void mpz_ssrandomm
-	(mpz_ptr r, gmp_randstate_t rnd, mpz_srcptr m)
+	(mpz_ptr r, mpz_srcptr m)
 {
 	unsigned char *rtmp;
 	gcry_mpi_t rr = gcry_mpi_new((unsigned int)mpz_sizeinbase(m, 2));
@@ -64,7 +64,7 @@ void mpz_ssrandomm
 }
 
 void mpz_srandomm
-	(mpz_ptr r, gmp_randstate_t rnd, mpz_srcptr m)
+	(mpz_ptr r, mpz_srcptr m)
 {
 	unsigned char *rtmp;
 	gcry_mpi_t rr = gcry_mpi_new((unsigned int)mpz_sizeinbase(m, 2));

@@ -45,7 +45,7 @@ int mpz_qrmn_p
 }
 
 void mpz_sqrtmp_r
-	(mpz_ptr root, mpz_srcptr a, mpz_srcptr p, gmp_randstate_t rnd)
+	(mpz_ptr root, mpz_srcptr a, mpz_srcptr p)
 {
 	/* ? a \neq 0 */
 	if (mpz_get_ui (a) != 0)
@@ -91,7 +91,7 @@ void mpz_sqrtmp_r
 				else
 				{
 					do
-						mpz_srandomm (b, rnd, p);
+						mpz_srandomm(b, p);
 					while (mpz_jacobi (b, p) != -1);
 					mpz_powm (b, b, s, p);
 					mpz_mul (root, root, b);
@@ -132,7 +132,7 @@ void mpz_sqrtmp_r
 				/* ! a^s = -1 (mod p) */
 				mpz_init (b);
 				do
-					mpz_srandomm (b, rnd, p);
+					mpz_srandomm(b, p);
 				while (mpz_jacobi (b, p) != -1);
 				mpz_init_set (t, p);
 				mpz_sub_ui (t, t, 1L);
@@ -296,7 +296,7 @@ void mpz_sqrtmn_2
 
 void mpz_sqrtmn_r
 	(mpz_ptr root, mpz_srcptr a, 
-	mpz_srcptr p, mpz_srcptr q, mpz_srcptr n, gmp_randstate_t rnd)
+	mpz_srcptr p, mpz_srcptr q, mpz_srcptr n)
 {
 	mpz_t g, u, v;
 	mpz_init (g);
@@ -309,8 +309,8 @@ void mpz_sqrtmn_r
 		/* single square roots */
 		mpz_init (root_p);
 		mpz_init (root_q);
-		mpz_sqrtmp_r (root_p, a, p, rnd);
-		mpz_sqrtmp_r (root_q, a, q, rnd);
+		mpz_sqrtmp_r(root_p, a, p);
+		mpz_sqrtmp_r(root_q, a, q);
 		/* construct common square root */
 		mpz_init_set (root1, root_q);
 		mpz_init_set (root2, root_p);
@@ -354,7 +354,7 @@ void mpz_sqrtmn_r
 
 void mpz_sqrtmn_r_all
 	(mpz_ptr root1, mpz_ptr root2, mpz_ptr root3, mpz_ptr root4,
-	mpz_srcptr a, mpz_srcptr p, mpz_srcptr q, mpz_srcptr n, gmp_randstate_t rnd)
+	mpz_srcptr a, mpz_srcptr p, mpz_srcptr q, mpz_srcptr n)
 {
 	mpz_t g, u, v;
 	
@@ -368,8 +368,8 @@ void mpz_sqrtmn_r_all
 		/* single square roots */
 		mpz_init (root_p);
 		mpz_init (root_q);
-		mpz_sqrtmp_r (root_p, a, p, rnd);
-		mpz_sqrtmp_r (root_q, a, q, rnd);
+		mpz_sqrtmp_r(root_p, a, p);
+		mpz_sqrtmp_r(root_q, a, q);
 		/* construct common square root */
 		mpz_set (root1, root_q);
 		mpz_set (root2, root_p);

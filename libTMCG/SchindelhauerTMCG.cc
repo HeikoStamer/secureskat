@@ -58,8 +58,8 @@ void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 		// choose random number r \in Z*m
 		do
 		{
-			mpz_srandomm (r, NULL, key.m);
-			mpz_gcd (lej, r, key.m);
+			mpz_srandomm(r, key.m);
+			mpz_gcd(lej, r, key.m);
 		}
 		while (mpz_cmp_ui (lej, 1L) || !mpz_cmp_ui (r, 1L));
 		
@@ -144,7 +144,7 @@ bool SchindelhauerTMCG::TMCG_VerifyQuadraticResidue
 		for (unsigned long int i = 0; i < TMCG_SecurityLevel; i++)
 		{
 			// send R/S-question to prover
-			mpz_srandomb (foo, NULL, 1L);
+			mpz_srandomb (foo, 1L);
 			out << foo << std::endl;
 			
 			// receive proof
@@ -266,8 +266,8 @@ void SchindelhauerTMCG::TMCG_ProofMaskValue
 			// choose random number r_i \in Z*m and b_i \in {0,1}
 			do
 			{
-				mpz_srandomm (r2, NULL, key.m);
-				mpz_srandomb (b2, NULL, 1L);
+				mpz_srandomm (r2, key.m);
+				mpz_srandomb (b2, 1L);
 				mpz_gcd (bar, r2, key.m);
 			}
 			while (mpz_cmp_ui (bar, 1L) || !mpz_cmp_ui(r2, 1L));
@@ -357,7 +357,7 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskValue
 		for (unsigned long int i = 0; i < TMCG_SecurityLevel; i++)
 		{
 			// send Z/Z'-question to prover
-			mpz_srandomb (foo, NULL, 1L);
+			mpz_srandomb(foo, 1L);
 			out << foo << std::endl;
 			
 			// receive proof (r, b)
@@ -410,8 +410,8 @@ void SchindelhauerTMCG::TMCG_ProofMaskOne
 		// choose random number r_i \in Z*m and b \in {0,1}
 		do
 		{
-			mpz_srandomm (r3, NULL, key.m);
-			mpz_srandomb (b3, NULL, 1L);
+			mpz_srandomm(r3, key.m);
+			mpz_srandomb(b3, 1L);
 			mpz_gcd (foo, r3, key.m);
 		}
 		while (mpz_cmp_ui (foo, 1L) || !mpz_cmp_ui (r3, 1L));
@@ -538,7 +538,7 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskOne
 		for (unsigned long int i = 0; i < TMCG_SecurityLevel; i++)
 		{
 			// send R/S-question to prover
-			mpz_srandomb (foo, NULL, 1L);
+			mpz_srandomb(foo, 1L);
 			out << foo << std::endl;
 			
 			// receive proof (r, b)
@@ -632,8 +632,8 @@ bool SchindelhauerTMCG::TMCG_VerifyNonQuadraticResidue_PerfectZeroKnowledge
 			// choose random number r \in Z*m and b \in {0,1}
 			do
 			{
-				mpz_srandomm (r, NULL, key.m);
-				mpz_srandomb (b, NULL, 1L);
+				mpz_srandomm(r, key.m);
+				mpz_srandomb(b, 1L);
 				mpz_gcd (foo, r, key.m);
 			}
 			while (mpz_cmp_ui (foo, 1L));
@@ -740,14 +740,14 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 			// choose random number r \in Z^*_m
 			do
 			{
-				mpz_srandomm(cs.r[k][w], NULL, ring.key[k].m);
+				mpz_srandomm(cs.r[k][w], ring.key[k].m);
 				mpz_gcd(foo, cs.r[k][w], ring.key[k].m);
 			}
 			while (mpz_cmp_ui(foo, 1L));
 			
 			// choose random bit b \in {0, 1} or set it initially to zero
 			if (k != index)
-				mpz_srandomb(cs.b[k][w], NULL, 1L);
+				mpz_srandomb(cs.b[k][w], 1L);
 			else
 				mpz_set_ui(cs.b[index][w], 0L);
 		}
@@ -799,8 +799,8 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	cc.Players = TMCG_Players, cc.TypeBits = TMCG_TypeBits;
 	for (size_t k = 0; k < TMCG_Players; k++)
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			mpz_init (cc.z[k][w]), TMCG_MaskValue(ring.key[k],
-				c.z[k][w], cc.z[k][w], cs.r[k][w], cs.b[k][w]);
+			TMCG_MaskValue(ring.key[k], c.z[k][w], cc.z[k][w],
+				cs.r[k][w], cs.b[k][w]);
 }
 
 void SchindelhauerTMCG::TMCG_MaskCard
@@ -875,25 +875,19 @@ void SchindelhauerTMCG::TMCG_ProofCardSecret
 	(const TMCG_Card &c, const TMCG_SecretKey &key, size_t index,
 	std::istream &in, std::ostream &out)
 {
-	mpz_t foo;
-	
-	mpz_init (foo);
 	for (size_t w = 0; w < TMCG_TypeBits; w++)
 	{
 		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
 		{
-			mpz_set_ui(foo, 0L);
-			out << foo << std::endl;
+			out << "0" << std::endl;
 			TMCG_ProofQuadraticResidue(key, c.z[index][w], in, out);
 		}
 		else
 		{
-			mpz_set_ui(foo, 1L);
-			out << foo << std::endl;
+			out << "1" << std::endl;
 			TMCG_ProofNonQuadraticResidue(key, c.z[index][w], in, out);
 		}
 	}
-	mpz_clear(foo);
 }
 
 void SchindelhauerTMCG::TMCG_ProofCardSecret
@@ -912,8 +906,8 @@ bool SchindelhauerTMCG::TMCG_VerifyCardSecret
 	{
 		for (size_t w = 0; w < TMCG_TypeBits; w++)
 		{
-			mpz_init(cs.b[index][w]), in >> cs.b[index][w];
-			mpz_init_set_ui(cs.r[index][w], 0L);
+			in >> cs.b[index][w];
+			mpz_set_ui(cs.r[index][w], 0L);
 			if (mpz_get_ui(cs.b[index][w]) & 1L)
 			{
 				if (!TMCG_VerifyNonQuadraticResidue(key, c.z[index][w], in, out))
@@ -951,11 +945,11 @@ void SchindelhauerTMCG::TMCG_SelfCardSecret
 	cs.Players = TMCG_Players, cs.TypeBits = TMCG_TypeBits;
 	for (size_t w = 0; w < TMCG_TypeBits; w++)
 	{
-		mpz_init_set_ui(cs.r[index][w], 0L);
+		mpz_set_ui(cs.r[index][w], 0L);
 		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
-			mpz_init_set_ui(cs.b[index][w], 0L);
+			mpz_set_ui(cs.b[index][w], 0L);
 		else
-			mpz_init_set_ui(cs.b[index][w], 1L);
+			mpz_set_ui(cs.b[index][w], 1L);
 	}
 }
 
@@ -1019,7 +1013,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 	{
 		mpz_t cy;
 		mpz_init(cy);
-		mpz_srandomm(cy, NULL, bar);
+		mpz_srandomm(cy, bar);
 		cyc = (size_t)mpz_get_ui(cy);
 		mpz_clear(cy);
 	}
@@ -1043,7 +1037,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 			do
 			{
 				pi_ok = true;
-				mpz_srandomm(foo, NULL, bar);
+				mpz_srandomm(foo, bar);
 				if (ss.find((size_t)mpz_get_ui(foo)))
 					pi_ok = false;
 			}
@@ -1068,7 +1062,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 	{
 		mpz_t cy;
 		mpz_init(cy);
-		mpz_srandomm(cy, NULL, bar);
+		mpz_srandomm(cy, bar);
 		cyc = (size_t)mpz_get_ui(cy);
 		mpz_clear(cy);
 	}
@@ -1092,7 +1086,7 @@ size_t SchindelhauerTMCG::TMCG_CreateStackSecret
 			do
 			{
 				pi_ok = true;
-				mpz_srandomm(foo, NULL, bar);
+				mpz_srandomm(foo, bar);
 				if (ss.find((size_t)mpz_get_ui(foo)))
 					pi_ok = false;
 			}
@@ -1304,7 +1298,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 		{
 			TMCG_Stack<TMCG_Card> s3, s4;
 			TMCG_StackSecret<TMCG_CardSecret> ss;
-			mpz_srandomb(foo, NULL, 1L);
+			mpz_srandomb(foo, 1L);
 			
 			// receive stack
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);
@@ -1367,7 +1361,7 @@ bool SchindelhauerTMCG::TMCG_VerifyStackEquality
 		{
 			TMCG_Stack<VTMF_Card> s3, s4;
 			TMCG_StackSecret<VTMF_CardSecret> ss;
-			mpz_srandomb(foo, NULL, 1L);
+			mpz_srandomb(foo, 1L);
 			
 			// receive stack (commitment)
 			in.getline(tmp, TMCG_MAX_STACK_CHARS);

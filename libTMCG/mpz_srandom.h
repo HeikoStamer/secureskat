@@ -32,13 +32,13 @@
 		{
 	#endif
 			void mpz_ssrandomb
-				(mpz_ptr r, gmp_randstate_t rnd, unsigned long int size);
+				(mpz_ptr r, unsigned long int size);
 			void mpz_srandomb
-				(mpz_ptr r, gmp_randstate_t rnd, unsigned long int size);
+				(mpz_ptr r, unsigned long int size);
 			void mpz_ssrandomm
-				(mpz_ptr r, gmp_randstate_t rnd, mpz_srcptr m);
+				(mpz_ptr r, mpz_srcptr m);
 			void mpz_srandomm
-				(mpz_ptr r, gmp_randstate_t rnd, mpz_srcptr m);
+				(mpz_ptr r, mpz_srcptr m);
 	#if defined(__cplusplus)
 		}
 	#endif

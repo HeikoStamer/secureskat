@@ -33,7 +33,7 @@
 				(mpz_srcptr a, mpz_srcptr p, mpz_srcptr q, mpz_srcptr n);
 			
 			void mpz_sqrtmp_r
-				(mpz_ptr root, mpz_srcptr a, mpz_srcptr p, gmp_randstate_t rnd);
+				(mpz_ptr root, mpz_srcptr a, mpz_srcptr p);
 			
 			void mpz_sqrtmp_fast
 				(mpz_ptr root, mpz_srcptr a, mpz_srcptr p, mpz_srcptr nqr,
@@ -45,12 +45,11 @@
 			
 			void mpz_sqrtmn_r
 				(mpz_ptr root, mpz_srcptr a, 
-				mpz_srcptr p, mpz_srcptr q, mpz_srcptr n, gmp_randstate_t rnd);
+				mpz_srcptr p, mpz_srcptr q, mpz_srcptr n);
 			
 			void mpz_sqrtmn_r_all
 				(mpz_ptr root1, mpz_ptr root2, mpz_ptr root3, mpz_ptr root4,
-				mpz_srcptr a, mpz_srcptr p, mpz_srcptr q, mpz_srcptr n,
-				gmp_randstate_t rnd);
+				mpz_srcptr a, mpz_srcptr p, mpz_srcptr q, mpz_srcptr n);
 			
 			void mpz_sqrtmn_fast
 				(mpz_ptr root, mpz_srcptr a, mpz_srcptr p, mpz_srcptr q,

@@ -54,7 +54,7 @@ TMCG_SecretKey::TMCG_SecretKey
 		// choose random p \in Z, but with fixed size (n/2 + 1) bit
 		do
 		{
-			mpz_ssrandomb(p, NULL, (keysize / 2L) + 1L);
+			mpz_ssrandomb(p, (keysize / 2L) + 1L);
 		}
 		while (mpz_sizeinbase(p, 2L) < ((keysize / 2L) + 1L));
 		
@@ -79,7 +79,7 @@ TMCG_SecretKey::TMCG_SecretKey
 		// choose random q \in Z, but with fixed size (n/2 + 1) bit
 		do
 		{
-			mpz_ssrandomb(q, NULL, (keysize / 2L) + 1L);
+			mpz_ssrandomb(q, (keysize / 2L) + 1L);
 		}
 		while (mpz_sizeinbase(q, 2L) < ((keysize / 2L) + 1L));
 		
@@ -119,7 +119,7 @@ TMCG_SecretKey::TMCG_SecretKey
 	// choose random y \in NQR^\circ_m for TMCG
 	do
 	{
-		mpz_srandomm(y, NULL, m);
+		mpz_srandomm(y, m);
 	}
 	while ((mpz_jacobi(y, m) != 1) || mpz_qrmn_p(y, p, q, m));
 	
@@ -177,22 +177,22 @@ TMCG_SecretKey::TMCG_SecretKey
 		
 		// compute square root of +-foo or +-2foo mod m
 		if (mpz_qrmn_p(foo, p, q, m))
-			mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
+			mpz_sqrtmn_r(bar, foo, p, q, m);
 		else
 		{
 			mpz_neg(foo, foo);
 			if (mpz_qrmn_p(foo, p, q, m))
-				mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
+				mpz_sqrtmn_r(bar, foo, p, q, m);
 			else
 			{
 				mpz_mul_2exp(foo, foo, 1L);
 				if (mpz_qrmn_p(foo, p, q, m))
-					mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
+					mpz_sqrtmn_r(bar, foo, p, q, m);
 				else
 				{
 					mpz_neg(foo, foo);
 					if (mpz_qrmn_p(foo, p, q, m))
-						mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
+						mpz_sqrtmn_r(bar, foo, p, q, m);
 					else
 						mpz_set_ui(bar, 0L);
 				}
@@ -223,7 +223,7 @@ TMCG_SecretKey::TMCG_SecretKey
 			mpz_mul(foo, foo, y);
 			mpz_mod(foo, foo, m);
 		}
-		mpz_sqrtmn_r(bar, foo, p, q, m, NULL);
+		mpz_sqrtmn_r(bar, foo, p, q, m);
 		
 		// update NIZK-proof stream
 		nizk2 << bar << "^";
@@ -745,7 +745,7 @@ std::string TMCG_SecretKey::sign
 		p, q, m, gcdext_up, gcdext_vq, pa1d4, qa1d4);
 	
 	// choose square root randomly (one of four)
-	mpz_srandomb(foo, NULL, 2L);
+	mpz_srandomb(foo, 2L);
 	
 	std::ostringstream ost;
 	ost << "sig|" << keyid() << "|" << foo_sqrt[mpz_get_ui(foo) % 4] << "|";

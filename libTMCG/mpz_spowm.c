@@ -32,7 +32,7 @@ void mpz_spowm_init
 	mpz_init(bvi), mpz_init(bvf), mpz_init_set(bx, x), mpz_init_set(bp, p);
 	do
 	{
-		mpz_srandomm(bvi, NULL, bp);
+		mpz_srandomm(bvi, bp);
 		ret = mpz_invert(bvf, bvi, bp);
 	}
 	while (!ret);
@@ -71,7 +71,7 @@ void mpz_sspowm
 	mpz_init(r), mpz_init(r1);
 	do
 	{
-		mpz_srandomm(r, NULL, p);
+		mpz_srandomm(r, p);
 		ret = mpz_invert(r1, r, p);
 	}
 	while (!ret);

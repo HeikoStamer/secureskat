@@ -137,7 +137,7 @@ void BarnettSmartVTMF_dlog::RandomElement
 {
 	// choose a random element of G (quadratic residue)
 	do
-		mpz_srandomm(a, NULL, p);
+		mpz_srandomm(a, p);
 	while (mpz_cmp_ui(a, 0) == 0);
 	mpz_powm_ui(a, a, 2, p);
 	assert(mpz_jacobi(a, p) == 1);
@@ -164,7 +164,7 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	()
 {
 	// generate random private key x_i \in Z_[q]
-	mpz_srandomb(x_i, NULL, exponent_size);
+	mpz_srandomb(x_i, exponent_size);
 	
 	// compute h_i = g^{x_i} \bmod p (by blinded exponentiation)
 	mpz_sspowm(h_i, g, x_i, p);
@@ -182,7 +182,7 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 	mpz_init(v), mpz_init(t), mpz_init(c), mpz_init(r);
 		
 		// commitment
-		mpz_srandomb(v, NULL, exponent_size);
+		mpz_srandomb(v, exponent_size);
 		mpz_sspowm(t, g, v, p);
 		// challenge
 		// We use the "Fiat-Shamir heuristic" to make
@@ -241,7 +241,7 @@ void BarnettSmartVTMF_dlog::CP_Prove
 	mpz_init(c), mpz_init(r), mpz_init(a), mpz_init(b), mpz_init(omega);
 		
 		// commitment
-		mpz_srandomb(omega, NULL, exponent_size);
+		mpz_srandomb(omega, exponent_size);
 		mpz_sspowm(a, gg, omega, p);
 		mpz_sspowm(b, hh, omega, p);
 		
@@ -300,7 +300,7 @@ void BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Mask
 	(mpz_srcptr m, mpz_ptr c_1, mpz_ptr c_2, mpz_ptr r)
 {
 	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, NULL, exponent_size);
+	mpz_srandomb(r, exponent_size);
 	
 	// compute c_1 = g^r \bmod p
 	mpz_sspowm(c_1, g, r, p);
@@ -357,7 +357,7 @@ void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 	(mpz_srcptr c_1, mpz_srcptr c_2, mpz_ptr c__1, mpz_ptr c__2, mpz_ptr r)
 {
 	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, NULL, exponent_size);
+	mpz_srandomb(r, exponent_size);
 	
 	// compute c'_1 = c_1 \cdot g^r \bmod p
 	mpz_sspowm(c__1, g, r, p);
@@ -374,7 +374,7 @@ void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_RemaskValue
 	(mpz_ptr r)
 {
 	// generate random masking value r \in Z_[q]
-	mpz_srandomb(r, NULL, exponent_size);
+	mpz_srandomb(r, exponent_size);
 }
 
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Remask
