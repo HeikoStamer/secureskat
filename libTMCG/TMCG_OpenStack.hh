@@ -99,6 +99,12 @@ template <typename CardType> struct TMCG_OpenStack
 	}
 	
 	void push
+		(const std::pair<size_t, CardType> &p)
+	{
+		stack.push_back(p);
+	}
+	
+	void push
 		(size_t type, const CardType& c)
 	{
 		stack.push_back(std::pair<size_t, CardType>(type, c));
