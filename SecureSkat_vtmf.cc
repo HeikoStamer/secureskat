@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -473,7 +473,7 @@ const char *skat_spiel2string
 	else if (skat_spiel2gwert(spiel) == 10)
 		wstr += "Rot (Ro)";
 	else if (skat_spiel2gwert(spiel) == 11)
-		wstr += "Gr? (Gr)";
+		wstr += "Gruen (Gr)";
 	else if (skat_spiel2gwert(spiel) == 12)
 		wstr += "Eicheln (Ei)";
 	else if (skat_spiel2gwert(spiel) == 23)
@@ -1204,7 +1204,7 @@ int skat_game
 			
 			size_t reiz_status = 0, reiz_counter = 0, vh = 0, mh = 0, hh = 0;
 			size_t spiel_status = 0, spiel_allein = 0, spiel_dran = 0, spiel_who[3];
-			bool hand_spiel = false;
+			bool hand_spiel = false, started = false;
 			if (p == 0)
 				vh = 0, mh = 1, hh = 2;
 			if (p == 1)
@@ -1357,10 +1357,10 @@ int skat_game
 					if (std::find(nicks.begin(), nicks.end(), nick) != nicks.end())
 						return 7;
 				}
-				if (master && (cmd.find("!ANNOUNCE", 0) == 0))
+				if (master && started && (cmd.find("!ANNOUNCE", 0) == 0))
 				{
-					*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << (rounds - r) 
-						<< "!" << std::endl << std::flush;
+					*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" <<
+						(rounds - r) << "!" << std::endl << std::flush;
 				}	
 				if (cmd.find("IRC ", 0) == 0)
 				{
@@ -1887,6 +1887,7 @@ int skat_game
 								}
 								spiel_dran = 0;
 								spiel_who[0] = vh, spiel_who[1] = mh, spiel_who[2] = hh;
+								started = true;
 							}
 						}
 					}	
@@ -2484,6 +2485,7 @@ int skat_game
 													ost.str() << std::endl << std::flush;
 											spiel_dran = 0;
 											spiel_who[0] = vh, spiel_who[1] = mh, spiel_who[2] = hh;
+											started = true;
 										}
 										else
 											std::cout << ">< ungueltige Spielansage: " << sz <<

@@ -999,6 +999,12 @@ int skat_child
 	
 	// start game
 	std::cout << X << _("Table") << " " << nr << " " << _("start the game.") << std::endl;
+	if (neu)
+	{
+		// set topic
+		*out_pipe << "TOPIC #openSkat_" << nr << " :" << PACKAGE_STRING	<<
+			std::endl << std::flush;
+	}
 	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i,
 		gp_tmcg, pkr, sec, right_neighbor, left_neighbor, vnicks, hpipe, pctl,
 		ipipe_readbuf, ipipe_readed);
@@ -1055,7 +1061,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				for (int i = 0; i < readed[pi->second]; i++)
 					if (readbuf[pi->second][i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
-				if (what == 1)
+				if (what == 1) // mutex update of ranking data from RNK childs
 				{
 					while (cnt_delim >= 2)
 					{
@@ -1074,7 +1080,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 						rnk[rnk1] = rnk2;
 					}
 				}
-				else if (what == 2)
+				else if (what == 2) // mutex IRC output from game childs
 				{
 					while (cnt_delim >= 1)
 					{
@@ -1084,7 +1090,9 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string irc1 = tmp;
-						
+
+//std::cerr << "to IRC: " << irc1 << std::endl;
+
 						// do operation
 						if (strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
 						{
@@ -1096,8 +1104,8 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 									// sign message
 									*irc << "PRIVMSG " << irc_parvec[0] <<
 										" :" << irc_parvec[1] << "~~~" <<
-										sec.sign(irc_parvec[1]) << std::endl
-										<< std::flush;
+										sec.sign(irc_parvec[1]) << std::endl <<
+										std::flush;
 								}
 								else if (irc_parvec[0] == "#openSkat")
 								{
@@ -1162,7 +1170,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							*irc << irc1 << std::endl << std::flush;
 					}
 				}
-				else if (what == 3)
+				else if (what == 3) // mutex import from PKI childs
 				{
 					while (cnt_delim >= 2)
 					{
@@ -1878,7 +1886,6 @@ void run_irc()
 #endif
 		MFD_SET(irc_handle, &rfds);
 		MFD_SET(pki7771_handle, &rfds);
-		MFD_SET(pki7772_handle, &rfds);
 		MFD_SET(rnk7773_handle, &rfds);
 		MFD_SET(rnk7774_handle, &rfds);
 		
@@ -2065,7 +2072,8 @@ void run_irc()
 				
 				if (num == 0)
 				{
-					std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
+					std::cerr << _("IRC ERROR: connection with server collapsed") <<
+						std::endl;
 					break;
 				}
 				
@@ -2099,7 +2107,7 @@ void run_irc()
 				}
 				
 				if (strncasecmp(irc_command(irc_reply), "PING", 4) == 0)
-				{				
+				{
 					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
 				}
 				else if (strncasecmp(irc_command(irc_reply), "001", 3) == 0)
@@ -2185,8 +2193,8 @@ void run_irc()
 					(strncasecmp(irc_command(irc_reply), "405", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "475", 3) == 0))
 				{
-//std::cerr << "IRC: could not join to channel, channel error:" << std::endl;
-//std::cerr << irc_reply << std::endl;
+					std::cerr << "IRC ERROR: could not join to channel" << std::endl;
+					std::cerr << irc_reply << std::endl;
 				}
 				else if (strncasecmp(irc_command(irc_reply), "PART", 4) == 0)
 				{
@@ -2493,7 +2501,7 @@ void run_irc()
 											delete npipe;
 										}
 										else
-											std::cerr << _("TMCG: VerifyData() failed") << std::endl;
+											std::cerr << _("TMCG: verify() failed") << std::endl;
 									}
 									else
 										std::cerr << _("TMCG: no public key available") << std::endl;
@@ -2517,7 +2525,7 @@ void run_irc()
 									std::cout << "<" << nick << "> " << realmsg << std::endl;
 								}
 								else
-									std::cerr << _("TMCG: VerifyData() failed") << std::endl;
+									std::cerr << _("TMCG: verify() failed") << std::endl;
 							}
 							else
 								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
@@ -2590,9 +2598,18 @@ void run_irc()
 						}
 					}
 				}
+				else if (strncasecmp(irc_command(irc_reply), "NOTICE", 6) == 0)
+				{
+					if (irc_paramvec(irc_params(irc_reply)) >= 2)
+					{
+						std::cout << "[NOTICE] " << irc_parvec[1] << std::endl;
+					}
+				}
 				else
 				{ 
 					// unparsed IRC-message -- ignore this one
+//std::cerr << "IRC: unparsed message:" << std::endl;
+//std::cerr << irc_reply << std::endl;
 				}
 				
 					}
@@ -3034,7 +3051,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.13 2005/03/23 15:37:37 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.14 2005/03/24 20:56:32 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
