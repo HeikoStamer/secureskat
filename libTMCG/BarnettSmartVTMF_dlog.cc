@@ -27,7 +27,7 @@
 #include "BarnettSmartVTMF_dlog.hh"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
-	(unsigned long int groupsize = TMCG_DDH_P_SIZE)
+	(unsigned long int groupsize)
 {
 	// initalize libgcrypt
 	if (!gcry_check_version(TMCG_LIBGCRYPT_VERSION))
@@ -87,7 +87,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 }
 
 bool BarnettSmartVTMF_dlog::CheckGroup
-	(unsigned long int groupsize = TMCG_DDH_P_SIZE)
+	(unsigned long int groupsize)
 {
 	mpz_t foo;
 	

@@ -52,7 +52,7 @@ TMCG_SecretKey::TMCG_SecretKey
 
 TMCG_SecretKey::TMCG_SecretKey
 	(const std::string &n, const std::string &e,
-	unsigned long int keysize = TMCG_KEY_SIZE):
+	unsigned long int keysize):
 		name(n), email(e)
 {
 	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
