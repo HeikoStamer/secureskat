@@ -1,0 +1,4 @@
+* procedure 'waiting for three players' unstable
+* gettext don't run on solaris (configure --disable-nls)
+* srandomb() and ssrandomb() don't return value of exact length
+* Zaurus/zgcc: AC_TYPE_SIGNAL does not work correctly

@@ -1,0 +1,30 @@
+Copyright (c)  2002-2004  Heiko Stamer, <stamer@gaos.org>
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.2
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+  Texts. A copy of the license is included in the section entitled "GNU
+  Free Documentation License" of the file "README".
+
+Stuff that should be done (until first production release):
+
++ replace (former) xskat GUI by native IRC server implementation
++ tunnel TCP connections via IRC (if requested, e.g. paranoid firewall)
+- for gcc: perror output with __FILE__::__FUNCTION__
+- do more internationalization support (in particular SecureSkat_vtmf.cc)
+- fix race conditions in parts of the voting system (or remove it completely)
+- fix race conditions in automatic player/table handshake
+- configuration and key databases in directory ~/.SecureSkat
+- add commands for manually key exchange (export/import)
+- provide nice libpopt commandline interface
+- use GcrySexp for ADTs/ store secrets via subkey in OpenPGP-impl.
++ create libTMCG from SchindelhauerTMCG (no fixed parameters) for
+  stronger usability in other (secure) card game projects
+- documentation: manpage, texinfo, paper
+
+Further open tasks:
+
+- [fair ranking system (command /rank)]
+- [artificial intelligence (SecureSkat_ai)]
+
+Any volunteers?
