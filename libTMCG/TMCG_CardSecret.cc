@@ -23,7 +23,7 @@
 TMCG_CardSecret::TMCG_CardSecret
 	()
 {
-	r.push_back(vector<MP_INT>(1)), b.push_back(vector<MP_INT>(1));
+	r.push_back(std::vector<MP_INT>(1)), b.push_back(std::vector<MP_INT>(1));
 	mpz_init(&r[0][0]), mpz_init(&b[0][0]);
 }
 
@@ -33,7 +33,7 @@ TMCG_CardSecret::TMCG_CardSecret
 	assert((n > 0) && (m > 0));
 	
 	for (size_t k = 0; k < n; k++)
-		r.push_back(vector<MP_INT>(m)), b.push_back(vector<MP_INT>(m));
+		r.push_back(std::vector<MP_INT>(m)), b.push_back(std::vector<MP_INT>(m));
 	for (size_t k = 0; k < r.size(); k++)
 		for (size_t w = 0; w < r[k].size(); w++)
 			mpz_init(&r[k][w]),
@@ -44,8 +44,8 @@ TMCG_CardSecret::TMCG_CardSecret
 	(const TMCG_CardSecret& that)
 {
 	for (size_t k = 0; k < that.r.size(); k++)
-		r.push_back(vector<MP_INT>(that.r[k].size())),
-		b.push_back(vector<MP_INT>(that.b[k].size()));
+		r.push_back(std::vector<MP_INT>(that.r[k].size())),
+		b.push_back(std::vector<MP_INT>(that.b[k].size()));
 	for (size_t k = 0; k < r.size(); k++)
 		for (size_t w = 0; w < r[k].size(); w++)
 			mpz_init_set(&r[k][w], &that.r[k][w]),
@@ -79,7 +79,7 @@ void TMCG_CardSecret::resize
 	r.clear(), b.clear();
 	
 	for (size_t k = 0; k < n; k++)
-		r.push_back(vector<MP_INT>(m)), b.push_back(vector<MP_INT>(m));
+		r.push_back(std::vector<MP_INT>(m)), b.push_back(std::vector<MP_INT>(m));
 	for (size_t k = 0; k < r.size(); k++)
 		for (size_t w = 0; w < r[k].size(); w++)
 			mpz_init(&r[k][w]),

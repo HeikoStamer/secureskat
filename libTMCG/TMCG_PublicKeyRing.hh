@@ -32,7 +32,7 @@
 
 struct TMCG_PublicKeyRing
 {
-	vector<TMCG_PublicKey>			key;
+	std::vector<TMCG_PublicKey>			key;
 	
 	TMCG_PublicKeyRing
 		(size_t n):

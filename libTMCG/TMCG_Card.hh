@@ -41,7 +41,7 @@
 	
 struct TMCG_Card
 {
-	vector< vector<MP_INT> >			z;
+	std::vector< std::vector<MP_INT> >			z;
 	
 	TMCG_Card
 		();
