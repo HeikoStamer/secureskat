@@ -179,8 +179,8 @@ bool BarnettSmartVTMF_dlog::CheckGroup
 	try
 	{
 		// check whether q has appropriate length
-		if ((mpz_sizeinbase(q, 2L) < (group_size - 32)) ||
-			(mpz_sizeinbase(q, 2L) > (group_size + 128)))
+		if ((mpz_sizeinbase(q, 2L) < (group_size - 16)) ||
+			(mpz_sizeinbase(q, 2L) > (group_size + 16)))
 				throw false;
 		
 		// check whether p, q are both probable prime
@@ -229,8 +229,8 @@ void BarnettSmartVTMF_dlog::IndexElement
 	(mpz_ptr a, std::size_t index)
 {
 	// choose the index-th element of G (quadratic residue)
-	// Notice that for IndexElement(a, 0) the equality a == 1
-	// holds, because 1 is the smallest quadratic residue mod p.	
+	// Notice that IndexElement(a, 0) returns the identity of G,
+	// because 1 is the smallest quadratic residue mod p.
 	mpz_set_ui(a, 0L);
 	do
 	{
@@ -245,10 +245,10 @@ void BarnettSmartVTMF_dlog::IndexElement
 void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	()
 {
-	// generate random private key x_i \in Z_~q~
+	// generate random private key x_i \in Z_[q]
 	mpz_srandomb(x_i, NULL, exponent_size);
 	
-	// compute h_i = g^{x_i} \bmod p (by secure exponentiation)
+	// compute h_i = g^{x_i} \bmod p (by blinded exponentiation)
 	mpz_sspowm(h_i, g, x_i, p);
 	
 	// set public key h
@@ -267,6 +267,8 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 		mpz_srandomb(v, NULL, exponent_size);
 		mpz_sspowm(t, g, v, p);
 		// challenge
+		// We use the "Fiat-Shamir heuristic" to make
+		// this part of the PK non-interactive.
 		mpz_shash(c, g, h_i, t);
 		// response
 		mpz_mul(r, c, x_i);
@@ -326,6 +328,8 @@ void BarnettSmartVTMF_dlog::CP_Prove
 		mpz_sspowm(b, hh, omega, p);
 		
 		// challenge
+		// We use the "Fiat-Shamir heuristic" to make
+		// this part of the PK non-interactive.
 		mpz_shash(c, a, b, x, y, gg, hh);
 		
 		// response
@@ -377,7 +381,7 @@ bool BarnettSmartVTMF_dlog::CP_Verify
 void BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Mask
 	(mpz_srcptr m, mpz_ptr c_1, mpz_ptr c_2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_q
+	// generate random masking value r \in Z_[q]
 	mpz_srandomb(r, NULL, exponent_size);
 	
 	// compute c_1 = g^r \bmod p
@@ -434,7 +438,7 @@ bool BarnettSmartVTMF_dlog::VerifiableMaskingProtocol_Verify
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 	(mpz_srcptr c_1, mpz_srcptr c_2, mpz_ptr c__1, mpz_ptr c__2, mpz_ptr r)
 {
-	// generate random masking value r \in Z_q
+	// generate random masking value r \in Z_[q]
 	mpz_srandomb(r, NULL, exponent_size);
 	
 	// compute c'_1 = c_1 \cdot g^r \bmod p
@@ -451,7 +455,7 @@ void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_Mask
 void BarnettSmartVTMF_dlog::VerifiableRemaskingProtocol_RemaskValue
 	(mpz_ptr r)
 {
-	// generate random masking value r \in Z_q
+	// generate random masking value r \in Z_[q]
 	mpz_srandomb(r, NULL, exponent_size);
 }
 

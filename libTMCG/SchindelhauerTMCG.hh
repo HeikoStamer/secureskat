@@ -223,7 +223,7 @@ class SchindelhauerTMCG
 	public:
 		static const size_t		TMCG_KeyIDSize = 5;			// octets
 		mpz_ui								TMCG_SecurityLevel;			// iterations
-		size_t								TMCG_Players, TMCG_TypeBits, TMCG_MaxCards;
+		size_t								TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
 		
 		SchindelhauerTMCG 
 			(mpz_ui security, size_t players, size_t typebits)
@@ -232,9 +232,9 @@ class SchindelhauerTMCG
 			assert (typebits <= TMCG_MAX_TYPEBITS);
 			
 			TMCG_SecurityLevel = security;
-			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCards = 1;
+			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCardType = 1;
 			for (mpz_ui i = 0; i < TMCG_TypeBits; i++)
-				TMCG_MaxCards *= 2;
+				TMCG_MaxCardType *= 2;
 			
 			if (!gcry_check_version (LIBGCRYPT_VERSION))
 			{
