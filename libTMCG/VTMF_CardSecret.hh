@@ -1,0 +1,97 @@
+/*******************************************************************************
+   This file is part of libTMCG.
+
+ Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+*******************************************************************************/
+
+#ifndef INCLUDED_VTMF_CardSecret_HH
+	#define INCLUDED_VTMF_CardSecret_HH
+
+	// config.h
+	#if HAVE_CONFIG_H
+		#include "config.h"
+	#endif
+
+	// C and STL header
+	#include <cstdio>
+	#include <cstdlib>
+	#include <cassert>
+	#include <string>
+	#include <sstream>
+	#include <iostream>
+	#include <vector>
+
+	// GNU multiple precision library
+	#include <gmp.h>
+	
+	#include "mpz_srandom.h"
+	#include "parse_helper.hh"
+
+
+
+struct VTMF_CardSecret
+{
+	mpz_t r;
+	
+	VTMF_CardSecret
+		()
+	{
+		mpz_init(r);
+	}
+	
+	VTMF_CardSecret
+		(const VTMF_CardSecret& that)
+	{
+		mpz_init_set(r, that.r);
+	}
+	
+	VTMF_CardSecret& operator =
+		(const VTMF_CardSecret& that)
+	{
+		mpz_set(r, that.r);
+		return *this;
+	}
+	
+	bool import
+		(std::string s)
+	{
+		try
+		{
+			// check magic
+			if (!cm(s, "crs", '|'))
+				throw false;
+			
+			// secret card data
+			if ((mpz_set_str(r, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+				throw false;
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
+	
+	~VTMF_CardSecret
+		()
+	{
+		mpz_clear(r);
+	}
+};
+
+#endif

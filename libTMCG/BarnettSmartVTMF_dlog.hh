@@ -41,7 +41,7 @@
 	#endif
 
 	// C and STL header
-	#include <stdio.h>
+	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
@@ -56,124 +56,6 @@
 	#include <gmp.h>
 	
 	#include "mpz_srandom.h"
-	#include "parse_helper.hh"
-
-struct VTMF_Card
-{
-	mpz_t c_1, c_2;
-	
-	VTMF_Card
-		()
-	{
-		mpz_init(c_1), mpz_init(c_2);
-	}
-	
-	VTMF_Card
-		(const VTMF_Card& that)
-	{
-		mpz_init_set(c_1, that.c_1), mpz_init_set(c_2, that.c_2);
-	}
-	
-	VTMF_Card& operator =
-		(const VTMF_Card& that)
-	{
-		mpz_set(c_1, that.c_1), mpz_set(c_2, that.c_2);
-		return *this;
-	}
-	
-	bool operator ==
-		(const VTMF_Card& that)
-	{
-		if (mpz_cmp(c_1, that.c_1) || mpz_cmp(c_2, that.c_2))
-			return false;
-		return true;
-	}
-	
-	bool operator !=
-		(const VTMF_Card& that)
-	{
-		return !(*this == that);
-	}
-	
-	bool import
-		(std::string s)
-	{
-		try
-		{
-			// check magic
-			if (!cm(s, "crd", '|'))
-				throw false;
-			
-			// card data
-			if ((mpz_set_str(c_1, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			if ((mpz_set_str(c_2, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
-	
-	~VTMF_Card()
-	{
-		mpz_clear(c_1), mpz_clear(c_2);
-	}
-};
-
-struct VTMF_CardSecret
-{
-	mpz_t r;
-	
-	VTMF_CardSecret
-		()
-	{
-		mpz_init(r);
-	}
-	
-	VTMF_CardSecret
-		(const VTMF_CardSecret& that)
-	{
-		mpz_init_set(r, that.r);
-	}
-	
-	VTMF_CardSecret& operator =
-		(const VTMF_CardSecret& that)
-	{
-		mpz_set(r, that.r);
-		return *this;
-	}
-	
-	bool import
-		(std::string s)
-	{
-		try
-		{
-			// check magic
-			if (!cm(s, "crs", '|'))
-				throw false;
-			
-			// secret card data
-			if ((mpz_set_str(r, gs(s, '|'), MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
-	
-	~VTMF_CardSecret
-		()
-	{
-		mpz_clear(r);
-	}
-};
 
 class BarnettSmartVTMF_dlog
 {
