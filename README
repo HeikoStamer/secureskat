@@ -35,7 +35,7 @@ Requirements
   * GNU MP Library (libgmp), version >= 4.1, http://www.swox.com/gmp/
     (compilied WITHOUT C++ support: ./configure --enable-cxx=no)
   * GNU Crypto Library (libgcrypt), version >= 1.2.0, ftp://ftp.gnupg.org/
-  * GNU Readline Library (libreadline), version >= 4.1, http://www.gnu.org/
+  * GNU Readline Library (libreadline), version >= 4.3, http://www.gnu.org/
   * GNU Database Manager (libgdbm), version >= 1.8.0, http://www.gnu.org/
   * ncurses Library (-lncurses)
   * zlib Library (-lz)
