@@ -233,8 +233,6 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 {
 	mpz_t v, t, c, r;
 	
-	out << h_i << std::endl;
-	
 	// proof of knowledge [CaS97]
 	mpz_init(v), mpz_init(t), mpz_init(c), mpz_init(r);
 		
@@ -249,7 +247,7 @@ void BarnettSmartVTMF_dlog::KeyGenerationProtocol_PublishKey
 		mpz_add(r, r, v);
 		mpz_mod(r, r, q);
 		
-	out << c << std::endl << r << std::endl;
+	out << h_i << std::endl << c << std::endl << r << std::endl;
 	mpz_clear(v), mpz_clear(t), mpz_clear(c), mpz_clear(r);
 }
 
