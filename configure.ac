@@ -13,7 +13,7 @@ AC_SUBST(VERSION)
 ALL_LINGUAS="de"
 AC_DEFINE_UNQUOTED(LOCALEDIR, "${datadir}/locale", "/usr/local/share/locale")
 AC_SUBST(LOCALEDIR)
-LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
+#LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
 
 
 # Check commandline switches
