@@ -22,7 +22,7 @@
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
-// global return string
+// global return std::string
 std::string wstr;
 
 // values for biding
@@ -456,9 +456,9 @@ void skat_okarte
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
-	*right << c << endl << flush;
+	*right << c << std::endl << std::flush;
 	tmcg->TMCG_ProofCardSecret(c, vtmf, *right, *right);
-	*left << c << endl << flush;
+	*left << c << std::endl << std::flush;
 	tmcg->TMCG_ProofCardSecret(c, vtmf, *left, *left);
 }
 
@@ -510,7 +510,7 @@ const char *skat_spiel2string
 
 int skat_wort2spiel
 	(
-		const string &wort
+		const std::string &wort
 	)
 {
 	if (wort == "")
@@ -585,7 +585,7 @@ bool skat_ssehen
 
 int skat_wort2type
 	(
-		const string &wort
+		const std::string &wort
 	)
 {
 	// Wenzel
@@ -601,7 +601,7 @@ int skat_wort2type
 	{
 		if (wort.length() < 3)
 			return -1;
-		string wert = wort.substr(2, wort.length() - 2);
+		std::string wert = wort.substr(2, wort.length() - 2);
 		int ww = -1;
 		// Figuren und Luschen
 		if (wert == "A")
@@ -680,29 +680,29 @@ const char *skat_type2string
 }
 
 void skat_blatt
-	( 
+	(
 		size_t p, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
-	vector<int> w;
+	std::vector<int> w;
 	for (size_t i = 0; i < os.size(); i++)
 		w.push_back(os[i].first);
 	if (p != 99)
 		std::sort(w.begin(), w.end());
 	if (p != 99)
-		cout << "><><>< ";
+		std::cout << "><><>< ";
 	if (p == 0)
-		cout << "VH: ";
+		std::cout << "VH: ";
 	if (p == 1)
-		cout << "MH: ";
+		std::cout << "MH: ";
 	if (p == 2)
-		cout << "HH: ";
+		std::cout << "HH: ";
 	if (p == 10)
-		cout << "offengelegte Karten: ";
-	for (vector<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
-		cout << skat_type2string(*wi);
+		std::cout << "offengelegte Karten: ";
+	for (std::vector<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
+		std::cout << skat_type2string(*wi);
 	if (p != 99)
-		cout << endl;
+		std::cout << std::endl;
 }
 
 bool skat_sehen
@@ -889,8 +889,8 @@ bool skat_mischen
 		if (pkr_self == 0)
 		{
 			tmcg->TMCG_MixStack(d, d0, ss, vtmf);
-			*right << d0 << endl << flush;
-			*left << d0 << endl << flush;
+			*right << d0 << std::endl << std::flush;
+			*left << d0 << std::endl << std::flush;
 			left->getline(tmp, TMCG_MAX_STACK_CHARS);
 			if (!d1.import(tmp))
 				throw false;
@@ -904,8 +904,8 @@ bool skat_mischen
 			if (!d0.import(tmp))
 				throw false;
 			tmcg->TMCG_MixStack(d0, d1, ss, vtmf);
-			*right << d1 << endl << flush;
-			*left << d1 << endl << flush;
+			*right << d1 << std::endl << std::flush;
+			*left << d1 << std::endl << std::flush;
 			left->getline(tmp, TMCG_MAX_STACK_CHARS);
 			if (!d2.import(tmp))
 				throw false;
@@ -919,8 +919,8 @@ bool skat_mischen
 			if (!d1.import(tmp))
 				throw false;
 			tmcg->TMCG_MixStack(d1, d2, ss, vtmf);
-			*right << d2 << endl << flush;
-			*left << d2 << endl << flush;
+			*right << d2 << std::endl << std::flush;
+			*left << d2 << std::endl << std::flush;
 		}
 		throw true;
 	}
@@ -933,10 +933,12 @@ bool skat_mischen
 
 int skat_game
 	(
-		string nr, size_t rounds, size_t pkr_self, bool master, int opipe, int ipipe, 
-		int ctl_o, int ctl_i, SchindelhauerTMCG *tmcg, const TMCG_PublicKeyRing &pkr,
-		const TMCG_SecretKey &sec, iosecuresocketstream *right, iosecuresocketstream *left,
-		const vector<string> &nicks, int hpipe, bool pctl, char *ireadbuf, int &ireaded
+		std::string nr, size_t rounds, size_t pkr_self, bool master, int opipe,
+		int ipipe, int ctl_o, int ctl_i, SchindelhauerTMCG *tmcg,
+		const TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
+		iosecuresocketstream *right, iosecuresocketstream *left,
+		const std::vector<std::string> &nicks, int hpipe, bool pctl,
+		char *ireadbuf, int &ireaded
 	)
 {
 	opipestream *out_pipe = new opipestream(opipe), *out_ctl = NULL;
@@ -946,10 +948,10 @@ int skat_game
 	int pkt_sum[3] = { 0, 0, 0 };
 	for (size_t i = 0; pctl && (i < 3); i++)
 	{
-		ostringstream ost;
+		std::ostringstream ost;
 		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " << 
-			pkr.key[i].name << endl;
-		*out_ctl << ost.str() << flush;
+			pkr.key[i].name << std::endl;
+		*out_ctl << ost.str() << std::flush;
 	}
 	
 	// VTMF initalization
@@ -957,8 +959,8 @@ int skat_game
 	if (pkr_self == 2)
 	{
 #ifdef COMMON_DDH_GROUP
-		stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << endl;
+		std::stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
 		vtmf = new BarnettSmartVTMF_dlog();
@@ -967,7 +969,7 @@ int skat_game
 		
 		if (!vtmf->CheckGroup())
 		{
-			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
+			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return 2;
 		}
 		
@@ -978,20 +980,20 @@ int skat_game
 		
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 		{
-			cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+			std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 			return 2;
 		}
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 		{
-			cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+			std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 			return 2;
 		}
 	}
 	else
 	{
 #ifdef COMMON_DDH_GROUP
-		stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << endl;
+		std::stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
 		if (pkr_self == 0)
@@ -1002,7 +1004,7 @@ int skat_game
 		
 		if (!vtmf->CheckGroup())
 		{
-			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
+			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return 2;
 		}
 		
@@ -1012,14 +1014,14 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
 			vtmf->KeyGenerationProtocol_PublishKey(*right);
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 				return 2;
 			}
 		}
@@ -1027,12 +1029,12 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 				return 2;
 			}
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				cout << ">< Fehler in VTMF: UpdateKey() failed" << endl;
+				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
@@ -1042,7 +1044,7 @@ int skat_game
 	
 	for (size_t r = 0; r < rounds; r++)
 	{
-		ostringstream spiel_protokoll;
+		std::ostringstream spiel_protokoll;
 		spiel_protokoll << "prt#" << nr << "#";
 		for (size_t p = 0; p < 3; p++)
 			spiel_protokoll << nicks[p] << "#";
@@ -1063,40 +1065,45 @@ int skat_game
 			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
 			d2.push(d);
 			tmcg->TMCG_CreateStackSecret(ss, false, d2.size(), vtmf);
-			cout << "><>< Mische Karten. Bitte warten ..." << flush;
+			std::cout << "><>< Mische Karten. Bitte warten ..." << std::flush;
 			if (pctl)
 			{
-				ostringstream ost;
-				ost << nicks[pkr_self] << " MISCHEN" << endl;
-				*out_ctl << ost.str() << flush;
+				std::ostringstream ost;
+				ost << nicks[pkr_self] << " MISCHEN" << std::endl;
+				*out_ctl << ost.str() << std::flush;
 			}
 			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
-				cout << ">< Fehler beim Mischen: falsches Stapelformat" << endl;
+				std::cout << ">< Fehler beim Mischen: falsches Stapelformat"
+					<< std::endl;
 				return 1;
 			}
 			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
-				cout << ">< Fehler beim Mischen: Betrugsversuch im ZNP" << endl;
+				std::cout << ">< Fehler beim Mischen: Betrugsversuch im ZNP"
+					<< std::endl;
 				return 2;
 			}
-			cout << "Fertig!" << endl;
+			std::cout << "Fertig!" << std::endl;
 			
 #ifdef ABHEBEN
 			// Abheben (cyclic shift of stack) von HH
-			cout << "><>< HH hebt Karten ab. Bitte warten ..." << flush;
+			std::cout << "><>< HH hebt Karten ab. Bitte warten ..."
+				<< std::flush;
 			if (((pkr_self + p) % 3) == 2)
 			{
 				size_t cyc = 0;
 				do
 				{
 					ab.clear();
-					cyc = tmcg->TMCG_CreateStackSecret(ab, true, vtmf, d_mix[2].size());
+					cyc = tmcg->TMCG_CreateStackSecret(ab, true, vtmf,
+						d_mix[2].size());
 				}
 				while ((cyc <= 3) || (cyc >= 29));
-				cout << "[" << cyc << " Karten abgehoben]..." << flush;
+				std::cout << "[" << cyc << " Karten abgehoben]..."
+					<< std::flush;
 				tmcg->TMCG_MixStack(d_mix[2], d_end, ab, vtmf);
 				*left << d_end << std::endl << std::flush;
 				*right << d_end << std::endl << std::flush;
@@ -1126,18 +1133,20 @@ int skat_game
 				hhs->getline(tmp, TMCG_MAX_STACK_CHARS);
 				if (!d_end.import(tmp))
 				{
-					cout << ">< Fehler beim Abheben: falsches Stapelformat" << endl;
+					std::cout << ">< Fehler beim Abheben: falsches Stapelformat"
+						<< std::endl;
 					delete [] tmp, return 1;
 				}
 				if (!tmcg->TMCG_VerifyStackEquality(d_mix[2], d_end,
 					true, vtmf, *hhs, *hhs))
 				{
-					cout << ">< Fehler beim Abheben: Betrugsversuch im ZNP" << endl;
+					std::cout << ">< Fehler beim Abheben: Betrugsversuch im ZNP"
+						<< std::endl;
 					delete [] tmp, return 2;
 				}
 				delete [] tmp;
 			}
-			cout << "Fertig!" << endl;
+			std::cout << "Fertig!" << std::endl;
 #else
 			d_end = d_mix[2];
 #endif
@@ -1157,38 +1166,40 @@ int skat_game
 					(unsigned char)game_digest[i]);
 			
 			// Geben
-			cout << "><>< Gebe Karten. Bitte warten ..." << flush;
+			std::cout << "><>< Gebe Karten. Bitte warten ..." << std::flush;
 			if (pctl)
 			{
-				ostringstream ost;
-				ost << nicks[pkr_self] << " GEBEN" << endl;
-				*out_ctl << ost.str() << flush;
+				std::ostringstream ost;
+				ost << nicks[pkr_self] << " GEBEN" << std::endl;
+				*out_ctl << ost.str() << std::flush;
 			}
 			TMCG_Stack<VTMF_Card> s[3], sk;
 			if (!skat_geben(tmcg, d_end, s[0], s[1], s[2], sk))
 			{
-				cout << ">< Fehler beim Geben: zu wenig Spielkarten" << endl;
+				std::cout << ">< Fehler beim Geben: zu wenig Spielkarten"
+					<< std::endl;
 				return 3;
 			}
 			TMCG_OpenStack<VTMF_Card> os, os_ov, os_sp, os_st, os_pkt[3], os_rc[3];
 			if (!skat_sehen(pkr_self, tmcg, vtmf, os,
 				s[0], s[1], s[2], right, left))
 			{
-				cout << ">< Fehler beim Geben: Betrugsversuch im ZNP" << endl;
+				std::cout << ">< Fehler beim Geben: Betrugsversuch im ZNP"
+					<< std::endl;
 				return 4;
 			}
-			cout << "Fertig!" << endl;
+			std::cout << "Fertig!" << std::endl;
 			for (size_t i = 0; pctl && (i < os.size()); i++)
 			{
-				ostringstream ost;
-				ost << nicks[pkr_self] << " KARTE " << os[i].first << endl;
-				*out_ctl << ost.str() << flush;
+				std::ostringstream ost;
+				ost << nicks[pkr_self] << " KARTE " << os[i].first << std::endl;
+				*out_ctl << ost.str() << std::flush;
 			}
 			if (pctl)
 			{
-				ostringstream ost;
-				ost << nicks[pkr_self] << " START " << ((pkr_self + p) % 3) << endl;
-				*out_ctl << ost.str() << flush;
+				std::ostringstream ost;
+				ost << nicks[pkr_self] << " START " << ((pkr_self + p) % 3) << std::endl;
+				*out_ctl << ost.str() << std::flush;
 			}
 			
 			size_t reiz_status = 0, reiz_counter = 0, vh = 0, mh = 0, hh = 0;
@@ -1207,47 +1218,47 @@ int skat_game
 			{
 				if (!left->good() || !right->good())
 				{
-					cout << ">< Verbindung mit Spielpartner(n) zusammengebrochen" << endl;
+					std::cout << ">< Verbindung mit Spielpartner(n) zusammengebrochen" << std::endl;
 					return 5;
 				}
 				if (reiz_status == 11)
 				{
 					reiz_status += 100;
-					cout << "><><>< Keiner reizt das Spiel. Neu geben!" << endl;
+					std::cout << "><><>< Keiner reizt das Spiel. Neu geben!" << std::endl;
 					if (pctl)
 					{
-						ostringstream ost;
-						ost << nicks[pkr_self] << " RAMSCH" << endl;
-						*out_ctl << ost.str() << flush;
+						std::ostringstream ost;
+						ost << nicks[pkr_self] << " RAMSCH" << std::endl;
+						*out_ctl << ost.str() << std::flush;
 					}
 					break;
 				}
 				if (reiz_status == 12)
 				{
 					reiz_status += 100;
-					cout << "><><>< VH aka \"" << pkr.key[vh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< VH aka \"" << pkr.key[vh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = vh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				if (reiz_status == 13)
 				{
 					reiz_status += 100;
-					cout << "><><>< MH aka \"" << pkr.key[mh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< MH aka \"" << pkr.key[mh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = mh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				if (reiz_status == 14)
 				{
 					reiz_status += 100;
-					cout << "><><>< HH aka \"" << pkr.key[hh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< HH aka \"" << pkr.key[hh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = hh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				
 				// select(2) -- initalize file descriptors
@@ -1278,7 +1289,7 @@ int skat_game
 					if (ireaded > 0)
 					{
 						bool got_break = false;
-						vector<int> pos_delim;
+						std::vector<int> pos_delim;
 						int cnt_delim = 0, cnt_pos = 0, pos = 0;
 						for (int i = 0; i < ireaded; i++)
 							if (ireadbuf[i] == '\n')
@@ -1289,50 +1300,51 @@ int skat_game
 							bzero(xtmp, sizeof(xtmp));
 							memcpy(xtmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-							string cmd = xtmp;
+							std::string cmd = xtmp;
 							// do operation
 							// ---------------------------------------------------------------
 				
 				if (!left->good() || !right->good())
 				{
-					cout << ">< Verbindung mit Spielpartner(n) zusammengebrochen" << endl;
+					std::cout << ">< Verbindung mit Spielpartner(n)"
+						<< " zusammengebrochen" << std::endl;
 					return 5;
 				}
 				if (reiz_status == 11)
 				{
 					reiz_status += 100;
-					cout << "><><>< Keiner reizt das Spiel. Neu geben!" << endl;
+					std::cout << "><><>< Keiner reizt das Spiel. Neu geben!" << std::endl;
 					if (pctl)
-						*out_ctl << nicks[pkr_self] << " RAMSCH" << endl << flush;
+						*out_ctl << nicks[pkr_self] << " RAMSCH" << std::endl << std::flush;
 					got_break = true;
 					break;
 				}
 				if (reiz_status == 12)
 				{
 					reiz_status += 100;
-					cout << "><><>< VH aka \"" << pkr.key[vh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< VH aka \"" << pkr.key[vh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = vh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				if (reiz_status == 13)
 				{
 					reiz_status += 100;
-					cout << "><><>< MH aka \"" << pkr.key[mh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< MH aka \"" << pkr.key[mh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = mh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				if (reiz_status == 14)
 				{
 					reiz_status += 100;
-					cout << "><><>< HH aka \"" << pkr.key[hh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << endl;
+					std::cout << "><><>< HH aka \"" << pkr.key[hh].name << 
+						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
 					spiel_allein = hh;
 					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
 				}
 				
 				if ((cmd.find("!KICK", 0) == 0) || (cmd.find("!QUIT", 0) == 0))
@@ -1341,24 +1353,24 @@ int skat_game
 					|| (cmd.find("QUIT ", 0) == 0)
 					|| (cmd.find("KICK ", 0) == 0))
 				{
-					string nick = cmd.substr(5, cmd.length() - 5);
+					std::string nick = cmd.substr(5, cmd.length() - 5);
 					if (std::find(nicks.begin(), nicks.end(), nick) != nicks.end())
 						return 7;
 				}
 				if (master && (cmd.find("!ANNOUNCE", 0) == 0))
 				{
 					*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << (rounds - r) 
-						<< "!" << endl << flush;
+						<< "!" << std::endl << std::flush;
 				}	
 				if (cmd.find("IRC ", 0) == 0)
 				{
 					*out_pipe << "PRIVMSG #openSkat :" << 
-						cmd.substr(4, cmd.length() - 4) << endl << flush;
+						cmd.substr(4, cmd.length() - 4) << std::endl << std::flush;
 				}
 				if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 				{
-					string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-					string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+					std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+					std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 						cmd.length() - cmd.find(" ", 4) - 1);
 					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0))
 					{
@@ -1367,11 +1379,11 @@ int skat_game
 						{
 							if (nick == nicks[vh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 11;
 								if (pctl)
-									*out_ctl << nicks[vh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[vh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// VH passt (nach Reizen HH)
@@ -1379,11 +1391,11 @@ int skat_game
 						{
 							if (nick == nicks[vh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 14;
 								if (pctl)
-									*out_ctl << nicks[vh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[vh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// VH passt (nach Reizen MH)
@@ -1391,11 +1403,11 @@ int skat_game
 						{
 							if (nick == nicks[vh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 8;
 								if (pctl)
-									*out_ctl << nicks[vh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[vh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// VH passt (nach Passen MH)
@@ -1403,11 +1415,11 @@ int skat_game
 						{
 							if (nick == nicks[vh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 14;
 								if (pctl)
-									*out_ctl << nicks[vh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[vh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// MH passt (sofort)
@@ -1415,11 +1427,11 @@ int skat_game
 						{
 							if (nick == nicks[mh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 3;
 								if (pctl)
-									*out_ctl << nicks[mh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[mh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// MH passt (nach dem Reizen)
@@ -1427,11 +1439,11 @@ int skat_game
 						{
 							if (nick == nicks[mh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 6;
 								if (pctl)
-									*out_ctl << nicks[mh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[mh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// MH passt (nach dem Passen VH)
@@ -1439,11 +1451,11 @@ int skat_game
 						{
 							if (nick == nicks[mh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 14;
 								if (pctl)
-									*out_ctl << nicks[mh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[mh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// HH passt (sofort)
@@ -1451,11 +1463,11 @@ int skat_game
 						{
 							if (nick == nicks[hh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 10;
 								if (pctl)
-									*out_ctl << nicks[hh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[hh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// HH passt (nach dem Reizen)
@@ -1463,11 +1475,11 @@ int skat_game
 						{
 							if (nick == nicks[hh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 12;
 								if (pctl)
-									*out_ctl << nicks[hh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[hh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						// HH passt (nach dem Passen VH)
@@ -1475,20 +1487,20 @@ int skat_game
 						{
 							if (nick == nicks[hh])
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" passt bei " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 13;
 								if (pctl)
-									*out_ctl << nicks[hh] << " PASSE" << endl << flush;
+									*out_ctl << nicks[hh] << " PASSE" << std::endl << std::flush;
 							}
 						}
 						else
-							cout << ">< Reizvorgang inkorrekt (Passe-Aktion)" << endl;
+							std::cout << ">< Reizvorgang inkorrekt (Passe-Aktion)" << std::endl;
 					}
 					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0))
 					{
 						size_t rei = msg.find(" ", 6);
-						string srw = msg.substr(6, rei - 6);
+						std::string srw = msg.substr(6, rei - 6);
 						size_t irw = atoi(srw.c_str());
 						
 						// VH sagt ja (nach Passen MH, Reizen HH)
@@ -1498,15 +1510,15 @@ int skat_game
 							{
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 5;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[vh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1517,15 +1529,15 @@ int skat_game
 							{
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 2;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[vh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1536,15 +1548,15 @@ int skat_game
 							{
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 6;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[vh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1556,15 +1568,15 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[vh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 12;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[vh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1576,15 +1588,15 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 1;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[mh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1596,15 +1608,15 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 1;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[mh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1615,15 +1627,15 @@ int skat_game
 							{
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
-									"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[mh].name << 
+									"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 8;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[mh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1635,15 +1647,15 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 7;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[hh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1655,15 +1667,15 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 9;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[hh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
@@ -1675,20 +1687,20 @@ int skat_game
 								reiz_counter++;
 								if (irw != reiz_wert[reiz_counter])
 									return 22;
-								cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
-									"\" reizt " << reiz_wert[reiz_counter] << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[hh].name << 
+									"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 								reiz_status = 4;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[hh] << " REIZE " << 
-										reiz_wert[reiz_counter] << endl;
-									*out_ctl << ost.str() << flush;
+										reiz_wert[reiz_counter] << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 							}
 						}
 						else
-							cout << ">< Reizvorgang inkorrekt (Reize-Aktion)" << endl;
+							std::cout << ">< Reizvorgang inkorrekt (Reize-Aktion)" << std::endl;
 					}
 					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
 					{
@@ -1697,11 +1709,11 @@ int skat_game
 							if ((nick == nicks[spiel_allein]) && (pkr_self != spiel_allein))
 							{
 								hand_spiel = true, reiz_status += 100;
-								cout << "><><>< Skatfreund \"" <<
+								std::cout << "><><>< Skatfreund \"" <<
 									pkr.key[spiel_allein].name << 
-									"\" spielt aus der Hand" << endl;
+									"\" spielt aus der Hand" << std::endl;
 								if (pctl)
-									*out_ctl << nicks[spiel_allein] << " HAND" << endl << flush;
+									*out_ctl << nicks[spiel_allein] << " HAND" << std::endl << std::flush;
 							}
 						}
 					}
@@ -1712,9 +1724,9 @@ int skat_game
 							if ((nick == nicks[spiel_allein]) && (pkr_self != spiel_allein))
 							{
 								hand_spiel = false, reiz_status += 100;
-								cout << "><><>< Skatfreund \"" << 
+								std::cout << "><><>< Skatfreund \"" << 
 									pkr.key[spiel_allein].name << 
-									"\" nimmt den Skat auf" << endl;
+									"\" nimmt den Skat auf" << std::endl;
 								assert(sk.size() == 2);
 								s[spiel_allein].push(sk);
 								if (pkr_self == 0)
@@ -1739,7 +1751,7 @@ int skat_game
 										skat_szeigen(tmcg, vtmf, sk, right);
 								}
 								if (pctl)
-									*out_ctl << nicks[spiel_allein] << " SKAT" << endl << flush;
+									*out_ctl << nicks[spiel_allein] << " SKAT" << std::endl << std::flush;
 							}
 						}
 					}
@@ -1757,12 +1769,12 @@ int skat_game
 									char *tmp2 = new char[TMCG_MAX_CARD_CHARS];
 									VTMF_Card c1, c2;
 									reiz_status += 100;
-									cout << "><><>< Skatfreund \"" << 
+									std::cout << "><><>< Skatfreund \"" << 
 										pkr.key[spiel_allein].name << 
-										"\" drueckt den Skat" << endl;
+										"\" drueckt den Skat" << std::endl;
 									if (pctl)
 										*out_ctl << nicks[spiel_allein] << " DRUECKE" <<
-											endl << flush;
+											std::endl << std::flush;
 									if (((pkr_self == 0) && (spiel_allein == 1)) ||
 										((pkr_self == 1) && (spiel_allein == 2)) ||
 										((pkr_self == 2) && (spiel_allein == 0)))
@@ -1849,29 +1861,29 @@ int skat_game
 											vtmf, s[spiel_allein], right, left, false);
 										if (type < 0)
 										{
-											cout << ">< Fehler beim Aufdecken: " <<
-												"Betrugsversuch im ZNP" << endl;
+											std::cout << ">< Fehler beim Aufdecken: " <<
+												"Betrugsversuch im ZNP" << std::endl;
 											return 11;
 										}
 										os_ov.push(type, VTMF_Card());
 										if (pctl)
 										{
-											ostringstream ost;
-											ost << nicks[spiel_allein] << " OUVERT " << type << endl;
-											*out_ctl << ost.str() << flush;
+											std::ostringstream ost;
+											ost << nicks[spiel_allein] << " OUVERT " << type << std::endl;
+											*out_ctl << ost.str() << std::flush;
 										}
 									}
 									skat_blatt(10, os_ov);
 								}
-								cout << "><><>< Skatfreund \"" << 
+								std::cout << "><><>< Skatfreund \"" << 
 									pkr.key[spiel_allein].name << "\" spielt: " <<
-									skat_spiel2string(spiel_status) << endl;
+									skat_spiel2string(spiel_status) << std::endl;
 								if (pctl)
 								{
-									ostringstream ost;
+									std::ostringstream ost;
 									ost << nicks[spiel_allein] << " SAGEAN " << spiel_status <<
-										endl;
-									*out_ctl << ost.str() << flush;
+										std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 								spiel_dran = 0;
 								spiel_who[0] = vh, spiel_who[1] = mh, spiel_who[2] = hh;
@@ -1887,18 +1899,18 @@ int skat_game
 								vtmf, s[spiel_who[spiel_dran]], right, left, true);
 							if (type < 0)
 							{
-								cout << ">< Fehler beim Aufdecken: " <<
-									"Betrugsversuch im ZNP" << endl;
+								std::cout << ">< Fehler beim Aufdecken: " <<
+									"Betrugsversuch im ZNP" << std::endl;
 								return 12;
 							}
-							cout << "><><>< Skatfreund \"" << 
+							std::cout << "><><>< Skatfreund \"" << 
 								pkr.key[spiel_who[spiel_dran]].name << 
-								"\" legt die Karte: " << skat_type2string(type) << endl;
+								"\" legt die Karte: " << skat_type2string(type) << std::endl;
 							if (pctl)
 							{
-								ostringstream ost;
-								ost << nicks[spiel_who[spiel_dran]] << " LEGE " << type << endl;
-								*out_ctl << ost.str() << flush;
+								std::ostringstream ost;
+								ost << nicks[spiel_who[spiel_dran]] << " LEGE " << type << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}	
 							VTMF_Card c;
 							tmcg->TMCG_CreateOpenCard(c, vtmf, type);
@@ -1910,16 +1922,16 @@ int skat_game
 							{
 								int bk = skat_bstich(os_sp, spiel_status);
 								assert (bk != -1);
-								cout << "><><>< Skatfreund \"" << 
+								std::cout << "><><>< Skatfreund \"" << 
 									pkr.key[spiel_who[bk]].name << "\" bekommt den Stich: ";
 								for (size_t i = 0; i < os_sp.size(); i++)
-									cout << skat_type2string(os_sp[i].first);
-								cout << endl;
+									std::cout << skat_type2string(os_sp[i].first);
+								std::cout << std::endl;
 								if (os.size() > 0)
 									skat_blatt((pkr_self + p) % 3, os);
 								if (pctl)
 									*out_ctl << nicks[spiel_who[bk]] << " BSTICH" << 
-										endl << flush;
+										std::endl << std::flush;
 								// Stichstapel erste Karte (Regelkontrolle)
 								os_st.push(os_sp[0].first, os_sp[0].second);
 								// Stichstapel jedes Spielers
@@ -1940,9 +1952,9 @@ int skat_game
 				}
 				if (cmd.find("CMD ", 0) == 0)
 				{
-					string msg = cmd.substr(4, cmd.length() - 4);
+					std::string msg = cmd.substr(4, cmd.length() - 4);
 					
-					// trim spaces at end of string
+					// trim spaces at end of std::string
 					while (msg.find(" ", msg.length() - 1) == (msg.length() - 1))
 						msg = msg.substr(0, (msg.length() - 1));
 					
@@ -1953,28 +1965,28 @@ int skat_game
 							skat_blatt(10, os_ov);
 						if (spiel_status > 0)
 						{
-							cout << "><><>< Skatfreund \"" << pkr.key[spiel_allein].name <<
+							std::cout << "><><>< Skatfreund \"" << pkr.key[spiel_allein].name <<
 								"\" (";
 							if ((reiz_status - 412) == 0)
-								cout << "VH";
+								std::cout << "VH";
 							if ((reiz_status - 412) == 1)
-								cout << "MH";
+								std::cout << "MH";
 							if ((reiz_status - 412) == 2)
-								cout << "HH";
-							cout << ") spielt \"" << skat_spiel2string(spiel_status) <<
-								"\"" << endl;
-							cout << "><><>< gelegt wurde: ";
+								std::cout << "HH";
+							std::cout << ") spielt \"" << skat_spiel2string(spiel_status) <<
+								"\"" << std::endl;
+							std::cout << "><><>< gelegt wurde: ";
 							for (size_t i = 0; i < os_sp.size(); i++)
 							{
 								TMCG_OpenStack<VTMF_Card> os_sp2;
 								os_sp2.push(os_sp[i].first, os_sp[i].second);
 								skat_blatt(99, os_sp2);
-								cout << "(" << pkr.key[spiel_who[i]].name << ") ";
+								std::cout << "(" << pkr.key[spiel_who[i]].name << ") ";
 							}
 							if (os_sp.size() < 3)
 							{
-								cout << " [" << pkr.key[spiel_who[spiel_dran]].name << 
-									" ist dran]" << endl;
+								std::cout << " [" << pkr.key[spiel_who[spiel_dran]].name << 
+									" ist dran]" << std::endl;
 							}
 						}
 					}
@@ -1984,117 +1996,117 @@ int skat_game
 						if ((reiz_status == 4) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 14;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 10) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 11;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 1) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 8;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 7) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 14;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						// MH beim Passen
 						else if ((reiz_status == 0) && (((pkr_self + p) % 3) == 1))
 						{
 							reiz_status = 3;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 2) && (((pkr_self + p) % 3) == 1))
 						{
 							reiz_status = 6;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 9) && (((pkr_self + p) % 3) == 1))
 						{
 							reiz_status = 14;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						// HH beim Passen
 						else if ((reiz_status == 3) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_status = 10;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 5) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_status = 12;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 6) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_status = 12;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else if ((reiz_status == 8) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_status = 13;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-								"\" passt bei " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+								"\" passt bei " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << endl << flush;
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
-								*out_ctl << nicks[pkr_self] << " PASSE" << endl << flush;
+								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << std::flush;
 						}
 						else
-							cout << ">< Passen z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Passen z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0))
 					{
@@ -2102,66 +2114,66 @@ int skat_game
 						if ((reiz_status == 1) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 2;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 4) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 5;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 7) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_status = 6;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 10) && (((pkr_self + p) % 3) == 0))
 						{
 							reiz_counter++;
 							reiz_status = 12;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						// MH beim Reizen
@@ -2169,50 +2181,50 @@ int skat_game
 						{
 							reiz_counter++;
 							reiz_status = 1;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 2) && (((pkr_self + p) % 3) == 1))
 						{
 							reiz_counter++;
 							reiz_status = 1;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 9) && (((pkr_self + p) % 3) == 1))
 						{
 							reiz_status = 8;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" sagt ja zu " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" sagt ja zu " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						// HH beim Reizen
@@ -2220,72 +2232,72 @@ int skat_game
 						{
 							reiz_counter++;
 							reiz_status = 4;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 5) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_counter++;
 							reiz_status = 4;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 6) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_counter++;
 							reiz_status = 7;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else if ((reiz_status == 8) && (((pkr_self + p) % 3) == 2))
 						{
 							reiz_counter++;
 							reiz_status = 9;
-							cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
-								"\" reizt " << reiz_wert[reiz_counter] << endl;
+							std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name <<
+								"\" reizt " << reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								endl << flush;
+								std::endl << std::flush;
 							if (pctl)
 							{
-								ostringstream ost;
+								std::ostringstream ost;
 								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << endl;
-								*out_ctl << ost.str() << flush;
+									reiz_wert[reiz_counter] << std::endl;
+								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else
-							cout << ">< Reizen z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Reizen z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
 					{
@@ -2293,19 +2305,19 @@ int skat_game
 						{
 							if ((reiz_status - 112) == ((pkr_self + p) % 3))
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-									"\" spielt aus der Hand" << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+									"\" spielt aus der Hand" << std::endl;
 								*out_pipe << "PRIVMSG #openSkat_" << nr << " :HAND " << 
-									hex_game_digest << endl << flush;
+									hex_game_digest << std::endl << std::flush;
 								hand_spiel = true, reiz_status += 100;
 								if (pctl)
-									*out_ctl << nicks[pkr_self] << " HAND" << endl << flush;
+									*out_ctl << nicks[pkr_self] << " HAND" << std::endl << std::flush;
 							}
 							else
-								cout << ">< es spielt eine andere Partei" << endl;
+								std::cout << ">< es spielt eine andere Partei" << std::endl;
 						}
 						else
-							cout << ">< Skataufnahme z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Skataufnahme z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("SKAT", 0) == 0) || (msg.find("skat", 0) == 0))
 					{
@@ -2313,33 +2325,33 @@ int skat_game
 						{
 							if (pkr_self == spiel_allein)
 							{
-								cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
-									"\" nimmt den Skat auf" << endl;
+								std::cout << "><><>< Skatfreund \"" << pkr.key[pkr_self].name << 
+									"\" nimmt den Skat auf" << std::endl;
 								*out_pipe << "PRIVMSG #openSkat_" << nr << " :SKAT " << 
-									hex_game_digest << endl << flush;
+									hex_game_digest << std::endl << std::flush;
 								hand_spiel = false, reiz_status += 100;
 								if (!skat_ssehen(pkr_self, tmcg, vtmf, os, sk,
 									right, left))
 								{
-									cout << ">< Fehler beim Aufdecken: " <<
-										"Betrugsversuch im ZNP" << endl;
+									std::cout << ">< Fehler beim Aufdecken: " <<
+										"Betrugsversuch im ZNP" << std::endl;
 									return 8;
 								}
 								for (size_t i = 10; (pctl && (i < os.size())); i++)
 								{
-									ostringstream ost;
-									ost << nicks[pkr_self] << " KARTE " << os[i].first << endl;
-									*out_ctl << ost.str() << flush;
+									std::ostringstream ost;
+									ost << nicks[pkr_self] << " KARTE " << os[i].first << std::endl;
+									*out_ctl << ost.str() << std::flush;
 								}
 								if (pctl)
-									*out_ctl << nicks[pkr_self] << " SKAT" << endl << flush;
+									*out_ctl << nicks[pkr_self] << " SKAT" << std::endl << std::flush;
 								skat_blatt((pkr_self + p) % 3, os);
 							}
 							else
-								cout << ">< es spielt eine andere Partei" << endl;
+								std::cout << ">< es spielt eine andere Partei" << std::endl;
 						}
 						else
-							cout << ">< Skataufnahme z.Z. nicht erlaubt" << endl;
+							std::cout << ">< Skataufnahme z.Z. nicht erlaubt" << std::endl;
 					}
 					else if ((msg.find("DRUECKE", 0) == 0) || 
 						(msg.find("druecke", 0) == 0))
@@ -2350,7 +2362,7 @@ int skat_game
 							{
 								if (!hand_spiel)
 								{
-									string par = ""; 
+									std::string par = ""; 
 									size_t ei = par.npos;
 									if ((msg.find(" ", 0) == 7) && (msg.length() > 8))
 									{
@@ -2372,7 +2384,7 @@ int skat_game
 												assert(sk.size() == 2);
 												s[pkr_self].clear();
 												s[pkr_self].push(os);
-												cout << "><><>< Skatfreund \"" << 
+												std::cout << "><><>< Skatfreund \"" << 
 													pkr.key[pkr_self].name << 
 													"\" drueckt: " << skat_type2string(tt1) <<
 													skat_type2string(tt2) << std::endl;
@@ -2598,14 +2610,14 @@ int skat_game
 					}
 					if (num == 0)
 					{
-						cout << ">< Verbindung zu Programmteilen zusammengebrochen" << endl;
+						std::cout << ">< Verbindung zu Programmteilen zusammengebrochen" << std::endl;
 						return 5;
 					}
 				}
 			}
 			
 			if (pctl)
-				*out_ctl << nicks[pkr_self] << " STOP" << endl << flush;
+				*out_ctl << nicks[pkr_self] << " STOP" << std::endl << std::flush;
 			
 			if (spiel_status > 0)
 			{
@@ -2617,9 +2629,9 @@ int skat_game
 					for (size_t j = 0; (i != spiel_allein) && (j < os_pkt[i].size()); j++)
 						pkt_gegner += pkt_wert[os_pkt[i][j].first];
 				pkt_allein = 120 - pkt_gegner;
-				cout << "><><>< Augen Alleinspieler (" << 
+				std::cout << "><><>< Augen Alleinspieler (" << 
 					pkr.key[spiel_allein].name << "): " << pkt_allein <<
-					", Augen Gegenpartei: " << pkt_gegner << endl;
+					", Augen Gegenpartei: " << pkt_gegner << std::endl;
 				
 				if (pkt_allein > 60)
 					spiel_gewonnen = true;
@@ -2705,25 +2717,25 @@ int skat_game
 					// Schwarz gespielt (6)
 					if (os_pkt[spiel_allein].size() == 30)
 					{
-						cout << "><>< Gegenpartei ist Schwarz!" << endl;
+						std::cout << "><>< Gegenpartei ist Schwarz!" << std::endl;
 						gstufen++;
 					}
 					// Schneider gespielt (7)
 					if (pkt_gegner < 31)
 					{
-						cout << "><>< Gegenpartei ist Schneider!" << endl;
+						std::cout << "><>< Gegenpartei ist Schneider!" << std::endl;
 						gstufen++;
 					}
 					// (selbst) Schwarz gespielt (6)
 					if (os_pkt[spiel_allein].size() == 0)
 					{
-						cout << "><>< Alleinspieler ist Schwarz. Verloren!" << endl;
+						std::cout << "><>< Alleinspieler ist Schwarz. Verloren!" << std::endl;
 						gstufen++, spiel_gewonnen = false;
 					}
 					// (selbst) Schneider gespielt (7)
 					if (pkt_allein < 31)
 					{
-						cout << "><>< Alleinspieler ist Schneider. Verloren!" << endl;
+						std::cout << "><>< Alleinspieler ist Schneider. Verloren!" << std::endl;
 						gstufen++, spiel_gewonnen = false;
 					}
 					
@@ -2731,7 +2743,7 @@ int skat_game
 				}
 				if (reiz_wert[reiz_counter] > (size_t)spiel_wert)
 				{
-					cout << "><>< Alleinspieler hat sich uebereizt. Verloren!" << endl;
+					std::cout << "><>< Alleinspieler hat sich uebereizt. Verloren!" << std::endl;
 					spiel_wert = 0;
 					while ((size_t)spiel_wert < reiz_wert[reiz_counter])
 						spiel_wert += skat_spiel2gwert(spiel_status);
@@ -2748,21 +2760,21 @@ int skat_game
 				{
 					if (!rules_ok[i])
 					{
-						cout << "><>< Skatfreund \"" << pkr.key[i].name << "\" hat " <<
-							"nicht regelkonform gespielt." << endl;
+						std::cout << "><>< Skatfreund \"" << pkr.key[i].name << "\" hat " <<
+							"nicht regelkonform gespielt." << std::endl;
 						return 20;
 					}
 				}
-				cout << "><><>< Spielwert: " << spiel_wert << ", Reizwert: " <<
+				std::cout << "><><>< Spielwert: " << spiel_wert << ", Reizwert: " <<
 					reiz_wert[reiz_counter] << ", Gewonnen: " <<
-					(spiel_gewonnen ? "JA" : "NEIN") << endl;
+					(spiel_gewonnen ? "JA" : "NEIN") << std::endl;
 				if (pctl)
 				{
-					string ctlt = "";
+					std::string ctlt = "";
 					if (spiel_gewonnen)
-						*out_ctl << nicks[spiel_allein] << " GEWONNEN" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " GEWONNEN" << std::endl << std::flush;
 					else
-						*out_ctl << nicks[spiel_allein] << " VERLOREN" << endl << flush;
+						*out_ctl << nicks[spiel_allein] << " VERLOREN" << std::endl << std::flush;
 				}
 				pkt_sum[spiel_allein] += spiel_wert;
 				
@@ -2773,12 +2785,12 @@ int skat_game
 				spiel_protokoll << einzel_protokoll.str() << "#";
 				if (pctl)
 					*out_ctl << nicks[spiel_allein] << " PROTO " <<
-						einzel_protokoll.str() << endl << flush;
+						einzel_protokoll.str() << std::endl << std::flush;
 			}
 			else
 			{	
 				if (pctl)
-					*out_ctl << nicks[pkr_self] << " NONE" << endl << flush;
+					*out_ctl << nicks[pkr_self] << " NONE" << std::endl << std::flush;
 				spiel_protokoll << "NONE~0~0~0~0~" << hex_game_digest << "~#";
 			}
 			
@@ -2801,10 +2813,10 @@ int skat_game
 			d2.clear();
 			d.clear();
 			
-			cout << "><><>< Spielstand <><><> ";
+			std::cout << "><><>< Spielstand <><><> ";
 			for (size_t i = 0; i < 3; i++)
-				cout << pkr.key[i].name << ": " << pkt_sum[i] << " ";
-			cout << endl;
+				std::cout << pkr.key[i].name << ": " << pkt_sum[i] << " ";
+			std::cout << std::endl;
 		}
 		
 		std::string sig;
@@ -2815,21 +2827,21 @@ int skat_game
 		{
 			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
-			*left << sig << endl << flush;
-			*right << sig << endl << flush;
+			*left << sig << std::endl << std::flush;
+			*right << sig << std::endl << std::flush;
 			left->getline(stmp, sizeof(stmp));
 			if (!pkr.key[1].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[1].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[1].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
 			right->getline(stmp, sizeof(stmp));
 			if (!pkr.key[2].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[2].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[2].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
@@ -2839,20 +2851,20 @@ int skat_game
 			right->getline(stmp, sizeof(stmp));
 			if (!pkr.key[0].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[0].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[0].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
 			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
-			*left << sig << endl << flush;
-			*right << sig << endl << flush;
+			*left << sig << std::endl << std::flush;
+			*right << sig << std::endl << std::flush;
 			left->getline(stmp, sizeof(stmp));
 			if (!pkr.key[2].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[2].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[2].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
@@ -2862,28 +2874,28 @@ int skat_game
 			left->getline(stmp, sizeof(stmp));
 			if (!pkr.key[0].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[0].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[0].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
 			right->getline(stmp, sizeof(stmp));
 			if (!pkr.key[1].verify(sig_data, stmp))
 			{
-				cout << "><>< Unterschrift von Skatfreund \"" << 
-					pkr.key[1].name << "\" ungueltig" << endl;
+				std::cout << "><>< Unterschrift von Skatfreund \"" << 
+					pkr.key[1].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
 			sig_protokoll << sig << "#";
 			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
-			*left << sig << endl << flush;
-			*right << sig << endl << flush;
+			*left << sig << std::endl << std::flush;
+			*right << sig << std::endl << std::flush;
 		}
 		spiel_protokoll << sig_protokoll.str();
 		
 		// compute rnk_id aka hex_rnk_digest
-		string osttmp = spiel_protokoll.str();
+		std::string osttmp = spiel_protokoll.str();
 		assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 		char *rnk_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
 		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest,
@@ -2894,14 +2906,14 @@ int skat_game
 			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", 
 				(unsigned char)rnk_digest[i]);
 		opipestream *npipe = new opipestream(hpipe);
-		*npipe << hex_rnk_digest << endl << flush;
-		*npipe << spiel_protokoll.str() << endl << flush;
+		*npipe << hex_rnk_digest << std::endl << std::flush;
+		*npipe << spiel_protokoll.str() << std::endl << std::flush;
 		delete [] rnk_digest, delete [] hex_rnk_digest;
 		delete npipe;
 	}
 	delete vtmf;
 	if (pctl)
-		*out_ctl << nicks[pkr_self] << " DONE" << endl << flush;
+		*out_ctl << nicks[pkr_self] << " DONE" << std::endl << std::flush;
 	delete out_pipe;
 	if (pctl)
 		delete out_ctl;
