@@ -71,13 +71,15 @@ AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
   AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
 fi
-LIBS="$LIBS $LIBGCRYPT_LIBS"
+AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
+AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
 AM_PATH_LIBTMCG("1.0.0")
 if test "x$LIBTMCG_LIBS" = "x"; then
   AC_MSG_ERROR([libTMCG >= 1.0.0 is needed])
 fi
-LIBS="$LIBS $LIBTMCG_LIBS"
+AC_SUBST(LIBTMCG_CONFIG_LIBS)
+AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
 
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
@@ -119,8 +121,8 @@ if test x$ac_try_nsl = x1; then
     fi
 fi
 
-CXXFLAGS="-Wall -g3 -pedantic -O $LIBGCRYPT_CFLAGS"
-##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
