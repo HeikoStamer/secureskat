@@ -38,14 +38,17 @@
 	#include <gmp.h>
 
 	#include "mpz_srandom.h"
+	#include "mpz_sqrtm.h"
+	#include "mpz_helper.hh"
 	#include "parse_helper.hh"
 
 struct TMCG_SecretKey
 {
-	string							name, email, type, nizk, sig;
+	string						name, email, type, nizk, sig;
 	mpz_t							m, y, p, q;
 	// below this line are non-persistent values (pre-computation)
 	mpz_t							y1, m1pq, gcdext_up, gcdext_vq, pa1d4, qa1d4;
+	int								ret;
 	
 	TMCG_SecretKey
 		(unsigned long int keysize, const string &n, const string &e):
