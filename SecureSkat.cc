@@ -3,18 +3,18 @@
 
  Copyright (C) 2002, 2003, 2004 Heiko Stamer, <stamer@gaos.org>
 
-   This program is free software; you can redistribute it and/or modify
+   SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   SecureSkat is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
+   along with SecureSkat; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
@@ -3033,7 +3033,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.9 2005/01/06 20:00:21 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.10 2005/01/26 10:01:45 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
