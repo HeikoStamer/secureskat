@@ -80,6 +80,8 @@ struct TMCG_CardSecret
 	bool import
 		(string s)
 	{
+		char *ec;
+		
 		try
 		{
 			// check magic
@@ -87,8 +89,18 @@ struct TMCG_CardSecret
 				throw false;
 			
 			// public card data
-// FIXME: read from string
-			Players = 0, TypeBits = 0;
+			if (gs(s, '|') == NULL)
+				throw false;
+			Players = strtoul(gs(s, '|'), &ec, 10);
+			if ((*ec != '\0') || (Players <= 0) ||
+				(Players > TMCG_MAX_PLAYERS) || (!nx(s, '|')))
+					throw false;
+			if (gs(s, '|') == NULL)
+				throw false;
+			TypeBits = strtoul(gs(s, '|'), &ec, 10);
+			if ((*ec != '\0') || (TypeBits <= 0) ||
+				(TypeBits > TMCG_MAX_TYPEBITS) || (!nx(s, '|')))
+					throw false;
 			
 			// secret card data
 			for (size_t k = 0; k < Players; k++)

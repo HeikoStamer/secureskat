@@ -123,32 +123,32 @@ class SchindelhauerTMCG
 	
 	public:
 		static const size_t		TMCG_KeyIDSize = 5;			// octets
-		mpz_ui								TMCG_SecurityLevel;			// iterations
-		size_t								TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
+		mpz_ui					TMCG_SecurityLevel;			// iterations
+		size_t					TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
 		
 		SchindelhauerTMCG 
 			(mpz_ui security, size_t players, size_t typebits)
 		{
-			assert (players <= TMCG_MAX_PLAYERS);
-			assert (typebits <= TMCG_MAX_TYPEBITS);
+			assert(players <= TMCG_MAX_PLAYERS);
+			assert(typebits <= TMCG_MAX_TYPEBITS);
 			
 			TMCG_SecurityLevel = security;
 			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCardType = 1;
 			for (mpz_ui i = 0; i < TMCG_TypeBits; i++)
 				TMCG_MaxCardType *= 2;
 			
-			if (!gcry_check_version (LIBGCRYPT_VERSION))
+			if (!gcry_check_version(LIBGCRYPT_VERSION))
 			{
-				cerr << "libgcrypt: need library version >= " << 
-				    LIBGCRYPT_VERSION << endl;
+				cerr << "libgcrypt: need library version >= " <<
+					LIBGCRYPT_VERSION << endl;
 				exit(-1);
 			}
-			gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-			gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
-			if (gcry_md_test_algo (TMCG_GCRY_MD_ALGO))
+			gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
+			gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+			if (gcry_md_test_algo(TMCG_GCRY_MD_ALGO))
 			{
-				cerr << "libgcrypt: algorithm " << TMCG_GCRY_MD_ALGO << 
-					" [" << gcry_md_algo_name (TMCG_GCRY_MD_ALGO) << 
+				cerr << "libgcrypt: algorithm " << TMCG_GCRY_MD_ALGO <<
+					" [" << gcry_md_algo_name(TMCG_GCRY_MD_ALGO) <<
 					"] not available" << endl;
 				exit(-1);
 			}
@@ -158,24 +158,24 @@ class SchindelhauerTMCG
 		void h
 			(char *output, const char *input, size_t size)
 		{
-			gcry_md_hash_buffer (TMCG_GCRY_MD_ALGO, output, input, size);
+			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, output, input, size);
 		}
 		
 		void g
 			(char *output, size_t osize, const char *input, size_t isize)
 		{
-			size_t mdsize = gcry_md_get_algo_dlen (TMCG_GCRY_MD_ALGO);
+			size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 			size_t times = (osize / mdsize) + 1;
 			char *out = new char[times * mdsize];
 			for (size_t i = 0; i < times; i++)
 			{
 				char *data = new char[6 + isize];
-				snprintf (data, 6 + isize, "TMCG%02x", (unsigned int)i);
-				memcpy (data + 6, input, isize);
+				snprintf(data, 6 + isize, "TMCG%02x", (unsigned int)i);
+				memcpy(data + 6, input, isize);
 				h(out + (i * mdsize), data, 6 + isize);
 				delete [] data;
 			}
-			memcpy (output, out, osize);
+			memcpy(output, out, osize);
 			delete [] out;
 		}
 		
@@ -184,21 +184,23 @@ class SchindelhauerTMCG
 			(ostream &out, const TMCG_SecretKey &key)
 		{
 			return
-				out << "sec|" << key.name << "|" << key.email << "|" << key.type << 
-					"|" << key.m << "|" << key.y << "|" << key.p << "|" << key.q << 
-					"|" << key.nizk << "|" << key.sig;
+				out << "sec|" << key.name << "|" << key.email << "|" <<
+					key.type << "|" << key.m << "|" << key.y << "|" <<
+					key.p << "|" << key.q << "|" <<
+					key.nizk << "|" << key.sig;
 		}
 		friend ostream& operator<< 
 			(ostream &out, const TMCG_PublicKey &key)
 		{
 			return
-				out << "pub|" << key.name << "|" << key.email << "|" << key.type <<
-					"|" << key.m << "|" << key.y << "|" << key.nizk << "|" << key.sig;
+				out << "pub|" << key.name << "|" << key.email << "|" <<
+					key.type << "|" << key.m << "|" << key.y << "|" <<
+					key.nizk << "|" << key.sig;
 		}
 		friend ostream& operator<< 
 			(ostream &out, const TMCG_Card &card)
 		{
-			out << "crd|";
+			out << "crd|" << card.Players << "|" << card.TypeBits << "|";
 			for (size_t k = 0; k < card.Players; k++)
 				for (size_t w = 0; w < card.TypeBits; w++)
 					out << card.z[k][w] << "|";
@@ -213,10 +215,12 @@ class SchindelhauerTMCG
 		friend ostream& operator<< 
 			(ostream &out, const TMCG_CardSecret &cardsecret)
 		{
-			out << "crs|";
+			out << "crs|" << cardsecret.Players << "|" <<
+				cardsecret.TypeBits << "|";
 			for (size_t k = 0; k < cardsecret.Players; k++)
 				for (size_t w = 0; w < cardsecret.TypeBits; w++)
-					out << cardsecret.r[k][w] << "|" << cardsecret.b[k][w] << "|";
+					out << cardsecret.r[k][w] << "|" <<
+						cardsecret.b[k][w] << "|";
 			return out;
 		}
 		friend ostream& operator<<

@@ -45,8 +45,8 @@
 
 struct TMCG_Card
 {
-	size_t	Players, TypeBits;
-	mpz_t		z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+	size_t					Players, TypeBits;
+	mpz_t					z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
 	
 	TMCG_Card
 		()
@@ -96,6 +96,8 @@ struct TMCG_Card
 	bool import
 		(string s)
 	{
+		char *ec;
+		
 		try
 		{
 			// check magic
@@ -103,8 +105,18 @@ struct TMCG_Card
 				throw false;
 			
 			// card description
-// FIXME: read from string
-			Players = 0, TypeBits = 0;
+			if (gs(s, '|') == NULL)
+				throw false;
+			Players = strtoul(gs(s, '|'), &ec, 10);
+			if ((*ec != '\0') || (Players <= 0) ||
+				(Players > TMCG_MAX_PLAYERS) || (!nx(s, '|')))
+					throw false;
+			if (gs(s, '|') == NULL)
+				throw false;
+			TypeBits = strtoul(gs(s, '|'), &ec, 10);
+			if ((*ec != '\0') || (TypeBits <= 0) ||
+				(TypeBits > TMCG_MAX_TYPEBITS) || (!nx(s, '|')))
+					throw false;
 			
 			// card data
 			for (size_t k = 0; k < Players; k++)
