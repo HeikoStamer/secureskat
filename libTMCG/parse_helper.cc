@@ -48,12 +48,12 @@ bool nx
 	return true;
 }
 
-const char *gs
+std::string gs
 	(const std::string &s, char p)
 {
 	size_t ei;
 	if ((ei = s.find(p, 0)) != s.npos)
-		return (s.substr(0, ei)).c_str();
+		return s.substr(0, ei);
 	else
 		return NULL;
 }

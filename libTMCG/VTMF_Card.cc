@@ -63,10 +63,12 @@ bool VTMF_Card::import
 			throw false;
 		
 		// card data
-		if ((mpz_set_str(c_1, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
-		if ((mpz_set_str(c_2, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
+		if ((mpz_set_str(c_1, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
+		if ((mpz_set_str(c_2, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
 		
 		throw true;
 	}

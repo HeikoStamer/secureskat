@@ -126,9 +126,9 @@ template <typename CardSecretType> struct TMCG_StackSecret
 				throw false;
 			
 			// size of stack
-			if (gs(s, '^') == NULL)
+			if (gs(s, '^').length() == 0)
 				throw false;
-			size = strtoul(gs(s, '^'), &ec, 10);
+			size = strtoul(gs(s, '^').c_str(), &ec, 10);
 			if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
 				throw false;
 			
@@ -138,15 +138,15 @@ template <typename CardSecretType> struct TMCG_StackSecret
 				std::pair<size_t, CardSecretType> lej;
 				
 				// permutation index
-				if (gs(s, '^') == NULL)
+				if (gs(s, '^').length() == 0)
 					throw false;
-				lej.first = (size_t)strtoul(gs(s, '^'), &ec, 10);
+				lej.first = (size_t)strtoul(gs(s, '^').c_str(), &ec, 10);
 				if ((*ec != '\0') || (lej.first < 0) || (lej.first >= size) ||
 					(!nx(s, '^')))
 						throw false;
 				
 				// card secret
-				if (gs(s, '^') == NULL)
+				if (gs(s, '^').length() == 0)
 					throw false;
 				if ((!lej.second.import(gs(s, '^'))) || (!nx(s, '^')))
 					throw false;

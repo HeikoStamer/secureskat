@@ -77,15 +77,15 @@ bool TMCG_Card::import
 			throw false;
 		
 		// card description
-		if (gs(s, '|') == NULL)
+		if (gs(s, '|').length() == 0)
 			throw false;
-		Players = strtoul(gs(s, '|'), &ec, 10);
+		Players = strtoul(gs(s, '|').c_str(), &ec, 10);
 		if ((*ec != '\0') || (Players <= 0) ||
 			(Players > TMCG_MAX_PLAYERS) || (!nx(s, '|')))
 				throw false;
-		if (gs(s, '|') == NULL)
+		if (gs(s, '|').length() == 0)
 			throw false;
-		TypeBits = strtoul(gs(s, '|'), &ec, 10);
+		TypeBits = strtoul(gs(s, '|').c_str(), &ec, 10);
 		if ((*ec != '\0') || (TypeBits <= 0) ||
 			(TypeBits > TMCG_MAX_TYPEBITS) || (!nx(s, '|')))
 				throw false;
@@ -96,7 +96,7 @@ bool TMCG_Card::import
 			for (size_t w = 0; w < TypeBits; w++)
 			{
 				// z_ij
-				if ((mpz_set_str(z[k][w], gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) ||
+				if ((mpz_set_str(z[k][w], gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
 			}

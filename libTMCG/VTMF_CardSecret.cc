@@ -49,8 +49,9 @@ bool VTMF_CardSecret::import
 			throw false;
 		
 		// secret card data
-		if ((mpz_set_str(r, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
+		if ((mpz_set_str(r, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
 		
 		throw true;
 	}

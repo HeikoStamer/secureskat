@@ -114,9 +114,9 @@ bool TMCG_PublicKey::check
 		input << m << "^" << y;
 		
 		// get security parameter of STAGE1
-		if (gs(s, '^') == NULL)
+		if (gs(s, '^').length() == 0)
 			throw false;
-		stage1_size = strtoul(gs(s, '^'), &ec, 10);
+		stage1_size = strtoul(gs(s, '^').c_str(), &ec, 10);
 		if ((*ec != '\0') || (stage1_size <= 0) || (!nx(s, '^')))
 			throw false;
 		
@@ -139,10 +139,11 @@ bool TMCG_PublicKey::check
 			while (mpz_cmp_ui(bar, 1L));
 			
 			// read NIZK proof
-			if (gs(s, '^') == NULL)
+			if (gs(s, '^').length() == 0)
 				throw false;
-			if ((mpz_set_str(bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
-				throw false;
+			if ((mpz_set_str(bar, gs(s, '^').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+				(!nx(s, '^')))
+					throw false;
 			
 			// check, whether bar^m mod m is equal to foo
 			mpz_powm(bar, bar, m, m);
@@ -151,9 +152,9 @@ bool TMCG_PublicKey::check
 		}
 		
 		// get security parameter of STAGE2
-		if (gs(s, '^') == NULL)
+		if (gs(s, '^').length() == 0)
 			throw false;
-		stage2_size = strtoul(gs(s, '^'), &ec, 10);
+		stage2_size = strtoul(gs(s, '^').c_str(), &ec, 10);
 		if ((*ec != '\0') || (stage2_size <= 0) || (!nx(s, '^')))
 			throw false;
 		
@@ -176,10 +177,11 @@ bool TMCG_PublicKey::check
 			while (mpz_cmp_ui(bar, 1L));
 			
 			// read NIZK proof
-			if (gs(s, '^') == NULL)
+			if (gs(s, '^').length() == 0)
 				throw false;
-			if ((mpz_set_str(bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
-				throw false;
+			if ((mpz_set_str(bar, gs(s, '^').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+				(!nx(s, '^')))
+					throw false;
 			
 			// check, whether bar^2 \equiv +-foo or \equiv +-2foo (mod m)
 			mpz_mul(bar, bar, bar);
@@ -201,9 +203,9 @@ bool TMCG_PublicKey::check
 		}
 		
 		// get security parameter of STAGE3
-		if (gs(s, '^') == NULL)
+		if (gs(s, '^').length() == 0)
 			throw false;
-		stage3_size = strtoul(gs(s, '^'), &ec, 10);
+		stage3_size = strtoul(gs(s, '^').c_str(), &ec, 10);
 		if ((*ec != '\0') || (stage3_size <= 0) || (!nx(s, '^')))
 			throw false;
 		
@@ -225,10 +227,11 @@ bool TMCG_PublicKey::check
 			while (mpz_jacobi(foo, m) != 1);
 			
 			// read NIZK proof
-			if (gs(s, '^') == NULL)
+			if (gs(s, '^').length() == 0)
 				throw false;
-			if ((mpz_set_str(bar, gs(s, '^'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '^')))
-				throw false;
+			if ((mpz_set_str(bar, gs(s, '^').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+				(!nx(s, '^')))
+					throw false;
 			
 			// check congruence [Goldwasser-Micali NIZK proof for NQR]
 			mpz_mul(bar, bar, bar);
@@ -308,30 +311,32 @@ bool TMCG_PublicKey::import
 		
 		// name
 		name = gs(s, '|');
-		if ((gs(s, '|') == NULL) || (!nx(s, '|')))
+		if ((gs(s, '|').length() == 0) || (!nx(s, '|')))
 			throw false;
 		
 		// email
 		email = gs(s, '|');
-		if ((gs(s, '|') == NULL) || (!nx(s, '|')))
+		if ((gs(s, '|').length() == 0) || (!nx(s, '|')))
 			throw false;
 		
 		// type
 		type = gs(s, '|');
-		if ((gs(s, '|') == NULL) || (!nx(s, '|')))
+		if ((gs(s, '|').length() == 0) || (!nx(s, '|')))
 			throw false;
 		
 		// m
-		if ((mpz_set_str(m, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
+		if ((mpz_set_str(m, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
 		
 		// y
-		if ((mpz_set_str(y, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
+		if ((mpz_set_str(y, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
 		
 		// NIZK
 		nizk = gs(s, '|');
-		if ((gs(s, '|') == NULL) || (!nx(s, '|')))
+		if ((gs(s, '|').length() == 0) || (!nx(s, '|')))
 			throw false;
 		
 		// sig
@@ -401,8 +406,9 @@ bool TMCG_PublicKey::verify
 			throw false;
 		
 		// value
-		if ((mpz_set_str(foo, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-			throw false;
+		if ((mpz_set_str(foo, gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+			(!nx(s, '|')))
+				throw false;
 		
 		// verify signature
 		size_t mdsize = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);

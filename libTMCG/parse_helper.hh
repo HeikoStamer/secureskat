@@ -35,6 +35,6 @@
 		(std::string &s, const std::string &c, char p);
 	bool nx
 		(std::string &s, char p);
-	const char *gs
+	std::string gs
 		(const std::string &s, char p);
 #endif

@@ -175,9 +175,9 @@ template <typename CardType> struct TMCG_Stack
 				throw false;
 			
 			// size of stack
-			if (gs(s, '^') == NULL)
+			if (gs(s, '^').length() == 0)
 				throw false;
-			size = strtoul(gs(s, '^'), &ec, 10);
+			size = strtoul(gs(s, '^').c_str(), &ec, 10);
 			if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
 				throw false;
 			
@@ -186,7 +186,7 @@ template <typename CardType> struct TMCG_Stack
 			{
 				CardType c;
 				
-				if (gs(s, '^') == NULL)
+				if (gs(s, '^').length() == 0)
 					throw false;
 				if ((!c.import(gs(s, '^'))) || (!nx(s, '^')))
 					throw false;
