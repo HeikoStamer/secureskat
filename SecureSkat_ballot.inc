@@ -586,16 +586,22 @@ int ballot_child
 	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 0)
 	{
+#ifdef COMMON_DDH_GROUP
+		stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << endl;	
+		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
+#else
 		vtmf = new BarnettSmartVTMF_dlog();
-		if (!vtmf->CheckGroup())
-		{
-			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
-			return -90;
-		}
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
 				vtmf->PublishGroup(*ios_out[vnicks[i]]);
+		}
+#endif
+		if (!vtmf->CheckGroup())
+		{
+			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
+			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
 		for (size_t i = 0; i < vnicks.size(); i++)
@@ -621,7 +627,13 @@ int ballot_child
 	}
 	else
 	{
+#ifdef COMMON_DDH_GROUP
+		stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << endl;	
+		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
+#else
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
+#endif
 		if (!vtmf->CheckGroup())
 		{
 			cout << ">< Fehler in VTMF: CheckGroup(" << vnicks[0] <<
