@@ -686,18 +686,18 @@ const char *SchindelhauerTMCG::TMCG_EncryptValue
 	mpz_t vdata;
 	size_t rabin_s2 = 2 * rabin_s0;
 	size_t rabin_s1 = (mpz_sizeinbase (key.m, 2L) / 8) - rabin_s2;
-
+	
 	assert (rabin_s2 < (mpz_sizeinbase (key.m, 2L) / 16));
 	assert (rabin_s2 < rabin_s1);
 	assert (rabin_s0 < (mpz_sizeinbase (key.m, 2L) / 32));
-
+	
 	char *r = new char[rabin_s1];
 	gcry_randomize ((unsigned char*)r, rabin_s1, GCRY_STRONG_RANDOM);
 		
 	char *Mt = new char[rabin_s2], *g12 = new char[rabin_s2];
 	memcpy (Mt, value, rabin_s0),	memset (Mt + rabin_s0, 0, rabin_s0);
 	g(g12, rabin_s2, r, rabin_s1);
-
+	
 	for (size_t i = 0; i < rabin_s2; i++)
 		Mt[i] ^= g12[i];
 	
@@ -705,11 +705,11 @@ const char *SchindelhauerTMCG::TMCG_EncryptValue
 	memcpy (y, Mt, rabin_s2),	memcpy (y + rabin_s2, r, rabin_s1);
 	mpz_init (vdata), mpz_import (vdata, 1, -1, rabin_s2 + rabin_s1, 1, 0, y);
 	delete [] y, delete [] g12, delete [] Mt, delete [] r;
-
+	
 	// apply RABIN function vdata = vdata^2 mod m
 	mpz_mul (vdata, vdata, vdata);
 	mpz_mod (vdata, vdata, key.m);
-
+	
 	TMCG_DataStream ost;
 	ost << "enc|" << TMCG_ExportKeyID(key) << "|" << vdata << "|";
 	mpz_clear (vdata);
@@ -724,11 +724,11 @@ const char *SchindelhauerTMCG::TMCG_DecryptValue
 	mpz_t vdata, vroot[4];
 	size_t rabin_s2 = 2 * rabin_s0;
 	size_t rabin_s1 = (mpz_sizeinbase (key.m, 2L) / 8) - rabin_s2;
-
+	
 	assert (rabin_s2 < (mpz_sizeinbase (key.m, 2L) / 16));
 	assert (rabin_s2 < rabin_s1);
 	assert (rabin_s0 < (mpz_sizeinbase (key.m, 2L) / 32));
-
+	
 	char *y = new char[rabin_s2 + rabin_s1 + 1024], *r = new char[rabin_s1];
 	char *Mt = new char[rabin_s2], *g12 = new char[rabin_s2];
 	mpz_init (vdata), mpz_init (vroot[0]), mpz_init (vroot[1]),
@@ -799,7 +799,7 @@ const char *SchindelhauerTMCG::TMCG_SignData
 	// check that y \in Z*m
 	assert (mpz_sizeinbase (key.m, 2L) > (mnsize * 8));
 	assert (mnsize > (mdsize + rabin_k0));
-
+	
 	// WARNING: only a probabilistic algorithm (Rabin's signature scheme)
 	// PRab from [Bellare, Rogaway: The Exact Security of Digital Signatures]
 	do
@@ -1825,24 +1825,6 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	vtmf->VerifiableRemaskingProtocol_Remask(c.c_1, c.c_2, cc.c_1, cc.c_2, cs.r);
 }
 
-bool SchindelhauerTMCG::TMCG_EqualCard
-	(const TMCG_Card &c, const TMCG_Card &cc)
-{
-	for (size_t k = 0; k < TMCG_Players; k++)
-		for (size_t w = 0; w < TMCG_TypeBits; w++)
-			if (mpz_cmp(c.z[k][w], cc.z[k][w]) != 0)
-				return false;
-	return true;
-}
-
-bool SchindelhauerTMCG::TMCG_EqualCard
-	(const VTMF_Card &c, const VTMF_Card &cc)
-{
-	if ((mpz_cmp(c.c_1, cc.c_1) != 0) || (mpz_cmp(c.c_2, cc.c_2) != 0))
-		return false;
-	return true;
-}
-
 void SchindelhauerTMCG::TMCG_ProofMaskCard
 	(const TMCG_Card &c, const TMCG_Card &cc, const TMCG_CardSecret &cs,
 	const TMCG_PublicKeyRing &ring,
@@ -2325,7 +2307,7 @@ bool SchindelhauerTMCG::TMCG_IsInStack
 	(const TMCG_Stack &s, const TMCG_Card &c)
 {
 	for (TMCG_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 			return true;
 	return false;
 }
@@ -2334,7 +2316,7 @@ bool SchindelhauerTMCG::TMCG_IsInStack
 	(const VTMF_Stack &s, const VTMF_Card &c)
 {
 	for (VTMF_Stack::const_iterator si = s.begin(); si != s.end(); si++)
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 			return true;
 	return false;
 }
@@ -2345,7 +2327,7 @@ void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
 	for (TMCG_Stack::iterator si = s.begin(); si != s.end(); si++)
 	{
 		// remove first card (which is equal to c) from stack s
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 		{
 			delete *si;
 			s.erase(si);
@@ -2360,7 +2342,7 @@ void SchindelhauerTMCG::TMCG_RemoveFirstFromStack
 	for (VTMF_Stack::iterator si = s.begin(); si != s.end(); si++)
 	{
 		// remove first card (which is equal to c) from stack s
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 		{
 			delete *si;
 			s.erase(si);
@@ -2376,7 +2358,7 @@ void SchindelhauerTMCG::TMCG_RemoveAllFromStack
 	while (si != s.end())
 	{
 		// remove all cards (that are equal to c) from stack s
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 		{
 			delete *si;
 			si = s.erase(si);
@@ -2393,7 +2375,7 @@ void SchindelhauerTMCG::TMCG_RemoveAllFromStack
 	while (si != s.end())
 	{
 		// remove all cards (that are equal to c) from stack s
-		if (TMCG_EqualCard(*(*si), c))
+		if (*(*si) == c)
 		{
 			delete *si;
 			si = s.erase(si);
@@ -2521,7 +2503,7 @@ bool SchindelhauerTMCG::TMCG_EqualStack
 	if (s.size() != s2.size())
 		return false;
 	for (size_t i = 0; i < s.size(); i++)
-		if (!TMCG_EqualCard(*(s[i]), *(s2[i])))
+		if (*(s[i]) != *(s2[i]))
 			return false;
 	return true;
 }
@@ -2532,7 +2514,7 @@ bool SchindelhauerTMCG::TMCG_EqualStack
 	if (s.size() != s2.size())
 		return false;
 	for (size_t i = 0; i < s.size(); i++)
-		if (!TMCG_EqualCard(*(s[i]), *(s2[i])))
+		if (*(s[i]) != *(s2[i]))
 			return false;
 	return true;
 }

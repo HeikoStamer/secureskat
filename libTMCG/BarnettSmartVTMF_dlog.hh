@@ -80,6 +80,20 @@ struct VTMF_Card
 		return *this;
 	}
 	
+	bool operator ==
+		(const VTMF_Card& that)
+	{
+		if (mpz_cmp(c_1, that.c_1) || mpz_cmp(c_2, that.c_2))
+			return false;
+		return true;
+	}
+	
+	bool operator !=
+		(const VTMF_Card& that)
+	{
+		return !(*this == that);
+	}
+	
 	~VTMF_Card()
 	{
 		mpz_clear(c_1), mpz_clear(c_2);

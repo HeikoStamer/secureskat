@@ -128,6 +128,24 @@ struct TMCG_Card
 		return *this;
 	}
 	
+	bool operator ==
+		(const TMCG_Card& that)
+	{
+		if ((Players != that.Players) || (TypeBits != that.TypeBits))
+			return false;
+		for (size_t k = 0; k < Players; k++)
+			for (size_t w = 0; w < TypeBits; w++)
+				if (mpz_cmp(z[k][w], that.z[k][w]))
+					return false;
+		return true;
+	}
+	
+	bool operator !=
+		(const TMCG_Card& that)
+	{
+		return !(*this == that);
+	}
+	
 	~TMCG_Card
 		()
 	{
@@ -399,7 +417,7 @@ class SchindelhauerTMCG
 		
 		// methods for key management
 		void TMCG_CreateKey
-			(TMCG_SecretKey &key, mpz_ui keysize, 
+			(TMCG_SecretKey &key, mpz_ui keysize,
 			const string &name, const string &email);
 		void TMCG_CreateKey
 			(TMCG_PublicKey &pkey, const TMCG_SecretKey &skey) const;
@@ -449,7 +467,7 @@ class SchindelhauerTMCG
 			(const TMCG_PublicKey &key, mpz_srcptr z, mpz_srcptr zz,
 			istream &in, ostream &out);
 		void TMCG_ProofMaskOne
-			(const TMCG_PublicKey &key, mpz_srcptr r, mpz_srcptr b, 
+			(const TMCG_PublicKey &key, mpz_srcptr r, mpz_srcptr b,
 			istream &in, ostream &out);
 		bool TMCG_VerifyMaskOne
 			(const TMCG_PublicKey &key, mpz_srcptr t, istream &in, ostream &out);
@@ -460,7 +478,7 @@ class SchindelhauerTMCG
 		
 		// operations on values
 		void TMCG_MaskValue
-			(const TMCG_PublicKey &key, mpz_srcptr z, mpz_ptr zz, 
+			(const TMCG_PublicKey &key, mpz_srcptr z, mpz_ptr zz,
 			mpz_srcptr r, mpz_srcptr b);
 		
 		// operations and proofs on cards
@@ -494,10 +512,6 @@ class SchindelhauerTMCG
 		void TMCG_MaskCard
 			(const VTMF_Card &c, VTMF_Card &cc, const VTMF_CardSecret &cs,
 			BarnettSmartVTMF_dlog *vtmf);
-		bool TMCG_EqualCard
-			(const TMCG_Card &c, const TMCG_Card &cc);
-		bool TMCG_EqualCard
-			(const VTMF_Card &c, const VTMF_Card &cc);
 		void TMCG_ProofMaskCard
 			(const TMCG_Card &c, const TMCG_Card &cc, const TMCG_CardSecret &cs,
 			const TMCG_PublicKeyRing &ring, istream &in, ostream &out);
@@ -517,7 +531,7 @@ class SchindelhauerTMCG
 			(const TMCG_Card &c, const TMCG_PublicKeyRing &ring,
 			istream &in, ostream &out);
 		void TMCG_ProofCardSecret
-			(const TMCG_Card &c, const TMCG_SecretKey &key, size_t index, 
+			(const TMCG_Card &c, const TMCG_SecretKey &key, size_t index,
 			istream &in, ostream &out);
 		void TMCG_ProofCardSecret
 			(const VTMF_Card &c, BarnettSmartVTMF_dlog *vtmf,
