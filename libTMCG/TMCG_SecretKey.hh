@@ -65,7 +65,8 @@ struct TMCG_SecretKey
 		();
 	
 	TMCG_SecretKey
-		(unsigned long int keysize, const std::string &n, const std::string &e);
+		(const std::string &n, const std::string &e,
+		unsigned long int keysize = TMCG_KEY_SIZE);
 	
 	TMCG_SecretKey
 		(const std::string& s);
@@ -75,6 +76,9 @@ struct TMCG_SecretKey
 	
 	TMCG_SecretKey& operator =
 		(const TMCG_SecretKey& that);
+	
+	void generate
+		(unsigned long int keysize);
 	
 	void precompute
 		();

@@ -51,17 +51,61 @@ TMCG_SecretKey::TMCG_SecretKey
 }
 
 TMCG_SecretKey::TMCG_SecretKey
-	(unsigned long int keysize, const std::string &n, const std::string &e):
+	(const std::string &n, const std::string &e,
+	unsigned long int keysize = TMCG_KEY_SIZE):
 		name(n), email(e)
+{
+	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
+	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
+		mpz_init(pa1d4), mpz_init(qa1d4);
+	
+	generate(keysize);
+}
+
+TMCG_SecretKey::TMCG_SecretKey
+	(const std::string& s)
+{
+	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
+	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
+		mpz_init(pa1d4), mpz_init(qa1d4);
+	
+	import(s);
+}
+
+TMCG_SecretKey::TMCG_SecretKey
+	(const TMCG_SecretKey& that):
+		name(that.name), email(that.email), type(that.type),
+		nizk(that.nizk), sig(that.sig)
+{
+	mpz_init_set(m, that.m), mpz_init_set(y, that.m),
+		mpz_init_set(p, that.p), mpz_init_set(q, that.q);
+	mpz_init_set(y1, that.y1), mpz_init_set(m1pq, that.m1pq),
+		mpz_init_set(gcdext_up, that.gcdext_up),
+		mpz_init_set(gcdext_vq, that.gcdext_vq),
+		mpz_init_set(pa1d4, that.pa1d4), mpz_init_set(qa1d4, that.qa1d4);
+}
+
+TMCG_SecretKey& TMCG_SecretKey::operator =
+	(const TMCG_SecretKey& that)
+{
+	name = that.name, email = that.email, type = that.type,
+		nizk = that.nizk, sig = that.sig;
+	mpz_set(m, that.m), mpz_set(y, that.y),
+		mpz_set(p, that.p), mpz_set(q, that.q);
+	mpz_set(y1, that.y1), mpz_set(m1pq, that.m1pq),
+		mpz_set(gcdext_up, that.gcdext_up), mpz_set(gcdext_vq, that.gcdext_vq),
+		mpz_set(pa1d4, that.pa1d4), mpz_set(qa1d4, that.qa1d4);
+	
+	return *this;
+}
+
+void TMCG_SecretKey::generate
+	(unsigned long int keysize)
 {
 	mpz_t foo, bar;
 	
 	assert(keysize <= TMCG_MAX_KEYBITS);
-	
 	mpz_init(foo), mpz_init(bar);
-	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
-	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
-		mpz_init(pa1d4), mpz_init(qa1d4);
 	
 	// set type of key
 	std::ostringstream t;
@@ -250,7 +294,8 @@ TMCG_SecretKey::TMCG_SecretKey
 	}
 	
 	nizk = nizk2.str();
-	delete [] mn, mpz_clear(foo), mpz_clear(bar);
+	delete [] mn;
+	mpz_clear(foo), mpz_clear(bar);
 	
 	// compute self-signature
 	std::ostringstream data, repl;
@@ -260,43 +305,6 @@ TMCG_SecretKey::TMCG_SecretKey
 	repl << "ID" << TMCG_KEYID_SIZE << "^";
 	sig.replace(sig.find(repl.str()),
 		(repl.str()).length() + TMCG_KEYID_SIZE, keyid());
-}
-
-TMCG_SecretKey::TMCG_SecretKey
-	(const std::string& s)
-{
-	mpz_init(m), mpz_init(y), mpz_init(p), mpz_init(q);
-	mpz_init(y1), mpz_init(m1pq), mpz_init(gcdext_up), mpz_init(gcdext_vq),
-		mpz_init(pa1d4), mpz_init(qa1d4);
-	
-	import(s);
-}
-
-TMCG_SecretKey::TMCG_SecretKey
-	(const TMCG_SecretKey& that):
-		name(that.name), email(that.email), type(that.type),
-		nizk(that.nizk), sig(that.sig)
-{
-	mpz_init_set(m, that.m), mpz_init_set(y, that.m),
-		mpz_init_set(p, that.p), mpz_init_set(q, that.q);
-	mpz_init_set(y1, that.y1), mpz_init_set(m1pq, that.m1pq),
-		mpz_init_set(gcdext_up, that.gcdext_up),
-		mpz_init_set(gcdext_vq, that.gcdext_vq),
-		mpz_init_set(pa1d4, that.pa1d4), mpz_init_set(qa1d4, that.qa1d4);
-}
-
-TMCG_SecretKey& TMCG_SecretKey::operator =
-	(const TMCG_SecretKey& that)
-{
-	name = that.name, email = that.email, type = that.type,
-		nizk = that.nizk, sig = that.sig;
-	mpz_set(m, that.m), mpz_set(y, that.y),
-		mpz_set(p, that.p), mpz_set(q, that.q);
-	mpz_set(y1, that.y1), mpz_set(m1pq, that.m1pq),
-		mpz_set(gcdext_up, that.gcdext_up), mpz_set(gcdext_vq, that.gcdext_vq),
-		mpz_set(pa1d4, that.pa1d4), mpz_set(qa1d4, that.qa1d4);
-	
-	return *this;
 }
 
 void TMCG_SecretKey::precompute

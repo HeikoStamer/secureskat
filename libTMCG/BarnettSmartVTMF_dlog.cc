@@ -27,7 +27,7 @@
 #include "BarnettSmartVTMF_dlog.hh"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
-	()
+	(unsigned long int groupsize = TMCG_DDH_P_SIZE)
 {
 	// initalize libgcrypt
 	if (!gcry_check_version(TMCG_LIBGCRYPT_VERSION))
@@ -50,7 +50,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	// We use the subgroup of quadratic residues modulo p,
 	// such that p = 2q + 1 and p, q are both prime.
 	mpz_init(p), mpz_init(q), mpz_init_set_ui(g, 2L);
-	mpz_sprime2g(p, q, TMCG_DDH_P_SIZE - 1L);
+	mpz_sprime2g(p, q, groupsize - 1L);
 	
 	// initalize the key
 	mpz_init(x_i), mpz_init(h_i), mpz_init(h), mpz_init(d);
@@ -87,7 +87,7 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 }
 
 bool BarnettSmartVTMF_dlog::CheckGroup
-	()
+	(unsigned long int groupsize = TMCG_DDH_P_SIZE)
 {
 	mpz_t foo;
 	
@@ -96,8 +96,8 @@ bool BarnettSmartVTMF_dlog::CheckGroup
 	try
 	{
 		// check whether q has appropriate length
-		if ((mpz_sizeinbase(p, 2L) < TMCG_DDH_P_SIZE) ||
-			(mpz_sizeinbase(p, 2L) > (TMCG_DDH_P_SIZE + 4096L)))
+		if ((mpz_sizeinbase(p, 2L) < (groupsize - 8L)) ||
+			(mpz_sizeinbase(p, 2L) > (groupsize + 4096L)))
 				throw false;
 		
 		// check whether p, q are both (probable) prime
