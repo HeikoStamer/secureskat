@@ -128,6 +128,7 @@ void mpz_sprime
 	while (1)
 	{
 		size_t i = 0;
+		unsigned long int mr_k;
 		
 		/* compute p = 2q + 1 */
 		mpz_add_ui(q, q, 2L);
@@ -148,7 +149,7 @@ void mpz_sprime
 		
 		/* step 3. [CS00] */
 		mpz_sub_ui(mr_nm1, q, 1L);
-		unsigned long int mr_k = mpz_scan1(mr_nm1, 0L);
+		mr_k = mpz_scan1(mr_nm1, 0L);
 		mpz_tdiv_q_2exp(mr_q, mr_nm1, mr_k);
 		mpz_powm(mr_y, mr_g, mr_q, q);
 		
@@ -205,6 +206,7 @@ void mpz_sprime2g
 	while (1)
 	{
 		size_t i = 0;
+		unsigned long int mr_k;
 		
 		/* compute p = 2q + 1 */
 		mpz_add_ui(q, q, 2L);
@@ -231,7 +233,7 @@ void mpz_sprime2g
 		
 		/* step 3. [CS00] */
 		mpz_sub_ui(mr_nm1, q, 1L);
-		unsigned long int mr_k = mpz_scan1(mr_nm1, 0L);
+		mr_k = mpz_scan1(mr_nm1, 0L);
 		mpz_tdiv_q_2exp(mr_q, mr_nm1, mr_k);
 		mpz_powm(mr_y, mr_g, mr_q, q);
 		
