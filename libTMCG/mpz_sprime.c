@@ -1,6 +1,14 @@
 /*******************************************************************************
    This file is part of libTMCG.
 
+     [CS00]  Ronald Cramer, Victor Shoup: 'Signature schemes based on the
+             strong RSA assumption', ACM Transactions on Information and
+             System Security, Vol.3(3), pp. 161--185, 2000
+
+     [RS00]  Jean-Francois Raymond, Anton Stiglic: 'Security Issues in the
+             Diffie-Hellman Key Agreement Protocol', ZKS technical report
+             http://citeseer.ist.psu.edu/455251.html
+
  Copyright (C) 2002-2004 Heiko Stamer, <stamer@gaos.org>
 
    libTMCG is free software; you can redistribute it and/or modify
@@ -17,6 +25,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
+
+#include "mpz_sprime.h"
 
 unsigned long int primes[] = {
     3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
@@ -99,3 +109,166 @@ unsigned long int primes[] = {
     4903, 4909, 4919, 4931, 4933, 4937, 4943, 4951,
     4957, 4967, 4969, 4973, 4987, 4993, 4999, 0
 };
+
+/* This fast generation of safe primes is due to [CS00] and
+   M.J.Wiener's "Safe Prime Generation with a Combined Sieve". */
+
+void mpz_sprime
+	(mpz_ptr p, mpz_ptr q, unsigned long int qsize)
+{
+	mpz_t mr_y, mr_q, mr_g, mr_nm1;
+	
+	mpz_init(mr_y), mpz_init(mr_nm1), mpz_init(mr_q), mpz_init_set_ui(mr_g, 2L);
+	
+	/* choose an odd random number of appropriate size */
+	mpz_srandomb(q, NULL, qsize);
+	if (mpz_even_p(q))
+			mpz_add_ui(q, q, 1L);
+	
+	while (1)
+	{
+		size_t i = 0;
+		
+		/* compute p = 2q + 1 */
+		mpz_add_ui(q, q, 2L);
+		mpz_mul_2exp(p, q, 1L);
+		mpz_add_ui(p, p, 1L);
+		
+		/* step 2. [CS00] and M.J.Wiener's "Combined Sieve" */
+		for (i = 0; primes[i]; i++)
+		{
+			if (mpz_congruent_ui_p(q, (primes[i] - 1L) / 2L, primes[i]) ||
+				mpz_congruent_ui_p(p, (primes[i] - 1L) / 2L, primes[i]) ||
+				mpz_congruent_ui_p(q, 0L, primes[i]) ||
+				mpz_congruent_ui_p(p, 0L, primes[i]))
+					break;
+		}
+		if (primes[i])
+			continue;
+		
+		/* step 3. [CS00] */
+		mpz_sub_ui(mr_nm1, q, 1L);
+		unsigned long int mr_k = mpz_scan1(mr_nm1, 0L);
+		mpz_tdiv_q_2exp(mr_q, mr_nm1, mr_k);
+		mpz_powm(mr_y, mr_g, mr_q, q);
+		
+		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
+		{
+			size_t mr_w = 0;
+			unsigned long int i;
+			for (i = 1; i < mr_k; i++)
+			{
+				mpz_powm_ui(mr_y, mr_y, 2L, q);
+				if (mpz_cmp(mr_y, mr_nm1) == 0)
+				{
+					mr_w = 1;
+					break;
+				}
+				if (mpz_cmp_ui(mr_y, 1L) == 0)
+					break;
+			}
+			if (!mr_w)
+				continue;
+		}
+		fprintf(stderr, ".");
+		
+		/* step 4. [CS00] */
+		mpz_powm(mr_y, mr_g, q, p);
+		mpz_sub_ui(mr_nm1, p, 1L);
+		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
+			continue;
+		fprintf(stderr, "!");
+		
+		/* step 5. [CS00] */
+		if (mpz_probab_prime_p(q, 25))
+			break;
+	}
+	mpz_clear(mr_y), mpz_clear(mr_nm1), mpz_clear(mr_q), mpz_clear(mr_g);
+	fprintf(stderr, "\n");
+	
+	assert(mpz_probab_prime_p(p, 25));
+	assert(mpz_probab_prime_p(q, 25));
+}
+
+void mpz_sprime2g
+	(mpz_ptr p, mpz_ptr q, unsigned long int qsize)
+{
+	mpz_t mr_y, mr_q, mr_g, mr_nm1;
+	
+	mpz_init(mr_y), mpz_init(mr_nm1), mpz_init(mr_q), mpz_init_set_ui(mr_g, 2L);
+	
+	/* choose an odd random number of appropriate size */
+	mpz_srandomb(q, NULL, qsize);
+	if (mpz_even_p(q))
+			mpz_add_ui(q, q, 1L);
+	
+	while (1)
+	{
+		size_t i = 0;
+		
+		/* compute p = 2q + 1 */
+		mpz_add_ui(q, q, 2L);
+		mpz_mul_2exp(p, q, 1L);
+		mpz_add_ui(p, p, 1L);
+		
+		/* The next step is necessary because we want 2 as generator of G.
+		   If p is congruent 7 modulo 8, then 2 is a quadratic residue
+		   and hence it will generate the cyclic subgroup of order q. [RS00] */
+		if (!mpz_congruent_ui_p(p, 7L, 8L))
+			continue;
+		
+		/* step 2. [CS00] and M.J.Wiener's "Combined Sieve" */
+		for (i = 0; primes[i]; i++)
+		{
+			if (mpz_congruent_ui_p(q, (primes[i] - 1L) / 2L, primes[i]) ||
+				mpz_congruent_ui_p(p, (primes[i] - 1L) / 2L, primes[i]) ||
+				mpz_congruent_ui_p(q, 0L, primes[i]) ||
+				mpz_congruent_ui_p(p, 0L, primes[i]))
+					break;
+		}
+		if (primes[i])
+			continue;
+		
+		/* step 3. [CS00] */
+		mpz_sub_ui(mr_nm1, q, 1L);
+		unsigned long int mr_k = mpz_scan1(mr_nm1, 0L);
+		mpz_tdiv_q_2exp(mr_q, mr_nm1, mr_k);
+		mpz_powm(mr_y, mr_g, mr_q, q);
+		
+		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
+		{
+			size_t mr_w = 0;
+			unsigned long int i;
+			for (i = 1; i < mr_k; i++)
+			{
+				mpz_powm_ui(mr_y, mr_y, 2L, q);
+				if (mpz_cmp(mr_y, mr_nm1) == 0)
+				{
+					mr_w = 1;
+					break;
+				}
+				if (mpz_cmp_ui(mr_y, 1L) == 0)
+					break;
+			}
+			if (!mr_w)
+				continue;
+		}
+		fprintf(stderr, ".");
+		
+		/* step 4. [CS00] */
+		mpz_powm(mr_y, mr_g, q, p);
+		mpz_sub_ui(mr_nm1, p, 1L);
+		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
+			continue;
+		fprintf(stderr, "!");
+		
+		/* step 5. [CS00] */
+		if (mpz_probab_prime_p(q, 25))
+			break;
+	}
+	mpz_clear(mr_y), mpz_clear(mr_nm1), mpz_clear(mr_q), mpz_clear(mr_g);
+	fprintf(stderr, "\n");
+	
+	assert(mpz_probab_prime_p(p, 25));
+	assert(mpz_probab_prime_p(q, 25));
+}

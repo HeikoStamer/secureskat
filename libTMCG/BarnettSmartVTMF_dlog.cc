@@ -7,14 +7,6 @@
      [CaS97] Jan Camenisch, Markus Stadler: 'Proof Systems for General
              Statements about Discrete Logarithms', technical report, 1997
 
-     [CS00]  Ronald Cramer, Victor Shoup: 'Signature schemes based on the
-             strong RSA assumption', ACM Transactions on Information and
-             System Security, Vol.3(3), pp. 161--185, 2000
-
-     [RS00]  Jean-Francois Raymond, Anton Stiglic: 'Security Issues in the
-             Diffie-Hellman Key Agreement Protocol', ZKS technical report
-             http://citeseer.ist.psu.edu/455251.html
-
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -33,7 +25,6 @@
 *******************************************************************************/
 
 #include "BarnettSmartVTMF_dlog.hh"
-#include "mpz_primes.h"
 
 BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	()
@@ -59,79 +50,8 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	// We use the subgroup of quadratic residues in Z*p
 	// where p = 2q + 1 and p, q are both prime.
 	
-	// The fast generation of safe primes is due to [CS00] and
-	// M.J.Wiener's "Safe Prime Generation with a Combined Sieve".
-	mpz_t mr_y, mr_q, mr_nm1;
-	mpz_init(mr_y), mpz_init(mr_nm1), mpz_init(mr_q);
 	mpz_init(p), mpz_init(q), mpz_init_set_ui(g, 2L);
-	mpz_srandomb(q, NULL, group_size);
-	if (mpz_even_p(q))
-			mpz_add_ui(q, q, 1L);
-	
-	while (1)
-	{
-		size_t i = 0;
-		
-		mpz_add_ui(q, q, 2L);
-		mpz_mul_2exp(p, q, 1L);
-		mpz_add_ui(p, p, 1L);
-		
-		// The next step is necessary because we want 2 as generator of G.
-		// If p is congruent 7 modulo 8, then 2 is a quadratic residue
-		// and hence it will generate the cyclic subgroup of order q. [RS00]
-		if (!mpz_congruent_ui_p(p, 7L, 8L))
-			continue;
-		
-		// step 2. [CS00] and M.J.Wiener's "Combined Sieve"
-		for (i = 0; primes[i]; i++)
-		{
-			if (mpz_congruent_ui_p(q, (primes[i] - 1L) / 2L, primes[i]) ||
-				mpz_congruent_ui_p(p, (primes[i] - 1L) / 2L, primes[i]) ||
-				mpz_congruent_ui_p(q, 0L, primes[i]) ||
-				mpz_congruent_ui_p(p, 0L, primes[i]))
-					break;
-		}
-		if (primes[i])
-			continue;
-		
-		// step 3. [CS00]
-		mpz_sub_ui(mr_nm1, q, 1L);
-		unsigned long int mr_k = mpz_scan1(mr_nm1, 0L);
-		mpz_tdiv_q_2exp(mr_q, mr_nm1, mr_k);
-		mpz_powm(mr_y, g, mr_q, q);
-		
-		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
-		{
-			bool mr_w = false;
-			for (unsigned long int i = 1; i < mr_k; i++)
-			{
-				mpz_powm_ui(mr_y, mr_y, 2L, q);
-				if (mpz_cmp(mr_y, mr_nm1) == 0)
-				{
-					mr_w = true;
-					break;
-				}
-				if (mpz_cmp_ui(mr_y, 1L) == 0)
-					break;
-			}
-			if (!mr_w)
-				continue;
-		}
-		std::cerr << ".";
-		
-		// step 4. [CS00]
-		mpz_powm(mr_y, g, q, p);
-		mpz_sub_ui(mr_nm1, p, 1L);
-		if (!((mpz_cmp_ui(mr_y, 1L) == 0) || (mpz_cmp(mr_y, mr_nm1) == 0)))
-			continue;
-		std::cerr << "!";
-		
-		// step 5. [CS00]
-		if (mpz_probab_prime_p(q, 25))
-			break;
-	}
-	mpz_clear(mr_y), mpz_clear(mr_nm1), mpz_clear(mr_q);
-	std::cerr << std::endl;
+	mpz_sprime2g(p, q, group_size);
 	
 	// initalize key
 	mpz_init(x_i), mpz_init(h_i), mpz_init(h), mpz_init(d);

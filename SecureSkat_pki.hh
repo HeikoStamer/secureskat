@@ -54,7 +54,7 @@
 		TMCG_SecretKey *sec, std::string &prefix);
 	void get_public_keys
 		(const std::string &filename, SchindelhauerTMCG *tmcg,
-		map<string, TMCG_PublicKey> &keys);
+		std::map<std::string, TMCG_PublicKey> &keys);
 	void set_public_keys
 		(const std::string &filename, SchindelhauerTMCG *tmcg,
 		const std::map<std::string, TMCG_PublicKey> &keys);

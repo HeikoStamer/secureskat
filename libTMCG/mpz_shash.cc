@@ -46,7 +46,7 @@ void mpz_shash
 	
 	/* convert digest to hex */
 	for (unsigned int i = 0; i < hash_size; i++)
-		std::snprintf(hex_digest + (2 * i), 3, "%02x", (unsigned char)digest[i]);
+		snprintf(hex_digest + (2 * i), 3, "%02x", (unsigned char)digest[i]);
 	
 	/* import hex string */
 	mpz_set_str(r, hex_digest, 16);

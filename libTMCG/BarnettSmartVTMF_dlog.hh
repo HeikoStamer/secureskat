@@ -7,14 +7,6 @@
      [CaS97] Jan Camenisch, Markus Stadler: 'Proof Systems for General
              Statements about Discrete Logarithms', technical report, 1997
 
-     [CS00]  Ronald Cramer, Victor Shoup: 'Signature schemes based on the
-             strong RSA assumption', ACM Transactions on Information and
-             System Security, Vol.3(3), pp. 161--185, 2000
-
-     [RS00]  Jean-Francois Raymond, Anton Stiglic: 'Security Issues in the
-             Diffie-Hellman Key Agreement Protocol', ZKS technical report
-             http://citeseer.ist.psu.edu/455251.html
-
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -57,6 +49,7 @@
 	
 	#include "mpz_srandom.h"
 	#include "mpz_spowm.h"
+	#include "mpz_sprime.h"
 	#include "mpz_helper.hh"
 	#include "mpz_shash.hh"
 
