@@ -23,8 +23,8 @@
 TMCG_Card::TMCG_Card
 	()
 {
-	z.push_back(vector<mpz_ptr>(1));
-	mpz_init(z[0][0]);
+	z.push_back(vector<MP_INT>(1));
+	mpz_init(&z[0][0]);
 }
 
 TMCG_Card::TMCG_Card
@@ -33,20 +33,20 @@ TMCG_Card::TMCG_Card
 	assert((n > 0) && (m > 0));
 	
 	for (size_t k = 0; k < n; k++)
-		z.push_back(vector<mpz_ptr>(m));
+		z.push_back(vector<MP_INT>(m));
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_init(z[k][w]);
+			mpz_init(&z[k][w]);
 }
 
 TMCG_Card::TMCG_Card
 	(const TMCG_Card& that)
 {
 	for (size_t k = 0; k < that.z.size(); k++)
-		z.push_back(vector<mpz_ptr>(that.z[k].size()));
+		z.push_back(vector<MP_INT>(that.z[k].size()));
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_init_set(z[k][w], that.z[k][w]);
+			mpz_init_set(&z[k][w], &that.z[k][w]);
 }
 
 TMCG_Card& TMCG_Card::operator =
@@ -55,7 +55,7 @@ TMCG_Card& TMCG_Card::operator =
 	resize(that.z.size(), that.z[0].size());
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_set(z[k][w], that.z[k][w]);
+			mpz_set(&z[k][w], &that.z[k][w]);
 	return *this;
 }
 
@@ -66,7 +66,7 @@ bool TMCG_Card::operator ==
 		return false;
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			if (mpz_cmp(z[k][w], that.z[k][w]))
+			if (mpz_cmp(&z[k][w], &that.z[k][w]))
 				return false;
 	return true;
 }
@@ -86,16 +86,16 @@ void TMCG_Card::resize
 	for (size_t k = 0; k < z.size(); k++)
 	{
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_clear(z[k][w]);
+			mpz_clear(&z[k][w]);
 		z[k].clear();
 	}
 	z.clear();
 	
 	for (size_t k = 0; k < n; k++)
-		z.push_back(vector<mpz_ptr>(m));
+		z.push_back(vector<MP_INT>(m));
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_init(z[k][w]);
+			mpz_init(&z[k][w]);
 }
 
 bool TMCG_Card::import
@@ -130,7 +130,7 @@ bool TMCG_Card::import
 			for (size_t w = 0; w < z[k].size(); w++)
 			{
 				// z_ij
-				if ((mpz_set_str(z[k][w], gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
+				if ((mpz_set_str(&z[k][w], gs(s, '|').c_str(), TMCG_MPZ_IO_BASE) < 0) ||
 					(!nx(s, '|')))
 						throw false;
 			}
@@ -148,7 +148,7 @@ TMCG_Card::~TMCG_Card
 {
 	for (size_t k = 0; k < z.size(); k++)
 		for (size_t w = 0; w < z[k].size(); w++)
-			mpz_clear(z[k][w]);
+			mpz_clear(&z[k][w]);
 }
 
 std::ostream& operator<< 
@@ -157,6 +157,6 @@ std::ostream& operator<<
 	out << "crd|" << card.z.size() << "|" << card.z[0].size() << "|";
 	for (size_t k = 0; k < card.z.size(); k++)
 		for (size_t w = 0; w < card.z[k].size(); w++)
-			out << card.z[k][w] << "|";
+			out << &card.z[k][w] << "|";
 	return out;
 }

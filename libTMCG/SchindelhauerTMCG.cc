@@ -681,19 +681,19 @@ void SchindelhauerTMCG::TMCG_CreateOpenCard
 	{
 		if (type & 1)
 		{
-			mpz_set(c.z[0][w], ring.key[0].y);
+			mpz_set(&c.z[0][w], ring.key[0].y);
 			--type, type /= 2;
 		}
 		else
 		{
-			mpz_set_ui(c.z[0][w], 1L);
+			mpz_set_ui(&c.z[0][w], 1L);
 			type /= 2;
 		}
 	}
 	
 	for (size_t k = 1; k < c.z.size(); k++)
 		for (size_t w = 0; w < c.z[k].size(); w++)
-			mpz_set_ui(c.z[k][w], 1L);
+			mpz_set_ui(&c.z[k][w], 1L);
 }
 
 void SchindelhauerTMCG::TMCG_CreateOpenCard
@@ -728,6 +728,8 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 void SchindelhauerTMCG::TMCG_CreateCardSecret
 	(TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring, size_t index)
 {
+	assert(index < cs.b.size());
+	
 	mpz_t foo;
 	
 	mpz_init(foo);
@@ -738,16 +740,16 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 			// choose random number r \in Z^*_m
 			do
 			{
-				mpz_srandomm(cs.r[k][w], ring.key[k].m);
-				mpz_gcd(foo, cs.r[k][w], ring.key[k].m);
+				mpz_srandomm(&cs.r[k][w], ring.key[k].m);
+				mpz_gcd(foo, &cs.r[k][w], ring.key[k].m);
 			}
 			while (mpz_cmp_ui(foo, 1L));
 			
 			// choose random bit b \in {0, 1} or set it initially to zero
 			if (k != index)
-				mpz_srandomb(cs.b[k][w], 1L);
+				mpz_srandomb(&cs.b[k][w], 1L);
 			else
-				mpz_set_ui(cs.b[index][w], 0L);
+				mpz_set_ui(&cs.b[index][w], 0L);
 		}
 	}
 	mpz_clear(foo);
@@ -757,19 +759,19 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 	{
 		for (size_t w = 0; (k != index) && (w < cs.r[k].size()); w++)
 		{
-			if (mpz_get_ui(cs.b[index][w]) & 1L)
+			if (mpz_get_ui(&cs.b[index][w]) & 1L)
 			{
-				if (mpz_get_ui(cs.b[k][w]) & 1L)
-					mpz_set_ui(cs.b[index][w], 0L);
+				if (mpz_get_ui(&cs.b[k][w]) & 1L)
+					mpz_set_ui(&cs.b[index][w], 0L);
 				else
-					mpz_set_ui(cs.b[index][w], 1L);
+					mpz_set_ui(&cs.b[index][w], 1L);
 			}
 			else
 			{
-				if (mpz_get_ui(cs.b[k][w]) & 1L)
-					mpz_set_ui(cs.b[index][w], 1L);
+				if (mpz_get_ui(&cs.b[k][w]) & 1L)
+					mpz_set_ui(&cs.b[index][w], 1L);
 				else
-					mpz_set_ui(cs.b[index][w], 0L);
+					mpz_set_ui(&cs.b[index][w], 0L);
 			}
 		}
 	}
@@ -786,7 +788,7 @@ void SchindelhauerTMCG::TMCG_CreateCardSecret
 {
 	for (size_t k = 0; k < cs.r.size(); k++)
 		for (size_t w = 0; w < cs.r[k].size(); w++)
-			mpz_set(cs.r[k][w], r), mpz_set_ui(cs.b[k][w], b);
+			mpz_set(&cs.r[k][w], r), mpz_set_ui(&cs.b[k][w], b);
 }
 
 void SchindelhauerTMCG::TMCG_MaskCard
@@ -798,8 +800,8 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	
 	for (size_t k = 0; k < c.z.size(); k++)
 		for (size_t w = 0; w < c.z[k].size(); w++)
-			TMCG_MaskValue(ring.key[k], c.z[k][w], cc.z[k][w],
-				cs.r[k][w], cs.b[k][w]);
+			TMCG_MaskValue(ring.key[k], &c.z[k][w], &cc.z[k][w],
+				&cs.r[k][w], &cs.b[k][w]);
 }
 
 void SchindelhauerTMCG::TMCG_MaskCard
@@ -819,8 +821,8 @@ void SchindelhauerTMCG::TMCG_ProofMaskCard
 	
 	for (size_t k = 0; k < c.z.size(); k++)
 		for (size_t w = 0; w < c.z[k].size(); w++)
-			TMCG_ProofMaskValue(ring.key[k], c.z[k][w], cc.z[k][w],
-				cs.r[k][w], cs.b[k][w], in, out);
+			TMCG_ProofMaskValue(ring.key[k], &c.z[k][w], &cc.z[k][w],
+				&cs.r[k][w], &cs.b[k][w], in, out);
 }
 
 void SchindelhauerTMCG::TMCG_ProofMaskCard
@@ -839,7 +841,7 @@ bool SchindelhauerTMCG::TMCG_VerifyMaskCard
 	
 	for (size_t k = 0; k < c.z.size(); k++)
 		for (size_t w = 0; w < c.z[k].size(); w++)
-			if (!TMCG_VerifyMaskValue(ring.key[k], c.z[k][w], cc.z[k][w], in, out))
+			if (!TMCG_VerifyMaskValue(ring.key[k], &c.z[k][w], &cc.z[k][w], in, out))
 				return false;
 	return true;
 }
@@ -860,7 +862,7 @@ void SchindelhauerTMCG::TMCG_ProofPrivateCard
 {
 	for (size_t k = 0; k < cs.r.size(); k++)
 		for (size_t w = 0; w < cs.r[k].size(); w++)
-			TMCG_ProofMaskOne(ring.key[k], cs.r[k][w], cs.b[k][w], in, out);
+			TMCG_ProofMaskOne(ring.key[k], &cs.r[k][w], &cs.b[k][w], in, out);
 	return;
 }
 
@@ -870,7 +872,7 @@ bool SchindelhauerTMCG::TMCG_VerifyPrivateCard
 {
 	for (size_t k = 0; k < c.z.size(); k++)
 		for (size_t w = 0; w < c.z[k].size(); w++)
-			if (!TMCG_VerifyMaskOne(ring.key[k], c.z[k][w], in, out))
+			if (!TMCG_VerifyMaskOne(ring.key[k], &c.z[k][w], in, out))
 				return false;
 	return true;
 }
@@ -883,15 +885,15 @@ void SchindelhauerTMCG::TMCG_ProofCardSecret
 	
 	for (size_t w = 0; w < c.z[0].size(); w++)
 	{
-		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
+		if (mpz_qrmn_p(&c.z[index][w], key.p, key.q, key.m))
 		{
 			out << "0" << std::endl;
-			TMCG_ProofQuadraticResidue(key, c.z[index][w], in, out);
+			TMCG_ProofQuadraticResidue(key, &c.z[index][w], in, out);
 		}
 		else
 		{
 			out << "1" << std::endl;
-			TMCG_ProofNonQuadraticResidue(key, c.z[index][w], in, out);
+			TMCG_ProofNonQuadraticResidue(key, &c.z[index][w], in, out);
 		}
 	}
 }
@@ -914,16 +916,16 @@ bool SchindelhauerTMCG::TMCG_VerifyCardSecret
 	{
 		for (size_t w = 0; w < c.z[0].size(); w++)
 		{
-			in >> cs.b[index][w];
-			mpz_set_ui(cs.r[index][w], 0L);
-			if (mpz_get_ui(cs.b[index][w]) & 1L)
+			in >> &cs.b[index][w];
+			mpz_set_ui(&cs.r[index][w], 0L);
+			if (mpz_get_ui(&cs.b[index][w]) & 1L)
 			{
-				if (!TMCG_VerifyNonQuadraticResidue(key, c.z[index][w], in, out))
+				if (!TMCG_VerifyNonQuadraticResidue(key, &c.z[index][w], in, out))
 					throw false;
 			}
 			else
 			{
-				if (!TMCG_VerifyQuadraticResidue(key, c.z[index][w], in, out))
+				if (!TMCG_VerifyQuadraticResidue(key, &c.z[index][w], in, out))
 					throw false;
 			}
 		}
@@ -955,11 +957,11 @@ void SchindelhauerTMCG::TMCG_SelfCardSecret
 	
 	for (size_t w = 0; w < c.z[0].size(); w++)
 	{
-		mpz_set_ui(cs.r[index][w], 0L);
-		if (mpz_qrmn_p(c.z[index][w], key.p, key.q, key.m))
-			mpz_set_ui(cs.b[index][w], 0L);
+		mpz_set_ui(&cs.r[index][w], 0L);
+		if (mpz_qrmn_p(&c.z[index][w], key.p, key.q, key.m))
+			mpz_set_ui(&cs.b[index][w], 0L);
 		else
-			mpz_set_ui(cs.b[index][w], 1L);
+			mpz_set_ui(&cs.b[index][w], 1L);
 	}
 }
 
@@ -978,7 +980,7 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 		bool bit = false;
 		for (size_t k = 0; k < cs.r.size(); k++)
 		{
-			if (mpz_get_ui(cs.b[k][w]) & 1L)
+			if (mpz_get_ui(&cs.b[k][w]) & 1L)
 				bit = !bit;
 		}
 		if (bit)
@@ -1161,30 +1163,30 @@ void SchindelhauerTMCG::TMCG_GlueStackSecret
 			for (size_t w = 0; w < TMCG_TypeBits; w++)
 			{
 				// compute r
-				mpz_mul (cs.r[k][w], (sigma[sigma_idx].second).r[k][w],
-					(pi[pi_idx].second).r[k][w]);
-				mpz_mod (cs.r[k][w], cs.r[k][w], ring.key[k].m);
-				if ((mpz_get_ui((sigma[sigma_idx].second).b[k][w]) & 1L) &&
-					(mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L))
+				mpz_mul(&cs.r[k][w], &(sigma[sigma_idx].second).r[k][w],
+					&(pi[pi_idx].second).r[k][w]);
+				mpz_mod(&cs.r[k][w], &cs.r[k][w], ring.key[k].m);
+				if ((mpz_get_ui(&(sigma[sigma_idx].second).b[k][w]) & 1L) &&
+					(mpz_get_ui(&(pi[pi_idx].second).b[k][w]) & 1L))
 				{
-					mpz_mul (cs.r[k][w], cs.r[k][w], ring.key[k].y);
-					mpz_mod (cs.r[k][w], cs.r[k][w], ring.key[k].m);
+					mpz_mul(&cs.r[k][w], &cs.r[k][w], ring.key[k].y);
+					mpz_mod(&cs.r[k][w], &cs.r[k][w], ring.key[k].m);
 				}
 				
 				// XOR
-				if (mpz_get_ui((sigma[sigma_idx].second).b[k][w]) & 1L)
+				if (mpz_get_ui(&(sigma[sigma_idx].second).b[k][w]) & 1L)
 				{
-					if (mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L)
-						mpz_set_ui (cs.b[k][w], 0L);
+					if (mpz_get_ui(&(pi[pi_idx].second).b[k][w]) & 1L)
+						mpz_set_ui(&cs.b[k][w], 0L);
 					else
-						mpz_set_ui (cs.b[k][w], 1L);
+						mpz_set_ui(&cs.b[k][w], 1L);
 				}
 				else
 				{
-					if (mpz_get_ui((pi[pi_idx].second).b[k][w]) & 1L)
-						mpz_set_ui (cs.b[k][w], 1L);
+					if (mpz_get_ui(&(pi[pi_idx].second).b[k][w]) & 1L)
+						mpz_set_ui(&cs.b[k][w], 1L);
 					else
-						mpz_set_ui (cs.b[k][w], 0L);
+						mpz_set_ui(&cs.b[k][w], 0L);
 				}
 			}
 		}

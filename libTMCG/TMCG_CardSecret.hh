@@ -41,7 +41,7 @@
 
 struct TMCG_CardSecret
 {
-	vector< vector<mpz_ptr> >			r, b;
+	vector< vector<MP_INT> >			r, b;
 	
 	TMCG_CardSecret
 		();

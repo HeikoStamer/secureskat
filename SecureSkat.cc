@@ -443,10 +443,10 @@ void skat_connect
 		sleep(1),	exit(-4);
 	}
 	iosocketstream *neighbor = new iosocketstream(handle);
-	
+
 	// authenticate connection
 	char tmp[TMCG_MAX_CARD_CHARS];
-	TMCG_CardSecret cs;
+	TMCG_CardSecret cs(3, 5);
 	// receive challenge
 	neighbor->getline(tmp, sizeof(tmp));
 	if (cs.import(tmp))
@@ -550,7 +550,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 				if (client_in.sin_addr.s_addr == sin.sin_addr.s_addr)
 				{
 					iosocketstream *neighbor = new iosocketstream(handle);
-					TMCG_CardSecret cs;
+					TMCG_CardSecret cs(3, 5);
 					t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 					*neighbor << cs << std::endl << std::flush;
 					char tmp[TMCG_MAX_CARD_CHARS];
@@ -698,7 +698,7 @@ int skat_child
 	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe, const std::string &master)
 {
 	SchindelhauerTMCG *gp_tmcg = 
-		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 32 cards
+		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 2^5 = 32 cards
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
@@ -858,7 +858,7 @@ int skat_child
 	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" << 
 		pkr.key[0].name << "', '" << 
 		pkr.key[1].name << "', '" << 
-		pkr.key[2].name << "' " << _("ready") << "." << std::endl;	
+		pkr.key[2].name << "' " << _("ready") << "." << std::endl;
 	std::list<std::string> gp_rdport;
 	std::map<std::string, int> gp_ports;
 	while (gp_rdport.size() < 2)
@@ -866,7 +866,7 @@ int skat_child
 		char tmp[10000];
 		in_pipe->getline(tmp, sizeof(tmp));
 		std::string cmd = tmp;
-	
+		
 		if (cmd.find("!KICK", 0) == 0)
 		{
 			return -1;
@@ -920,9 +920,9 @@ int skat_child
 	iosecuresocketstream *left_neighbor, *right_neighbor;
 	if (pkr_self == 0)
 	{
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 1, 
+		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 1,
 			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
-		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2, 
+		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
 			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 			ipipe_readbuf, ipipe_readed);
 	}
@@ -931,15 +931,15 @@ int skat_child
 		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
 			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 			ipipe_readbuf, ipipe_readed);
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 2, 
-			left_neighbor, connect_handle, gp_ports, vnicks, pkr); 
+		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 2,
+			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
 	}
 	else if (pkr_self == 2)
 	{
 		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
 			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 			ipipe_readbuf, ipipe_readed);
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 0, 
+		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 0,
 			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
 	}
 	skat_alive(out_pipe, nr, right_neighbor, left_neighbor);
@@ -3033,7 +3033,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.7 2004/12/22 21:07:10 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.8 2005/01/05 22:18:11 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
