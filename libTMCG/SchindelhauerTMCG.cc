@@ -2,7 +2,7 @@
    SchindelhauerTMCG.cc, cryptographic |T|oolbox for |M|ental |C|ard |G|ames
 
      Christian Schindelhauer: 'A Toolbox for Mental Card Games',
-     Medizinische Universit? L?eck, 17. September 1998
+     Medizinische Universit\"at L\"ubeck, 17. September 1998
 
      Rosario Gennaro, Daniele Micciancio, Tal Rabin: 
      'An Efficient Non-Interactive Statistical Zero-Knowledge
