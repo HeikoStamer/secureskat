@@ -134,7 +134,7 @@ class SchindelhauerTMCG
 	public:
 		static const size_t		TMCG_KeyIDSize = 5;			// octets
 		mpz_ui								TMCG_SecurityLevel;			// iterations
-		size_t								TMCG_Players, TMCG_TypeBits;
+		size_t								TMCG_Players, TMCG_TypeBits, TMCG_MaxCards;
 
 		SchindelhauerTMCG 
 			(mpz_ui security, size_t players, size_t typebits)
@@ -143,7 +143,9 @@ class SchindelhauerTMCG
 			assert (typebits <= TMCG_MAX_TYPEBITS);
 			
 			TMCG_SecurityLevel = security;
-			TMCG_Players = players, TMCG_TypeBits = typebits;
+			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCards = 1;
+			for (mpz_ui i = 0; i < TMCG_TypeBits; i++)
+				TMCG_MaxCards *= 2;
 			
 			if (!gcry_check_version (LIBGCRYPT_VERSION))
 			{
@@ -394,7 +396,7 @@ class SchindelhauerTMCG
 		void TMCG_CreateOpenCard
 			(TMCG_Card &c, const TMCG_PublicKeyRing &ring, size_t type);
 		void TMCG_CreateOpenCard
-			(VTMF_Card &c, size_t type);
+			(VTMF_Card &c, BarnettSmartVTMF_dlog *vtmf, size_t type);
 		void TMCG_CreatePrivateCard
 			(TMCG_Card &c, TMCG_CardSecret &cs, const TMCG_PublicKeyRing &ring,
 			size_t index, size_t type);

@@ -111,6 +111,10 @@ class BarnettSmartVTMF_dlog
 			();
 		void PublishGroup
 			(std::ostream &out);
+		void RandomElement
+			(mpz_ptr a);
+		void IndexElement
+			(mpz_ptr a, std::size_t index);
 		void KeyGenerationProtocol_GenerateKey
 			();
 		void KeyGenerationProtocol_PublishKey

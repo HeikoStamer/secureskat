@@ -214,6 +214,34 @@ void BarnettSmartVTMF_dlog::PublishGroup
 	out << q << std::endl;
 }
 
+void BarnettSmartVTMF_dlog::RandomElement
+	(mpz_ptr a)
+{
+	// choose a random element of G (quadratic residue)
+	do
+		mpz_srandomm(a, NULL, p);
+	while (mpz_cmp_ui(a, 0) == 0);
+	mpz_powm_ui(a, a, 2, p);
+	assert(mpz_jacobi(a, p) == 1);
+}
+
+void BarnettSmartVTMF_dlog::IndexElement
+	(mpz_ptr a, std::size_t index)
+{
+	// choose the index-th element of G (quadratic residue)
+	// Notice that for IndexElement(a, 0) the equality a == 1
+	// holds, because 1 is the smallest quadratic residue mod p.	
+	mpz_set_ui(a, 0L);
+	do
+	{
+		do
+			mpz_add_ui(a, a, 1L);
+		while (mpz_jacobi(a, p) != 1);
+	}
+	while (index--);
+	assert(mpz_jacobi(a, p) == 1);
+}
+
 void BarnettSmartVTMF_dlog::KeyGenerationProtocol_GenerateKey
 	()
 {

@@ -2,7 +2,7 @@
    SchindelhauerTMCG.cc, cryptographic |T|oolbox for |M|ental |C|ard |G|ames
 
      Christian Schindelhauer: 'A Toolbox for Mental Card Games',
-     Medizinische Universität Lübeck, 17. September 1998
+     Medizinische Universit? L?eck, 17. September 1998
 
      Rosario Gennaro, Daniele Micciancio, Tal Rabin: 
      'An Efficient Non-Interactive Statistical Zero-Knowledge
@@ -104,7 +104,7 @@ void SchindelhauerTMCG::TMCG_CreateKey
 	while ((mpz_sizeinbase (key.m, 2L) < (keysize + 1L)) ||
 		(mpz_cmp (key.m, bar) >= 0));
 	
-	// choose random y \in NQR°m for TMCG
+	// choose random y \in NQR? for TMCG
 	mpz_init (key.y);
 	do
 	{
@@ -135,7 +135,7 @@ void SchindelhauerTMCG::TMCG_CreateKey
 	mpz_fdiv_q_2exp (key.pa1d4, key.pa1d4, 2L);
 	mpz_fdiv_q_2exp (key.qa1d4, key.qa1d4, 2L);
 	
-	// compute NIZK-proofs (STAGE1+2: m = p^i * q^j    STAGE3: y \in NQR°m)
+	// compute NIZK-proofs (STAGE1+2: m = p^i * q^j    STAGE3: y \in NQR?)
 	TMCG_DataStream nizk, input;
 	input << key.m << "^" << key.y,	nizk << "nzk^";
 	size_t mnsize = mpz_sizeinbase (key.m, 2L) / 8;
@@ -206,11 +206,11 @@ void SchindelhauerTMCG::TMCG_CreateKey
 		nizk << bar << "^";
 	}
 	
-	// STAGE3: y \in NQR°m, soundness error probability = 2^{-nizk_stage3}
+	// STAGE3: y \in NQR?, soundness error probability = 2^{-nizk_stage3}
 	nizk << nizk_stage3 << "^";
 	for (size_t stage3 = 0; stage3 < nizk_stage3; stage3++)
 	{
-		// common random number foo \in Z°m (build from hash function g)
+		// common random number foo \in Z? (build from hash function g)
 		do
 		{
 			g(mn, mnsize, (input.str()).c_str(), (input.str()).length());
@@ -266,7 +266,7 @@ bool SchindelhauerTMCG::TMCG_CheckKey
 	mpz_init (foo), mpz_init (bar);
 	try
 	{
-		// sanity check, if y \in Z°m
+		// sanity check, if y \in Z?
 		if (mpz_jacobi (pkey.y, pkey.m) != 1)
 			throw false;
 		
@@ -424,10 +424,10 @@ bool SchindelhauerTMCG::TMCG_CheckKey
 		if (stage3_size < nizk_stage3)
 			throw false;
 		
-		// STAGE3: y \in NQR°m
+		// STAGE3: y \in NQR?
 		for (size_t i = 0; i < stage3_size; i++)
 		{
-			// common random number foo \in Z°m (build from hash function g)
+			// common random number foo \in Z? (build from hash function g)
 			do
 			{
 				g(mn, mnsize, (input.str()).c_str(), (input.str()).length());
@@ -1006,7 +1006,7 @@ bool SchindelhauerTMCG::TMCG_VerifyQuadraticResidue
 	mpz_t foo, bar, lej;
 	out << TMCG_SecurityLevel << endl;
 	
-	// check for positive jacobi symbol	(t \in Z°m)
+	// check for positive jacobi symbol	(t \in Z?)
 	if (mpz_jacobi (t, key.m) != 1)
 		return false;
 	
@@ -1600,10 +1600,13 @@ void SchindelhauerTMCG::TMCG_CreateOpenCard
 }
 
 void SchindelhauerTMCG::TMCG_CreateOpenCard
-(VTMF_Card &c, size_t type)
+(VTMF_Card &c, BarnettSmartVTMF_dlog *vtmf, size_t type)
 {
 	mpz_set_ui(c.c_1, 1L);
-	mpz_set_ui(c.c_2, type + 2L);
+	vtmf->IndexElement(c.c_2, type);
+cerr << c.c_2 << endl;
+cerr << "type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
+	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 }
 
 void SchindelhauerTMCG::TMCG_CreatePrivateCard
@@ -1622,8 +1625,13 @@ void SchindelhauerTMCG::TMCG_CreatePrivateCard
 	size_t type)
 {
 	mpz_t m;
-	mpz_init_set_ui(m, type + 2L);
+
+	mpz_init(m);
+	vtmf->IndexElement(m, type);
+cerr << m << endl;
 	vtmf->VerifiableMaskingProtocol_Mask(m, c.c_1, c.c_2, cs.r);
+cerr << "after mask -- type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
+	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 	mpz_clear(m);
 }
 
@@ -1864,6 +1872,8 @@ void SchindelhauerTMCG::TMCG_MaskCard
 	BarnettSmartVTMF_dlog *vtmf)
 {
 	vtmf->VerifiableRemaskingProtocol_Remask(c.c_1, c.c_2, cc.c_1, cc.c_2, cs.r);
+cerr << "mask3 -- type = ? mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
+	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
 }
 
 bool SchindelhauerTMCG::TMCG_EqualCard
@@ -2074,15 +2084,25 @@ size_t SchindelhauerTMCG::TMCG_TypeOfCard
 size_t SchindelhauerTMCG::TMCG_TypeOfCard
 	(const VTMF_Card &c, BarnettSmartVTMF_dlog *vtmf)
 {
-	size_t type = 0;
-	mpz_t m;
-	
-	mpz_init_set_ui(m, 0L);
+	size_t type = TMCG_MaxCards;
+	mpz_t m, a;
+
+	mpz_init_set_ui(m, 0L), mpz_init(a);
 	vtmf->VerifiableDecryptionProtocol_Verify_Finalize(c.c_2, m);
-	mpz_sub_ui(m, m, 2L);
-	type = mpz_get_ui(m);
-	mpz_clear(m);
-	
+	for (size_t t = 0; t < TMCG_MaxCards; t++)
+	{
+		vtmf->IndexElement(a, t);
+		if (!mpz_cmp(a, m))
+		{
+			type = t;
+			break;
+		}	
+	}
+	mpz_clear(m), mpz_clear(a);
+
+cerr << "TOC -- type = " << type << " mpz_jacobi = " << mpz_jacobi(c.c_2, vtmf->p) <<
+	" bzw. mod q = " << mpz_jacobi(c.c_2, vtmf->q) << endl;
+
 	return type;
 }
 
