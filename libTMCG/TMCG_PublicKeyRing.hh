@@ -18,84 +18,26 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
-#ifndef INCLUDED_VTMF_CardSecret_HH
-	#define INCLUDED_VTMF_CardSecret_HH
+#ifndef INCLUDED_TMCG_PublicKeyRing_HH
+	#define INCLUDED_TMCG_PublicKeyRing_HH
 
 	// config.h
 	#if HAVE_CONFIG_H
 		#include "config.h"
 	#endif
 
-	// C and STL header
+	// C++/STL header
 	#include <cstdio>
 	#include <cstdlib>
 	#include <cassert>
 	#include <string>
 	#include <sstream>
 	#include <iostream>
+	#include <vector>
 
-	// GNU multiple precision library
-	#include <gmp.h>
-	
-	#include "parse_helper.hh"
-
-
-
-struct VTMF_CardSecret
-{
-	mpz_t r;
-	
-	VTMF_CardSecret
-		()
+	struct TMCG_PublicKeyRing
 	{
-		mpz_init(r);
-	}
-	
-	VTMF_CardSecret
-		(const VTMF_CardSecret& that)
-	{
-		mpz_init_set(r, that.r);
-	}
-	
-	VTMF_CardSecret& operator =
-		(const VTMF_CardSecret& that)
-	{
-		mpz_set(r, that.r);
-		return *this;
-	}
-	
-	bool import
-		(std::string s)
-	{
-		try
-		{
-			// check magic
-			if (!cm(s, "crs", '|'))
-				throw false;
-			
-			// secret card data
-			if ((mpz_set_str(r, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
-	
-	~VTMF_CardSecret
-		()
-	{
-		mpz_clear(r);
-	}
-};
-
-friend ostream& operator<<
-	(ostream &out, const VTMF_CardSecret &cardsecret)
-{
-	return out << "crs|" << cardsecret.r << "|";
-}
+		TMCG_PublicKey					key[TMCG_MAX_PLAYERS];
+	};
 
 #endif

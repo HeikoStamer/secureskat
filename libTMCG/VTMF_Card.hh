@@ -33,12 +33,10 @@
 	#include <string>
 	#include <sstream>
 	#include <iostream>
-	#include <vector>
 
 	// GNU multiple precision library
 	#include <gmp.h>
 	
-	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
 
 struct VTMF_Card
@@ -106,5 +104,12 @@ struct VTMF_Card
 		mpz_clear(c_1), mpz_clear(c_2);
 	}
 };
+
+friend ostream& operator<< 
+	(ostream &out, const VTMF_Card &card)
+{
+	out << "crd|" << card.c_1 << "|" << card.c_2 << "|";
+	return out;
+}
 
 #endif

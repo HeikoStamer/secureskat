@@ -56,6 +56,7 @@
 	#include <gmp.h>
 	
 	#include "mpz_srandom.h"
+	#include "mpz_helper.hh"
 
 class BarnettSmartVTMF_dlog
 {
@@ -120,28 +121,6 @@ class BarnettSmartVTMF_dlog
 			(mpz_srcptr c_2, mpz_ptr m);
 		~BarnettSmartVTMF_dlog
 			();
-
-		// friendly iostream operators 
-		// FIXME: currently << and >> are insufficent defined by <gmpxx.h>
-		friend std::ostream& operator<< 
-			(std::ostream &out, mpz_srcptr value)
-		{
-			char *tmp = new char[10000];
-			out << mpz_get_str(tmp, TMCG_MPZ_IO_BASE, value);
-			delete [] tmp;
-			return out;
-		}
-
-		friend std::istream& operator>> 
-			(std::istream &in, mpz_ptr value)
-		{
-			char *tmp = new char[10000];
-			in.getline(tmp, 10000);
-			if (mpz_set_str(value, tmp, TMCG_MPZ_IO_BASE) < 0)
-				mpz_set_ui(value, 0L);
-			delete [] tmp;
-			return in;
-		}
 };
 
 #endif

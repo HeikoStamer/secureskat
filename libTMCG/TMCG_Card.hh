@@ -146,4 +146,14 @@ struct TMCG_Card
 	}
 };
 
+friend ostream& operator<< 
+	(ostream &out, const TMCG_Card &card)
+{
+	out << "crd|" << card.Players << "|" << card.TypeBits << "|";
+	for (size_t k = 0; k < card.Players; k++)
+		for (size_t w = 0; w < card.TypeBits; w++)
+			out << card.z[k][w] << "|";
+	return out;
+}
+
 #endif

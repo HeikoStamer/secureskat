@@ -165,4 +165,13 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	}
 };
 
+template<typename CardSecretType> friend ostream& operator<<
+	(ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
+{
+	out << "sts^" << ss.size() << "^";
+	for (size_t i = 0; i < ss.size(); i++)
+		out << ss[i].first << "^" << ss[i].second << "^";
+	return out;
+}
+
 #endif

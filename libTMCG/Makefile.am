@@ -2,7 +2,7 @@ LIBS = -lgmp -lgcrypt -lgpg-error
 
 lib_LTLIBRARIES = libTMCG.la
 
-include_HEADERS = mpz_srandom.h parse_helper.hh\
+include_HEADERS = mpz_srandom.h parse_helper.hh mpz_helper.hh\
 	BarnettSmartVTMF_dlog.hh SchindelhauerTMCG.hh\
 	VTMF_Card.hh VTMF_CardSecret.hh\
 	TMCG_Card.hh TMCG_CardSecret.hh\
@@ -11,6 +11,7 @@ include_HEADERS = mpz_srandom.h parse_helper.hh\
 
 libTMCG_la_SOURCES = mpz_srandom.c mpz_srandom.h\
 	parse_helper.cc parse_helper.hh\
+	mpz_helper.cc mpz_helper.hh\
 	mpz_primes.h mpz_shash.h mpz_spowm.h mpz_sqrtm.h\
 	BarnettSmartVTMF_dlog.cc BarnettSmartVTMF_dlog.hh\
 	SchindelhauerTMCG.cc SchindelhauerTMCG.hh\

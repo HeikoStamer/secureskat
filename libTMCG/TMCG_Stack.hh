@@ -203,4 +203,13 @@ template <typename CardType> struct TMCG_Stack
 	}
 };
 
+template<typename CardType> friend ostream& operator<<
+	(ostream &out, const TMCG_Stack<CardType> &s)
+{
+	out << "stk^" << s.size() << "^";
+	for (size_t i = 0; i < s.size(); i++)
+		out << s[i] << "^";
+	return out;
+}
+
 #endif

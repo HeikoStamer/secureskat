@@ -136,4 +136,14 @@ struct TMCG_CardSecret
 	}
 };
 
+friend ostream& operator<< 
+	(ostream &out, const TMCG_CardSecret &cardsecret)
+{
+	out << "crs|" << cardsecret.Players << "|" << cardsecret.TypeBits << "|";
+	for (size_t k = 0; k < cardsecret.Players; k++)
+		for (size_t w = 0; w < cardsecret.TypeBits; w++)
+			out << cardsecret.r[k][w] << "|" << cardsecret.b[k][w] << "|";
+	return out;
+}
+
 #endif

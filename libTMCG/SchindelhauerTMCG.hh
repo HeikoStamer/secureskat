@@ -56,28 +56,8 @@
 	#include "BarnettSmartVTMF_dlog.hh"
 	#include "mpz_srandom.h"
 
-using namespace std;
-typedef unsigned long int		mpz_ui;
-typedef ostringstream				TMCG_DataStream;
-typedef string							TMCG_KeyString,		TMCG_DataString;
-typedef string							TMCG_CipherValue,	TMCG_Signature;
-typedef const char*					TMCG_PlainValue;	// allocate rabin_s0 octets
-
-struct TMCG_PublicKey
-{
-	string										name, email, type, nizk;
-	mpz_t											m, y;
-	string										sig;
-};
-
-struct TMCG_SecretKey
-{
-	string										name, email, type, nizk;
-	mpz_t											m, y, p, q;
-	string										sig;
-	// below this line are non-persistent values (due to pre-computation)
-	mpz_t											y1, m1pq, gcdext_up, gcdext_vq, pa1d4, qa1d4;
-};
+//using namespace std;
+//typedef unsigned long int		mpz_ui;
 
 #define							TMCG_MAX_PLAYERS			32L
 #define							TMCG_MAX_CARDS				64L
@@ -91,11 +71,9 @@ struct TMCG_SecretKey
 #define							TMCG_MAX_STACK_CHARS		\
 	(TMCG_MAX_CARDS * TMCG_MAX_CARD_CHARS)
 
-struct TMCG_PublicKeyRing
-{
-	TMCG_PublicKey							key[TMCG_MAX_PLAYERS];
-};
-
+#include <TMCG_SecretKey.hh>
+#include <TMCG_PublicKey.hh>
+#include <TMCG_PublicKeyRing.hh>
 #include <VTMF_Card.hh>
 #include <VTMF_CardSecret.hh>
 #include <TMCG_Card.hh>
@@ -108,14 +86,7 @@ template <typename CardType> struct TMCG_OpenStack;
 class SchindelhauerTMCG
 {
 	private:
-		static const size_t		bcs_size = 1024;			// random bits
-		static const size_t		rabin_k0 = 20;				// SAEP octets
-		static const size_t		rabin_s0 = 20;				// SAEP octets
-		
-															// soundness error
-		static const size_t		nizk_stage1 = 16;			// d^{-nizk_stage1}
-		static const size_t		nizk_stage2 = 128;		// 2^{-nizk_stage2}
-		static const size_t		nizk_stage3 = 128;		// 2^{-nizk_stage3}
+	
 		
 		string								str, str2, str3;
 		char									encval[rabin_s0];
@@ -178,109 +149,6 @@ class SchindelhauerTMCG
 			memcpy(output, out, osize);
 			delete [] out;
 		}
-		
-		// export operators
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_SecretKey &key)
-		{
-			return
-				out << "sec|" << key.name << "|" << key.email << "|" <<
-					key.type << "|" << key.m << "|" << key.y << "|" <<
-					key.p << "|" << key.q << "|" <<
-					key.nizk << "|" << key.sig;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_PublicKey &key)
-		{
-			return
-				out << "pub|" << key.name << "|" << key.email << "|" <<
-					key.type << "|" << key.m << "|" << key.y << "|" <<
-					key.nizk << "|" << key.sig;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_Card &card)
-		{
-			out << "crd|" << card.Players << "|" << card.TypeBits << "|";
-			for (size_t k = 0; k < card.Players; k++)
-				for (size_t w = 0; w < card.TypeBits; w++)
-					out << card.z[k][w] << "|";
-			return out;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const VTMF_Card &card)
-		{
-			out << "crd|" << card.c_1 << "|" << card.c_2 << "|";
-			return out;
-		}
-		friend ostream& operator<< 
-			(ostream &out, const TMCG_CardSecret &cardsecret)
-		{
-			out << "crs|" << cardsecret.Players << "|" <<
-				cardsecret.TypeBits << "|";
-			for (size_t k = 0; k < cardsecret.Players; k++)
-				for (size_t w = 0; w < cardsecret.TypeBits; w++)
-					out << cardsecret.r[k][w] << "|" <<
-						cardsecret.b[k][w] << "|";
-			return out;
-		}
-		friend ostream& operator<<
-			(ostream &out, const VTMF_CardSecret &cardsecret)
-		{
-			out << "crs|" << cardsecret.r << "|";
-			return out;
-		}
-		template<typename CardType> friend ostream& operator<<
-			(ostream &out, const TMCG_Stack<CardType> &s)
-		{
-			out << "stk^" << s.size() << "^";
-			for (size_t i = 0; i < s.size(); i++)
-				out << s[i] << "^";
-			return out;
-		}
-		template<typename CardSecretType> friend ostream& operator<<
-			(ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
-		{
-			out << "sts^" << ss.size() << "^";
-			for (size_t i = 0; i < ss.size(); i++)
-				out << ss[i].first << "^" << ss[i].second << "^";
-			return out;
-		}
-		
-		// methods for key management
-		void TMCG_CreateKey
-			(TMCG_SecretKey &key, mpz_ui keysize,
-			const string &name, const string &email);
-		void TMCG_CreateKey
-			(TMCG_PublicKey &pkey, const TMCG_SecretKey &skey) const;
-		bool TMCG_CheckKey
-			(const TMCG_PublicKey &pkey);
-		void TMCG_ReleaseKey
-			(TMCG_SecretKey &key) const;
-		void TMCG_ReleaseKey
-			(TMCG_PublicKey &key) const;
-		const char *TMCG_ExportKeyID
-			(const TMCG_SecretKey &key);
-		const char *TMCG_ExportKeyID
-			(const TMCG_PublicKey &key);
-		const char *TMCG_ExportKeyID
-			(const TMCG_Signature &sig);
-		const char *TMCG_ExportSigID
-			(const TMCG_Signature &sig);
-		bool TMCG_ImportKey
-			(TMCG_SecretKey &key, const TMCG_KeyString &import);
-		bool TMCG_ImportKey
-			(TMCG_PublicKey &key, const TMCG_KeyString &import);
-		
-		// methods for encryption and authentification
-		const char *TMCG_EncryptValue
-			(const TMCG_PublicKey &key, const TMCG_PlainValue &value);
-		const char *TMCG_DecryptValue
-			(const TMCG_SecretKey &key, TMCG_CipherValue value);
-		const char *TMCG_SignData
-			(const TMCG_SecretKey &key, const TMCG_DataString &data);
-		bool TMCG_VerifyData
-			(const TMCG_PublicKey &key, const TMCG_DataString &data,
-			const TMCG_Signature &sig);
 		
 		// zero-knowledge proofs on values
 		void TMCG_ProofQuadraticResidue
