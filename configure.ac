@@ -117,7 +117,7 @@ if test x$ac_try_nsl = x1; then
     fi
 fi
 
-CXXFLAGS="-Wall -Werror -g3 -pedantic $LIBGCRYPT_CFLAGS"
+CXXFLAGS="-Wall -g3 -pedantic $LIBGCRYPT_CFLAGS"
 ##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in libTMCG/Makefile])
