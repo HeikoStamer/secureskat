@@ -44,72 +44,27 @@ struct VTMF_Card
 	mpz_t c_1, c_2;
 	
 	VTMF_Card
-		()
-	{
-		mpz_init(c_1), mpz_init(c_2);
-	}
+		();
 	
 	VTMF_Card
-		(const VTMF_Card& that)
-	{
-		mpz_init_set(c_1, that.c_1), mpz_init_set(c_2, that.c_2);
-	}
+		(const VTMF_Card& that);
 	
 	VTMF_Card& operator =
-		(const VTMF_Card& that)
-	{
-		mpz_set(c_1, that.c_1), mpz_set(c_2, that.c_2);
-		return *this;
-	}
+		(const VTMF_Card& that);
 	
 	bool operator ==
-		(const VTMF_Card& that) const
-	{
-		if (mpz_cmp(c_1, that.c_1) || mpz_cmp(c_2, that.c_2))
-			return false;
-		return true;
-	}
+		(const VTMF_Card& that) const;
 	
 	bool operator !=
-		(const VTMF_Card& that) const
-	{
-		return !(*this == that);
-	}
+		(const VTMF_Card& that) const;
 	
 	bool import
-		(std::string s)
-	{
-		try
-		{
-			// check magic
-			if (!cm(s, "crd", '|'))
-				throw false;
-			
-			// card data
-			if ((mpz_set_str(c_1, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			if ((mpz_set_str(c_2, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
+		(std::string s);
 	
-	~VTMF_Card()
-	{
-		mpz_clear(c_1), mpz_clear(c_2);
-	}
+	~VTMF_Card();
 };
 
 std::ostream& operator<< 
-	(std::ostream &out, const VTMF_Card &card)
-{
-	out << "crd|" << card.c_1 << "|" << card.c_2 << "|";
-	return out;
-}
+	(std::ostream &out, const VTMF_Card &card);
 
 #endif

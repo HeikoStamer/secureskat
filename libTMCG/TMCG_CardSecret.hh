@@ -42,108 +42,32 @@
 
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
+	
+	#include "TMCG.def"
 
 struct TMCG_CardSecret
 {
-	size_t	Players, TypeBits;
+	size_t		Players, TypeBits;
 	mpz_t		r[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS],
-					b[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
+				b[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
 	
 	TMCG_CardSecret
-		()
-	{
-		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
-				mpz_init(r[k][w]), mpz_init(b[k][w]);
-	}
+		();
 	
 	TMCG_CardSecret
-		(const TMCG_CardSecret& that) :
-		Players(that.Players), TypeBits(that.TypeBits)
-	{
-		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
-				mpz_init_set(r[k][w], that.r[k][w]),
-				mpz_init_set(b[k][w], that.b[k][w]);
-	}
+		(const TMCG_CardSecret& that);
 	
 	TMCG_CardSecret& operator =
-		(const TMCG_CardSecret& that)
-	{
-		Players = that.Players, TypeBits = that.TypeBits;
-		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
-				mpz_set(r[k][w], that.r[k][w]), mpz_set(b[k][w], that.b[k][w]);
-		return *this;
-	}
+		(const TMCG_CardSecret& that);
 	
 	bool import
-		(std::string s)
-	{
-		char *ec;
-		
-		try
-		{
-			// check magic
-			if (!cm(s, "crs", '|'))
-				throw false;
-			
-			// public card data
-			if (gs(s, '|') == NULL)
-				throw false;
-			Players = strtoul(gs(s, '|'), &ec, 10);
-			if ((*ec != '\0') || (Players <= 0) ||
-				(Players > TMCG_MAX_PLAYERS) || (!nx(s, '|')))
-					throw false;
-			if (gs(s, '|') == NULL)
-				throw false;
-			TypeBits = strtoul(gs(s, '|'), &ec, 10);
-			if ((*ec != '\0') || (TypeBits <= 0) ||
-				(TypeBits > TMCG_MAX_TYPEBITS) || (!nx(s, '|')))
-					throw false;
-			
-			// secret card data
-			for (size_t k = 0; k < Players; k++)
-			{
-				for (size_t w = 0; w < TypeBits; w++)
-				{
-					// r_ij
-					if ((mpz_set_str(r[k][w], gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) ||
-						(!nx(s, '|')))
-							throw false;
-							
-					// b_ij
-					if ((mpz_set_str(b[k][w], gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) ||
-						(!nx(s, '|')))
-							throw false;
-				}
-			}
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
+		(std::string s);
 	
 	~TMCG_CardSecret
-		()
-	{
-		for (size_t k = 0; k < TMCG_MAX_PLAYERS; k++)
-			for (size_t w = 0; w < TMCG_MAX_TYPEBITS; w++)
-				mpz_clear(r[k][w]), mpz_clear(b[k][w]);
-	}
+		();
 };
 
 std::ostream& operator<< 
-	(std::ostream &out, const TMCG_CardSecret &cardsecret)
-{
-	out << "crs|" << cardsecret.Players << "|" << cardsecret.TypeBits << "|";
-	for (size_t k = 0; k < cardsecret.Players; k++)
-		for (size_t w = 0; w < cardsecret.TypeBits; w++)
-			out << cardsecret.r[k][w] << "|" << cardsecret.b[k][w] << "|";
-	return out;
-}
+	(std::ostream &out, const TMCG_CardSecret &cardsecret);
 
 #endif

@@ -18,61 +18,56 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
-#ifndef INCLUDED_TMCG_Card_HH
-	#define INCLUDED_TMCG_Card_HH
+#include "VTMF_CardSecret.hh"
 
-	// config.h
-	#if HAVE_CONFIG_H
-		#include "config.h"
-	#endif
-
-	// C++/STL header
-	#include <cstdio>
-	#include <cstdlib>
-	#include <cassert>
-	#include <string>
-	#include <sstream>
-	#include <iostream>
-	#include <vector>
-	#include <algorithm>
-	#include <functional>
-	
-	// GNU multiple precision library
-	#include <gmp.h>
-
-	#include "mpz_srandom.h"
-	#include "parse_helper.hh"
-	
-	#include "TMCG.def"
-
-struct TMCG_Card
+VTMF_CardSecret::VTMF_CardSecret
+	()
 {
-	size_t					Players, TypeBits;
-	mpz_t					z[TMCG_MAX_PLAYERS][TMCG_MAX_TYPEBITS];
-	
-	TMCG_Card
-		();
-	
-	TMCG_Card
-		(const TMCG_Card& that);
-	
-	TMCG_Card& operator =
-		(const TMCG_Card& that);
-	
-	bool operator ==
-		(const TMCG_Card& that);
-	
-	bool operator !=
-		(const TMCG_Card& that);
-	
-	bool import
-		(std::string s);
-	
-	~TMCG_Card
-		();
-};
+	mpz_init(r);
+}
 
-std::ostream& operator<< 
-	(std::ostream &out, const TMCG_Card &card);
+VTMF_CardSecret::VTMF_CardSecret
+	(const VTMF_CardSecret& that)
+{
+	mpz_init_set(r, that.r);
+}
 
-#endif
+VTMF_CardSecret& VTMF_CardSecret::operator =
+	(const VTMF_CardSecret& that)
+{
+	mpz_set(r, that.r);
+	return *this;
+}
+
+bool VTMF_CardSecret::import
+	(std::string s)
+{
+	try
+	{
+		// check magic
+		if (!cm(s, "crs", '|'))
+			throw false;
+		
+		// secret card data
+		if ((mpz_set_str(r, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
+			throw false;
+		
+		throw true;
+	}
+	catch (bool return_value)
+	{
+		return return_value;
+	}
+}
+
+VTMF_CardSecret::~VTMF_CardSecret
+	()
+{
+	mpz_clear(r);
+}
+
+std::ostream& operator<<
+	(std::ostream &out, const VTMF_CardSecret &cardsecret)
+{
+	return out << "crs|" << cardsecret.r << "|";
+}

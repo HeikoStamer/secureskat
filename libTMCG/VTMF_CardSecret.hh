@@ -39,63 +39,27 @@
 	
 	#include "parse_helper.hh"
 
-
-
 struct VTMF_CardSecret
 {
 	mpz_t r;
 	
 	VTMF_CardSecret
-		()
-	{
-		mpz_init(r);
-	}
+		();
 	
 	VTMF_CardSecret
-		(const VTMF_CardSecret& that)
-	{
-		mpz_init_set(r, that.r);
-	}
+		(const VTMF_CardSecret& that);
 	
 	VTMF_CardSecret& operator =
-		(const VTMF_CardSecret& that)
-	{
-		mpz_set(r, that.r);
-		return *this;
-	}
+		(const VTMF_CardSecret& that);
 	
 	bool import
-		(std::string s)
-	{
-		try
-		{
-			// check magic
-			if (!cm(s, "crs", '|'))
-				throw false;
-			
-			// secret card data
-			if ((mpz_set_str(r, gs(s, '|'), TMCG_MPZ_IO_BASE) < 0) || (!nx(s, '|')))
-				throw false;
-			
-			throw true;
-		}
-		catch (bool return_value)
-		{
-			return return_value;
-		}
-	}
+		(std::string s);
 	
 	~VTMF_CardSecret
-		()
-	{
-		mpz_clear(r);
-	}
+		();
 };
 
 std::ostream& operator<<
-	(std::ostream &out, const VTMF_CardSecret &cardsecret)
-{
-	return out << "crs|" << cardsecret.r << "|";
-}
+	(std::ostream &out, const VTMF_CardSecret &cardsecret);
 
 #endif

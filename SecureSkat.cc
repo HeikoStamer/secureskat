@@ -58,7 +58,9 @@
 #include <iostream>
 #include <sstream>
 
+// libTMCG
 #include <libTMCG.hh>
+
 #include "socketstream.hh"
 #include "securesocketstream.hh"
 #include "pipestream.hh"
@@ -67,81 +69,84 @@
 #include "SecureSkat_rnk.hh"
 #include "SecureSkat_vtmf.hh"
 
-using namespace std;
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 #ifdef ENABLE_NLS
-	#define _(String) gettext(String)
+	#ifndef _
+		#define _(Foo) gettext(Foo)
+	#endif
 #else
-	#define _(String) String
+	#ifndef _
+		#define _(Bar) Bar
+	#endif
 #endif
 
 // define TIMEOUT (in seconds)
 #define PKI_TIMEOUT							1500
 #define RNK_TIMEOUT							500
-#define ANNOUNCE_TIMEOUT				5
+#define ANNOUNCE_TIMEOUT					5
 #define CLEAR_TIMEOUT						60
-#define AUTOJOIN_TIMEOUT				75
+#define AUTOJOIN_TIMEOUT					75
 
 // define BOUNDS (in child processes)
 #define PKI_CHILDS							10
 #define RNK_CHILDS							5
 
-SchindelhauerTMCG								*tmcg;
-mpz_ui													security_level = 16;
-string													game_ctl;
-char														**game_env;
-TMCG_SecretKey 									sec;
-TMCG_PublicKey 									pub;
-map<int, char*> 								readbuf;
-map<int, ssize_t>								readed;
+SchindelhauerTMCG							*tmcg;
+unsigned long int							security_level = 16;
+std::string									game_ctl;
+char										**game_env;
+TMCG_SecretKey								sec;
+TMCG_PublicKey								pub;
+std::map<int, char*>						readbuf;
+std::map<int, ssize_t>						readed;
 
-TMCG_KeyString 									secret_key, public_key, public_prefix;
-list< pair<pid_t, int> >				usr1_stat;
-map<string, string>							nick_players;
-map<string, int>								nick_p7771, nick_p7772, 
-																nick_p7773, nick_p7774, nick_sl;
-map<string, TMCG_PublicKey>			nick_key;
-list<string>										tables;
-map<string, int>								tables_r, tables_p;
-map<string, string>							tables_u, tables_o;
-pid_t														game_pid, ballot_pid;
-map<string, pid_t>							games_tnr2pid;
-map<pid_t, string>							games_pid2tnr;
-map<pid_t, int>									games_rnkpipe, games_opipe, games_ipipe;
+std::string									secret_key, public_key, public_prefix;
+std::list< std::pair<pid_t, int> >			usr1_stat;
+std::map<std::string, std::string>			nick_players;
+std::map<std::string, int>					nick_p7771, nick_p7772,
+											nick_p7773, nick_p7774, nick_sl;
+std::map<std::string, TMCG_PublicKey>		nick_key;
+std::list<std::string>						tables;
+std::map<std::string, int>					tables_r, tables_p;
+std::map<std::string, std::string>			tables_u, tables_o;
+pid_t										game_pid, ballot_pid;
+std::map<std::string, pid_t>				games_tnr2pid;
+std::map<pid_t, std::string>				games_pid2tnr;
+std::map<pid_t, int>						games_rnkpipe, games_opipe, games_ipipe;
 
-pid_t														nick_pid;
-list<pid_t>											nick_pids;
-list<string>										nick_ninf;
-map<string, int>								nick_ncnt;
-map<pid_t, string>							nick_nick, nick_host;
-map<pid_t, int>									nick_pipe;
+pid_t										nick_pid;
+std::list<pid_t>							nick_pids;
+std::list<std::string>						nick_ninf;
+std::map<std::string, int>					nick_ncnt;
+std::map<pid_t, std::string>				nick_nick, nick_host;
+std::map<pid_t, int>						nick_pipe;
 
-list<pid_t>											rnk_pids, rnkrpl_pid;
-pid_t														rnk_pid;
-map<string, string>							rnk;
-map<string, int>								nick_rnkcnt, nick_rcnt;
-map<string, pid_t>							nick_rnkpid;
-map<pid_t, string>							rnk_nick;
-map<pid_t, int>									rnk_pipe;
+std::list<pid_t>							rnk_pids, rnkrpl_pid;
+pid_t										rnk_pid;
+std::map<std::string, std::string>			rnk;
+std::map<std::string, int>					nick_rnkcnt, nick_rcnt;
+std::map<std::string, pid_t>				nick_rnkpid;
+std::map<pid_t, std::string>				rnk_nick;
+std::map<pid_t, int>						rnk_pipe;
 
-int															pki7771_port, pki7772_port, 
-																rnk7773_port, rnk7774_port;
-int															pki7771_handle, pki7772_handle,
-																rnk7773_handle, rnk7774_handle;
-list<pid_t>											pkiprf_pid;
+int											pki7771_port, pki7772_port, 
+											rnk7773_port, rnk7774_port;
+int											pki7771_handle, pki7772_handle,
+											rnk7773_handle, rnk7774_handle;
+std::list<pid_t>							pkiprf_pid;
 
-map<string, int>								bad_nick;
+std::map<std::string, int>					bad_nick;
 
-string													irc_reply, irc_pfx, irc_cmd, irc_par;
-int															irc_port, irc_handle, ctl_pid = 0;
-vector<string>									irc_parvec;
-bool														irc_stat = true;
-iosocketstream									*irc;
+std::string									irc_reply, irc_pfx, irc_cmd, irc_par;
+int											irc_port, irc_handle, ctl_pid = 0;
+std::vector<std::string>					irc_parvec;
+bool										irc_stat = true;
+iosocketstream								*irc;
 
-string													X = ">< ", XX = "><>< ", XXX = "><><>< ";
+std::string									X = ">< ", XX = "><>< ", XXX = "><><>< ";
 struct termios									old_term, new_term;
 
-sig_atomic_t		irc_quit = 0, sigchld_critical = 0;
+sig_atomic_t								irc_quit = 0, sigchld_critical = 0;
 
 #ifndef RETSIGTYPE
 	#define RETSIGTYPE void
@@ -149,7 +154,7 @@ sig_atomic_t		irc_quit = 0, sigchld_critical = 0;
 
 RETSIGTYPE sig_handler_quit(int sig)
 {
-	cerr << "... SIGNAL " << sig << " RECEIVED ..." << endl;
+	std::cerr << "... SIGNAL " << sig << " RECEIVED ..." << std::endl;
 	irc_quit = 1;
 }
 
@@ -191,29 +196,29 @@ RETSIGTYPE sig_handler_usr1(int sig)
 	
 	while (!usr1_stat.empty())
 	{
-		pair <pid_t, int> chld_stat = usr1_stat.front();
+		std::pair <pid_t, int> chld_stat = usr1_stat.front();
 		usr1_stat.pop_front();
 		pid_t chld_pid = chld_stat.first;
 		int status = chld_stat.second;
 		
 		if (games_pid2tnr.find(chld_pid) != games_pid2tnr.end())
 		{
-			string tnr = games_pid2tnr[chld_pid];
+			std::string tnr = games_pid2tnr[chld_pid];
 			if (WIFEXITED(status))
 			{
 				if (WEXITSTATUS(status) == 0)
-					cerr << X << _("Session") << " \"" << tnr << "\" " << 
-						_("succeeded properly") << endl;
+					std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
+						_("succeeded properly") << std::endl;
 				else
-					cerr << X << _("Session") << " \"" << tnr << "\" " << 
+					std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
 						_("failed. Error code: WEXITSTATUS ") << 
-						WEXITSTATUS(status) << endl;
+						WEXITSTATUS(status) << std::endl;
 			}
 			if (WIFSIGNALED(status))
 			{
-				cerr << X << _("Session") << " \"" << tnr << "\" " << 
+				std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
 					_("failed. Error code: WTERMSIG ") <<
-					WTERMSIG(status) << endl;
+					WTERMSIG(status) << std::endl;
 			}
 			games_tnr2pid.erase(games_pid2tnr[chld_pid]);
 			games_pid2tnr.erase(chld_pid);
@@ -221,15 +226,15 @@ RETSIGTYPE sig_handler_usr1(int sig)
 		else if (std::find(pkiprf_pid.begin(), pkiprf_pid.end(), chld_pid) !=
 			pkiprf_pid.end())
 		{
-			cerr << X << "PKI (pid = " << chld_pid << ") " << 
-				_("succeeded properly") << endl;
+			std::cerr << X << "PKI (pid = " << chld_pid << ") " << 
+				_("succeeded properly") << std::endl;
 			pkiprf_pid.remove(chld_pid);
 		}
 		else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) !=
 			rnkrpl_pid.end())
 		{
-			cerr << X << "RNK (pid = " << chld_pid << ") " << 
-				_("succeeded properly") << endl;
+			std::cerr << X << "RNK (pid = " << chld_pid << ") " << 
+				_("succeeded properly") << std::endl;
 			rnkrpl_pid.remove(chld_pid);
 		}
 		else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) !=
@@ -239,16 +244,16 @@ RETSIGTYPE sig_handler_usr1(int sig)
 			{
 				if (WEXITSTATUS(status) != 0)
 				{
-					cerr << X << "RNK (pid = " << chld_pid << ") " <<
+					std::cerr << X << "RNK (pid = " << chld_pid << ") " <<
 						_("failed. Error code: WEXITSTATUS ") << 
-						WEXITSTATUS(status) << endl;
+						WEXITSTATUS(status) << std::endl;
 				}
 			}
 			if (WIFSIGNALED(status))
 			{
-				cerr << X << "RNK (pid = " << chld_pid << ") " << 
+				std::cerr << X << "RNK (pid = " << chld_pid << ") " << 
 					_("failed. Error code: WTERMSIG ") << 
-					WTERMSIG(status) << endl;
+					WTERMSIG(status) << std::endl;
 			}
 			rnk_pids.remove(chld_pid);
 			nick_rnkcnt.erase(rnk_nick[chld_pid]);
@@ -261,19 +266,19 @@ RETSIGTYPE sig_handler_usr1(int sig)
 			{
 				if (WEXITSTATUS(status) != 0)
 				{
-					cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << 
+					std::cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << 
 						" " << _("failed. Error code: WEXITSTATUS ") << 
-						WEXITSTATUS(status) << endl;
+						WEXITSTATUS(status) << std::endl;
 				}
 			}
 			if (WIFSIGNALED(status))
 			{
-				cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] <<
+				std::cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] <<
 					" " << _("failed. Error code: WTERMSIG ") << 
-					WTERMSIG(status) << endl;
+					WTERMSIG(status) << std::endl;
 			}
 			
-			// remove bad nick from player list
+			// remove bad nick from player std::list
 			if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
 				bad_nick[nick_nick[chld_pid]] = 1;
 			else if (bad_nick[nick_nick[chld_pid]] <= 3)
@@ -307,9 +312,9 @@ RETSIGTYPE sig_handler_usr1(int sig)
 RETSIGTYPE sig_handler_chld(int sig)
 {
 	sigchld_critical = 1;
-
+	
 	// look for died children (zombies) and evaluate their exit code
-	pair <pid_t, int> chld_stat;
+	std::pair <pid_t, int> chld_stat;
 	int status;
 	chld_stat.first = wait(&status), chld_stat.second = status;
 	usr1_stat.push_back(chld_stat);
@@ -317,7 +322,7 @@ RETSIGTYPE sig_handler_chld(int sig)
 	sigchld_critical = 0;
 }
 
-void create_irc(const string &server, short int port)
+void create_irc(const std::string &server, short int port)
 {
 	irc_handle = ConnectToHost(server.c_str(), port);
 	if (irc_handle < 0)
@@ -328,7 +333,7 @@ void create_irc(const string &server, short int port)
 	irc = new iosocketstream(irc_handle);
 }
 
-const char *irc_prefix(const string &input)
+const char *irc_prefix(const std::string &input)
 {
 	irc_pfx = input;
 	if (irc_pfx.find(":", 0) == 0)
@@ -338,13 +343,13 @@ const char *irc_prefix(const string &input)
 	return irc_pfx.c_str();
 }
 
-const char *irc_command(const string &input)
+const char *irc_command(const std::string &input)
 {
 	irc_cmd = input;
 	// prefix?
 	if (irc_cmd.find(":", 0) == 0)
 	{
-		irc_cmd = irc_cmd.substr(irc_cmd.find(" ", 0) + 1, 
+		irc_cmd = irc_cmd.substr(irc_cmd.find(" ", 0) + 1,
 			irc_cmd.length() - irc_cmd.find(" ", 0) - 1);
 	}
 	// strip leading whitespaces
@@ -355,25 +360,25 @@ const char *irc_command(const string &input)
 	return irc_cmd.c_str();
 }
 
-const char *irc_params(const string &input)
+const char *irc_params(const std::string &input)
 {
 	irc_par = input;
 	if (irc_par.find(":", 0) == 0)
 	{
-		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1, 
+		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1,
 			irc_par.length() - irc_par.find(" ", 0) - 1);
 	}
 	while (irc_par.find(" ", 0) == 0)
 		irc_par = irc_par.substr(1, irc_par.length() - 1);
 	if (irc_par.find(" ", 0) != irc_par.npos)
-		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1, 
+		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1,
 			irc_par.length() - irc_par.find(" ", 0) - 1);
 	else
 		irc_par = "";
 	return irc_par.c_str();
 }
 
-size_t irc_paramvec(string input)
+size_t irc_paramvec(std::string input)
 {
 	irc_parvec.clear();
 	while (input != "")
@@ -391,7 +396,7 @@ size_t irc_paramvec(string input)
 		else if (input.find(" ", 0) != input.npos)
 		{
 			irc_parvec.push_back(input.substr(0, input.find(" ", 0)));
-			input = input.substr(input.find(" ", 0) + 1, 
+			input = input.substr(input.find(" ", 0) + 1,
 				input.length() - input.find(" ", 0));
 		}
 		// last token
@@ -418,13 +423,13 @@ void init_irc()
 #endif
 	signal(SIGUSR1, sig_handler_usr1);
 	// send NICKname
-	*irc << "NICK " << tmcg->TMCG_ExportKeyID(pub) << endl << flush;
+	*irc << "NICK " << pub.keyid() << std::endl << std::flush;
 }
 
 void skat_connect
-	(opipestream *out_pipe, const string &nr, SchindelhauerTMCG *t,
-	size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle, 
-	map<string, int> gp_ports, const vector<string> &vnicks,
+	(opipestream *out_pipe, const std::string &nr, SchindelhauerTMCG *t,
+	size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
+	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
 	TMCG_PublicKeyRing pkr)
 {
 	// create TCP/IP connection
@@ -434,36 +439,36 @@ void skat_connect
 	);
 	if (handle < 0)
 	{
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1),	exit(-4);
 	}
 	iosocketstream *neighbor = new iosocketstream(handle);
-
+	
 	// authenticate connection
 	char tmp[TMCG_MAX_CARD_CHARS];
 	TMCG_CardSecret cs;
 	// receive challenge
 	neighbor->getline(tmp, sizeof(tmp));
-	if (t->TMCG_ImportCardSecret(cs, tmp))
+	if (cs.import(tmp))
 	{
-		string chlg1 = tmp, chlg2 = "";
+		std::string chlg1 = tmp, chlg2 = "";
 		chlg1 += "<>" + vnicks[pkr_idx];
 		// send signature
-		*neighbor << t->TMCG_SignData(sec, chlg1) << endl << flush;
+		*neighbor << sec.sign(chlg1) << std::endl << std::flush;
 		// create new challenge
 		t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 		// send challenge
-		*neighbor << cs << endl << flush;
+		*neighbor << cs << std::endl << std::flush;
 		// receive signature
 		neighbor->getline(tmp, sizeof(tmp));
 		// verify signature
-		ostringstream ost;
+		std::ostringstream ost;
 		ost << cs, chlg2 = ost.str() + "<>" + vnicks[pkr_self];
-		if (!t->TMCG_VerifyData(pkr.key[pkr_idx], chlg2, tmp) || !neighbor->good())
+		if (!pkr.key[pkr_idx].verify(chlg2, tmp) || !neighbor->good())
 		{
 			delete neighbor;
 			close(handle);
-			*out_pipe << "PART #openSkat_" << nr << endl << flush;
+			*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 			sleep(1),	exit(-6);
 		}
 	}
@@ -471,46 +476,37 @@ void skat_connect
 	{
 		delete neighbor;
 		close(handle);
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1),	exit(-6);
 	}
-
+	
 	// exchange secret keys for securesocketstreams
-	assert (gcry_md_test_algo (GCRY_MD_RMD160) == 0);
-	char *key1 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-	char *key2 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-	gcry_randomize((unsigned char*)key1, 
-		gcry_md_get_algo_dlen (GCRY_MD_RMD160), GCRY_STRONG_RANDOM);
-	const char *ev = t->TMCG_EncryptValue(pkr.key[pkr_idx], key1);
-	if (ev == NULL)
-	{
-		cerr << _("TMCG: EncryptValue() failed") << endl;
-		delete neighbor;
-		close(handle);
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
-		sleep(1),	exit(-6);
-	}
-	*neighbor << ev << endl << flush;
-
+	assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
+	char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+	char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+	gcry_randomize((unsigned char*)key1,
+		gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+	*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
+	
 	neighbor->getline(tmp, sizeof(tmp));
-	const char *dv = t->TMCG_DecryptValue(sec, tmp);
+	const char *dv = sec.decrypt(tmp);
 	if (dv == NULL)
 	{
-		cerr << _("TMCG: DecryptValue() failed") << endl;
+		std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
 		delete neighbor;
 		close(handle);
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1),	exit(-6);
 	}
-	memcpy(key2, dv, gcry_md_get_algo_dlen (GCRY_MD_RMD160)); 
+	memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 	delete neighbor;
 	secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
 	delete [] key1, delete [] key2;
 }
 
-void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
+void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r,
 	SchindelhauerTMCG *t, int pkr_self, int pkr_idx, 
-	iosecuresocketstream *&secure, int &handle, const vector<string> &vnicks,
+	iosecuresocketstream *&secure, int &handle, const std::vector<std::string> &vnicks,
 	const TMCG_PublicKeyRing &pkr, int gp_handle, bool neu, char *ireadbuf, int &ireaded)
 {
 	struct hostent *hostinf;
@@ -522,7 +518,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 	else
 	{
 		perror("skat_accept (gethostbyname)");
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1),	exit(-4);
 	}
 	fd_set rfds;									// set of read descriptors
@@ -539,7 +535,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 		if (ret < 0)
 			if (errno != EINTR)
 				perror("skat_accept (select)");
-
+		
 		// connection request
 		if ((ret > 0) && FD_ISSET(gp_handle, &rfds))
 		{
@@ -556,56 +552,47 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 					iosocketstream *neighbor = new iosocketstream(handle);
 					TMCG_CardSecret cs;
 					t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
-					*neighbor << cs << endl << flush;
+					*neighbor << cs << std::endl << std::flush;
 					char tmp[TMCG_MAX_CARD_CHARS];
 					neighbor->getline(tmp, sizeof(tmp));
-					ostringstream ost;
+					std::ostringstream ost;
 					ost << cs;
-					if (!t->TMCG_VerifyData(pkr.key[pkr_idx], ost.str() + "<>" + 
+					if (!pkr.key[pkr_idx].verify(ost.str() + "<>" +
 						vnicks[pkr_self], tmp) || !neighbor->good())
 					{
 						delete neighbor;
 						close(handle);
-						*out_pipe << "PART #openSkat_" << nr << endl << flush;
+						*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 						sleep(1),	exit(-6);
 					}
 					else
 					{
 						neighbor->getline(tmp, sizeof(tmp));
-						if (t->TMCG_ImportCardSecret(cs, tmp))
+						if (cs.import(tmp))
 						{
-							string st = tmp;
+							std::string st = tmp;
 							st += "<>" + vnicks[pkr_idx];
-							*neighbor << t->TMCG_SignData(sec, st) << endl << flush;
+							*neighbor << sec.sign(st) << std::endl << std::flush;
 							
 							// exchange secret keys for securesocketstreams
-							assert (gcry_md_test_algo (GCRY_MD_RMD160) == 0);
-							char *key1 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-							char *key2 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
+							assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
+							char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+							char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
 							neighbor->getline(tmp, sizeof(tmp));
-							const char *dv = t->TMCG_DecryptValue(sec, tmp);
+							const char *dv = sec.decrypt(tmp);
 							if (dv == NULL)
 							{
-								cerr << _("TMCG: DecryptValue() failed") << endl;
+								std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
 								delete neighbor;
 								close(handle);
-								*out_pipe << "PART #openSkat_" << nr << endl << flush;
+								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 								sleep(1),	exit(-6);
 							}
-							memcpy(key2, dv, gcry_md_get_algo_dlen (GCRY_MD_RMD160));
+							memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 							
-							gcry_randomize((unsigned char*)key1, 
-								gcry_md_get_algo_dlen (GCRY_MD_RMD160), GCRY_STRONG_RANDOM);
-							const char *ev = t->TMCG_EncryptValue(pkr.key[pkr_idx], key1);
-							if (ev == NULL)
-							{
-								cerr << _("TMCG: EncryptValue() failed") << endl;
-								delete neighbor;
-								close(handle);
-								*out_pipe << "PART #openSkat_" << nr << endl << flush;
-								sleep(1),	exit(-6);
-							}
-							*neighbor << ev << endl << flush;
+							gcry_randomize((unsigned char*)key1,
+								gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+							*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
 							delete neighbor;
 							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
 							delete [] key1, delete [] key2;
@@ -615,7 +602,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 						{
 							delete neighbor;
 							close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							sleep(1),	exit(-6);
 						}
 					}
@@ -623,7 +610,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 				else
 				{
 					close(handle);
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					sleep(1),	exit(-6);
 				}
 			}
@@ -636,7 +623,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 			ireaded += num;
 			if (ireaded > 0)
 			{
-				vector<int> pos_delim;
+				std::vector<int> pos_delim;
 				int cnt_delim = 0, cnt_pos = 0, pos = 0;
 				for (int i = 0; i < ireaded; i++)
 					if (ireadbuf[i] == '\n')
@@ -647,7 +634,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 					bzero(tmp, sizeof(tmp));
 					memcpy(tmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 					--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-					string cmd = tmp;
+					std::string cmd = tmp;
 					// do operation
 					if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 					{
@@ -656,26 +643,26 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
 						*out_pipe << "PRIVMSG #openSkat :" 
-							<< nr << "|3~" << r << "!" << endl << flush;
+							<< nr << "|3~" << r << "!" << std::endl << std::flush;
 					}	
 					if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 					{
-						string nick = cmd.substr(8, cmd.length() - 8);
+						std::string nick = cmd.substr(8, cmd.length() - 8);
 						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("observers currently not permitted") << endl << flush;
+							_("observers currently not permitted") << std::endl << std::flush;
 					}
 					if (neu && (cmd.find("JOIN ", 0) == 0))
 					{
-						string nick = cmd.substr(5, cmd.length() - 5);
+						std::string nick = cmd.substr(5, cmd.length() - 5);
 						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("table completely occupied") << endl << flush;
+							_("table completely occupied") << std::endl << std::flush;
 					}
 					if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 					{
-						string nick = cmd.substr(5, cmd.length() - 5);
+						std::string nick = cmd.substr(5, cmd.length() - 5);
 						if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 						{
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							sleep(1), exit(-5);
 						}
 					}
@@ -688,19 +675,19 @@ void skat_accept (opipestream *out_pipe, int ipipe, const string &nr, int r,
 			}
 			if (num == 0)
 			{
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				sleep(1), exit(-50);
 			}
 		}
 	}
 }
 
-void skat_alive(opipestream *out_pipe, const string &nr, 
+void skat_alive(opipestream *out_pipe, const std::string &nr, 
 	iosecuresocketstream *r, iosecuresocketstream *l)
 {
 	if (!r->good() || !l->good())
 	{
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1), exit(-5);
 	}
 }
@@ -708,21 +695,21 @@ void skat_alive(opipestream *out_pipe, const string &nr,
 #include "SecureSkat_ballot.inc"
 
 int skat_child
-	(const string &nr, int r, bool neu, int ipipe, int opipe, int hpipe, const string &master)
+	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe, const std::string &master)
 {
 	SchindelhauerTMCG *gp_tmcg = 
 		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 32 cards
-	list<string> gp_nick;
-	map<string, string> gp_name;
+	std::list<std::string> gp_nick;
+	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
 	int ipipe_readed = 0;
 	if (ipipe_readbuf == NULL)
 	{
-		cerr << _("MALLOC ERROR: out of memory") << endl;
+		std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
 		exit(-1);
 	}
-	gp_nick.push_back(gp_tmcg->TMCG_ExportKeyID(pub));
-	gp_name[gp_tmcg->TMCG_ExportKeyID(pub)] = pub.name;
+	gp_nick.push_back(pub.keyid());
+	gp_name[pub.keyid()] = pub.name;
 	
 	// install old signal handlers
 	signal(SIGINT, sig_handler_skat_quit);
@@ -743,14 +730,14 @@ int skat_child
 	
 	if (neu)
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-			"~" << r << "!" << endl << flush;
+			"~" << r << "!" << std::endl << std::flush;
 	
 	// wait for players
 	while (1)
 	{
 		char tmp[10000];
 		in_pipe->getline(tmp, sizeof(tmp));
-		string cmd = tmp;
+		std::string cmd = tmp;
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 		{
@@ -759,36 +746,36 @@ int skat_child
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-				"~" << r << "!" << endl << flush;
+				"~" << r << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 		{
-			string nick = cmd.substr(8, cmd.length() - 8);
+			std::string nick = cmd.substr(8, cmd.length() - 8);
 			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("observers currently not permitted") << endl << flush;
+				_("observers currently not permitted") << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (nick_key.find(nick) != nick_key.end())
 			{
 				if (nick_players.find(nick) != nick_players.end())
 				{
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 					*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
-						gp_nick.size() << "~" << r << "!" << endl << flush;
+						gp_nick.size() << "~" << r << "!" << std::endl << std::flush;
 				}
 				else
 					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("player was at table creation not present") << endl << flush;
+						_("player was at table creation not present") << std::endl << std::flush;
 			}
 			else
 				*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-					_("key exchange with owner is incomplete") << endl << flush;
+					_("key exchange with owner is incomplete") << std::endl << std::flush;
 		}
 		if (!neu && ((cmd.find("JOIN ", 0) == 0) || (cmd.find("WHO ", 0) == 0)))
 		{
-			string nick = (cmd.find("JOIN ", 0) == 0) ?
+			std::string nick = (cmd.find("JOIN ", 0) == 0) ?
 				cmd.substr(5, cmd.length() - 5) : cmd.substr(4, cmd.length() - 4);
 			if (nick_key.find(nick) != nick_key.end())
 			{
@@ -796,19 +783,19 @@ int skat_child
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 				else
 					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("player was at table creation not present") << endl << flush;
+						_("player was at table creation not present") << std::endl << std::flush;
 			}
 			else
 			{
-				cerr << X << _("key exchange with") << " " << nick << " " << 
-					_("is incomplete") << endl;
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				std::cerr << X << _("key exchange with") << " " << nick << " " << 
+					_("is incomplete") << std::endl;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -1;
 			}
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(gp_nick.begin(), gp_nick.end(), nick)	!= gp_nick.end())
 			{
 				gp_nick.remove(nick),	gp_name.erase(nick);
@@ -816,8 +803,8 @@ int skat_child
 		}
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-			string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 				cmd.length() - cmd.find(" ", 4) - 1);
 				
 			if ((msg == "!READY") && (nick == master))
@@ -826,31 +813,31 @@ int skat_child
 		if (neu && (gp_nick.size() == 3))
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-				"~" << r << "!" << endl << flush;
-			*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << endl << flush;
+				"~" << r << "!" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << std::endl << std::flush;
 			break;
 		}
 	}
-	cout << X << _("Table") << " " << nr << " " << _("preparing the game") << 
-		" ..." << endl;
+	std::cout << X << _("Table") << " " << nr << " " << _("preparing the game") << 
+		" ..." << std::endl;
 	// prepare game (check number of players, create PKR, create connections)
 	if ((gp_nick.size() != 3) || (std::find(gp_nick.begin(), gp_nick.end(),
-		gp_tmcg->TMCG_ExportKeyID(pub)) == gp_nick.end()))
+		pub.keyid()) == gp_nick.end()))
 	{
-		cerr << X << _("wrong number of players") << ": " << 
-			gp_nick.size() << endl;
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		std::cerr << X << _("wrong number of players") << ": " << 
+			gp_nick.size() << std::endl;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		return -2;
 	}
 	TMCG_PublicKeyRing pkr;
-	vector<string> vnicks;
+	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
-	for (list<string>::const_iterator pi = gp_nick.begin(); 
+	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); 
 		pi != gp_nick.end(); pi++)
 	{
 		vnicks.push_back(*pi);
-		if (*pi == gp_tmcg->TMCG_ExportKeyID(pub))
+		if (*pi == pub.keyid())
 		{
 			pkr_self = pkr_i;
 			pkr.key[pkr_i++] = pub;
@@ -861,24 +848,24 @@ int skat_child
 	int gp_port = BindEmptyPort(7800), gp_handle;
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		return -4;
 	}
 	
-	ostringstream ost;
-	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << endl;
-	*out_pipe << ost.str() << flush;
-	cout << X << _("Table") << " " << nr << " " << _("with") << " '" << 
+	std::ostringstream ost;
+	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
+	*out_pipe << ost.str() << std::flush;
+	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" << 
 		pkr.key[0].name << "', '" << 
 		pkr.key[1].name << "', '" << 
-		pkr.key[2].name << "' " << _("ready") << "." << endl;	
-	list<string> gp_rdport;
-	map<string, int> gp_ports;
+		pkr.key[2].name << "' " << _("ready") << "." << std::endl;	
+	std::list<std::string> gp_rdport;
+	std::map<std::string, int> gp_ports;
 	while (gp_rdport.size() < 2)
 	{
 		char tmp[10000];
 		in_pipe->getline(tmp, sizeof(tmp));
-		string cmd = tmp;
+		std::string cmd = tmp;
 	
 		if (cmd.find("!KICK", 0) == 0)
 		{
@@ -887,37 +874,37 @@ int skat_child
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << r << "!" << 
-				endl << flush;
+				std::endl << std::flush;
 		}		
 		if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 		{
-			string nick = cmd.substr(8, cmd.length() - 8);
+			std::string nick = cmd.substr(8, cmd.length() - 8);
 			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("observers currently not permitted") << endl << flush;
+				_("observers currently not permitted") << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("table completely occupied") << endl << flush;
+				_("table completely occupied") << std::endl << std::flush;
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -5;
 			}
 		}
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-			string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 				cmd.length() - cmd.find(" ", 4) - 1);
 			if (msg.find("PORT ", 0) == 0)
 			{
-				string port = msg.substr(5, msg.length() - 5);
+				std::string port = msg.substr(5, msg.length() - 5);
 				if ((std::find(gp_rdport.begin(), gp_rdport.end(), nick) 
 					== gp_rdport.end()))
 				{
@@ -927,8 +914,8 @@ int skat_child
 			}
 		}
 	}
-	cout << X << _("Table") << " " << nr << " " <<
-		_("establishing secure channels") << " ..." << endl;
+	std::cout << X << _("Table") << " " << nr << " " <<
+		_("establishing secure channels") << " ..." << std::endl;
 	int connect_handle, accept_handle;
 	iosecuresocketstream *left_neighbor, *right_neighbor;
 	if (pkr_self == 0)
@@ -958,7 +945,7 @@ int skat_child
 	skat_alive(out_pipe, nr, right_neighbor, left_neighbor);
 	if (neu)
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << vnicks[0] << ", " <<
-			vnicks[1] << ", " << vnicks[2] << "!" << endl << flush;
+			vnicks[1] << ", " << vnicks[2] << "!" << std::endl << std::flush;
 	
 	// start gui or ai (control program)
 	int ctl_i = 0, ctl_o = 0;
@@ -996,21 +983,21 @@ int skat_child
 				if ((close(pipe1fd[1]) < 0) || (close(pipe2fd[0]) < 0))
 					perror("skat_child (close)");
 				ctl_i = pipe1fd[0], ctl_o = pipe2fd[1];
-				cout << X << _("Execute control process") << " (" << ctl_pid << 
-					"): " << flush;
+				std::cout << X << _("Execute control process") << " (" << ctl_pid << 
+					"): " << std::flush;
 				char buffer[1024];
 				bzero(buffer, sizeof(buffer));
 				ssize_t num = read(ctl_i, buffer, sizeof(buffer));
 				if (num > 0)
-					cout << buffer << flush;
+					std::cout << buffer << std::flush;
 				else
-					cout << "... " << _("failed!") << endl;
+					std::cout << "... " << _("failed!") << std::endl;
 			}
 		}
 	}
 	
 	// start game
-	cout << X << _("Table") << " " << nr << " " << _("start the game.") << endl;
+	std::cout << X << _("Table") << " " << nr << " " << _("start the game.") << std::endl;
 	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i,
 		gp_tmcg, pkr, sec, right_neighbor, left_neighbor, vnicks, hpipe, pctl,
 		ipipe_readbuf, ipipe_readed);
@@ -1025,22 +1012,22 @@ int skat_child
 	
 	if (neu)
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << r << "!" << 
-			endl << flush;
+			std::endl << std::flush;
 	
 	// exit from game
 	delete gp_tmcg, delete left_neighbor, delete right_neighbor;
 	close(connect_handle), close(accept_handle);
 	if (exit_code != 6)
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 	delete in_pipe, delete out_pipe;
 	delete [] ipipe_readbuf;
 	return exit_code;
 }
 
-void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
+void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 {
-	vector<pid_t> del_pipe;
-	for (map<pid_t, int>::const_iterator pi = read_pipe.begin(); 
+	std::vector<pid_t> del_pipe;
+	for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); 
 		pi != read_pipe.end(); pi++)
 	{
 		if ((pi->second >= 0) && FD_ISSET(pi->second, &rfds))
@@ -1050,7 +1037,7 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 				readbuf[pi->second] = new char[65536];
 				if (readbuf[pi->second] == NULL)
 				{
-					cerr << _("MALLOC ERROR: out of memory") << endl;
+					std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
 					exit(-1);
 				}
 				readed[pi->second] = 0;
@@ -1062,7 +1049,7 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 				del_pipe.push_back(pi->first);
 			if (readed[pi->second] > 0)
 			{
-				vector<int> pos_delim;
+				std::vector<int> pos_delim;
 				int cnt_delim = 0, cnt_pos = 0, pos = 0;
 				for (int i = 0; i < readed[pi->second]; i++)
 					if (readbuf[pi->second][i] == '\n')
@@ -1076,12 +1063,12 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						string rnk1 = tmp;
+						std::string rnk1 = tmp;
 						bzero(tmp, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
-						string rnk2 = tmp;
+						std::string rnk2 = tmp;
 						// do operation
 						rnk[rnk1] = rnk2;
 					}
@@ -1095,7 +1082,7 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						string irc1 = tmp;
+						std::string irc1 = tmp;
 						
 						// do operation
 						if (strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
@@ -1106,18 +1093,19 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 									(irc_parvec[0].length() > 10))
 								{
 									// sign message
-									string sig = tmcg->TMCG_SignData(sec, irc_parvec[1]);
-									*irc << "PRIVMSG " << irc_parvec[0] << " :" <<
-										irc_parvec[1] << "~~~" << sig << endl << flush;
+									*irc << "PRIVMSG " << irc_parvec[0] <<
+										" :" << irc_parvec[1] << "~~~" <<
+										sec.sign(irc_parvec[1]) << std::endl
+										<< std::flush;
 								}
 								else if (irc_parvec[0] == "#openSkat")
 								{
-									for (map<string, string>::const_iterator ni = 
+									for (std::map<std::string, std::string>::const_iterator ni = 
 										nick_players.begin(); ni != nick_players.end(); ni++)
 									{
 										// send announcement PRIVMSG to each player
 										*irc << "PRIVMSG " << ni->first << " :" << 
-											irc_parvec[1] << endl << flush;
+											irc_parvec[1] << std::endl << std::flush;
 									}
 									
 									// process announcement PRIVMSG
@@ -1129,10 +1117,10 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 										(tabei3 != irc_parvec[1].npos) && 
 										(tabei1 < tabei2) && (tabei2 < tabei3))
 									{
-										string tabmsg1 = irc_parvec[1].substr(0, tabei1);
-										string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
+										std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
+										std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
 											tabei2 - tabei1 - 1);
-										string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
+										std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
 											tabei3 - tabei2 - 1);	
 										if ((std::find(tables.begin(), tables.end(), tabmsg1) 
 											== tables.end()) && (tabmsg2 != "0"))
@@ -1142,7 +1130,7 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 											tables_p[tabmsg1] = atoi(tabmsg2.c_str());
 											tables_r[tabmsg1] = atoi(tabmsg3.c_str());
 											tables_u[tabmsg1] = tabmsg3;
-											tables_o[tabmsg1] = tmcg->TMCG_ExportKeyID(pub);
+											tables_o[tabmsg1] = pub.keyid();
 										}	
 										else
 										{
@@ -1164,13 +1152,13 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 									}
 								}
 								else
-									*irc << irc1 << endl << flush;
+									*irc << irc1 << std::endl << std::flush;
 							}
 							else
-								*irc << irc1 << endl << flush;
+								*irc << irc1 << std::endl << std::flush;
 						}
 						else
-							*irc << irc1 << endl << flush;
+							*irc << irc1 << std::endl << std::flush;
 					}
 				}
 				else if (what == 3)
@@ -1182,27 +1170,27 @@ void read_after_select(fd_set rfds, map<pid_t, int> &read_pipe, int what)
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						TMCG_KeyString pki1 = tmp;
+						std::string pki1 = tmp;
 						bzero(tmp, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
-						TMCG_KeyString pki2 = tmp;
+						std::string pki2 = tmp;
 						// do operation
 						TMCG_PublicKey apkey;
-						if (!tmcg->TMCG_ImportKey(apkey, pki2))
+						if (!apkey.import(pki2))
 						{
-							cerr << _("TMCG: public key import error") << endl;
+							std::cerr << _("TMCG: public key import error") << std::endl;
 						}
-						else if (pki1 != tmcg->TMCG_ExportKeyID(apkey))
+						else if (pki1 != apkey.keyid())
 						{
-							cerr << _("TMCG: wrong public key") << endl;
+							std::cerr << _("TMCG: wrong public key") << std::endl;
 						}
 						else
 						{
-							cout << X << "PKI " << _("identified") << 
+							std::cout << X << "PKI " << _("identified") << 
 								" \"" << pki1 << "\" " << "aka \"" << apkey.name << 
-								"\" <" << apkey.email << ">" << endl;
+								"\" <" << apkey.email << ">" << std::endl;
 							nick_key[pki1] = apkey;
 						}
 					}
@@ -1243,7 +1231,7 @@ static void process_line(char *line)
 	if (s[0] == '/')
 	{
 		size_t cmd_argc = irc_paramvec(s + 1);
-		vector<string> cmd_argv = irc_parvec;
+		std::vector<std::string> cmd_argv = irc_parvec;
 		
 		if (cmd_argc == 0)
 			cmd_argv.push_back("help");
@@ -1262,78 +1250,78 @@ static void process_line(char *line)
 		}
 		else if ((cmd_argv[0] == "players") || (cmd_argv[0] == "spieler"))
 		{
-			for (map<string, string>::const_iterator ni = nick_players.begin();
+			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin();
 				ni != nick_players.end(); ni++)
 			{
-				string nick = ni->first, host = ni->second;
-				string name = "?", email = "?", type = "?";
+				std::string nick = ni->first, host = ni->second;
+				std::string name = "?", email = "?", type = "?";
 				if (nick_key.find(nick) != nick_key.end())
 				{
 					name = nick_key[nick].name;
 					email = nick_key[nick].email;
 					type = nick_key[nick].type;
 				}
-				cout << XX << nick << " (" << host << ":" << 
+				std::cout << XX << nick << " (" << host << ":" << 
 					nick_p7771[nick] << ":" << nick_p7773[nick] << ":" <<
-					nick_p7774[nick] << ")" << endl;
-				cout << XX << "    aka " << name << " <" << email << "> " << endl;
-				cout << XX << "    " << "[ " << 
+					nick_p7774[nick] << ")" << std::endl;
+				std::cout << XX << "    aka " << name << " <" << email << "> " << std::endl;
+				std::cout << XX << "    " << "[ " << 
 					"SECURITY_LEVEL = " << nick_sl[nick] << ", " <<
 					"KEY_TYPE = " << type << " " <<
-					"]" << endl;
+					"]" << std::endl;
 			}
 		}
 		else if ((cmd_argv[0] == "tables") || (cmd_argv[0] == "tische"))
 		{
-			for (list<string>::const_iterator ti = tables.begin(); 
+			for (std::list<std::string>::const_iterator ti = tables.begin(); 
 				ti != tables.end(); ti++)
 			{
 				if (tables_r[*ti] > 0)
 				{
 					if (tables_p[*ti] < 3)
 					{
-						cout << XX << _("table") << " <nr> = " << *ti << 
+						std::cout << XX << _("table") << " <nr> = " << *ti << 
 							", " << _("rounds") << " <r> = " << tables_r[*ti] <<
 							", # " << _("players") << " = " << tables_p[*ti] <<
-							", " << _("owner") << " = " << tables_o[*ti] << endl;
+							", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 					}
 					else
 					{
-						cout << XX << _("table") << " <nr> = " << *ti << ", " << 
+						std::cout << XX << _("table") << " <nr> = " << *ti << ", " << 
 							_("still") << " <r> = " << tables_r[*ti] << " " << _("rounds") <<
-							", " << _("owner") << " = " << tables_o[*ti] << endl;
+							", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 					}
 				}
 			}
 		}
 		else if ((cmd_argv[0] == "rooms") || (cmd_argv[0] == "r?me"))
 		{
-			for (list<string>::const_iterator ti = tables.begin(); 
+			for (std::list<std::string>::const_iterator ti = tables.begin(); 
 				ti != tables.end(); ti++)
 			{
 				if (tables_r[*ti] < 0)
 				{
-					cout << XX << _("room") << " <nr> = " << *ti << 
+					std::cout << XX << _("room") << " <nr> = " << *ti << 
 						", <bits> = " << -tables_r[*ti] <<
 						", # " << _("voters") << " = " << tables_p[*ti] <<
-						", " << _("owner") << " = " << tables_o[*ti] << endl;
+						", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 				}
 			}
 		}
 		else if ((cmd_argv[0] == "rank") || (cmd_argv[0] == "rang"))
 		{
-			list<string> rnk_nicktab, rnk_ranktab;
-			map<string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
+			std::list<std::string> rnk_nicktab, rnk_ranktab;
+			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
 						
 			// Parsen der RNK Daten
-			nick_key[tmcg->TMCG_ExportKeyID(pub)] = pub;
-			for (map<string, string>::const_iterator ri = rnk.begin(); 
+			nick_key[pub.keyid()] = pub;
+			for (std::map<std::string, std::string>::const_iterator ri = rnk.begin(); 
 				ri != rnk.end(); ri++)
 			{
-				TMCG_Signature tk_sig1, tk_sig2, tk_sig3;
-				string tk_header, tk_table;
-				string tk_game[3], tk_nick[3];
-				string s = ri->second;
+				std::string tk_sig1, tk_sig2, tk_sig3;
+				std::string tk_header, tk_table;
+				std::string tk_game[3], tk_nick[3];
+				std::string s = ri->second;
 				size_t ei;
 				
 				// header
@@ -1426,24 +1414,24 @@ static void process_line(char *line)
 					continue;
 				
 				if ((tk_header != "prt") ||
-					(tk_nick[0] != tmcg->TMCG_ExportKeyID(tk_sig1)) ||
-					(tk_nick[1] != tmcg->TMCG_ExportKeyID(tk_sig2)) ||
-					(tk_nick[2] != tmcg->TMCG_ExportKeyID(tk_sig3)) ||
+					(tk_nick[0] != pub.sigid(tk_sig1)) ||
+					(tk_nick[1] != pub.sigid(tk_sig2)) ||
+					(tk_nick[2] != pub.sigid(tk_sig3)) ||
 					(nick_key.find(tk_nick[0]) == nick_key.end()) ||
 					(nick_key.find(tk_nick[1]) == nick_key.end()) ||
 					(nick_key.find(tk_nick[2]) == nick_key.end()))
 							continue;
-				TMCG_DataString sig_data = tk_header + "#" + tk_table + "#" +
+				std::string sig_data = tk_header + "#" + tk_table + "#" +
 					tk_nick[0] + "#" + tk_nick[1] + "#" + tk_nick[2] + "#" +
 					tk_game[0] + "#" + tk_game[1] + "#" + tk_game[2] + "#";
-				if (!tmcg->TMCG_VerifyData(nick_key[tk_nick[0]], sig_data, tk_sig1))
+				if (!nick_key[tk_nick[0]].verify(sig_data, tk_sig1))
 					continue;
-				if (!tmcg->TMCG_VerifyData(nick_key[tk_nick[1]], sig_data, tk_sig2))
+				if (!nick_key[tk_nick[1]].verify(sig_data, tk_sig2))
 					continue;
-				if (!tmcg->TMCG_VerifyData(nick_key[tk_nick[2]], sig_data, tk_sig3))
+				if (!nick_key[tk_nick[2]].verify(sig_data, tk_sig3))
 					continue;
-				list<string> gp_l;
-				string gp_s = "";
+				std::list<std::string> gp_l;
+				std::string gp_s = "";
 				for (size_t j = 0; j < 3; j++)
 				{
 					if (std::find(rnk_nicktab.begin(), rnk_nicktab.end(), 
@@ -1452,12 +1440,12 @@ static void process_line(char *line)
 					gp_l.push_back(tk_nick[j]);
 				}
 				gp_l.sort();
-				for (list<string>::const_iterator gpi = gp_l.begin(); 
+				for (std::list<std::string>::const_iterator gpi = gp_l.begin(); 
 					gpi != gp_l.end(); gpi++)
 						gp_s = gp_s + (*gpi) + "~";
 				for (size_t j = 0; j < 3; j++)
 				{
-					vector<string> gp_par;
+					std::vector<std::string> gp_par;
 					size_t ei;
 					// parse game
 					while ((ei = tk_game[j].find("~", 0)) != tk_game[j].npos)
@@ -1490,7 +1478,7 @@ static void process_line(char *line)
 			// Berechnen der Leistungspunkte (Erweitertes Seeger-System)
 			for (size_t j = 0; j < 3; j++)
 			{
-				for (map<string, long>::const_iterator gpi = pkt[j].begin();
+				for (std::map<std::string, long>::const_iterator gpi = pkt[j].begin();
 					gpi != pkt[j].end(); gpi++)
 				{
 					long seeger = 0;
@@ -1502,13 +1490,13 @@ static void process_line(char *line)
 					pkt[j][gpi->first] += seeger;
 				}
 			}
-			// Ausgabe der Ranglisten mit eigener Beteiligung
-			for (map<string, long>::const_iterator gpi = pkt[0].begin();
+			// Ausgabe der Rangstd::listen mit eigener Beteiligung
+			for (std::map<std::string, long>::const_iterator gpi = pkt[0].begin();
 				gpi != pkt[0].end(); gpi++)
 			{
-				string gp = gpi->first, gp_w = gpi->first;
+				std::string gp = gpi->first, gp_w = gpi->first;
 				size_t ei;
-				vector<string> gp_p;
+				std::vector<std::string> gp_p;
 				// parse gp
 				while ((ei = gp_w.find("~", 0)) != gp_w.npos)
 				{
@@ -1516,7 +1504,7 @@ static void process_line(char *line)
 					gp_w = gp_w.substr(ei + 1, gp_w.length() - ei - 1);
 				}
 				// eigene Beteiligung?
-				if ((gp.find(tmcg->TMCG_ExportKeyID(pub), 0) != gp.npos) && 
+				if ((gp.find(pub.keyid(), 0) != gp.npos) && 
 					(gp_p.size() == 3))
 				{
 					// naives sortieren
@@ -1539,23 +1527,23 @@ static void process_line(char *line)
 						else
 							gp1 = 1, gp2 = 0, gp3 = 2;
 					}
-					cout << "+----+ " << endl;
-					cout << "| 1. | " << nick_key[gp_p[gp1]].name << 
-						" : " << pkt[gp1][gp] << " " << _("score points") << endl;
-					cout << "| 2. | " << nick_key[gp_p[gp2]].name << 
-						" : " << pkt[gp2][gp] << " " << _("score points") << endl;
-					cout << "| 3. | " << nick_key[gp_p[gp3]].name << 
-						" : " << pkt[gp3][gp] << " " << _("score points") << endl;
-					cout << "+----+ " << endl;
+					std::cout << "+----+ " << std::endl;
+					std::cout << "| 1. | " << nick_key[gp_p[gp1]].name << 
+						" : " << pkt[gp1][gp] << " " << _("score points") << std::endl;
+					std::cout << "| 2. | " << nick_key[gp_p[gp2]].name << 
+						" : " << pkt[gp2][gp] << " " << _("score points") << std::endl;
+					std::cout << "| 3. | " << nick_key[gp_p[gp3]].name << 
+						" : " << pkt[gp3][gp] << " " << _("score points") << std::endl;
+					std::cout << "+----+ " << std::endl;
 				}
 			}
-			nick_key.erase(tmcg->TMCG_ExportKeyID(pub));
+			nick_key.erase(pub.keyid());
 		}
 		else if (cmd_argv[0] == "skat")
 		{
 			if (cmd_argc == 3)
 			{
-				string tnr = cmd_argv[1], trr = cmd_argv[2];
+				std::string tnr = cmd_argv[1], trr = cmd_argv[2];
 				if (std::find(tables.begin(), tables.end(), tnr) == tables.end())
 				{
 					int r = atoi(trr.c_str());
@@ -1576,7 +1564,7 @@ static void process_line(char *line)
 									(close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 										perror("run_irc (close)");
 								int ret = skat_child(tnr, r, true, in_pipe[0], 
-									out_pipe[1], rnk_pipe[1], tmcg->TMCG_ExportKeyID(pub));
+									out_pipe[1], rnk_pipe[1], pub.keyid());
 								sleep(1);
 								if ((close(rnk_pipe[1]) < 0) || 
 									(close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -1593,21 +1581,21 @@ static void process_line(char *line)
 								games_rnkpipe[game_pid] = rnk_pipe[0];
 								games_opipe[game_pid] = out_pipe[0];
 								games_ipipe[game_pid] = in_pipe[1];
-								*irc << "JOIN #openSkat_" << tnr << endl << flush;
+								*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
 							}
 						}
 					}
 					else
-						cout << X << _("wrong number of rounds") << " <r> = " <<
-							trr << endl;
+						std::cout << X << _("wrong number of rounds") << " <r> = " <<
+							trr << std::endl;
 				}
 				else
-					cout << X << _("table") << " <nr> = \"" << tnr << "\" " <<
-						_("already exists") << endl;
+					std::cout << X << _("table") << " <nr> = \"" << tnr << "\" " <<
+						_("already exists") << std::endl;
 			}
 			else if (cmd_argc == 2)
 			{
-				string tnr = cmd_argv[1];
+				std::string tnr = cmd_argv[1];
 				if (std::find(tables.begin(), tables.end(), tnr) != tables.end())
 				{
 					if ((tables_p[tnr] > 0) && (tables_p[tnr] < 3) &&
@@ -1647,32 +1635,32 @@ static void process_line(char *line)
 									games_rnkpipe[game_pid] = rnk_pipe[0];
 									games_opipe[game_pid] = out_pipe[0];
 									games_ipipe[game_pid] = in_pipe[1];
-									*irc << "JOIN #openSkat_" << tnr << endl << flush;
-									*irc << "WHO #openSkat_" << tnr << endl << flush;
+									*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
+									*irc << "WHO #openSkat_" << tnr << std::endl << std::flush;
 								}
 							}
 						}
 						else
-							cout << X << _("player") << " \"" << pub.name << "\" " <<
-								_("is already on table") << " <nr> = " << tnr << endl;
+							std::cout << X << _("player") << " \"" << pub.name << "\" " <<
+								_("is already on table") << " <nr> = " << tnr << std::endl;
 					}
 					else
-						cout << X << _("table") << " <nr> = " << tnr << " " <<
-							_("is completely occupied") << endl;
+						std::cout << X << _("table") << " <nr> = " << tnr << " " <<
+							_("is completely occupied") << std::endl;
 				}
 				else
-					cout << X << _("table") << " <nr> = " << tnr << " " <<
-						_("don't exists (yet)") << endl;
+					std::cout << X << _("table") << " <nr> = " << tnr << " " <<
+						_("don't exists (yet)") << std::endl;
 			}
 			else
-				cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
-					endl << X << _("/help shows the list of commands") << endl;
+				std::cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
+					std::endl << X << _("/help shows the list of commands") << std::endl;
 		}
 		else if ((cmd_argv[0] == "ballot") || (cmd_argv[0] == "abstimmung"))
 		{
 			if (cmd_argc == 3)
 			{
-				string tnr = cmd_argv[1], tbb = cmd_argv[2];
+				std::string tnr = cmd_argv[1], tbb = cmd_argv[2];
 				if (std::find(tables.begin(), tables.end(), tnr) == tables.end())
 				{
 					int b = atoi(tbb.c_str());
@@ -1691,7 +1679,7 @@ static void process_line(char *line)
 								if ((close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 									perror("run_irc (close)");
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
-									tmcg->TMCG_ExportKeyID(pub));
+									pub.keyid());
 								sleep(1);
 								if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 									perror("run_irc (close)");
@@ -1706,21 +1694,21 @@ static void process_line(char *line)
 								games_rnkpipe[ballot_pid] = -1;
 								games_opipe[ballot_pid] = out_pipe[0];
 								games_ipipe[ballot_pid] = in_pipe[1];
-								*irc << "JOIN #openSkat_" << tnr << endl << flush;
+								*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
 							}
 						}
 					}
 					else
-						cout << X << _("wrong number of bits") << " <bits> = " <<
-							tbb << endl;
+						std::cout << X << _("wrong number of bits") << " <bits> = " <<
+							tbb << std::endl;
 				}
 				else
-					cout << X << _("room") << " <nr> = \"" << tnr << "\" " <<
-						_("already exists") << endl;
+					std::cout << X << _("room") << " <nr> = \"" << tnr << "\" " <<
+						_("already exists") << std::endl;
 			}
 			else if (cmd_argc == 2)
 			{
-				string tnr = cmd_argv[1];
+				std::string tnr = cmd_argv[1];
 				if (std::find(tables.begin(), tables.end(), tnr) != tables.end())
 				{
 					if ((tables_p[tnr] > 0) && (-tables_r[tnr] > 0) && 
@@ -1756,85 +1744,85 @@ static void process_line(char *line)
 									games_rnkpipe[ballot_pid] = -1;
 									games_opipe[ballot_pid] = out_pipe[0];
 									games_ipipe[ballot_pid] = in_pipe[1];
-									*irc << "JOIN #openSkat_" << tnr << endl << flush;
-									*irc << "WHO #openSkat_" << tnr << endl << flush;
+									*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
+									*irc << "WHO #openSkat_" << tnr << std::endl << std::flush;
 								}
 							}
 						}
 						else
-							cout << X << _("voter") << " \"" << pub.name << "\" " <<
-								_("is already in room") << " <nr> = " << tnr << endl;
+							std::cout << X << _("voter") << " \"" << pub.name << "\" " <<
+								_("is already in room") << " <nr> = " << tnr << std::endl;
 					}
 					else
-						cout << X << _("room") << " <nr> = " << tnr << " " <<
-							_("is closed") << endl;
+						std::cout << X << _("room") << " <nr> = " << tnr << " " <<
+							_("is closed") << std::endl;
 				}
 				else
-					cout << X << _("room") << " <nr> = " << tnr << " " <<
-						_("don't exists (yet)") << endl;
+					std::cout << X << _("room") << " <nr> = " << tnr << " " <<
+						_("don't exists (yet)") << std::endl;
 			}
 			else
-				cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
-					endl << X << _("/help shows the list of commands") << endl;
+				std::cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
+					std::endl << X << _("/help shows the std::list of commands") << std::endl;
 		}
 		else if ((cmd_argv[0] == "help") || (cmd_argv[0] == "hilfe"))
 		{
-			cout << XX << _("/quit") << " -- " <<
-				_("quit SecureSkat") << endl;
-			cout << XX << _("/on") << " -- " <<
-				_("turn output of IRC channel #openSkat on") << endl;
-			cout << XX << ("/off") << " -- " <<
-				_("turn output of IRC channel #openSkat off") << endl;
-			cout << XX << ("/players") << " -- " <<
-				_("show list of possible participants") << endl;
-			cout << XX << ("/tables") << " -- " <<
-				_("show list of existing game tables") << endl;
-			cout << XX << ("/rooms") << " -- " <<
-				_("show list of existing voting rooms") << endl;
-			cout << XX << _("/rank") << " -- " <<
-				_("show your current rank in all score lists") << endl;
-			cout << XX << _("/ballot") << " <nr> <bits> -- " <<
-				_("create room <nr> for voting between 2^<bits> values") << endl;
-			cout << XX << _("/ballot") << " <nr> -- " <<
-				_("join the voting in room <nr>") << endl;
-			cout << XXX << "/<nr> open -- " <<
-				_("open the voting process in room <nr> (only owner)") << endl;
-			cout << XXX << "/<nr> vote <r> -- " <<
-				_("vote in room <nr> for value <r>") << endl;
-			cout << XX << "/skat <nr> <r> -- " <<
-				_("create table <nr> for playing <r> rounds") << endl;
-			cout << XX << "/skat <nr> -- " <<
-				_("join the game on table <nr>") << endl;
-			cout << XX << "/<nr> <cmd> -- " <<
-				_("execute command <cmd> on table <nr>") << ":" << endl;
-			cout << XXX << "/<nr> blatt --- " <<
-				_("show own cards and additional information") << endl;
-			cout << XXX << "/<nr> reize --- " <<
-				_("bid or justify a bid") << endl;
-			cout << XXX << "/<nr> passe --- " <<
-				_("pass biding") << endl;
-			cout << XXX << "/<nr> hand --- " <<
-				_("play without taking the two cards") << endl;
-			cout << XXX << "/<nr> skat --- " <<
-				_("take the two cards and show all") << endl;
-			cout << XXX << "/<nr> druecke <k1> <k2> --- " <<
-				_("put away card <k1> and <k2>") << endl;
-			cout << XXX << "/<nr> sagean <spiel> [zusatz] --- " <<
-				_("announce game <spiel> ([zusatz] is optional)") << endl;
-			cout << XXX << "/<nr> lege <k1> --- " <<
-				_("play card <k1>") << endl;
-			cout << XX << "<nr> " << _("arbitrary string") << endl;
-			cout << XX << "<r> " << _("unsigned integer") << endl;
-			cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } || " <<
-				"{ 7, 8, 9, U, O, K, 10, A }" << endl;
-			cout << XXX << "<spiel> " << _("from") << " { Sc, Ro, Gr, Nu, Ei, Gd }"
-				<< endl;
-			cout << XXX << "[zusatz] " << _("from") << " { Sn, Sw, Ov }" << endl;
+			std::cout << XX << _("/quit") << " -- " <<
+				_("quit SecureSkat") << std::endl;
+			std::cout << XX << _("/on") << " -- " <<
+				_("turn output of IRC channel #openSkat on") << std::endl;
+			std::cout << XX << ("/off") << " -- " <<
+				_("turn output of IRC channel #openSkat off") << std::endl;
+			std::cout << XX << ("/players") << " -- " <<
+				_("show std::list of possible participants") << std::endl;
+			std::cout << XX << ("/tables") << " -- " <<
+				_("show std::list of existing game tables") << std::endl;
+			std::cout << XX << ("/rooms") << " -- " <<
+				_("show std::list of existing voting rooms") << std::endl;
+			std::cout << XX << _("/rank") << " -- " <<
+				_("show your current rank in all score std::lists") << std::endl;
+			std::cout << XX << _("/ballot") << " <nr> <bits> -- " <<
+				_("create room <nr> for voting between 2^<bits> values") << std::endl;
+			std::cout << XX << _("/ballot") << " <nr> -- " <<
+				_("join the voting in room <nr>") << std::endl;
+			std::cout << XXX << "/<nr> open -- " <<
+				_("open the voting process in room <nr> (only owner)") << std::endl;
+			std::cout << XXX << "/<nr> vote <r> -- " <<
+				_("vote in room <nr> for value <r>") << std::endl;
+			std::cout << XX << "/skat <nr> <r> -- " <<
+				_("create table <nr> for playing <r> rounds") << std::endl;
+			std::cout << XX << "/skat <nr> -- " <<
+				_("join the game on table <nr>") << std::endl;
+			std::cout << XX << "/<nr> <cmd> -- " <<
+				_("execute command <cmd> on table <nr>") << ":" << std::endl;
+			std::cout << XXX << "/<nr> blatt --- " <<
+				_("show own cards and additional information") << std::endl;
+			std::cout << XXX << "/<nr> reize --- " <<
+				_("bid or justify a bid") << std::endl;
+			std::cout << XXX << "/<nr> passe --- " <<
+				_("pass biding") << std::endl;
+			std::cout << XXX << "/<nr> hand --- " <<
+				_("play without taking the two cards") << std::endl;
+			std::cout << XXX << "/<nr> skat --- " <<
+				_("take the two cards and show all") << std::endl;
+			std::cout << XXX << "/<nr> druecke <k1> <k2> --- " <<
+				_("put away card <k1> and <k2>") << std::endl;
+			std::cout << XXX << "/<nr> sagean <spiel> [zusatz] --- " <<
+				_("announce game <spiel> ([zusatz] is optional)") << std::endl;
+			std::cout << XXX << "/<nr> lege <k1> --- " <<
+				_("play card <k1>") << std::endl;
+			std::cout << XX << "<nr> " << _("arbitrary std::string") << std::endl;
+			std::cout << XX << "<r> " << _("unsigned integer") << std::endl;
+			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } || " <<
+				"{ 7, 8, 9, U, O, K, 10, A }" << std::endl;
+			std::cout << XXX << "<spiel> " << _("from") << " { Sc, Ro, Gr, Nu, Ei, Gd }"
+				<< std::endl;
+			std::cout << XXX << "[zusatz] " << _("from") << " { Sn, Sw, Ov }" << std::endl;
 		}
 		else
 		{
 			bool found = false;
-			for (map<string, pid_t>::const_iterator gi = games_tnr2pid.begin(); 
+			for (std::map<std::string, pid_t>::const_iterator gi = games_tnr2pid.begin(); 
 				gi != games_tnr2pid.end(); gi++)
 			{
 				if (cmd_argv[0] == gi->first)
@@ -1844,13 +1832,13 @@ static void process_line(char *line)
 					*npipe << "CMD ";
 					for (size_t gj = 1; gj < cmd_argc; gj++)
 						*npipe << cmd_argv[gj] << " ";
-					*npipe << endl << flush;
+					*npipe << std::endl << std::flush;
 					delete npipe;
 				}
 			}
 			if (!found)
-				cout << X << _("unknown command") << ": \"/" << cmd_argv[0] << 
-					"\"" << endl << X << _("/help shows the list of commands") << endl;
+				std::cout << X << _("unknown command") << ": \"/" << cmd_argv[0] << 
+					"\"" << std::endl << X << _("/help shows the std::list of commands") << std::endl;
 		}
 	}
 	else
@@ -1858,9 +1846,9 @@ static void process_line(char *line)
 		if ((s != NULL) && (strlen(s) > 0))
 		{
 			// sign and send chat message
-			string sig = tmcg->TMCG_SignData(sec, s);
-			*irc << "PRIVMSG #openSkat :" << s << "~~~" << sig << endl << flush;
-			cout << "<" << pub.name << "> " << s << endl;
+			*irc << "PRIVMSG #openSkat :" << s << "~~~" <<
+				sec.sign(s) << std::endl << std::flush;
+			std::cout << "<" << pub.name << "> " << s << std::endl;
 		}
 	}
 	free(line);
@@ -1894,23 +1882,23 @@ void run_irc()
 		MFD_SET(rnk7774_handle, &rfds);
 		
 		// PKI pipes from childs
-		for (map<pid_t, int>::const_iterator pi = nick_pipe.begin();
+		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin();
 			pi != nick_pipe.end(); pi++)
 				MFD_SET(pi->second, &rfds);
 				
 		// RNK pipes from childs
-		for (map<pid_t, int>::const_iterator pi = rnk_pipe.begin();
+		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin();
 			pi != rnk_pipe.end(); pi++)
 				MFD_SET(pi->second, &rfds);
 		
 		// RNK pipes from game childs
-		for (map<pid_t, int>::const_iterator pi = games_rnkpipe.begin();
+		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin();
 			pi != games_rnkpipe.end(); pi++)
 				if (pi->second >= 0)
 					MFD_SET(pi->second, &rfds);
 		
 		// OUT pipes from game childs
-		for (map<pid_t, int>::const_iterator pi = games_opipe.begin();
+		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin();
 			pi != games_opipe.end(); pi++)
 				MFD_SET(pi->second, &rfds);
 		
@@ -1949,7 +1937,7 @@ void run_irc()
 			// ----------------------------------------------------------------------
 			read_after_select(rfds, nick_pipe, 3);
 			
-			// RNK (export rank list on port 7773)
+			// RNK (export rank std::list on port 7773)
 			// ----------------------------------------------------------------------
 			if (FD_ISSET(rnk7773_handle, &rfds))
 			{
@@ -1965,11 +1953,11 @@ void run_irc()
 				else
 				{
 					iosocketstream *rnk_io = new iosocketstream(client_handle);
-					*rnk_io << rnk.size() << endl << flush;
-					for (map<string, string>::const_iterator pi = rnk.begin(); 
+					*rnk_io << rnk.size() << std::endl << std::flush;
+					for (std::map<std::string, std::string>::const_iterator pi = rnk.begin(); 
 						pi != rnk.end(); pi++)
 					{
-						*rnk_io << pi->first << endl << flush;
+						*rnk_io << pi->first << std::endl << std::flush;
 					}
 					delete rnk_io;
 					if (close(client_handle) < 0)
@@ -1993,7 +1981,7 @@ void run_irc()
 				else
 				{
 					iosocketstream *pki = new iosocketstream(client_handle);
-					*pki << pub << endl << flush;
+					*pki << pub << std::endl << std::flush;
 					delete pki;
 					if (close(client_handle) < 0)
 						perror("run_irc (close)");
@@ -2040,9 +2028,9 @@ void run_irc()
 							client_ios->getline(tmp, 100000L);
 							
 							if (rnk.find(tmp) != rnk.end())
-								*client_ios << rnk[tmp] << endl << flush;
+								*client_ios << rnk[tmp] << std::endl << std::flush;
 							else
-								*client_ios << endl << flush;
+								*client_ios << std::endl << std::flush;
 							delete client_ios, delete [] tmp;
 							exit(0);
 							// end -- child code
@@ -2076,13 +2064,13 @@ void run_irc()
 				
 				if (num == 0)
 				{
-					cerr << _("IRC ERROR: connection with server collapsed") << endl;
+					std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
 					break;
 				}
 				
 				if (irc_readed > 0)
 				{
-					vector<int> pos_delim;
+					std::vector<int> pos_delim;
 					int cnt_delim = 0, cnt_pos = 0, pos = 0;
 					for (int i = 0; i < irc_readed; i++)
 					{
@@ -2100,8 +2088,8 @@ void run_irc()
 						irc_reply = tmp;
 				
 				// parse NICK and HOST from IRC prefix
-				string pfx = irc_prefix(irc_reply);
-				string nick = "?", host = "?";
+				std::string pfx = irc_prefix(irc_reply);
+				std::string nick = "?", host = "?";
 				if ((pfx.find("!", 0) != pfx.npos) && (pfx.find("@", 0) != pfx.npos))
 				{
 					nick = pfx.substr(0, pfx.find("!", 0));
@@ -2111,7 +2099,7 @@ void run_irc()
 				
 				if (strncasecmp(irc_command(irc_reply), "PING", 4) == 0)
 				{				
-					*irc << "PONG " << irc_params(irc_reply) << endl << flush;
+					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
 				}
 				else if (strncasecmp(irc_command(irc_reply), "001", 3) == 0)
 				{
@@ -2122,8 +2110,8 @@ void run_irc()
 					(strncasecmp(irc_command(irc_reply), "433", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "468", 3) == 0))
 				{
-					cerr << _("IRC ERROR: not registered at IRC server") << endl;
-					cerr << irc_reply << endl;
+					std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
+					std::cerr << irc_reply << std::endl;
 					irc_quit = 1;
 					break;
 				}
@@ -2133,32 +2121,32 @@ void run_irc()
 					{
 						if (irc_parvec[0] == "#openSkat")
 						{
-							if (nick.find(tmcg->TMCG_ExportKeyID(pub), 0) == 0)
+							if (nick.find(pub.keyid(), 0) == 0)
 							{
-								cout << X << _("you join channel") << " " << 
-									irc_parvec[0] << endl;
+								std::cout << X << _("you join channel") << " " << 
+									irc_parvec[0] << std::endl;
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
-								*irc << "WHO " << irc_parvec[0] << endl << flush;
+								*irc << "WHO " << irc_parvec[0] << std::endl << std::flush;
 							}
 							else
 							{
 								if (irc_stat)
-									cout << X << _("observer") << " \"" << nick << "\" ("
+									std::cout << X << _("observer") << " \"" << nick << "\" ("
 										<< host << ") " << _("joins channel") << " " << 
-										irc_parvec[0] << endl;
+										irc_parvec[0] << std::endl;
 							}
 						}
 						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
 							(irc_parvec[0].length() > 10))
 						{
-							string tb = 
+							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
 								
-							if (nick.find(tmcg->TMCG_ExportKeyID(pub), 0)	== 0)
+							if (nick.find(pub.keyid(), 0)	== 0)
 							{
-								cout << X << _("you join") << " " << tb << endl;
+								std::cout << X << _("you join") << " " << tb << std::endl;
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
@@ -2166,13 +2154,13 @@ void run_irc()
 								{
 									opipestream *npipe = 
 										new opipestream(games_ipipe[games_tnr2pid[tb]]);
-									*npipe << "JOIN " << nick << endl << flush;
+									*npipe << "JOIN " << nick << std::endl << std::flush;
 									delete npipe;
 								}
 								if (nick_key.find(nick) != nick_key.end())
 									nick = nick_key[nick].name;
-								cout << X << _("player") << " \"" << nick << "\" (" <<
-									host << ") " << _("joins") << " " << tb << endl;
+								std::cout << X << _("player") << " \"" << nick << "\" (" <<
+									host << ") " << _("joins") << " " << tb << std::endl;
 							}
 							else
 							{	
@@ -2180,11 +2168,11 @@ void run_irc()
 								{
 									opipestream *npipe = 
 										new opipestream(games_ipipe[games_tnr2pid[tb]]);
-									*npipe << "KIEBITZ " << nick << endl << flush;
+									*npipe << "KIEBITZ " << nick << std::endl << std::flush;
 									delete npipe;
 								}
-								cout << X << _("observer") << " \"" << nick << "\" (" <<
-									host << ") " << _("joins") << " " << tb << endl;
+								std::cout << X << _("observer") << " \"" << nick << "\" (" <<
+									host << ") " << _("joins") << " " << tb << std::endl;
 							}
 						}
 					}
@@ -2196,8 +2184,8 @@ void run_irc()
 					(strncasecmp(irc_command(irc_reply), "405", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "475", 3) == 0))
 				{
-//cerr << "IRC: could not join to channel, channel error:" << endl;
-//cerr << irc_reply << endl;
+//std::cerr << "IRC: could not join to channel, channel error:" << std::endl;
+//std::cerr << irc_reply << std::endl;
 				}
 				else if (strncasecmp(irc_command(irc_reply), "PART", 4) == 0)
 				{
@@ -2205,10 +2193,10 @@ void run_irc()
 					{
 						if (irc_parvec[0] == "#openSkat")
 						{
-							if (nick.find(tmcg->TMCG_ExportKeyID(pub), 0)	== 0)
+							if (nick.find(pub.keyid(), 0)	== 0)
 							{
-								cout << X << _("you leave channel") << " " <<
-									irc_parvec[0] << endl;
+								std::cout << X << _("you leave channel") << " " <<
+									irc_parvec[0] << std::endl;
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
@@ -2218,27 +2206,27 @@ void run_irc()
 								if (nick_key.find(nick) != nick_key.end())
 									nick = nick_key[nick].name;
 								if (irc_stat)
-									cout << X << _("player") << " \"" << nick << "\" (" << 
+									std::cout << X << _("player") << " \"" << nick << "\" (" << 
 										host << ") " << _("leaves channel") << " " << 
-										irc_parvec[0] << endl;
+										irc_parvec[0] << std::endl;
 							}
 							else
 							{
 								if (irc_stat)
-									cout << X << _("observer") << " \"" << nick << "\" (" <<
+									std::cout << X << _("observer") << " \"" << nick << "\" (" <<
 										host << ") " << _("leaves channel") << " " <<
-										irc_parvec[0] << endl;
+										irc_parvec[0] << std::endl;
 							}
 						}
 						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
 							(irc_parvec[0].length() > 10))
 						{
-							string tb = 
+							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
 								
-							if (nick.find(tmcg->TMCG_ExportKeyID(pub), 0)	== 0)
+							if (nick.find(pub.keyid(), 0)	== 0)
 							{
-								cout << X << _("you leave") << " " << tb << endl;
+								std::cout << X << _("you leave") << " " << tb << std::endl;
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
@@ -2246,18 +2234,18 @@ void run_irc()
 								{
 									opipestream *npipe = 
 										new opipestream(games_ipipe[games_tnr2pid[tb]]);
-									*npipe << "PART " << nick << endl << flush;
+									*npipe << "PART " << nick << std::endl << std::flush;
 									delete npipe;
 								}
 								if (nick_key.find(nick) != nick_key.end())
 									nick = nick_key[nick].name;
-								cout << X << _("player") << " \"" << nick << "\" (" <<
-									host << ") " << _("leaves") << " " << tb << endl;
+								std::cout << X << _("player") << " \"" << nick << "\" (" <<
+									host << ") " << _("leaves") << " " << tb << std::endl;
 							}
 							else
 							{
-								cout << X << _("observer") << " \"" << nick << "\" (" <<
-									host << ") " << _("leaves") << " " << tb << endl;
+								std::cout << X << _("observer") << " \"" << nick << "\" (" <<
+									host << ") " << _("leaves") << " " << tb << std::endl;
 							}
 						}
 					}
@@ -2269,13 +2257,13 @@ void run_irc()
 					{
 						if (irc_parvec[0] == "#openSkat")
 						{
-							if (irc_parvec[1].find(tmcg->TMCG_ExportKeyID(pub), 0) == 0)
+							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
 							{
-								cout << X << _("you kicked from channel") << " " << 
+								std::cout << X << _("you kicked from channel") << " " << 
 									irc_parvec[0] << " " << _("by operator") << " " << 
-									nick << endl;
+									nick << std::endl;
 								if (pvs == 3)
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 								irc_quit = 1;
 								break;
 							}
@@ -2287,40 +2275,40 @@ void run_irc()
 								if (nick_key.find(irc_parvec[1]) != nick_key.end())
 									host = nick_key[irc_parvec[1]].name;
 								if (irc_stat)
-									cout << X << _("player") << " \"" << host << "\" " <<
+									std::cout << X << _("player") << " \"" << host << "\" " <<
 										_("kicked from channel") << " " << irc_parvec[0] << " " <<
-										_("by operator") << " " << nick << endl;
+										_("by operator") << " " << nick << std::endl;
 								if (irc_stat && (pvs == 3))
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 							}
 							else
 							{
 								if (irc_stat)
-									cout << X << _("observer") << " \"" << host << "\" " <<
+									std::cout << X << _("observer") << " \"" << host << "\" " <<
 										_("kicked from channel") << " " << irc_parvec[0] << " " <<
-										_("by operator") << " " << nick << endl;
+										_("by operator") << " " << nick << std::endl;
 								if (irc_stat && (pvs == 3))
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 							}
 						}
 						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
 							(irc_parvec[0].length() > 10))
 						{
-							string tb = 
+							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
 								
-							if (irc_parvec[1].find(tmcg->TMCG_ExportKeyID(pub), 0) == 0)
+							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
 							{
 								if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 								{
 									opipestream *npipe = 
 										new opipestream(games_ipipe[games_tnr2pid[tb]]);
-									*npipe << "!KICK" << endl << flush;
+									*npipe << "!KICK" << std::endl << std::flush;
 									delete npipe;
 								}
-								cout << X << _("you kicked from") << " " << tb << endl;
+								std::cout << X << _("you kicked from") << " " << tb << std::endl;
 								if (pvs == 3)
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 							}
 							else if (irc_parvec[1].find(public_prefix, 0) == 0)
 							{
@@ -2328,73 +2316,73 @@ void run_irc()
 								{
 									opipestream *npipe = 
 										new opipestream(games_ipipe[games_tnr2pid[tb]]);
-									*npipe << "KICK " << irc_parvec[1] << endl << flush;
+									*npipe << "KICK " << irc_parvec[1] << std::endl << std::flush;
 									delete npipe;
 								}
 								if (nick_key.find(irc_parvec[1]) != nick_key.end())
 									nick = nick_key[irc_parvec[1]].name;
-								cout << X << _("player") << " \"" << nick << "\" " <<
-										_("kicked from") << " " << tb << endl;
+								std::cout << X << _("player") << " \"" << nick << "\" " <<
+										_("kicked from") << " " << tb << std::endl;
 								if (pvs == 3)
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;	
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;	
 							}
 							else
 							{
-								cout << X << _("observer") << " \"" << irc_parvec[1] << 
-									"\" " << _("kicked from") << " " << tb << endl;
+								std::cout << X << _("observer") << " \"" << irc_parvec[1] << 
+									"\" " << _("kicked from") << " " << tb << std::endl;
 								if (pvs == 3)
-									cout << X << _("reason") << ": " << irc_parvec[2] << endl;	
+									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;	
 							}
 						}
 					}
 				}
 				else if (strncasecmp(irc_command(irc_reply), "QUIT", 4) == 0)
 				{
-					if (nick.find(tmcg->TMCG_ExportKeyID(pub), 0) == 0)
+					if (nick.find(pub.keyid(), 0) == 0)
 					{
-						cout << X << _("you quit SecureSkat") << endl;
+						std::cout << X << _("you quit SecureSkat") << std::endl;
 					}
 					else if (nick.find(public_prefix, 0) == 0)
 					{
 						nick_players.erase(nick),nick_sl.erase(nick); 
 						nick_p7771.erase(nick), nick_p7772.erase(nick);
 						nick_p7773.erase(nick), nick_p7774.erase(nick);
-						for (map<string, pid_t>::const_iterator gi = games_tnr2pid.begin();
+						for (std::map<std::string, pid_t>::const_iterator gi = games_tnr2pid.begin();
 							gi != games_tnr2pid.end(); gi++)
 						{
 							opipestream *npipe = 
 								new opipestream(games_ipipe[gi->second]);
-							*npipe << "QUIT " << nick << endl << flush;
+							*npipe << "QUIT " << nick << std::endl << std::flush;
 							delete npipe;
 						}
 						if (nick_key.find(nick) != nick_key.end())
 							nick = nick_key[nick].name;
 						if (irc_stat)
-							cout << X << _("player") << " \"" << nick << "\" (" << host << 
-								") " << _("quits SecureSkat") << endl;
+							std::cout << X << _("player") << " \"" << nick << "\" (" << host << 
+								") " << _("quits SecureSkat") << std::endl;
 					}
 					else
 					{
 						if (irc_stat)
-							cout << X << _("observer") << " \"" << nick << "\" (" << host <<
-								") " << _("quits IRC client") << endl;
+							std::cout << X << _("observer") << " \"" << nick << "\" (" << host <<
+								") " << _("quits IRC client") << std::endl;
 					}
 				}
 				else if (strncasecmp(irc_command(irc_reply), "352", 3) == 0)
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 8)
 					{
-						if (irc_parvec[5] != tmcg->TMCG_ExportKeyID(pub))
+						if (irc_parvec[5] != pub.keyid())
 						{
 							if (irc_parvec[1] == "#openSkat")
 							{
 								if (irc_parvec[5].find(public_prefix, 0) == 0)
 								{
 									if ((irc_stat) && (irc_parvec[3] == "localhost"))
-										cerr << _("WARNING: host of player") << " \"" <<
+										std::cerr << _("WARNING: host of player") << " \"" <<
 											irc_parvec[5] << "\" " << 
-											_("has unqualified domain (no FQDN)") << endl;
-									string tmp = irc_parvec[7];
+											_("has unqualified domain (no FQDN)") << std::endl;
+									std::string tmp = irc_parvec[7];
 									int p7771 = 0, p7772 = 0, p7773 = 0, p7774 = 0, sl = 0;
 									size_t ai = tmp.find("|", 0), bi = tmp.find("~", 0);
 									size_t ci = tmp.find("!", 0), di = tmp.find("#", 0);
@@ -2405,11 +2393,11 @@ void run_irc()
 										(ai < bi) && (bi < ci) && (ci < di) &&
 										(di < ei) && (ei < fi))
 									{
-										string ptmp7771 = tmp.substr(ai + 1, bi - ai - 1);
-										string ptmp7772 = tmp.substr(bi + 1, ci - bi - 1);
-										string ptmp7773 = tmp.substr(ci + 1, di - ci - 1);
-										string ptmp7774 = tmp.substr(di + 1, ei - di - 1);
-										string sltmp = tmp.substr(ei + 1, fi - ei - 1);
+										std::string ptmp7771 = tmp.substr(ai + 1, bi - ai - 1);
+										std::string ptmp7772 = tmp.substr(bi + 1, ci - bi - 1);
+										std::string ptmp7773 = tmp.substr(ci + 1, di - ci - 1);
+										std::string ptmp7774 = tmp.substr(di + 1, ei - di - 1);
+										std::string sltmp = tmp.substr(ei + 1, fi - ei - 1);
 										p7771 = atoi(ptmp7771.c_str());
 										p7772 = atoi(ptmp7772.c_str());
 										p7773 = atoi(ptmp7773.c_str());
@@ -2425,22 +2413,22 @@ void run_irc()
 									if (nick_key.find(irc_parvec[5]) != nick_key.end())
 										irc_parvec[5] = nick_key[irc_parvec[5]].name;
 									if (irc_stat)
-										cout << X << _("player") << " \"" << irc_parvec[5] << 
+										std::cout << X << _("player") << " \"" << irc_parvec[5] << 
 											"\" (" << irc_parvec[3] << ") " << _("is in channel") <<
-											" " << irc_parvec[1] << endl;
+											" " << irc_parvec[1] << std::endl;
 								}
 								else
 								{
 									if (irc_stat)
-										cout << X << _("observer") << " \"" << irc_parvec[5] << 
+										std::cout << X << _("observer") << " \"" << irc_parvec[5] << 
 											"\" (" << irc_parvec[3] << ") " << _("is in channel") <<
-											" " << irc_parvec[1] << endl;
+											" " << irc_parvec[1] << std::endl;
 								}
 							}
 							else if ((irc_parvec[1].find("#openSkat_", 0) == 0) && 
 							(irc_parvec[1].length() > 10))
 							{
-								string tb = 
+								std::string tb = 
 									irc_parvec[1].substr(10, irc_parvec[1].length() - 10);
 								if (irc_parvec[5].find(public_prefix, 0) == 0)
 								{
@@ -2448,15 +2436,15 @@ void run_irc()
 									{
 										opipestream *npipe = 
 											new opipestream(games_ipipe[games_tnr2pid[tb]]);
-										*npipe << "WHO " << irc_parvec[5] << endl << flush;
+										*npipe << "WHO " << irc_parvec[5] << std::endl << std::flush;
 										delete npipe;
 									}
 									if (nick_key.find(irc_parvec[5]) != nick_key.end())
 										irc_parvec[5] = nick_key[irc_parvec[5]].name;
 									if (irc_stat)
-										cout << X << _("player") << " \"" << irc_parvec[5] << 
+										std::cout << X << _("player") << " \"" << irc_parvec[5] << 
 											"\" (" << irc_parvec[3] << ") " << _("is at") <<
-											" " << irc_parvec[1] << endl;
+											" " << irc_parvec[1] << std::endl;
 								}
 							}
 						}
@@ -2465,14 +2453,14 @@ void run_irc()
 				else if ((strncasecmp(irc_command(irc_reply), "375", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "376", 3) == 0))
 				{
-					cout << endl;
+					std::cout << std::endl;
 				} // MOTD text line
 				else if (strncasecmp(irc_command(irc_reply), "372", 3) == 0)
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 2)
 					{
-						string tms = irc_parvec[1].substr(1, irc_parvec[1].length() - 1);
-						cout << X << tms << endl;
+						std::string tms = irc_parvec[1].substr(1, irc_parvec[1].length() - 1);
+						std::cout << X << tms << std::endl;
 					}
 				} // PRIVMSG
 				else if (strncasecmp(irc_command(irc_reply), "PRIVMSG", 7) == 0)
@@ -2484,30 +2472,30 @@ void run_irc()
 							(irc_parvec[0].length() > 10) && 
 							(nick.find(public_prefix, 0) == 0))
 						{
-							string tb = irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
+							std::string tb = irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
 							if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 							{
 								size_t tei = irc_parvec[1].find("~~~");
 								if (tei != irc_parvec[1].npos)
 								{
-									string realmsg = irc_parvec[1].substr(0, tei);
-									TMCG_Signature sig = irc_parvec[1].substr(tei + 3, 
+									std::string realmsg = irc_parvec[1].substr(0, tei);
+									std::string sig = irc_parvec[1].substr(tei + 3, 
 										irc_parvec[1].length() - realmsg.length() - 3);
 									if (nick_key.find(nick) != nick_key.end())
 									{
-										if (tmcg->TMCG_VerifyData(nick_key[nick], realmsg, sig))
+										if (nick_key[nick].verify(realmsg, sig))
 										{
 											opipestream *npipe = 
 												new opipestream(games_ipipe[games_tnr2pid[tb]]);
 											*npipe << "MSG " << nick << " " << realmsg <<
-											endl << flush;
+											std::endl << std::flush;
 											delete npipe;
 										}
 										else
-											cerr << _("TMCG: VerifyData() failed") << endl;
+											std::cerr << _("TMCG: VerifyData() failed") << std::endl;
 									}
 									else
-										cerr << _("TMCG: no public key available") << endl;
+										std::cerr << _("TMCG: no public key available") << std::endl;
 								}
 							}
 						}
@@ -2519,23 +2507,23 @@ void run_irc()
 								(nick_key.find(nick) != nick_key.end()) &&
 								(tei != irc_parvec[1].npos))
 							{
-								string realmsg = irc_parvec[1].substr(0, tei);
-								TMCG_Signature sig = irc_parvec[1].substr(tei + 3, 
+								std::string realmsg = irc_parvec[1].substr(0, tei);
+								std::string sig = irc_parvec[1].substr(tei + 3, 
 									irc_parvec[1].length() - realmsg.length() - 3);
-								if (tmcg->TMCG_VerifyData(nick_key[nick], realmsg, sig))
+								if (nick_key[nick].verify(realmsg, sig))
 								{
 									nick = nick_key[nick].name;
-									cout << "<" << nick << "> " << realmsg << endl;
+									std::cout << "<" << nick << "> " << realmsg << std::endl;
 								}
 								else
-									cerr << _("TMCG: VerifyData() failed") << endl;
+									std::cerr << _("TMCG: VerifyData() failed") << std::endl;
 							}
 							else
-								cout << "<?" << nick << "?> " << irc_parvec[1] << endl;
+								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
 						} // announce and no channel messages
 						else if ((nick.find(public_prefix, 0) == 0) &&
-							((irc_parvec[0] == tmcg->TMCG_ExportKeyID(pub)) &&
-							(nick != tmcg->TMCG_ExportKeyID(pub))))
+							((irc_parvec[0] == pub.keyid()) &&
+							(nick != pub.keyid())))
 						{
 							size_t tabei1 = irc_parvec[1].find("|", 0);
 							size_t tabei2 = irc_parvec[1].find("~", 0);
@@ -2545,10 +2533,10 @@ void run_irc()
 								(tabei3 != irc_parvec[1].npos) && 
 								(tabei1 < tabei2) && (tabei2 < tabei3))
 							{
-								string tabmsg1 = irc_parvec[1].substr(0, tabei1);
-								string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
+								std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
+								std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
 									tabei2 - tabei1 - 1);
-								string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
+								std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
 									tabei3 - tabei2 - 1);	
 								if ((std::find(tables.begin(), tables.end(), tabmsg1) 
 									== tables.end()) && (tabmsg2 != "0"))
@@ -2580,24 +2568,24 @@ void run_irc()
 										}
 									}
 									else
-										cout << XX << _("player") << " \"" << nick << 
+										std::cout << XX << _("player") << " \"" << nick << 
 											"\" (" << host << ") " << 
 											_("announces unauthorized session") << " " <<
-											tabmsg1 << endl;
+											tabmsg1 << std::endl;
 								}						
 							}
 							else if (irc_stat)
 							{
 								if (nick_key.find(nick) != nick_key.end())
 									nick = nick_key[nick].name;
-								cout << ">" << nick << "< " << irc_parvec[1] << endl;
+								std::cout << ">" << nick << "< " << irc_parvec[1] << std::endl;
 							}
 						}
 						else if (irc_stat &&
-							((irc_parvec[0] == tmcg->TMCG_ExportKeyID(pub)) &&
-							(nick != tmcg->TMCG_ExportKeyID(pub))))
+							((irc_parvec[0] == pub.keyid()) &&
+							(nick != pub.keyid())))
 						{
-							cout << ">?" << nick << "?< " << irc_parvec[1] << endl;
+							std::cout << ">?" << nick << "?< " << irc_parvec[1] << std::endl;
 						}
 					}
 				}
@@ -2639,10 +2627,10 @@ void run_irc()
 				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
 					pki7771_port, pki7772_port, rnk7773_port, rnk7774_port,
 					(int)tmcg->TMCG_SecurityLevel);
-				string uname = tmcg->TMCG_ExportKeyID(pub);
+				std::string uname = pub.keyid();
 				if (uname.length() > 4)
 				{
-					string uname2 = "os";
+					std::string uname2 = "os";
 					for (size_t ic = 4; ic < uname.length(); ic++)
 					{
 						if (islower(uname[ic]))
@@ -2657,13 +2645,13 @@ void run_irc()
 				else
 					uname = "unknown";
 				*irc << "USER " << uname << " 0 0 :" << PACKAGE_STRING << ptmp << 
-					endl << flush;
+					std::endl << std::flush;
 				first_command = false;
 			}
 			else if (first_entry)
 			{
-				*irc << "JOIN #openSkat" << endl << flush;
-				*irc << "WHO #openSkat" << endl << flush;
+				*irc << "JOIN #openSkat" << std::endl << std::flush;
+				*irc << "WHO #openSkat" << std::endl << std::flush;
 				first_entry = false;
 			}
 			else if (entry_ok)
@@ -2672,7 +2660,7 @@ void run_irc()
 				// timer: autojoin to known tables each AUTOJOIN_TIMEOUT seconds
 				if (atj_counter >= AUTOJOIN_TIMEOUT)
 				{
-					for (list<string>::const_iterator ti = tables.begin(); 
+					for (std::list<std::string>::const_iterator ti = tables.begin(); 
 						ti != tables.end(); ti++)
 					{
 						// if not joined in game, do AUTOJOIN (greedy behaviour)
@@ -2681,7 +2669,7 @@ void run_irc()
 							char *command = (char*)malloc(500);
 							if (command == NULL)
 							{
-								cerr << _("MALLOC ERROR: out of memory") << endl;
+								std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
 							bzero(command, 500);
@@ -2709,11 +2697,11 @@ void run_irc()
 					else
 						clr_counter++;
 					
-					for (map<pid_t, int>::const_iterator pi = games_ipipe.begin();
+					for (std::map<pid_t, int>::const_iterator pi = games_ipipe.begin();
 						pi != games_ipipe.end(); ++pi)
 					{
 						opipestream *npipe = new opipestream(pi->second);
-						*npipe << "!ANNOUNCE" << endl << flush;
+						*npipe << "!ANNOUNCE" << std::endl << std::flush;
 						delete npipe;
 					}
 					ann_counter = 0;
@@ -2723,7 +2711,7 @@ void run_irc()
 			}
 			
 			// send SIGQUIT to all PKI processes -- PKI TIMEMOUT
-			for (list<pid_t>::const_iterator pidi = nick_pids.begin();
+			for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
 				pidi != nick_pids.end(); pidi++)
 			{
 				if (nick_ncnt[nick_nick[*pidi]] > PKI_TIMEOUT)
@@ -2732,7 +2720,7 @@ void run_irc()
 			}
 			
 			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT
-			for (list<pid_t>::const_iterator pidi = rnk_pids.begin();
+			for (std::list<pid_t>::const_iterator pidi = rnk_pids.begin();
 				pidi != rnk_pids.end(); pidi++)
 			{
 				if (nick_rnkcnt[rnk_nick[*pidi]] > RNK_TIMEOUT)
@@ -2741,10 +2729,10 @@ void run_irc()
 			}
 			
 			// start RNK or PKI process
-			for (map<string, string>::const_iterator ni = nick_players.begin();
+			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin();
 					ni != nick_players.end(); ni++)
 			{
-				string nick = ni->first, host = ni->second;
+				std::string nick = ni->first, host = ni->second;
 				
 				// RNK
 				if (nick_rcnt.find(nick) == nick_rcnt.end())
@@ -2777,22 +2765,22 @@ void run_irc()
 							}
 							opipestream *npipe = new opipestream(fd_pipe[1]);
 							size_t rnk_idsize = 0;
-							vector<string> rnk_idlist;
+							std::vector<std::string> rnk_idlist;
 							
 							// create TCP/IP connection
 							int nick_handle = ConnectToHost(host.c_str(), nick_p7773[nick]);
 							if (nick_handle < 0)
 							{
-								cerr << "run_irc [RNK/child] (ConnectToHost)" << endl;
+								std::cerr << "run_irc [RNK/child] (ConnectToHost)" << std::endl;
 								exit(-1);
 							}
 							iosocketstream *nrnk = new iosocketstream(nick_handle);
 							
-							// get RNK list
+							// get RNK std::list
 							char *tmp = new char[1000000L];
 							if (tmp == NULL)
 							{
-								cerr << _("RNK ERROR: out of memory") << endl;
+								std::cerr << _("RNK ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
 							nrnk->getline(tmp, 1000000L);
@@ -2809,31 +2797,31 @@ void run_irc()
 							if (close(nick_handle) < 0)
 								perror("run_irc [RNK/child] (close)");
 							
-							// iterate RNK list
-							for (vector<string>::const_iterator ri = rnk_idlist.begin();
+							// iterate RNK std::list
+							for (std::vector<std::string>::const_iterator ri = rnk_idlist.begin();
 								ri != rnk_idlist.end(); ri++)
 							{
 								// create TCP/IP connection
 								int rhd = ConnectToHost(host.c_str(), nick_p7774[nick]);
 								if (rhd < 0)
 								{
-									cerr << "run_irc [RNK2/child] (ConnectToHost)" << endl;
+									std::cerr << "run_irc [RNK2/child] (ConnectToHost)" << std::endl;
 									exit(-1);
 								}
 								iosocketstream *nrpl = new iosocketstream(rhd);
 								
 								// get RNK data and send it to parent
-								*nrpl << *ri << endl << flush;
+								*nrpl << *ri << std::endl << std::flush;
 								nrpl->getline(tmp, 1000000L);
-								*npipe << *ri << endl << flush;
-								*npipe << tmp << endl << flush;
+								*npipe << *ri << std::endl << std::flush;
+								*npipe << tmp << std::endl << std::flush;
 								
 								// close TCP/IP connection
 								delete nrpl;
 								if (close(rhd) < 0)
 									perror("run_irc [RNK2/child] (close)");
 							}
-							*npipe << "EOF" << endl << flush;
+							*npipe << "EOF" << std::endl << std::flush;
 							delete npipe, delete [] tmp;
 							if (close(fd_pipe[1]) < 0)
 								perror("run_irc (close)");
@@ -2883,7 +2871,7 @@ void run_irc()
 							int nick_handle = ConnectToHost(host.c_str(), nick_p7771[nick]);
 							if (nick_handle < 0)
 							{
-								cerr << "run_irc [PKI/child] (ConnectToHost)" << endl;
+								std::cerr << "run_irc [PKI/child] (ConnectToHost)" << std::endl;
 								exit(-1);
 							}
 							iosocketstream *nkey = new iosocketstream(nick_handle);
@@ -2892,7 +2880,7 @@ void run_irc()
 							char *tmp = new char[1000000L];
 							if (tmp == NULL)
 							{
-								cerr << _("PKI ERROR: out of memory") << endl;
+								std::cerr << _("PKI ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
 							nkey->getline(tmp, 1000000L);
@@ -2905,29 +2893,29 @@ void run_irc()
 							
 							// import public key
 							TMCG_PublicKey pkey;
-							if (!tmcg->TMCG_ImportKey(pkey, public_key))
+							if (!pkey.import(public_key))
 							{
-								cerr << _("TMCG: public key import error") << endl;
+								std::cerr << _("TMCG: public key import error") << std::endl;
 								exit(-2);
 							}
 							
 							// check keyID
-							if (nick != tmcg->TMCG_ExportKeyID(pkey))
+							if (nick != pkey.keyid())
 							{
-								cerr << _("TMCG: wrong public key") << endl;
+								std::cerr << _("TMCG: wrong public key") << std::endl;
 								exit(-3);
 							}
 							
 							// check NIZK
-							if (!tmcg->TMCG_CheckKey(pkey))
+							if (!pkey.check())
 							{
-								cerr << _("TMCG: public key not valid") << endl;
+								std::cerr << _("TMCG: public key not valid") << std::endl;
 								exit(-4);
 							}
 							
 							// send valid public key to parent
-							*npipe << nick << endl << flush;
-							*npipe << public_key << endl << flush;
+							*npipe << nick << std::endl << std::flush;
+							*npipe << public_key << std::endl << std::flush;
 							
 							delete npipe;
 							if (close(fd_pipe[1]) < 0)
@@ -2957,16 +2945,16 @@ void run_irc()
 		}
 	}
 	if (!irc->good())
-		cerr << _("IRC ERROR: connection with server collapsed") << endl;
+		std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
 }
 
 void done_irc()
 {
 	signal(SIGINT, SIG_IGN), signal(SIGQUIT, SIG_IGN), signal(SIGTERM, SIG_IGN);
 	signal(SIGCHLD, SIG_IGN), signal(SIGPIPE, SIG_IGN), signal(SIGHUP, SIG_IGN);
-	*irc << "PART #openSkat" << endl << flush;
-	*irc << "QUIT :SecureSkat rulez!" << endl << flush;
-	for (map<pid_t, string>::const_iterator pidi = games_pid2tnr.begin();
+	*irc << "PART #openSkat" << std::endl << std::flush;
+	*irc << "QUIT :SecureSkat rulez!" << std::endl << std::flush;
+	for (std::map<pid_t, std::string>::const_iterator pidi = games_pid2tnr.begin();
 		pidi != games_pid2tnr.end(); pidi++)
 	{
 		if (kill(pidi->first, SIGQUIT) < 0)
@@ -2974,7 +2962,7 @@ void done_irc()
 		waitpid(pidi->first, NULL, 0);
 	}
 	games_pid2tnr.clear(), games_tnr2pid.clear();
-	for (list<pid_t>::const_iterator pidi = nick_pids.begin();
+	for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
 		pidi != nick_pids.end(); pidi++)
 	{
 		if (kill(*pidi, SIGQUIT) < 0)
@@ -2983,7 +2971,7 @@ void done_irc()
 	}
 	nick_pids.clear(), nick_nick.clear(), nick_host.clear(),
 		nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
-	for (list<pid_t>::const_iterator pidi = pkiprf_pid.begin();
+	for (std::list<pid_t>::const_iterator pidi = pkiprf_pid.begin();
 		pidi != pkiprf_pid.end(); pidi++)
 	{
 		if (kill(*pidi, SIGQUIT) < 0)
@@ -2991,7 +2979,7 @@ void done_irc()
 		waitpid(*pidi, NULL, 0);
 	}
 	pkiprf_pid.clear();
-	for (list<pid_t>::const_iterator pidi = rnkrpl_pid.begin();
+	for (std::list<pid_t>::const_iterator pidi = rnkrpl_pid.begin();
 		pidi != rnkrpl_pid.end(); pidi++)
 	{
 		if (kill(*pidi, SIGQUIT) < 0)
@@ -3042,10 +3030,10 @@ void done_term()
 
 int main(int argc, char* argv[], char* envp[])
 {
-	string cmd = argv[0];
-	cout << PACKAGE_STRING <<
-		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << endl <<
-		" $Id: SecureSkat.cc,v 1.5 2004/12/16 21:33:07 stamer Exp $ " << endl;
+	std::string cmd = argv[0];
+	std::cout << PACKAGE_STRING <<
+		", (c) 2002-2004 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
+		" $Id: SecureSkat.cc,v 1.6 2004/12/21 15:01:42 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3092,16 +3080,16 @@ int main(int argc, char* argv[], char* envp[])
 			game_env = NULL;
 		}
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
-		get_public_keys(cmd + ".pkr", tmcg, nick_key);
-		get_secret_key(cmd + ".skr", tmcg, sec, public_prefix);
-		tmcg->TMCG_CreateKey(pub, sec);
+		get_public_keys(cmd + ".pkr", nick_key);
+		get_secret_key(cmd + ".skr", sec, public_prefix);
+		pub = TMCG_PublicKey(sec);
 		
 		create_pki(pki7771_port, pki7771_handle);
 		create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
 		load_rnk(cmd + ".rnk", rnk);
 		create_irc(argv[1], irc_port);
 		init_irc();
-		cout << _("Usage: type /help for command list or read file README") << endl;
+		std::cout << _("Usage: type /help for command list or read file README") << std::endl;
 #ifndef NOHUP
 		init_term();
 #endif
@@ -3114,14 +3102,13 @@ int main(int argc, char* argv[], char* envp[])
 		save_rnk(cmd + ".rnk", rnk);
 		release_rnk(rnk7773_handle, rnk7774_handle);
 		release_pki(pki7771_handle);
-		set_public_keys(cmd + ".pkr", tmcg, nick_key);
-		tmcg->TMCG_ReleaseKey(pub), tmcg->TMCG_ReleaseKey(sec);
+		set_public_keys(cmd + ".pkr", nick_key);
 		delete tmcg;
 		return 0;
 	}
 	
-	cout << _("Usage: ") << cmd << " IRC_SERVER<string> [ IRC_PORT<int> " <<
-		"[ SECURITY_LEVEL<int> ..." << endl;
-	cout << "       " << " ... [ CONTROL_PROGRAM<string> ] ] ]" << endl;
+	std::cout << _("Usage: ") << cmd << " IRC_SERVER<std::string> [ IRC_PORT<int> " <<
+		"[ SECURITY_LEVEL<int> ..." << std::endl;
+	std::cout << "       " << " ... [ CONTROL_PROGRAM<std::string> ] ] ]" << std::endl;
 	return -1;
 }

@@ -8,6 +8,7 @@ include_HEADERS = mpz_srandom.h mpz_sqrtm.h mpz_spowm.h mpz_sprime.h\
 	VTMF_Card.hh VTMF_CardSecret.hh\
 	TMCG_Card.hh TMCG_CardSecret.hh\
 	TMCG_Stack.hh TMCG_OpenStack.hh TMCG_StackSecret.hh\
+	TMCG_SecretKey.hh TMCG_PublicKey.hh TMCG_PublicKeyRing.hh\
 	libTMCG.hh
 
 libTMCG_la_SOURCES = mpz_srandom.c mpz_srandom.h\
@@ -19,7 +20,13 @@ libTMCG_la_SOURCES = mpz_srandom.c mpz_srandom.h\
 	mpz_helper.cc mpz_helper.hh\
 	BarnettSmartVTMF_dlog.cc BarnettSmartVTMF_dlog.hh\
 	SchindelhauerTMCG.cc SchindelhauerTMCG.hh\
-	VTMF_Card.hh VTMF_CardSecret.hh\
-	TMCG_Card.hh TMCG_CardSecret.hh\
-	TMCG_Stack.hh TMCG_OpenStack.hh TMCG_StackSecret.hh\
-	libTMCG.hh
+	VTMF_Card.cc VTMF_Card.hh\
+	VTMF_CardSecret.cc VTMF_CardSecret.hh\
+	TMCG_Card.cc TMCG_Card.hh\
+	TMCG_CardSecret.cc TMCG_CardSecret.hh\
+	TMCG_Stack.cc TMCG_Stack.hh\
+	TMCG_OpenStack.cc TMCG_OpenStack.hh\
+	TMCG_StackSecret.cc TMCG_StackSecret.hh\
+	TMCG_SecretKey.cc TMCG_SecretKey.hh\
+	TMCG_PublicKey.cc TMCG_PublicKey.hh\
+	TMCG_PublicKeyRing.hh libTMCG.hh

@@ -42,6 +42,8 @@
 
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
+	
+	#include "TMCG.def"
 
 template <typename CardType> struct TMCG_OpenStack
 {
@@ -59,137 +61,52 @@ template <typename CardType> struct TMCG_OpenStack
 	};
 	
 	TMCG_OpenStack
-		()
-	{
-	}
+		();
 	
 	TMCG_OpenStack& operator =
-		(const TMCG_OpenStack& that)
-	{
-		clear();
-		stack = that.stack;
-		return *this;
-	}
+		(const TMCG_OpenStack& that);
 	
 	bool operator ==
-		(const TMCG_OpenStack& that)
-	{
-		if (stack.size() != that.stack.size())
-			return false;
-		return std::equal(stack.begin(), stack.end(), that.stack.begin());
-	}
+		(const TMCG_OpenStack& that);
 	
 	bool operator !=
-		(const TMCG_OpenStack& that)
-	{
-		return !(*this == that);
-	}
+		(const TMCG_OpenStack& that);
 	
 	const std::pair<size_t, CardType>& operator []
-		(size_t n) const
-	{
-		return stack[n];
-	}
+		(size_t n) const;
 	
 	std::pair<size_t, CardType>& operator []
-		(size_t n)
-	{
-		return stack[n];
-	}
+		(size_t n);
 	
 	size_t size
-		() const
-	{
-		return stack.size();
-	}
+		() const;
 	
 	void push
-		(size_t type, const CardType& c)
-	{
-		stack.push_back(std::pair<size_t, CardType>(type, c));
-	}
+		(size_t type, const CardType& c);
 	
 	void push
-		(const TMCG_OpenStack& s)
-	{
-		std::copy(s.stack.begin(), s.stack.end(), std::back_inserter(stack));
-	}
+		(const TMCG_OpenStack& s);
 	
 	size_t pop
-		(CardType& c)
-	{
-		size_t type = (1 << TMCG_MAX_TYPEBITS);		// set 'error code'
-		
-		if (stack.empty())
-			return type;
-		
-		type = (stack.back())->first;
-		c = (stack.back())->second;
-		stack.pop_back();
-		return type;
-	}
+		(CardType& c);
 	
 	void clear
-		()
-	{
-		stack.clear();
-	}
+		();
 	
 	bool find
-		(size_t type) const
-	{
-		return (std::find_if(stack.begin(), stack.end(),
-			std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
-				(type, CardType()))) != stack.end());
-	}
+		(size_t type) const;
 	
 	bool remove
-		(size_t type)
-	{
-		typename std::vector<std::pair<size_t, CardType> >::iterator si =
-			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
-					(type, CardType())));
-		
-		if (si != stack.end())
-		{
-			stack.erase(si);
-			return true;
-		}
-		return false;
-	}
+		(size_t type);
 	
 	size_t removeAll
-		(size_t type)
-	{
-		size_t counter = 0;
-		while (remove(type))
-			counter++;
-		return counter;
-	}
+		(size_t type);
 	
 	bool move
-		(size_t type, TMCG_Stack<CardType>& s)
-	{
-		typename std::vector<std::pair<size_t, CardType> >::iterator si =
-			std::find_if(stack.begin(), stack.end(),
-				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
-					(type, CardType())));
-		
-		if (si != stack.end())
-		{
-			s.push(si->second);
-			stack.erase(si);
-			return true;
-		}
-		return false;
-	}
+		(size_t type, TMCG_Stack<CardType>& s);
 	
 	~TMCG_OpenStack
-		()
-	{
-		stack.clear();
-	}
+		();
 };
 
 #endif

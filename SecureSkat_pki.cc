@@ -21,8 +21,7 @@
 #include "SecureSkat_pki.hh"
 
 void get_secret_key
-	(const std::string &filename, SchindelhauerTMCG *tmcg,
-	TMCG_SecretKey *sec, std::string &prefix) 
+	(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix)
 {
 	std::ostringstream ost;
 	datum key, data;
@@ -47,15 +46,17 @@ void get_secret_key
 			std::getline(std::cin, email);
 			while (1)
 			{
-				sec = new TMCG_SecretKey(1024L, name, email);
-				if (sec->check())
+				TMCG_SecretKey tmpsec(1024L, name, email);
+				if (tmpsec.check())
+				{
+					sec = tmpsec;
 					break;
+				}
 				else
-					delete sec;
-				std::cerr << "." << std::flush;
+					std::cerr << "." << std::flush;
 			}
 			ost << sec;
-			keyid = sec->keyid();
+			keyid = sec.keyid();
 			key.dptr = (char*)keyid.c_str();
 			key.dsize = keyid.length() + 1;
 			osttmp = ost.str();
@@ -64,7 +65,6 @@ void get_secret_key
 			gdbm_store(sec_db, key, data, GDBM_INSERT);
 			std::cout << _("PKI: cryptographic key") << " \"" << keyid <<
 				"\" " << _("created and stored") << std::endl;
-			delete sec;
 		}
 		gdbm_close(sec_db);
 	}
@@ -76,8 +76,8 @@ void get_secret_key
 		exit(-1);
 	}
 	
-	sec = new TMCG_SecretKey(ost.str());
-	prefix = sec->keyid();
+	sec = TMCG_SecretKey(ost.str());
+	prefix = sec.keyid();
 	size_t ei = prefix.find("^", 0);
 	if (ei == prefix.npos)
 	{
@@ -89,8 +89,7 @@ void get_secret_key
 }
 
 void get_public_keys
-	(const std::string &filename, SchindelhauerTMCG *tmcg,
-	std::map<std::string, TMCG_PublicKey> &keys)
+	(const std::string &filename, std::map<std::string, TMCG_PublicKey> &keys)
 {
 	datum key, nextkey, data;
 	GDBM_FILE pub_db = 
@@ -124,7 +123,7 @@ void get_public_keys
 }
 
 void set_public_keys
-	(const std::string &filename, SchindelhauerTMCG *tmcg,
+	(const std::string &filename,
 	const std::map<std::string, TMCG_PublicKey> &keys)
 {
 	datum key, data;

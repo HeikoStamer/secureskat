@@ -1,0 +1,186 @@
+/*******************************************************************************
+   This file is part of libTMCG.
+
+ Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+*******************************************************************************/
+
+#include "TMCG_Stack.hh"
+
+template <typename CardType> struct TMCG_Stack::TMCG_Stack
+	()
+{
+}
+
+TMCG_Stack& TMCG_Stack::operator =
+	(const TMCG_Stack& that)
+{
+	clear();
+	stack = that.stack;
+	return *this;
+}
+
+bool TMCG_Stack::operator ==
+	(const TMCG_Stack& that)
+{
+	if (stack.size() != that.stack.size())
+		return false;
+	return std::equal(stack.begin(), stack.end(), that.stack.begin());
+}
+
+bool TMCG_Stack::operator !=
+	(const TMCG_Stack& that)
+{
+	return !(*this == that);
+}
+
+const CardType& TMCG_Stack::operator []
+	(size_t n) const
+{
+	return stack[n];
+}
+
+CardType& TMCG_Stack::operator []
+	(size_t n)
+{
+	return stack[n];
+}
+
+size_t TMCG_Stack::size
+	() const
+{
+	return stack.size();
+}
+
+void TMCG_Stack::push
+	(const CardType& c)
+{
+	stack.push_back(c);
+}
+
+void TMCG_Stack::push
+	(const TMCG_Stack& s)
+{
+	std::copy(s.stack.begin(), s.stack.end(), back_inserter(stack));
+}
+
+void TMCG_Stack::push
+	(const TMCG_OpenStack<CardType>& s)
+{
+	for (typename std::vector<std::pair<size_t, CardType> >::const_iterator
+		si = s.stack.begin(); si != s.stack.end(); si++)
+			stack.push_back(si->second);
+}
+
+bool TMCG_Stack::pop
+	(CardType& c)
+{
+	if (stack.empty())
+		return false;
+	
+	c = stack.back();
+	stack.pop_back();
+	return true;
+}
+
+void TMCG_Stack::clear
+	()
+{
+	stack.clear();
+}
+
+bool TMCG_Stack::find
+	(const CardType& c) const
+{
+	return (std::find(stack.begin(), stack.end(), c) != stack.end());
+}
+
+bool TMCG_Stack::remove
+	(const CardType& c)
+{
+	typename std::vector<CardType>::iterator si =
+		std::find(stack.begin(), stack.end(), c);
+	
+	if (si != stack.end())
+	{
+		stack.erase(si);
+		return true;
+	}
+	return false;
+}
+
+size_t TMCG_Stack::removeAll
+	(const CardType& c)
+{
+	size_t counter = 0;
+	while (remove(c))
+		counter++;
+	return counter;
+}
+
+bool TMCG_Stack::import
+	(std::string s)
+{
+	size_t size = 0;
+	char *ec;
+	
+	try
+	{
+		// check magic
+		if (!cm(s, "stk", '^'))
+			throw false;
+		
+		// size of stack
+		if (gs(s, '^') == NULL)
+			throw false;
+		size = strtoul(gs(s, '^'), &ec, 10);
+		if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
+			throw false;
+		
+		// cards on stack
+		for (size_t i = 0; i < size; i++)
+		{
+			CardType c;
+			
+			if (gs(s, '^') == NULL)
+				throw false;
+			if ((!c.import(gs(s, '^'))) || (!nx(s, '^')))
+				throw false;
+			stack.push_back(c);
+		}
+		
+		throw true;
+	}
+	catch (bool return_value)
+	{
+		return return_value;
+	}
+}
+
+TMCG_Stack::~TMCG_Stack
+	()
+{
+	stack.clear();
+}
+
+template<typename CardType> std::ostream& operator<<
+	(std::ostream &out, const TMCG_Stack<CardType> &s)
+{
+	out << "stk^" << s.size() << "^";
+	for (size_t i = 0; i < s.size(); i++)
+		out << s[i] << "^";
+	return out;
+}

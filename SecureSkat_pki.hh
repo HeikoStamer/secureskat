@@ -50,13 +50,12 @@
 	#endif
 	
 	void get_secret_key
-		(const std::string &filename, SchindelhauerTMCG *tmcg,
-		TMCG_SecretKey *sec, std::string &prefix);
+		(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix);
 	void get_public_keys
-		(const std::string &filename, SchindelhauerTMCG *tmcg,
+		(const std::string &filename,
 		std::map<std::string, TMCG_PublicKey> &keys);
 	void set_public_keys
-		(const std::string &filename, SchindelhauerTMCG *tmcg,
+		(const std::string &filename,
 		const std::map<std::string, TMCG_PublicKey> &keys);
 	void create_pki
 		(int &pki7771_port, int &pki7771_handle);

@@ -19,7 +19,7 @@
 *******************************************************************************/
 
 int ballot_child
-	(const string &nr, int b, bool neu, int ipipe, int opipe, const string &master)
+	(const std::string &nr, int b, bool neu, int ipipe, int opipe, const std::string &master)
 {
 	// install old signal handlers
 	signal(SIGINT, sig_handler_ballot_quit);
@@ -36,8 +36,8 @@ int ballot_child
 	signal(SIGUSR1, SIG_DFL);
 	
 	// variables
-	list<string> gp_nick;
-	map<string, string> gp_name;
+	std::list<std::string> gp_nick;
+	std::map<std::string, std::string> gp_name;
 	opipestream *out_pipe = new opipestream(opipe);
 	ipipestream *in_pipe = new ipipestream(ipipe);
 	
@@ -47,18 +47,18 @@ int ballot_child
 		b_pow *= 2;
 	
 	// announce table construction
-	gp_nick.push_back(tmcg->TMCG_ExportKeyID(pub));
-	gp_name[tmcg->TMCG_ExportKeyID(pub)] = pub.name;
+	gp_nick.push_back(pub.keyid());
+	gp_name[pub.keyid()] = pub.name;
 	if (neu)
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|1~" << -b << "!" << 
-			endl << flush;
+			std::endl << std::flush;
 	
 	// wait for voters
 	while (1)
 	{
 		char tmp[10000];
 		in_pipe->getline(tmp, sizeof(tmp));
-		string cmd = tmp;
+		std::string cmd = tmp;
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0) || (b <= 0))
 		{
@@ -67,11 +67,11 @@ int ballot_child
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-				"~" << -b << "!" << endl << flush;
+				"~" << -b << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (nick_key.find(nick) != nick_key.end())
 			{
 				if (nick_players.find(nick) != nick_players.end())
@@ -80,23 +80,23 @@ int ballot_child
 					{
 						gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 						*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
-							gp_nick.size() << "~" << b << "!" << endl << flush;
+							gp_nick.size() << "~" << b << "!" << std::endl << std::flush;
 					}
 					else
 						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("room completely occupied") << endl << flush;
+							_("room completely occupied") << std::endl << std::flush;
 				}
 				else
 					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("voter was at room creation not present") << endl << flush;
+						_("voter was at room creation not present") << std::endl << std::flush;
 			}
 			else
 				*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-					_("key exchange with owner is incomplete") << endl << flush;
+					_("key exchange with owner is incomplete") << std::endl << std::flush;
 		}
 		if (!neu && ((cmd.find("JOIN ", 0) == 0) || (cmd.find("WHO ", 0) == 0)))
 		{
-			string nick = (cmd.find("JOIN ", 0) == 0) ?
+			std::string nick = (cmd.find("JOIN ", 0) == 0) ?
 				cmd.substr(5, cmd.length() - 5) : cmd.substr(4, cmd.length() - 4);
 			if (nick_key.find(nick) != nick_key.end())
 			{
@@ -104,19 +104,19 @@ int ballot_child
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 				else
 					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("voter was at room creation not present") << endl << flush;
+						_("voter was at room creation not present") << std::endl << std::flush;
 			}
 			else
 			{
-				cout << X << _("key exchange with") << " " << nick << " " << 
-					_("is incomplete") << endl;
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				std::cout << X << _("key exchange with") << " " << nick << " " << 
+					_("is incomplete") << std::endl;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -1;
 			}
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(gp_nick.begin(), gp_nick.end(), nick)	!= gp_nick.end())
 			{
 				gp_nick.remove(nick),	gp_name.erase(nick);
@@ -126,8 +126,8 @@ int ballot_child
 		// control messages
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-			string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 				cmd.length() - cmd.find(" ", 4) - 1);
 			
 			if ((msg == "!READY") && (nick == master))
@@ -137,33 +137,33 @@ int ballot_child
 		// stdin messages
 		if ((cmd.find("CMD ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string msg = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string msg = cmd.substr(4, cmd.find(" ", 4) - 4);
 			
 			if (neu && ((msg.find("OPEN", 0) == 0) || (msg.find("open", 0) == 0)))
 			{
 				*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-					"~" << b << "!" << endl << flush;
-				*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << endl << flush;
+					"~" << b << "!" << std::endl << std::flush;
+				*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << std::endl << std::flush;
 				break;
 			}
 		}
 	}
-	cout << X << _("Room") << " " << nr << " " << _("preparing the ballot") << 
-		" ..." << endl;
+	std::cout << X << _("Room") << " " << nr << " " << _("preparing the ballot") << 
+		" ..." << std::endl;
 	// prepare ballot (create PKR, bind port for secure connection)
 	assert(gp_nick.size() <= TMCG_MAX_PLAYERS);
 	assert(b <= TMCG_MAX_TYPEBITS);
 	SchindelhauerTMCG *ballot_tmcg = 							// n players, 2^b cards
 		new SchindelhauerTMCG(security_level, gp_nick.size(), b);
 	TMCG_PublicKeyRing pkr;
-	vector<string> vnicks;
+	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
-	for (list<string>::const_iterator pi = gp_nick.begin(); 
+	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); 
 		pi != gp_nick.end(); pi++, pkr_i++)
 	{
 		vnicks.push_back(*pi);
-		if (*pi == ballot_tmcg->TMCG_ExportKeyID(pub))
+		if (*pi == pub.keyid())
 		{
 			pkr_self = pkr_i;
 			pkr.key[pkr_i] = pub;
@@ -174,21 +174,21 @@ int ballot_child
 	int gp_handle, gp_port = BindEmptyPort(7900);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
-		*out_pipe << "PART #openSkat_" << nr << endl << flush;
+		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		return -4;
 	}
-	ostringstream ost;
-	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << endl;
-	*out_pipe << ost.str() << flush;
-	cout << X << _("Room") << " " << nr << " " << _("with");
+	std::ostringstream ost;
+	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
+	*out_pipe << ost.str() << std::flush;
+	std::cout << X << _("Room") << " " << nr << " " << _("with");
 	for (size_t i = 0; i < gp_nick.size(); i++)
-		cout << " '" << pkr.key[i].name << "'";
-	cout << " " << _("ready") << "." << endl;
-	cout << XX << _("BALLOT: please make your vote with command") << 
-		" /<nr> vote <r>" << endl;
+		std::cout << " '" << pkr.key[i].name << "'";
+	std::cout << " " << _("ready") << "." << std::endl;
+	std::cout << XX << _("BALLOT: please make your vote with command") << 
+		" /<nr> vote <r>" << std::endl;
 	
-	list<string> gp_rdport, gp_voters;
-	map<string, int> gp_ports;
+	std::list<std::string> gp_rdport, gp_voters;
+	std::map<std::string, int> gp_ports;
 	size_t vote = 0;
 	bool has_voted = false;
 	while ((gp_rdport.size() < (gp_nick.size() - 1)) || 
@@ -196,7 +196,7 @@ int ballot_child
 	{
 		char tmp[10000];
 		in_pipe->getline(tmp, sizeof(tmp));
-		string cmd = tmp;
+		std::string cmd = tmp;
 		
 		if (cmd.find("!KICK", 0) == 0)
 		{
@@ -205,31 +205,31 @@ int ballot_child
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() << 
-				"~" << -b << "!" << endl << flush;
+				"~" << -b << "!" << std::endl << std::flush;
 		}		
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("room completely occupied") << endl << flush;
+				_("room completely occupied") << std::endl << std::flush;
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
-			string nick = cmd.substr(5, cmd.length() - 5);
+			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -5;
 			}
 		}
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-			string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 				cmd.length() - cmd.find(" ", 4) - 1);
 			if (msg.find("PORT ", 0) == 0)
 			{
-				string port = msg.substr(5, msg.length() - 5);
+				std::string port = msg.substr(5, msg.length() - 5);
 				if (std::find(gp_rdport.begin(), gp_rdport.end(), nick) 
 					== gp_rdport.end())
 				{
@@ -245,15 +245,15 @@ int ballot_child
 					gp_voters.push_back(nick);
 					if (nick_key.find(nick) != nick_key.end())
 						nick = nick_key[nick].name;
-					cout << XX << _("BALLOT") << ": " << nick << " " << 
-						_("has voted") << endl;
+					std::cout << XX << _("BALLOT") << ": " << nick << " " << 
+						_("has voted") << std::endl;
 				}
 			}
 		}
 		if ((cmd.find("CMD ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
-			string msg = cmd.substr(4, cmd.find(" ", 4) - 4);
-			string vstr = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string msg = cmd.substr(4, cmd.find(" ", 4) - 4);
+			std::string vstr = cmd.substr(cmd.find(" ", 4) + 1, 
 				cmd.length() - cmd.find(" ", 4) - 1);
 			
 			if ((msg.find("VOTE", 0) == 0) || (msg.find("vote", 0) == 0))
@@ -261,19 +261,19 @@ int ballot_child
 				vote = atoi(vstr.c_str());
 				if  (!has_voted && (vote < b_pow))
 				{
-					cout << XX << _("BALLOT: you voted for value r = ") << vote << endl;
-					*out_pipe << "PRIVMSG #openSkat_" << nr << " :VOTE" << endl << flush;
+					std::cout << XX << _("BALLOT: you voted for value r = ") << vote << std::endl;
+					*out_pipe << "PRIVMSG #openSkat_" << nr << " :VOTE" << std::endl << std::flush;
 					gp_voters.push_back(vnicks[pkr_self]);
 					has_voted = true;
 				}
 				else
-					cout << XX << _("BALLOT ERROR: already voted or bad value <r> ") <<
-						"(0 <= r < " << b_pow << ")" << endl;
+					std::cout << XX << _("BALLOT ERROR: already voted or bad value <r> ") <<
+						"(0 <= r < " << b_pow << ")" << std::endl;
 			}
 		}
 	}
-	cout << X << _("Room") << " " << nr << " " <<
-		_("establishing secure channels") << " ..." << endl;
+	std::cout << X << _("Room") << " " << nr << " " <<
+		_("establishing secure channels") << " ..." << std::endl;
 
 	// FIXME: the following part contains race conditions
 	
@@ -283,7 +283,7 @@ int ballot_child
 	char *ireadbuf = (char*)malloc(65536);
 	int ireaded = 0;
 	size_t pkr_idx = 0;
-	map<string, iosecuresocketstream*>	ios_in, ios_out;
+	std::map<std::string, iosecuresocketstream*>	ios_in, ios_out;
 	while (pkr_idx < gp_nick.size())
 	{
 		// select(2) -- initalize file descriptors
@@ -328,76 +328,66 @@ int ballot_child
 				else
 				{
 					perror("ballot_child (gethostbyname)");
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -70;
 				}
 				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr)
 				{
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -71;
 				}
 				// establish connection
 				iosocketstream *neighbor = new iosocketstream(handle);
 				TMCG_CardSecret cs;
 				ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
-				*neighbor << cs << endl << flush;
+				*neighbor << cs << std::endl << std::flush;
 				char challenge_sig[TMCG_MAX_CARD_CHARS];
 				neighbor->getline(challenge_sig, sizeof(challenge_sig));
-				TMCG_DataStream challenge;
+				std::ostringstream challenge;
 				challenge << cs << vnicks[pkr_self];
 				if (!neighbor->good())
 				{
 					delete neighbor, close(handle);
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -72;
 				}
-				else if (!ballot_tmcg->TMCG_VerifyData(pkr.key[pkr_idx], 
-					challenge.str(), challenge_sig))
+				else if (!pkr.key[pkr_idx].verify(challenge.str(), challenge_sig))
 				{
 					delete neighbor, close(handle);
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -73;
 				}
 				else
 				{
 					neighbor->getline(challenge_sig, sizeof(challenge_sig));
-					if (ballot_tmcg->TMCG_ImportCardSecret(cs, challenge_sig))
+					if (cs.import(challenge_sig))
 					{
-						TMCG_DataStream response;
+						std::ostringstream response;
 						response << challenge_sig << vnicks[pkr_idx];
-						*neighbor << ballot_tmcg->TMCG_SignData(sec, response.str()) << 
-							endl << flush;
+						*neighbor << sec.sign(response.str()) <<
+							std::endl << std::flush;
 						
 						// exchange secret keys for securesocketstreams
-						assert (gcry_md_test_algo (GCRY_MD_RMD160) == 0);
-						char *key1 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-						char *key2 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
+						assert (gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
+						char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+						char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
 						neighbor->getline(challenge_sig, sizeof(challenge_sig));
-						const char *dv = 
-							ballot_tmcg->TMCG_DecryptValue(sec, challenge_sig);
+						const char *dv = sec.decrypt(challenge_sig);
 						if (dv == NULL)
 						{
-							cerr << _("TMCG: DecryptValue() failed") << endl;
+							std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
 							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -74;
 						}
-						memcpy(key2, dv, gcry_md_get_algo_dlen (GCRY_MD_RMD160));
+						memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 						
-						gcry_randomize((unsigned char*)key1, 
-							gcry_md_get_algo_dlen (GCRY_MD_RMD160),	GCRY_STRONG_RANDOM);
-						const char *ev = 
-							ballot_tmcg->TMCG_EncryptValue(pkr.key[pkr_idx], key1);
-						if (ev == NULL)
-						{
-							cerr << _("TMCG: EncryptValue() failed") << endl;
-							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
-							return -75;
-						}
-						*neighbor << ev << endl << flush;
+						gcry_randomize((unsigned char*)key1,
+							gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+						*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl
+							<< std::flush;
 						delete neighbor;
-						iosecuresocketstream *secure = 
+						iosecuresocketstream *secure =
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
 						ios_in[vnicks[pkr_idx]] = secure;
 						delete [] key1, delete [] key2;
@@ -407,7 +397,7 @@ int ballot_child
 					else
 					{
 						delete neighbor, close(handle);
-						*out_pipe << "PART #openSkat_" << nr << endl << flush;
+						*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 						return -76;
 					}
 				}
@@ -420,7 +410,7 @@ int ballot_child
 			ireaded += num;
 			if (ireaded > 0)
 			{
-				vector<int> pos_delim;
+				std::vector<int> pos_delim;
 				int cnt_delim = 0, cnt_pos = 0, pos = 0;
 				for (int i = 0; i < ireaded; i++)
 					if (ireadbuf[i] == '\n')
@@ -431,7 +421,7 @@ int ballot_child
 					bzero(tmp, sizeof(tmp));
 					memcpy(tmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 					--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-					string cmd = tmp;
+					std::string cmd = tmp;
 					// do operation
 					if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 					{
@@ -440,27 +430,27 @@ int ballot_child
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
 						*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
-							gp_nick.size() << "~" << -b << "!" << endl << flush;
+							gp_nick.size() << "~" << -b << "!" << std::endl << std::flush;
 					}
 					if (neu && (cmd.find("JOIN ", 0) == 0))
 					{
-						string nick = cmd.substr(5, cmd.length() - 5);
+						std::string nick = cmd.substr(5, cmd.length() - 5);
 						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("room completely occupied") << endl << flush;
+							_("room completely occupied") << std::endl << std::flush;
 					}
 					if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 					{
-						string nick = cmd.substr(5, cmd.length() - 5);
+						std::string nick = cmd.substr(5, cmd.length() - 5);
 						if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 						{
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -77;
 						}
 					}
 					if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 					{
-						string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-						string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+						std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
+						std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
 							cmd.length() - cmd.find(" ", 4) - 1);
 					}
 				}
@@ -472,7 +462,7 @@ int ballot_child
 			}
 			if (num == 0)
 			{
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -78;
 			}
 		}
@@ -493,7 +483,7 @@ int ballot_child
 						);
 						if (handle < 0)
 						{
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -79;
 						}
 						iosocketstream *neighbor = new iosocketstream(handle);
@@ -503,17 +493,17 @@ int ballot_child
 						TMCG_CardSecret cs;
 						// receive challenge
 						neighbor->getline(tmp, sizeof(tmp));
-						if (ballot_tmcg->TMCG_ImportCardSecret(cs, tmp))
+						if (cs.import(tmp))
 						{
-							TMCG_DataStream challenge, response;
+							std::ostringstream challenge, response;
 							challenge << tmp << vnicks[i];
 							// send signature
-							*neighbor << ballot_tmcg->TMCG_SignData(sec, challenge.str()) <<
-								endl << flush;
+							*neighbor << sec.sign(challenge.str()) << std::endl
+								<< std::flush;
 							// create new challenge
 							ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 							// send challenge
-							*neighbor << cs << endl << flush;
+							*neighbor << cs << std::endl << std::flush;
 							// receive signature
 							neighbor->getline(tmp, sizeof(tmp));
 							// verify signature
@@ -521,52 +511,41 @@ int ballot_child
 							if (!neighbor->good())
 							{
 								delete neighbor, close(handle);
-								*out_pipe << "PART #openSkat_" << nr << endl << flush;
+								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 								return -80;
 							}
-							else if (!ballot_tmcg->TMCG_VerifyData(pkr.key[i], 
-								response.str(), tmp))
+							else if (!pkr.key[i].verify(response.str(), tmp))
 							{
 								delete neighbor, close(handle);
-								*out_pipe << "PART #openSkat_" << nr << endl << flush;
+								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 								return -81;
 							}
 						}
 						else
 						{
 							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -82;
 						}
 						
 						// exchange secret keys for securesocketstreams
-						assert (gcry_md_test_algo (GCRY_MD_RMD160) == 0);
-						char *key1 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-						char *key2 = new char[gcry_md_get_algo_dlen (GCRY_MD_RMD160)];
-						gcry_randomize((unsigned char*)key1, 
-							gcry_md_get_algo_dlen (GCRY_MD_RMD160), GCRY_STRONG_RANDOM);
-						const char *ev = 
-							ballot_tmcg->TMCG_EncryptValue(pkr.key[i], key1);
-						if (ev == NULL)
-						{
-							cerr << _("TMCG: EncryptValue() failed") << endl;
-							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
-							return -83;
-						}
-						*neighbor << ev << endl << flush;
+						assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
+						char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+						char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+						gcry_randomize((unsigned char*)key1,
+							gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+						*neighbor << pkr.key[i].encrypt(key1) << std::endl << std::flush;
 						
 						neighbor->getline(tmp, sizeof(tmp));
-						const char *dv = 
-							ballot_tmcg->TMCG_DecryptValue(sec, tmp);
+						const char *dv = sec.decrypt(tmp);
 						if (dv == NULL)
 						{
-							cerr << _("TMCG: DecryptValue() failed") << endl;
+							std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
 							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << endl << flush;
+							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -84;
 						}
-						memcpy(key2, dv, gcry_md_get_algo_dlen (GCRY_MD_RMD160)); 
+						memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)); 
 						delete neighbor;
 						iosecuresocketstream *secure = 
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
@@ -585,8 +564,8 @@ int ballot_child
 	if (pkr_self == 0)
 	{
 #ifdef COMMON_DDH_GROUP
-		stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << endl;
+		std::stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
 		vtmf = new BarnettSmartVTMF_dlog();
@@ -598,7 +577,7 @@ int ballot_child
 #endif
 		if (!vtmf->CheckGroup())
 		{
-			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
+			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
@@ -608,8 +587,8 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
-						") failed" << endl;
+					std::cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
+						") failed" << std::endl;
 					return -90;
 				}
 			}
@@ -626,15 +605,15 @@ int ballot_child
 	else
 	{
 #ifdef COMMON_DDH_GROUP
-		stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << endl;
+		std::stringstream ddh_group;
+		ddh_group << COMMON_DDH_GROUP << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
 #else
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
 #endif
 		if (!vtmf->CheckGroup())
 		{
-			cout << ">< Fehler in VTMF: CheckGroup() failed" << endl;
+			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
 			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
@@ -644,8 +623,8 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
-						") failed" << endl;
+					std::cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
+						") failed" << std::endl;
 					return -90;
 				}
 			}
@@ -664,7 +643,7 @@ int ballot_child
 	VTMF_Card vote_c;
 	VTMF_CardSecret vote_cs;
 	ballot_tmcg->TMCG_CreatePrivateCard(vote_c, vote_cs, vtmf, vote);
-	VTMF_Stack s;
+	TMCG_Stack<VTMF_Card> s;
 	char *tmp = new char[TMCG_MAX_STACK_CHARS];
 	
 	// send and receive private cards for ballot
@@ -675,31 +654,31 @@ int ballot_child
 			VTMF_Card c;
 			ios_in[vnicks[i]]->getline(tmp, TMCG_MAX_STACK_CHARS);
 			
-			if (ballot_tmcg->TMCG_ImportCard(c, tmp))
+			if (c.import(tmp))
 			{
-				ballot_tmcg->TMCG_PushToStack(s, c);
+				s.push(c);
 			}
 			else
 			{
-				cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << endl;
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				std::cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << std::endl;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -85;
 			}
 		}
 		else
 		{
-			ballot_tmcg->TMCG_PushToStack(s, vote_c);
+			s.push(vote_c);
 			for (size_t j = 0; j < vnicks.size(); j++)
 			{
 				if (j != pkr_self)
-					*(ios_out[vnicks[j]]) << vote_c << endl << flush;
+					*(ios_out[vnicks[j]]) << vote_c << std::endl << std::flush;
 			}
 		}
 	}
 	
 	// create stack secret
-	VTMF_Stack s2;
-	VTMF_StackSecret ss;
+	TMCG_Stack<VTMF_Card> s2;
+	TMCG_StackSecret<VTMF_CardSecret> ss;
 	ballot_tmcg->TMCG_CreateStackSecret(ss, false, s.size(), vtmf);
 	
 	// mix ballot stack
@@ -708,25 +687,26 @@ int ballot_child
 		if (i != pkr_self)
 		{
 			ios_in[vnicks[i]]->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (ballot_tmcg->TMCG_ImportStack(s2, tmp))
+			if (s2.import(tmp))
 			{
 				if (ballot_tmcg->TMCG_VerifyStackEquality(s, s2, false, vtmf,
 					*(ios_in[vnicks[i]]), *(ios_in[vnicks[i]])))
 				{
-					s.swap(s2);
-					ballot_tmcg->TMCG_ReleaseStack(s2);
+					s.clear();
+					s = s2;
+					s2.clear();
 				}
 				else
 				{
-					cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << endl;
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -85;
 				}
 			}
 			else
 			{
-				cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << endl;
-				*out_pipe << "PART #openSkat_" << nr << endl << flush;
+				std::cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << std::endl;
+				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -85;
 			}
 		}
@@ -737,31 +717,32 @@ int ballot_child
 			{
 				if (j != pkr_self)
 				{
-					*(ios_out[vnicks[j]]) << s2 << endl << flush;
+					*(ios_out[vnicks[j]]) << s2 << std::endl << std::flush;
 					ballot_tmcg->TMCG_ProofStackEquality(s, s2, ss, false, vtmf,
 						*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
 				}
 			}
-			s.swap(s2);
-			ballot_tmcg->TMCG_ReleaseStack(s2);
+			s.clear();
+			s = s2;
+			s2.clear();
 		}
 	}
 	
-	vector<size_t> br;
+	std::vector<size_t> br;
 	for (size_t k = 0; k < s.size(); k++)
 	{
-		ballot_tmcg->TMCG_SelfCardSecret(*(s[k]), vtmf);
+		ballot_tmcg->TMCG_SelfCardSecret(s[k], vtmf);
 		
 		// open cards to get result of the ballot
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
 			{
-				if (!ballot_tmcg->TMCG_VerifyCardSecret(*(s[k]), vtmf,
+				if (!ballot_tmcg->TMCG_VerifyCardSecret(s[k], vtmf,
 					*(ios_in[vnicks[i]]), *(ios_in[vnicks[i]])))
 				{
-					cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << endl;
-					*out_pipe << "PART #openSkat_" << nr << endl << flush;
+					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
+					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -85;
 				}
 			}
@@ -771,40 +752,38 @@ int ballot_child
 				{
 					if (j != pkr_self)
 					{
-						ballot_tmcg->TMCG_ProofCardSecret(*(s[k]), vtmf,
+						ballot_tmcg->TMCG_ProofCardSecret(s[k], vtmf,
 							*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
 					}
 				}
 			}
 		}
 		
-		br.push_back(ballot_tmcg->TMCG_TypeOfCard(*(s[k]), vtmf));
+		br.push_back(ballot_tmcg->TMCG_TypeOfCard(s[k], vtmf));
 	}
 	
 	// output votes
-	cout << XXX << _("BALLOT RESULT:") << " ";
+	std::cout << XXX << _("BALLOT RESULT:") << " ";
 	for (size_t k = 0; k < br.size(); k++)
 	{
-		cout << br[k] << " ";
-		*out_pipe << "PRIVMSG #openSkat_" << nr << " :RESULT " << 
-			br[k] << endl << flush;
+		std::cout << br[k] << " ";
+		*out_pipe << "PRIVMSG #openSkat_" << nr << " :RESULT " <<
+			br[k] << std::endl << std::flush;
 	}
-	cout << endl;
+	std::cout << std::endl;
 	sleep(1);
 	
-	ballot_tmcg->TMCG_ReleaseStack(s);
-	ballot_tmcg->TMCG_ReleaseStackSecret(ss);
 	delete [] tmp;
 	
 	// announce table destruction
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << -b << "!" << 
-			endl << flush;
+		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << -b << "!" <<
+			std::endl << std::flush;
 	
 	// exit from game
 	delete vtmf;
 	delete ballot_tmcg;
-	*out_pipe << "PART #openSkat_" << nr << endl << flush;
+	*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 	delete in_pipe;
 	delete out_pipe;
 	
