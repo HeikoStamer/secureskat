@@ -31,7 +31,32 @@
 *******************************************************************************/
 
 #include "SchindelhauerTMCG.hh"
-#include "mpz_sqrtm.h"
+#include "libTMCG.def"
+
+SchindelhauerTMCG::SchindelhauerTMCG
+	(unsigned long int security, size_t n, size_t m):
+		TMCG_SecurityLevel(security), TMCG_Players(n), TMCG_TypeBits(m)
+{
+	TMCG_MaxCardType = 1;
+	for (unsigned long int i = 0; i < TMCG_TypeBits; i++)
+		TMCG_MaxCardType *= 2;
+	
+	if (!gcry_check_version(TMCG_LIBGCRYPT_VERSION))
+	{
+		std::cerr << "libgcrypt: need library version >= " <<
+			TMCG_LIBGCRYPT_VERSION << std::endl;
+		exit(-1);
+	}
+	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
+	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+	if (gcry_md_test_algo(TMCG_GCRY_MD_ALGO))
+	{
+		std::cerr << "libgcrypt: algorithm " << TMCG_GCRY_MD_ALGO <<
+			" [" << gcry_md_algo_name(TMCG_GCRY_MD_ALGO) <<
+			"] not available" << std::endl;
+		exit(-1);
+	}
+}
 
 void SchindelhauerTMCG::TMCG_ProofQuadraticResidue
 	(const TMCG_SecretKey &key, mpz_srcptr t, std::istream &in, std::ostream &out)
@@ -1447,4 +1472,9 @@ void SchindelhauerTMCG::TMCG_MixOpenStack
 		TMCG_MaskCard((os[ss[i].first].second), c, (ss[ss[i].first].second), vtmf);
 		os2.push(os[ss[i].first].first, c);
 	}
+}
+
+SchindelhauerTMCG::~SchindelhauerTMCG 
+	()
+{
 }

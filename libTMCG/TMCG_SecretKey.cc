@@ -28,6 +28,19 @@
 *******************************************************************************/
 
 #include "TMCG_SecretKey.hh"
+#include "libTMCG.def"
+
+// SAEP octets
+#define rabin_k0 20
+#define rabin_s0 20
+
+// soundness error of the NIZK
+// d^{-nizk_stage1}
+#define nizk_stage1 16
+// 2^{-nizk_stage2}
+#define nizk_stage2 128
+// 2^{-nizk_stage3}
+#define nizk_stage3 128
 
 TMCG_SecretKey::TMCG_SecretKey
 	()
@@ -246,9 +259,9 @@ TMCG_SecretKey::TMCG_SecretKey
 	data << name << "|" << email << "|" << type << "|" <<
 		m << "|" << y << "|" << nizk << "|";
 	sig = sign(data.str());
-	repl << "ID" << TMCG_KeyIDSize << "^";
+	repl << "ID" << TMCG_KEYID_SIZE << "^";
 	sig.replace(sig.find(repl.str()),
-		(repl.str()).length() + TMCG_KeyIDSize, keyid());
+		(repl.str()).length() + TMCG_KEYID_SIZE, keyid());
 }
 
 TMCG_SecretKey::TMCG_SecretKey
@@ -619,9 +632,9 @@ std::string TMCG_SecretKey::keyid
 	std::ostringstream data;
 	std::string tmp = selfid();
 	
-	data << "ID" << TMCG_KeyIDSize << "^" << tmp.substr(tmp.length() -
-		((TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length()),
-		(TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length());
+	data << "ID" << TMCG_KEYID_SIZE << "^" << tmp.substr(tmp.length() -
+		((TMCG_KEYID_SIZE < tmp.length()) ? TMCG_KEYID_SIZE : tmp.length()),
+		(TMCG_KEYID_SIZE < tmp.length()) ? TMCG_KEYID_SIZE : tmp.length());
 	return data.str();
 }
 
@@ -646,6 +659,7 @@ const char* TMCG_SecretKey::decrypt
 	assert(rabin_s2 < (mpz_sizeinbase(m, 2L) / 16));
 	assert(rabin_s2 < rabin_s1);
 	assert(rabin_s0 < (mpz_sizeinbase(m, 2L) / 32));
+	assert(rabin_s0 < sizeof(encval));
 	
 	char *yy = new char[rabin_s2 + rabin_s1 + 1024];
 	char *r = new char[rabin_s1];

@@ -44,7 +44,6 @@
 	// GNU multiple precision library
 	#include <gmp.h>
 	
-	#include "TMCG.def"
 	#include "TMCG_SecretKey.hh"
 	#include "TMCG_PublicKey.hh"
 	#include "TMCG_PublicKeyRing.hh"
@@ -58,40 +57,22 @@
 	
 	#include "BarnettSmartVTMF_dlog.hh"
 	#include "mpz_srandom.h"
+	#include "mpz_sqrtm.h"
 
 class SchindelhauerTMCG
 {
 	private:
-		int										ret;
+		int									ret;
 	
 	public:
 		unsigned long int		TMCG_SecurityLevel;			// iterations
 		size_t							TMCG_Players, TMCG_TypeBits, TMCG_MaxCardType;
 		
-		SchindelhauerTMCG 
-			(unsigned long int security, size_t players, size_t typebits)
-		{
-			TMCG_SecurityLevel = security;
-			TMCG_Players = players, TMCG_TypeBits = typebits, TMCG_MaxCardType = 1;
-			for (unsigned long int i = 0; i < TMCG_TypeBits; i++)
-				TMCG_MaxCardType *= 2;
-			
-			if (!gcry_check_version(LIBGCRYPT_VERSION))
-			{
-				std::cerr << "libgcrypt: need library version >= " <<
-					LIBGCRYPT_VERSION << std::endl;
-				exit(-1);
-			}
-			gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
-			gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
-			if (gcry_md_test_algo(TMCG_GCRY_MD_ALGO))
-			{
-				std::cerr << "libgcrypt: algorithm " << TMCG_GCRY_MD_ALGO <<
-					" [" << gcry_md_algo_name(TMCG_GCRY_MD_ALGO) <<
-					"] not available" << std::endl;
-				exit(-1);
-			}
-		}
+		// constructors and destructors
+		SchindelhauerTMCG
+			(unsigned long int security, size_t n, size_t m);
+		~SchindelhauerTMCG
+			();
 		
 		// zero-knowledge proofs on values
 		void TMCG_ProofQuadraticResidue
@@ -227,11 +208,6 @@ class SchindelhauerTMCG
 		void TMCG_MixOpenStack
 			(const TMCG_OpenStack<VTMF_Card> &os, TMCG_OpenStack<VTMF_Card> &os2,
 			const TMCG_StackSecret<VTMF_CardSecret> &ss, BarnettSmartVTMF_dlog *vtmf);
-		
-		~SchindelhauerTMCG 
-			()
-		{
-		}
 };
 
 #endif

@@ -51,10 +51,19 @@ if test "$use_commongroup" = yes ; then
 	[safe prime p (1024 bit) of the common DDH-hard group G])
 fi
 
+# Defines for libTMCG
+AC_DEFINE(TMCG_LIBGCRYPT_VERSION, "1.2.0",
+	[Define appropriate version number of the necessary libgcrypt])
+AC_DEFINE(TMCG_MPZ_IO_BASE, 36,
+	[Define input/ouput base encoding of the iostream operators])
+AC_DEFINE(TMCG_GCRY_MD_ALGO, GCRY_MD_RMD160,
+	[Define message digest algorithm for signatures and FS-heuristic; Underlying assumptions: Random Oracle Model])
 AC_DEFINE(TMCG_DDH_P_SIZE, 1024L,
-	[security parameter of the DDH-hard group G; assumptions: DDH, CDH, DLOG])
+	[Define security parameter of the DDH-hard group G; Underlying assumptions: DDH, CDH, DLOG])
 AC_DEFINE(TMCG_KEY_SIZE, 1024L,
-	[security parameter of the TMCG public key; assumptions: QRA, FAKTOR])
+	[Define security parameter of the TMCG public key; Underlying assumptions: QRA, FAKTOR])
+AC_DEFINE(TMCG_KEYID_SIZE, 5,
+	[Define size of the unique TMCG key ID (in characters)])
 
 # Checks for programs.
 AC_PROG_CC
@@ -73,15 +82,12 @@ AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 ##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
-AC_DEFINE(TMCG_MPZ_IO_BASE, 36, [Define input/ouput base encoding of iostream operators])
-AC_DEFINE(TMCG_GCRY_MD_ALGO, GCRY_MD_RMD160, [Define message digest algorithm for signatures and FS-heuristic])
 
 AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
-  AC_MSG_ERROR([libgcrypt is needed])
+  AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
 fi
 LIBS="$LIBS $LIBGCRYPT_LIBS"
-AC_DEFINE(LIBGCRYPT_VERSION, "1.2.0", [Define appropriate version number of libgcrypt])
 
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))

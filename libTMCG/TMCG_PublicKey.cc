@@ -29,6 +29,18 @@
 
 #include "TMCG_PublicKey.hh"
 
+// SAEP octets
+#define rabin_k0 20
+#define rabin_s0 20
+
+// soundness error of the NIZK
+// d^{-nizk_stage1}
+#define nizk_stage1 16
+// 2^{-nizk_stage2}
+#define nizk_stage2 128
+// 2^{-nizk_stage3}
+#define nizk_stage3 128
+
 TMCG_PublicKey::TMCG_PublicKey
 	()
 {
@@ -312,9 +324,9 @@ std::string TMCG_PublicKey::keyid
 	std::ostringstream data;
 	std::string tmp = selfid();
 	
-	data << "ID" << TMCG_KeyIDSize << "^" << tmp.substr(tmp.length() -
-		((TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length()),
-		(TMCG_KeyIDSize < tmp.length()) ? TMCG_KeyIDSize : tmp.length());
+	data << "ID" << TMCG_KEYID_SIZE << "^" << tmp.substr(tmp.length() -
+		((TMCG_KEYID_SIZE < tmp.length()) ? TMCG_KEYID_SIZE : tmp.length()),
+		(TMCG_KEYID_SIZE < tmp.length()) ? TMCG_KEYID_SIZE : tmp.length());
 	return data.str();
 }
 

@@ -30,10 +30,10 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	()
 {
 	// initalize libgcrypt
-	if (!gcry_check_version(LIBGCRYPT_VERSION))
+	if (!gcry_check_version(TMCG_LIBGCRYPT_VERSION))
 	{
 		std::cerr << "libgcrypt: need library version >= " <<
-			LIBGCRYPT_VERSION << std::endl;
+			TMCG_LIBGCRYPT_VERSION << std::endl;
 		exit(-1);
 	}
 	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
@@ -60,10 +60,10 @@ BarnettSmartVTMF_dlog::BarnettSmartVTMF_dlog
 	(std::istream &in)
 {
 	// initalize libgcrypt
-	if (!gcry_check_version(LIBGCRYPT_VERSION))
+	if (!gcry_check_version(TMCG_LIBGCRYPT_VERSION))
 	{
 		std::cerr << "libgcrypt: need library version >= " <<
-			LIBGCRYPT_VERSION << std::endl;
+			TMCG_LIBGCRYPT_VERSION << std::endl;
 		exit(-1);
 	}
 	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);

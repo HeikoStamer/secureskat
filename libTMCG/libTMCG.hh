@@ -1,5 +1,5 @@
 /*******************************************************************************
-   libTMCG.hh, general header of the |T|oolbox for |M|ental |C|ard |G|ames
+   libTMCG.hh, general header for the |T|oolbox for |M|ental |C|ard |G|ames
 
  Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
 
@@ -21,23 +21,44 @@
 #ifndef INCLUDED_libTMCG_HH
 	#define INCLUDED_libTMCG_HH
 
-	#ifndef LIBGCRYPT_VERSION
-		/* Define appropriate version number of libgcrypt */
-		#define LIBGCRYPT_VERSION "1.2.0"
+	#ifndef TMCG_LIBGCRYPT_VERSION
+		/* Define appropriate version number of the necessary libgcrypt */
+		#define TMCG_LIBGCRYPT_VERSION "1.2.0"
 	#endif
 
 	#ifndef TMCG_MPZ_IO_BASE
-		/* Define input/ouput base encoding of iostream operators */
+		/* Define input/ouput base encoding of the iostream operators */
 		#define TMCG_MPZ_IO_BASE 36
 	#endif
 	
 	#ifndef TMCG_GCRY_MD_ALGO
-		/* Define message digest algorithm for signatures and FS-heuristic */
+		/* Define message digest algorithm for signatures and FS-heuristic
+		 * Underlying assumptions: Random Oracle Model
+		 */
 		#define TMCG_GCRY_MD_ALGO GCRY_MD_RMD160
 	#endif
-
-	#include "TMCG.def"
 	
+	#ifndef TMCG_DDH_P_SIZE
+		/* Define security parameter of the DDH-hard group G
+		 * Underlying assumptions: DDH, CDH, DLOG
+		 */
+		#define TMCG_DDH_P_SIZE 1024L
+	#endif
+	
+	#ifndef TMCG_KEY_SIZE
+		/* security parameter of the TMCG public key
+		 * Underlying assumptions: QRA, FAKTOR
+		 */
+		#define TMCG_KEY_SIZE 1024L
+	#endif
+	
+	#ifndef TMCG_KEYID_SIZE
+		/* Define size of the unique TMCG key ID (in characters) */
+		#define TMCG_KEYID_SIZE 5
+	#endif
+
+	#include <libTMCG.def>
+
 	#include <TMCG_SecretKey.hh>
 	#include <TMCG_PublicKey.hh>
 	#include <TMCG_PublicKeyRing.hh>
