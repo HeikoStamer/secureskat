@@ -1,4 +1,4 @@
-Copyright (C)  2002, 2003, 2004  Heiko Stamer, <stamer@gaos.org>
+Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer, <stamer@gaos.org>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -11,8 +11,6 @@ Introduction
 
   `SecureSkat' is a cryptographically secure implementation of the german
   card game Skat for multiple players over IRC (Internet Relay Chat).
-  The included shared library (libTMCG) provides a general interface for
-  secure mental card games.
 
   All protocols work in the 'honest-but-curious' (or semi-honest)
   adversary model, thus we do not care about robustness or availability
@@ -32,6 +30,7 @@ Requirements
   You need the following libraries and appropriate header files to
   compile (gcc version 3.4.x is recommended) `SecureSkat' successfully:
 
+  * libTMCG, version >= 1.0.0, http://savannah.nongnu.org/projects/libtmcg/
   * GNU MP Library (libgmp), version >= 4.1, http://www.swox.com/gmp/
     (compilied WITHOUT C++ support: ./configure --enable-cxx=no)
   * GNU Crypto Library (libgcrypt), version >= 1.2.0, ftp://ftp.gnupg.org/
@@ -62,7 +61,7 @@ Build & Install
   3. make install
 
 Playing `SecureSkat' over IRC
----------------------------
+-----------------------------
 
   Run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<SECURITY> [<INTERFACE>]]]', 
   where
@@ -160,7 +159,7 @@ Bugs, Contribution, CVS
 Copyright and License of this software
 --------------------------------------
 
-  (C) 2002, 2003, 2004  Heiko Stamer, <stamer@gaos.org>
+  (C) 2002, 2003, 2004, 2005  Heiko Stamer, <stamer@gaos.org>
       GNU General Public License version 2
 
   Please have a look at file 'COPYING' and http://www.fsf.org/.
@@ -169,7 +168,7 @@ References
 ----------
 
 [1] Christian Schindelhauer: 'A Toolbox for Mental Card Games',
-    Medizinische Universit? L?eck, 17. September 1998
+    Medizinische Universität Lübeck, 17. September 1998
 
 [2] Rosario Gennaro, Daniele Micciancio, Tal Rabin:
     'An Efficient Non-Interactive Statistical Zero-Knowledge 
