@@ -36,7 +36,7 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
+	
 	#include "mpz_srandom.h"
 	#include "mpz_sqrtm.h"
 	#include "mpz_helper.hh"
@@ -84,8 +84,17 @@ struct TMCG_SecretKey
 				mpz_add_ui(p, p, 1L);
 			
 			// while p is not probable prime and \equiv 3 (mod 4)
-			while (!(mpz_congruent_ui_p(p, 3L, 4L) && mpz_probab_prime_p(p, 25)))
+			// choose a safe prime, i.e. (p-1)/2 is probable prime
+			do
+			{
 				mpz_add_ui(p, p, 2L);
+				mpz_sub_ui(bar, p, 1L);
+				mpz_fdiv_q_2exp(bar, bar, 1L);
+			}
+			while (!(mpz_congruent_ui_p(p, 3L, 4L) &&
+				mpz_probab_prime_p(p, 25) &&
+				mpz_probab_prime_p(bar, 25)));
+				
 			assert(!mpz_congruent_ui_p(p, 1L, 8L));
 			
 			// choose random q \in Z, but with fixed size (n/2 + 1) bit
@@ -101,10 +110,19 @@ struct TMCG_SecretKey
 			
 			// while q is not probable prime, \equiv 3 (mod 4) and
 			// p \not\equiv q (mod 8)
+			// choose a safe prime, i.e. (p-1)/2 is probable prime
 			mpz_set_ui(foo, 8L);
-			while (!(mpz_congruent_ui_p(q, 3L, 4L) && mpz_probab_prime_p(q, 25)
-				&& !mpz_congruent_p(p, q, foo)))
-					mpz_add_ui(q, q, 2L);
+			do
+			{
+				mpz_add_ui(q, q, 2L);
+				mpz_sub_ui(bar, q, 1L);
+				mpz_fdiv_q_2exp(bar, bar, 1L);
+			}
+			while (!(mpz_congruent_ui_p(q, 3L, 4L) &&
+				mpz_probab_prime_p(q, 25) &&
+				mpz_probab_prime_p(bar, 25) &&
+				!mpz_congruent_p(p, q, foo)));
+			
 			assert(!mpz_congruent_ui_p(q, 1L, 8L));
 			assert(!mpz_congruent_p(p, q, foo));
 			
