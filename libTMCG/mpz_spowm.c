@@ -68,6 +68,7 @@ void mpz_sspowm
 	int ret;
 	mpz_t r, r1;
 	
+	/* choose random blinding value */
 	mpz_init(r), mpz_init(r1);
 	do
 	{
@@ -77,10 +78,14 @@ void mpz_sspowm
 	while (!ret);
 	mpz_powm(r1, r1, x, p);
 	
-	/* blinded exponentiation (res = m^x mod p) */
+	/* blind message */
 	mpz_mul(res, m, r);
 	mpz_mod(res, res, p);
+	
+	/* modular exponentiation (res = m^x mod p) */
 	mpz_powm(res, res, x, p);
+	
+	/* unblind result */
 	mpz_mul(res, res, r1);
 	mpz_mod(res, res, p);
 	
