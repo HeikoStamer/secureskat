@@ -484,27 +484,25 @@ void skat_connect
 	}
 	
 	// exchange secret keys for securesocketstreams
-	assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
-	char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-	char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-	gcry_randomize((unsigned char*)key1,
-		gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+	char *key1 = new char[TMCG_SAEP_S0], *key2 = new char[TMCG_SAEP_S0],
+		*dv = NULL;
+	gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 	*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
 	
 	neighbor->getline(tmp, sizeof(tmp));
-	const char *dv = sec.decrypt(tmp);
-	if (dv == NULL)
+	if (!sec.decrypt(dv, tmp))
 	{
-		std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
+		std::cerr << _("TMCG: *.decrypt() failed") << std::endl;
 		delete neighbor;
+		delete [] key1, delete [] key2;
 		close(handle);
 		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 		sleep(1),	exit(-6);
 	}
-	memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+	memcpy(key2, dv, TMCG_SAEP_S0);
 	delete neighbor;
 	secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
-	delete [] key1, delete [] key2;
+	delete [] key1, delete [] key2, delete [] dv;
 }
 
 void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r,
@@ -578,27 +576,27 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 							*neighbor << sec.sign(st) << std::endl << std::flush;
 							
 							// exchange secret keys for securesocketstreams
-							assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
-							char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-							char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+							char *key1 = new char[TMCG_SAEP_S0],
+								*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
 							neighbor->getline(tmp, sizeof(tmp));
-							const char *dv = sec.decrypt(tmp);
-							if (dv == NULL)
+							if (!sec.decrypt(dv, tmp))
 							{
-								std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
+								std::cerr << _("TMCG: *.decrypt() failed") << std::endl;
 								delete neighbor;
+								delete [] key1, delete [] key2;
 								close(handle);
 								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 								sleep(1),	exit(-6);
 							}
-							memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+							memcpy(key2, dv, TMCG_SAEP_S0);
 							
-							gcry_randomize((unsigned char*)key1,
-								gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
-							*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
+							gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
+								GCRY_STRONG_RANDOM);
+							*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl <<
+								std::flush;
 							delete neighbor;
 							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
-							delete [] key1, delete [] key2;
+							delete [] key1, delete [] key2, delete [] dv;
 							break;
 						}
 						else
@@ -3035,8 +3033,8 @@ int main(int argc, char* argv[], char* envp[])
 {
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
-		", (c) 2002, 2005 Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.12 2005/03/15 20:35:02 stamer Exp $ " << std::endl;
+		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
+		" $Id: SecureSkat.cc,v 1.13 2005/03/23 15:37:37 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3082,6 +3080,14 @@ int main(int argc, char* argv[], char* envp[])
 			game_ctl = "";
 			game_env = NULL;
 		}
+		
+		// initalize libTMCG
+		if (!init_libTMCG())
+		{
+			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
+			return -1;
+		}
+				
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
 		get_public_keys(cmd + ".pkr", nick_key);
 		get_secret_key(cmd + ".skr", sec, public_prefix);
@@ -3107,6 +3113,7 @@ int main(int argc, char* argv[], char* envp[])
 		release_pki(pki7771_handle);
 		set_public_keys(cmd + ".pkr", nick_key);
 		delete tmcg;
+		
 		return 0;
 	}
 	

@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2003, 2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -369,35 +369,34 @@ int ballot_child
 							std::endl << std::flush;
 						
 						// exchange secret keys for securesocketstreams
-						assert (gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
-						char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-						char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+						char *key1 = new char[TMCG_SAEP_S0],
+							*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
 						neighbor->getline(challenge_sig, sizeof(challenge_sig));
-						const char *dv = sec.decrypt(challenge_sig);
-						if (dv == NULL)
+						if (!sec.decrypt(dv, challenge_sig))
 						{
-							std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
-							delete neighbor, close(handle);
+							std::cerr << _("TMCG: decrypt() failed") << std::endl;
+							delete neighbor, delete [] key1, delete [] key2;
+							close(handle);
 							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -74;
 						}
-						memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+						memcpy(key2, dv, TMCG_SAEP_S0);
 						
-						gcry_randomize((unsigned char*)key1,
-							gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
+							GCRY_STRONG_RANDOM);
 						*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl
 							<< std::flush;
-						delete neighbor;
 						iosecuresocketstream *secure =
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
 						ios_in[vnicks[pkr_idx]] = secure;
-						delete [] key1, delete [] key2;
+						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 						
 						pkr_idx++;
 					}
 					else
 					{
-						delete neighbor, close(handle);
+						delete neighbor;
+						close(handle);
 						*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 						return -76;
 					}
@@ -530,28 +529,26 @@ int ballot_child
 						}
 						
 						// exchange secret keys for securesocketstreams
-						assert(gcry_md_test_algo(TMCG_GCRY_MD_ALGO) == 0);
-						char *key1 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-						char *key2 = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-						gcry_randomize((unsigned char*)key1,
-							gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO), GCRY_STRONG_RANDOM);
+						char *key1 = new char[TMCG_SAEP_S0],
+							*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
+						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
+							GCRY_STRONG_RANDOM);
 						*neighbor << pkr.key[i].encrypt(key1) << std::endl << std::flush;
 						
 						neighbor->getline(tmp, sizeof(tmp));
-						const char *dv = sec.decrypt(tmp);
-						if (dv == NULL)
+						if (!sec.decrypt(dv, tmp))
 						{
 							std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
-							delete neighbor, close(handle);
+							delete neighbor, delete [] key1, delete [] key2;
+							close(handle);
 							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -84;
 						}
-						memcpy(key2, dv, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)); 
-						delete neighbor;
-						iosecuresocketstream *secure = 
+						memcpy(key2, dv, TMCG_SAEP_S0);
+						iosecuresocketstream *secure =
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
 						ios_out[vnicks[i]] = secure;
-						delete [] key1, delete [] key2;
+						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 					}
 				}
 				
