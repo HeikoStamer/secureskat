@@ -13,8 +13,6 @@ AC_SUBST(VERSION)
 ALL_LINGUAS="de"
 AC_DEFINE_UNQUOTED(LOCALEDIR, "${datadir}/locale", "/usr/local/share/locale")
 AC_SUBST(LOCALEDIR)
-#LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
-
 
 # Check commandline switches
 AC_MSG_CHECKING([whether NOHUP behaviour is enabled])
@@ -51,20 +49,6 @@ if test "$use_commongroup" = yes ; then
 	[safe prime p (1024 bit) of the common DDH-hard group G])
 fi
 
-# Defines for libTMCG
-AC_DEFINE(TMCG_LIBGCRYPT_VERSION, "1.2.0",
-	[Define appropriate version number of the necessary libgcrypt])
-AC_DEFINE(TMCG_MPZ_IO_BASE, 36,
-	[Define input/ouput base encoding of the iostream operators])
-AC_DEFINE(TMCG_GCRY_MD_ALGO, GCRY_MD_RMD160,
-	[Define message digest algorithm for signatures and FS-heuristic; Underlying assumptions: Random Oracle Model])
-AC_DEFINE(TMCG_DDH_P_SIZE, 1024L,
-	[Define security parameter of the DDH-hard group G; Underlying assumptions: DDH, CDH, DLOG])
-AC_DEFINE(TMCG_KEY_SIZE, 1024L,
-	[Define security parameter of the TMCG public key; Underlying assumptions: QRA, FAKTOR])
-AC_DEFINE(TMCG_KEYID_SIZE, 5,
-	[Define size of the unique TMCG key ID (in characters)])
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -88,6 +72,12 @@ if test "x$LIBGCRYPT_LIBS" = "x"; then
   AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
 fi
 LIBS="$LIBS $LIBGCRYPT_LIBS"
+
+AM_PATH_LIBTMCG("1.0.0")
+if test "x$LIBTMCG_LIBS" = "x"; then
+  AC_MSG_ERROR([libTMCG >= 1.0.0 is needed])
+fi
+LIBS="$LIBS $LIBTMCG_LIBS"
 
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
@@ -132,7 +122,7 @@ fi
 CXXFLAGS="-Wall -g3 -pedantic -O $LIBGCRYPT_CFLAGS"
 ##CXXFLAGS="$CXXFLAGS -O2 -Wall -D NODEBUG $LIBGCRYPT_CFLAGS"
 
-AC_CONFIG_FILES([Makefile libTMCG/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install SecureSkat."
