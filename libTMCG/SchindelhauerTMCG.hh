@@ -52,23 +52,21 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
-#include "TMCG.def"
-
-#include <TMCG_SecretKey.hh>
-#include <TMCG_PublicKey.hh>
-#include <TMCG_PublicKeyRing.hh>
-#include <VTMF_Card.hh>
-#include <VTMF_CardSecret.hh>
-#include <TMCG_Card.hh>
-#include <TMCG_CardSecret.hh>
-template <typename CardType> struct TMCG_OpenStack;
-#include <TMCG_Stack.hh>
-#include <TMCG_OpenStack.hh>
-#include <TMCG_StackSecret.hh>
-
-#include "BarnettSmartVTMF_dlog.hh"
-#include "mpz_srandom.h"
+	
+	#include "TMCG.def"
+	#include "TMCG_SecretKey.hh"
+	#include "TMCG_PublicKey.hh"
+	#include "TMCG_PublicKeyRing.hh"
+	#include "VTMF_Card.hh"
+	#include "VTMF_CardSecret.hh"
+	#include "TMCG_Card.hh"
+	#include "TMCG_CardSecret.hh"
+	#include "TMCG_Stack.hh"
+	#include "TMCG_OpenStack.hh"
+	#include "TMCG_StackSecret.hh"
+	
+	#include "BarnettSmartVTMF_dlog.hh"
+	#include "mpz_srandom.h"
 
 class SchindelhauerTMCG
 {

@@ -39,12 +39,12 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
+	
+	#include "TMCG.def"
+	
 	#include "mpz_srandom.h"
 	#include "parse_helper.hh"
 	
-	#include "TMCG.def"
-
 struct TMCG_Card
 {
 	size_t					Players, TypeBits;

@@ -39,11 +39,11 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
-	#include "mpz_srandom.h"
-	#include "parse_helper.hh"
 	
 	#include "TMCG.def"
+	
+	#include "mpz_srandom.h"
+	#include "parse_helper.hh"
 
 template <typename CardSecretType> struct TMCG_StackSecret
 {
@@ -62,37 +62,121 @@ template <typename CardSecretType> struct TMCG_StackSecret
 	};
 	
 	TMCG_StackSecret
-		();
+		()
+	{
+	}
 	
 	TMCG_StackSecret& operator =
-		(const TMCG_StackSecret<CardSecretType>& that);
+		(const TMCG_StackSecret<CardSecretType>& that)
+	{
+		stack.clear();
+		stack = that.stack;
+		return *this;
+	}
 	
 	const std::pair<size_t, CardSecretType>& operator []
-		(size_t n) const;
+		(size_t n) const
+	{
+		return stack[n];
+	}
 	
 	std::pair<size_t, CardSecretType>& operator []
-		(size_t n);
+		(size_t n)
+	{
+		return stack[n];
+	}
 	
 	size_t size
-		() const;
+		() const
+	{
+		return stack.size();
+	}
 	
 	void push
-		(size_t index, const CardSecretType& cs);
+		(size_t index, const CardSecretType& cs)
+	{
+		stack.push_back(std::pair<size_t, CardSecretType>(index, cs));
+	}
 	
 	void clear
-		();
+		()
+	{
+		stack.clear();
+	}
 	
 	bool find
-		(size_t index);
+		(size_t index)
+	{
+		return (std::find_if(stack.begin(), stack.end(),
+			std::bind2nd(eq_first_component(),
+				std::pair<size_t, CardSecretType>(index, CardSecretType())))
+					!= stack.end());
+	}
 	
 	bool import
-		(std::string s);
+		(std::string s)
+	{
+		size_t size = 0;
+		char *ec;
+		
+		try
+		{
+			// check magic
+			if (!cm(s, "sts", '^'))
+				throw false;
+			
+			// size of stack
+			if (gs(s, '^') == NULL)
+				throw false;
+			size = strtoul(gs(s, '^'), &ec, 10);
+			if ((*ec != '\0') || (size <= 0) || (!nx(s, '^')))
+				throw false;
+			
+			// cards on stack
+			for (size_t i = 0; i < size; i++)
+			{
+				std::pair<size_t, CardSecretType> lej;
+				
+				// permutation index
+				if (gs(s, '^') == NULL)
+					throw false;
+				lej.first = (size_t)strtoul(gs(s, '^'), &ec, 10);
+				if ((*ec != '\0') || (lej.first < 0) || (lej.first >= size) ||
+					(!nx(s, '^')))
+						throw false;
+				
+				// card secret
+				if (gs(s, '^') == NULL)
+					throw false;
+				if ((!lej.second.import(gs(s, '^'))) || (!nx(s, '^')))
+					throw false;
+				
+				// store pair
+				stack.push_back(lej);
+			}
+			
+			throw true;
+		}
+		catch (bool return_value)
+		{
+			return return_value;
+		}
+	}
 	
 	~TMCG_StackSecret
-		();
+		()
+	{
+		stack.clear();
+	}
 };
 
 template<typename CardSecretType> std::ostream& operator<<
-	(std::ostream &out, const TMCG_StackSecret<CardSecretType> &ss);
+	(std::ostream &out, const TMCG_StackSecret<CardSecretType> &ss)
+{
+	out << "sts^" << ss.size() << "^";
+	for (size_t i = 0; i < ss.size(); i++)
+		out << ss[i].first << "^" << ss[i].second << "^";
+	return out;
+}
 
 #endif

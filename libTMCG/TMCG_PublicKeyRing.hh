@@ -34,10 +34,12 @@
 	#include <sstream>
 	#include <iostream>
 	#include <vector>
+	
+	#include "TMCG.def"
 
-	struct TMCG_PublicKeyRing
-	{
-		TMCG_PublicKey					key[TMCG_MAX_PLAYERS];
-	};
+struct TMCG_PublicKeyRing
+{
+	TMCG_PublicKey					key[TMCG_MAX_PLAYERS];
+};
 
 #endif

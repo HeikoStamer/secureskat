@@ -47,6 +47,8 @@
 	// GNU multiple precision library
 	#include <gmp.h>
 	
+	#include "TMCG.def"
+	
 	#include "mpz_srandom.h"
 	#include "mpz_spowm.h"
 	#include "mpz_sprime.h"

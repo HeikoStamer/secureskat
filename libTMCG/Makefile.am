@@ -24,9 +24,9 @@ libTMCG_la_SOURCES = mpz_srandom.c mpz_srandom.h\
 	VTMF_CardSecret.cc VTMF_CardSecret.hh\
 	TMCG_Card.cc TMCG_Card.hh\
 	TMCG_CardSecret.cc TMCG_CardSecret.hh\
-	TMCG_Stack.cc TMCG_Stack.hh\
-	TMCG_OpenStack.cc TMCG_OpenStack.hh\
-	TMCG_StackSecret.cc TMCG_StackSecret.hh\
+	TMCG_Stack.hh\
+	TMCG_OpenStack.hh\
+	TMCG_StackSecret.hh\
 	TMCG_SecretKey.cc TMCG_SecretKey.hh\
 	TMCG_PublicKey.cc TMCG_PublicKey.hh\
 	TMCG_PublicKeyRing.hh libTMCG.hh

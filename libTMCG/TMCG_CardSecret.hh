@@ -39,11 +39,11 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
-	#include "mpz_srandom.h"
-	#include "parse_helper.hh"
 	
 	#include "TMCG.def"
+	
+	#include "mpz_srandom.h"
+	#include "parse_helper.hh"
 
 struct TMCG_CardSecret
 {

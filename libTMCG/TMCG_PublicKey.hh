@@ -37,9 +37,15 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
+	
+	#include "TMCG.def"
+	
 	#include "mpz_srandom.h"
+	#include "mpz_sqrtm.h"
+	#include "mpz_helper.hh"
 	#include "parse_helper.hh"
+	#include "mpz_shash.hh"
+	#include "TMCG_SecretKey.hh"
 
 struct TMCG_PublicKey
 {
@@ -81,10 +87,6 @@ struct TMCG_PublicKey
 };
 
 std::ostream& operator<< 
-	(std::ostream &out, const TMCG_PublicKey &key)
-{
-	return out << "pub|" << key.name << "|" << key.email << "|" << key.type <<
-		"|" << key.m << "|" << key.y << "|" << key.nizk << "|" << key.sig;
-}
+	(std::ostream &out, const TMCG_PublicKey &key);
 
 #endif

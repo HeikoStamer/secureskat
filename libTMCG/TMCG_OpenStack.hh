@@ -39,15 +39,15 @@
 	
 	// GNU multiple precision library
 	#include <gmp.h>
-
-	#include "mpz_srandom.h"
-	#include "parse_helper.hh"
 	
 	#include "TMCG.def"
+	
+	#include "mpz_srandom.h"
+	#include "parse_helper.hh"
 
 template <typename CardType> struct TMCG_OpenStack
 {
-	std::vector<std::pair<size_t, CardType> >	stack;
+	std::vector<std::pair<size_t, CardType> > stack;
 	
 	struct eq_first_component : public std::binary_function<
 		std::pair<size_t, CardType>, std::pair<size_t, CardType>, bool>
@@ -61,52 +61,137 @@ template <typename CardType> struct TMCG_OpenStack
 	};
 	
 	TMCG_OpenStack
-		();
+		()
+	{
+	}
 	
 	TMCG_OpenStack& operator =
-		(const TMCG_OpenStack& that);
+		(const TMCG_OpenStack& that)
+	{
+		clear();
+		stack = that.stack;
+		return *this;
+	}
 	
 	bool operator ==
-		(const TMCG_OpenStack& that);
+		(const TMCG_OpenStack& that)
+	{
+		if (stack.size() != that.stack.size())
+			return false;
+		return std::equal(stack.begin(), stack.end(), that.stack.begin());
+	}
 	
 	bool operator !=
-		(const TMCG_OpenStack& that);
+		(const TMCG_OpenStack& that)
+	{
+		return !(*this == that);
+	}
 	
 	const std::pair<size_t, CardType>& operator []
-		(size_t n) const;
+		(size_t n) const
+	{
+		return stack[n];
+	}
 	
 	std::pair<size_t, CardType>& operator []
-		(size_t n);
+		(size_t n)
+	{
+		return stack[n];
+	}
 	
 	size_t size
-		() const;
+		() const
+	{
+		return stack.size();
+	}
 	
 	void push
-		(size_t type, const CardType& c);
+		(size_t type, const CardType& c)
+	{
+		stack.push_back(std::pair<size_t, CardType>(type, c));
+	}
 	
 	void push
-		(const TMCG_OpenStack& s);
+		(const TMCG_OpenStack& s)
+	{
+		std::copy(s.stack.begin(), s.stack.end(), std::back_inserter(stack));
+	}
 	
 	size_t pop
-		(CardType& c);
+		(CardType& c)
+	{
+		size_t type = (1 << TMCG_MAX_TYPEBITS);		// set 'error code'
+		
+		if (stack.empty())
+			return type;
+		
+		type = (stack.back())->first;
+		c = (stack.back())->second;
+		stack.pop_back();
+		return type;
+	}
 	
 	void clear
-		();
+		()
+	{
+		stack.clear();
+	}
 	
 	bool find
-		(size_t type) const;
+		(size_t type) const
+	{
+		return (std::find_if(stack.begin(), stack.end(),
+			std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
+				(type, CardType()))) != stack.end());
+	}
 	
 	bool remove
-		(size_t type);
+		(size_t type)
+	{
+		typename std::vector<std::pair<size_t, CardType> >::iterator si =
+			std::find_if(stack.begin(), stack.end(),
+				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
+					(type, CardType())));
+		
+		if (si != stack.end())
+		{
+			stack.erase(si);
+			return true;
+		}
+		return false;
+	}
 	
 	size_t removeAll
-		(size_t type);
+		(size_t type)
+	{
+		size_t counter = 0;
+		while (remove(type))
+			counter++;
+		return counter;
+	}
 	
 	bool move
-		(size_t type, TMCG_Stack<CardType>& s);
+		(size_t type, TMCG_Stack<CardType>& s)
+	{
+		typename std::vector<std::pair<size_t, CardType> >::iterator si =
+			std::find_if(stack.begin(), stack.end(),
+				std::bind2nd(eq_first_component(), std::pair<size_t, CardType>
+					(type, CardType())));
+		
+		if (si != stack.end())
+		{
+			s.push(si->second);
+			stack.erase(si);
+			return true;
+		}
+		return false;
+	}
 	
 	~TMCG_OpenStack
-		();
+		()
+	{
+		stack.clear();
+	}
 };
 
 #endif

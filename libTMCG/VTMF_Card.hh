@@ -33,7 +33,7 @@
 	#include <string>
 	#include <sstream>
 	#include <iostream>
-
+	
 	// GNU multiple precision library
 	#include <gmp.h>
 	

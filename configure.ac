@@ -124,4 +124,4 @@ CXXFLAGS="-Wall -g3 -pedantic $LIBGCRYPT_CFLAGS"
 AC_CONFIG_FILES([Makefile po/Makefile.in libTMCG/Makefile])
 AC_OUTPUT
 
-echo "Now type 'make && make install' to build and to install openSkat."
+echo "Now type 'make && make install' to build and to install SecureSkat."

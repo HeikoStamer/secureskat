@@ -37,6 +37,8 @@
 	// GNU multiple precision library
 	#include <gmp.h>
 	
+	#include "TMCG.def"
+	
 	#include "mpz_srandom.h"
 	#include "mpz_sqrtm.h"
 	#include "mpz_helper.hh"
@@ -45,7 +47,7 @@
 
 struct TMCG_SecretKey
 {
-	std::string						name, email, type, nizk, sig;
+	std::string				name, email, type, nizk, sig;
 	mpz_t							m, y, p, q;
 	// below this line are non-persistent values (pre-computation)
 	mpz_t							y1, m1pq, gcdext_up, gcdext_vq, pa1d4, qa1d4;
