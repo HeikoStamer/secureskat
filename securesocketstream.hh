@@ -117,7 +117,7 @@ template <class traits = securesocketbuf_traits>
 			const char *key_in, size_t size_in, const char *key_out, size_t size_out
 		) : mSocket(iSocket) 
 		{
-			err = gcry_cipher_open(&chd_in, 
+			err = gcry_cipher_open(&chd_in,
 				GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
 			if (err)
 			{
@@ -392,10 +392,10 @@ template <class traits = securesocketbuf_traits>
 typedef basic_securesocketbuf<> securesocketbuf;
 
 /*! @class isecuresocketstream
- * An istream subclass that uses a socketbuf.  Create one if you wish to
+ * An istream subclass that uses a socketbuf. Create one if you wish to
  * have a read-only socket attached to an istream.
  */
-class isecuresocketstream : public std::istream 
+class isecuresocketstream : public std::istream
 {
 	protected:
 		securesocketbuf buf; /*! @member buf the securesocketbuf */
@@ -405,18 +405,19 @@ class isecuresocketstream : public std::istream
 		 * The primary constructor, which takes an open socket as first argument
 		 * @param iSocket an open and connected socket
 		 */
-		isecuresocketstream(int iSocket,
-			const char *key_in, size_t size_in, const char *key_out, size_t size_out
-		) : std::istream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
+		isecuresocketstream
+			(int iSocket, const char *key_in, size_t size_in,
+			const char *key_out, size_t size_out):
+				std::istream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
 };
 
 /*! @class osecuresocketstream
- * An ostream subclass that uses a socketbuf.  Create one if you wish to
+ * An ostream subclass that uses a socketbuf. Create one if you wish to
  * have a write-only socket attached to an ostream.
  */
-class osecuresocketstream : public std::ostream 
+class osecuresocketstream : public std::ostream
 {
 	protected:
 		securesocketbuf buf; /*! @member buf the securesocketbuf */
@@ -426,18 +427,19 @@ class osecuresocketstream : public std::ostream
 		 * The primary constructor, which takes an open socket as first argument
 		 * @param iSocket an open and connected socket
 		 */
-		osecuresocketstream(int iSocket,
-			const char *key_in, size_t size_in,	const char *key_out, size_t size_out
-		) : std::ostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
+		osecuresocketstream
+			(int iSocket, const char *key_in, size_t size_in,
+			const char *key_out, size_t size_out):
+				std::ostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
 };
 
 /*! @class iosocketstream
- * An iostream subclass that uses a socketbuf.  Create one if you wish to
+ * An iostream subclass that uses a socketbuf. Create one if you wish to
  * have a read/write socket attached to an iostream.
  */
-class iosecuresocketstream : public std::iostream 
+class iosecuresocketstream : public std::iostream
 {
 	protected:
 		securesocketbuf buf; /*! @member buf the securesocketbuf */
@@ -447,9 +449,10 @@ class iosecuresocketstream : public std::iostream
 		 * The primary constructor, which takes an open socket as first argument
 		 * @param iSocket an open and connected socket
 		 */
-		iosecuresocketstream(int iSocket, 
-			const char *key_in, size_t size_in,	const char *key_out, size_t size_out
-		) : std::iostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
+		iosecuresocketstream
+			(int iSocket, const char *key_in, size_t size_in,
+			const char *key_out, size_t size_out):
+				std::iostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
 };
