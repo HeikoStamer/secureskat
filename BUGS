@@ -1,4 +1,2 @@
 * procedure 'waiting for three players' is rarely unstable
-* srandomb() and ssrandomb() don't return a value of exact length
 * Zaurus/zgcc: AC_TYPE_SIGNAL does not work correctly
-* Zaurus/zgcc: ld SIGSEGV during linking (configure --disable-shared)
