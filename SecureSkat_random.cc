@@ -48,7 +48,7 @@
 using namespace std;
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
-void random_announce(vector<size_t> cards)
+void random_announce(const vector<size_t> &cards)
 {
 	if (random() & 1L)
 	{
@@ -111,8 +111,8 @@ int main (int argc, char **argv)
 				perror("SecureSkat_*::main (select)");
 		
 		if ((ret > 0) && FD_ISSET(fileno(stdin), &rfds))
-		{	
-			ssize_t num = read(fileno(stdin), buffer + readed, 
+		{
+			ssize_t num = read(fileno(stdin), buffer + readed,
 				sizeof(buffer) - readed);
 			readed += num;
 				
@@ -145,7 +145,7 @@ int main (int argc, char **argv)
 						for (size_t j = 0; j < nicks.size(); j++)
 							if (par[0] == nicks[j])
 								from = j;
-												
+						
 						if ((par[1] == "INIT") && (par.size() == 4) && (nicks.size() < 3))
 						{
 							if (par[2] == par[0])
@@ -338,7 +338,7 @@ int main (int argc, char **argv)
 				if ((stich.size() == 0) && (cards.size() > 0))
 				{
 					string card = skat_type2string(cards[0]);
-					cout << "CMD lege " << card.substr(0, card.length() - 1) << 
+					cout << "CMD lege " << card.substr(0, card.length() - 1) <<
 						endl << flush;
 				}
 				else
@@ -349,7 +349,7 @@ int main (int argc, char **argv)
 						if (skat_rulectl(stich[0], *ci, spiel_status, cards))
 						{
 							string card = skat_type2string(*ci);
-							cout << "CMD lege " << card.substr(0, card.length() - 1) << 
+							cout << "CMD lege " << card.substr(0, card.length() - 1) <<
 								endl << flush;
 							break;
 						}
