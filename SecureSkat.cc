@@ -1303,7 +1303,7 @@ static void process_line(char *line)
 				}
 			}
 		}
-		else if ((cmd_argv[0] == "rooms") || (cmd_argv[0] == "r?me"))
+		else if ((cmd_argv[0] == "rooms") || (cmd_argv[0] == "raeume"))
 		{
 			for (std::list<std::string>::const_iterator ti = tables.begin(); 
 				ti != tables.end(); ti++)
@@ -1772,26 +1772,26 @@ static void process_line(char *line)
 			}
 			else
 				std::cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
-					std::endl << X << _("/help shows the std::list of commands") << std::endl;
+					std::endl << X << _("/help shows the list of commands") << std::endl;
 		}
 		else if ((cmd_argv[0] == "help") || (cmd_argv[0] == "hilfe"))
 		{
 			std::cout << XX << _("/quit") << " -- " <<
 				_("quit SecureSkat") << std::endl;
 			std::cout << XX << _("/on") << " -- " <<
-				_("turn output of IRC channel #openSkat on") << std::endl;
+				_("turn the output of IRC channel #openSkat on") << std::endl;
 			std::cout << XX << ("/off") << " -- " <<
-				_("turn output of IRC channel #openSkat off") << std::endl;
+				_("turn the output of IRC channel #openSkat off") << std::endl;
 			std::cout << XX << ("/players") << " -- " <<
-				_("show std::list of possible participants") << std::endl;
+				_("show the list of possible participants") << std::endl;
 			std::cout << XX << ("/tables") << " -- " <<
-				_("show std::list of existing game tables") << std::endl;
+				_("show the list of existing game tables") << std::endl;
 			std::cout << XX << ("/rooms") << " -- " <<
-				_("show std::list of existing voting rooms") << std::endl;
+				_("show the list of existing voting rooms") << std::endl;
 			std::cout << XX << _("/rank") << " -- " <<
-				_("show your current rank in all score std::lists") << std::endl;
+				_("show your current rank in all score lists") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> <bits> -- " <<
-				_("create room <nr> for voting between 2^<bits> values") << std::endl;
+				_("create the room <nr> for voting between 2^<bits> values") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> -- " <<
 				_("join the voting in room <nr>") << std::endl;
 			std::cout << XXX << "/<nr> open -- " <<
@@ -1799,28 +1799,28 @@ static void process_line(char *line)
 			std::cout << XXX << "/<nr> vote <r> -- " <<
 				_("vote in room <nr> for value <r>") << std::endl;
 			std::cout << XX << "/skat <nr> <r> -- " <<
-				_("create table <nr> for playing <r> rounds") << std::endl;
+				_("create the table <nr> for playing <r> rounds") << std::endl;
 			std::cout << XX << "/skat <nr> -- " <<
 				_("join the game on table <nr>") << std::endl;
 			std::cout << XX << "/<nr> <cmd> -- " <<
-				_("execute command <cmd> on table <nr>") << ":" << std::endl;
+				_("execute the command <cmd> on table <nr>") << ":" << std::endl;
 			std::cout << XXX << "/<nr> blatt --- " <<
-				_("show own cards and additional information") << std::endl;
+				_("show your own cards and additional information") << std::endl;
 			std::cout << XXX << "/<nr> reize --- " <<
 				_("bid or justify a bid") << std::endl;
 			std::cout << XXX << "/<nr> passe --- " <<
-				_("pass biding") << std::endl;
+				_("pass the biding") << std::endl;
 			std::cout << XXX << "/<nr> hand --- " <<
 				_("play without taking the two cards") << std::endl;
 			std::cout << XXX << "/<nr> skat --- " <<
-				_("take the two cards and show all") << std::endl;
+				_("take the two cards and show them") << std::endl;
 			std::cout << XXX << "/<nr> druecke <k1> <k2> --- " <<
-				_("put away card <k1> and <k2>") << std::endl;
+				_("put away the cards <k1> and <k2>") << std::endl;
 			std::cout << XXX << "/<nr> sagean <spiel> [zusatz] --- " <<
-				_("announce game <spiel> ([zusatz] is optional)") << std::endl;
+				_("announce the game <spiel> ([zusatz] is optional)") << std::endl;
 			std::cout << XXX << "/<nr> lege <k1> --- " <<
-				_("play card <k1>") << std::endl;
-			std::cout << XX << "<nr> " << _("arbitrary std::string") << std::endl;
+				_("play the card <k1>") << std::endl;
+			std::cout << XX << "<nr> " << _("arbitrary string") << std::endl;
 			std::cout << XX << "<r> " << _("unsigned integer") << std::endl;
 			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } || " <<
 				"{ 7, 8, 9, U, O, K, 10, A }" << std::endl;
@@ -1847,7 +1847,7 @@ static void process_line(char *line)
 			}
 			if (!found)
 				std::cout << X << _("unknown command") << ": \"/" << cmd_argv[0] << 
-					"\"" << std::endl << X << _("/help shows the std::list of commands") << std::endl;
+					"\"" << std::endl << X << _("/help shows the list of commands") << std::endl;
 		}
 	}
 	else
@@ -2152,8 +2152,8 @@ void run_irc()
 						{
 							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
-								
-							if (nick.find(pub.keyid(), 0)	== 0)
+							
+							if (nick.find(pub.keyid(), 0) == 0)
 							{
 								std::cout << X << _("you join") << " " << tb << std::endl;
 							}
@@ -2202,7 +2202,7 @@ void run_irc()
 					{
 						if (irc_parvec[0] == "#openSkat")
 						{
-							if (nick.find(pub.keyid(), 0)	== 0)
+							if (nick.find(pub.keyid(), 0) == 0)
 							{
 								std::cout << X << _("you leave channel") << " " <<
 									irc_parvec[0] << std::endl;
@@ -2210,8 +2210,8 @@ void run_irc()
 							else if (nick.find(public_prefix, 0) == 0)
 							{
 								nick_players.erase(nick), nick_sl.erase(nick);
-								nick_p7771.erase(nick),	nick_p7772.erase(nick);
-								nick_p7773.erase(nick),	nick_p7774.erase(nick);
+								nick_p7771.erase(nick), nick_p7772.erase(nick);
+								nick_p7773.erase(nick), nick_p7774.erase(nick);
 								if (nick_key.find(nick) != nick_key.end())
 									nick = nick_key[nick].name;
 								if (irc_stat)
@@ -2300,12 +2300,12 @@ void run_irc()
 									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 							}
 						}
-						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
+						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) &&
 							(irc_parvec[0].length() > 10))
 						{
 							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
-								
+							
 							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
 							{
 								if (games_tnr2pid.find(tb) != games_tnr2pid.end())
@@ -2353,7 +2353,7 @@ void run_irc()
 					}
 					else if (nick.find(public_prefix, 0) == 0)
 					{
-						nick_players.erase(nick),nick_sl.erase(nick); 
+						nick_players.erase(nick),nick_sl.erase(nick);
 						nick_p7771.erase(nick), nick_p7772.erase(nick);
 						nick_p7773.erase(nick), nick_p7774.erase(nick);
 						for (std::map<std::string, pid_t>::const_iterator gi = games_tnr2pid.begin();
@@ -2434,8 +2434,8 @@ void run_irc()
 											" " << irc_parvec[1] << std::endl;
 								}
 							}
-							else if ((irc_parvec[1].find("#openSkat_", 0) == 0) && 
-							(irc_parvec[1].length() > 10))
+							else if ((irc_parvec[1].find("#openSkat_", 0) == 0) &&
+								(irc_parvec[1].length() > 10))
 							{
 								std::string tb = 
 									irc_parvec[1].substr(10, irc_parvec[1].length() - 10);
@@ -2477,8 +2477,8 @@ void run_irc()
 					if (irc_paramvec(irc_params(irc_reply)) >= 2)
 					{
 						// control messages
-						if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
-							(irc_parvec[0].length() > 10) && 
+						if ((irc_parvec[0].find("#openSkat_", 0) == 0) &&
+							(irc_parvec[0].length() > 10) &&
 							(nick.find(public_prefix, 0) == 0))
 						{
 							std::string tb = irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
@@ -3020,14 +3020,14 @@ void init_term()
 	{
 		perror("init_term (tcgetattr)");
 		exit(-1);
-	} 
+	}
 	new_term = old_term;
 	new_term.c_lflag &= ~ICANON, new_term.c_cc[VTIME] = 1;
 	if (tcsetattr(fileno(stdin), TCSANOW, &new_term) < 0)
 	{
 		perror("init_term (tcsetattr)");
 		exit(-1);
-	} 
+	}
 	rl_readline_name = "SecureSkat";
 #ifdef _RL_FUNCTION_TYPEDEF
 	rl_callback_handler_install(NULL, (rl_vcpfunc_t*)process_line);
@@ -3051,7 +3051,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.14 2005/03/24 20:56:32 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.15 2005/04/12 20:44:22 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3104,7 +3104,7 @@ int main(int argc, char* argv[], char* envp[])
 			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
 			return -1;
 		}
-				
+		
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
 		get_public_keys(cmd + ".pkr", nick_key);
 		get_secret_key(cmd + ".skr", sec, public_prefix);
@@ -3134,8 +3134,8 @@ int main(int argc, char* argv[], char* envp[])
 		return 0;
 	}
 	
-	std::cout << _("Usage: ") << cmd << " IRC_SERVER<std::string> [ IRC_PORT<int> " <<
+	std::cout << _("Usage: ") << cmd << " IRC_SERVER<string> [ IRC_PORT<int> " <<
 		"[ SECURITY_LEVEL<int> ..." << std::endl;
-	std::cout << "       " << " ... [ CONTROL_PROGRAM<std::string> ] ] ]" << std::endl;
+	std::cout << "       " << " ... [ CONTROL_PROGRAM<string> ] ] ]" << std::endl;
 	return -1;
 }
