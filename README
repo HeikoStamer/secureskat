@@ -11,7 +11,8 @@ Introduction
 
   SecureSkat is a network implementation of the german card game Skat
   for multiple players over IRC (Internet Relay Chat). It uses the free
-  library libTMCG to ensure the fairness between participants.
+  (like in speech) library libTMCG to ensure the fairness between
+  participants.
 
   All protocols work in the 'honest-but-curious' (or semi-honest)
   adversary model, thus we do not care about robustness or availability.
@@ -68,10 +69,10 @@ Build & Install
 
   3. make install
 
-Playing `SecureSkat' over IRC
------------------------------
+Playing `SecureSkat' over an IRC network
+----------------------------------------
 
-  Run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<SECURITY> [<INTERFACE>]]]', 
+  Please run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<SECURITY> [<INTERFACE>]]]',
   where
     <IRC_SERVER> is the hostname of an RFC1459 conform IRC server,
     <IRC_PORT> is the TCP port number of this server, e.g. 6667,
@@ -91,27 +92,27 @@ Playing `SecureSkat' over IRC
   
   You should input two non-empty strings, hopefully based on honest data.
   After this procedure your public and secret key is created and stored 
-  in file 'SecureSkat.skr' (Protect this one, because it is'nt encrypted!).
+  in file 'SecureSkat.skr' (Protect this one, because it is NOT encrypted!).
   
-  Dependent on your hardware the key generation will take some time until
+  Dependent on your hardware the key generation will take much time until
   the success message `PKI: cryptographic key ID5^????? created and stored'
-  is printed out. (? is here a wildcard)
+  is printed out. (? is here a wildcard for some random letters)
   
-  Then you will be registered at IRC server with a strange nickname like
-  `ID5^z34g0' (based on key id from public key). In large player networks
-  collisions become probable -- in such case, please generate a new key.
+  Then you will registered at the IRC server with a strange nickname like
+  `ID5^z34g0' (based on key id from your public key). In large player networks
+  collisions become probable--- in such cases, please generate a new key.
   
-  Automagicly you are in channel #openSkat (The name was chosen in this way
-  to provide compatibility with old versions.) and you can chat with other
-  players simple by typing lines of text. Commands are strings, where the
-  first letter is a '/' (slash). '/help' prints a help screen:
+  Automagicly you are joined to channel #openSkat (The former name was kept
+  to provide the compatibility with old versions.) and you can chat with
+  other players simply by typing lines of text. Commands are strings, where
+  the first letter is a '/' (slash). '/help' prints the following help screen:
   
     /ende         /quit      quits SecureSkat
     /an           /on        turns output of IRC channel #openSkat on
     /aus          /off       turns output of IRC channel #openSkat off
     /spieler      /player    shows list of possible participants
     /tische       /tables    shows list of existing game tables
-    /r?me        /rooms     shows list of existing ballot rooms
+    /raeume       /rooms     shows list of existing ballot rooms
     /rang         /rank      shows your current rank (Extended Seeger System)
     /skat <nr> <r>           creates new table <nr> to play <r> rounds
     /skat <nr>               start playing on table <nr>
@@ -135,10 +136,10 @@ Playing `SecureSkat' over IRC
   The program try to exchange and check public keys automagically. Therefore
   SecureSkat binds three TCP-ports (free ports up from 7771): the first exports
   the public key, the second exports a table of stored ranking data, and the
-  third answers ranking data requests. The check of public key validity is 
-  done with some non-interactive zero knowledge proofs (their soundness error
-  probability is currently fixed at 2^{-80}). Hence execution can take
-  much time until a success message `PKI identified ID5^????? aka ???...' 
+  third answers ranking data requests. The check whether any public key is valid
+  will done with non-interactive zero knowledge proofs (their soundness error
+  probability is currently fixed at 2^{-80}). Hence the execution can take
+  a lot of time until a success message `PKI identified ID5^????? aka ???...'
   (? is a wildcard) is printed out or the child process aborts with an
   appropriate error message.
 
@@ -148,9 +149,9 @@ Playing `SecureSkat' over IRC
   participants. The command /tables prints out a short list of all existing
   tables. During the session initalization of /skat a TCP/IP-connection with
   your opponents will be established. Therefore (and for the key exchange)
-  your workstation should not be behind a (paranoid) firewall. Maybe
-  you can convince your network administrator (with a bottle of famous
-  german beer %-) to permit incoming TCP connections in the range 7771:8000.
+  your workstation should not be behind a (paranoid) firewall. Maybe you can
+  convince your network administrator (with a bottle of famous german beer
+  %-) to permit incoming TCP connections in the range of 7771:8000.
 
 Bugs, Contribution, CVS
 -----------------------
