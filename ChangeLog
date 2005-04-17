@@ -8,3 +8,4 @@ SecureSkat 2.4:
 		  instantiation of mpz_shash on the verifier side permits cheating.
 		  These problems are issues of the library libTMCG. We announce them
 		  here to reach all possible users of SecureSkat.
+SecureSkat 2.5:
