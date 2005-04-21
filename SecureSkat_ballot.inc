@@ -418,7 +418,7 @@ int ballot_child
 				while (cnt_delim >= 1)
 				{
 					char tmp[65536];
-					bzero(tmp, sizeof(tmp));
+					memset(tmp, 0, sizeof(tmp));
 					memcpy(tmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 					--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 					std::string cmd = tmp;
@@ -455,7 +455,7 @@ int ballot_child
 					}
 				}
 				char tmp[65536];
-				bzero(tmp, sizeof(tmp));
+				memset(tmp, 0, sizeof(tmp));
 				ireaded -= cnt_pos;
 				memcpy(tmp, ireadbuf + cnt_pos, ireaded);
 				memcpy(ireadbuf, tmp, ireaded);

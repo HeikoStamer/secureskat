@@ -106,7 +106,7 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([bzero dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname])
+AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname])
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.

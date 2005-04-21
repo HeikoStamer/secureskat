@@ -632,10 +632,11 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 				while (cnt_delim >= 1)
 				{
 					char tmp[65536];
-					bzero(tmp, sizeof(tmp));
+					memset(tmp, 0, sizeof(tmp));
 					memcpy(tmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 					--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 					std::string cmd = tmp;
+					
 					// do operation
 					if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 					{
@@ -669,7 +670,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 					}
 				}
 				char tmp[65536];
-				bzero(tmp, sizeof(tmp));
+				memset(tmp, 0, sizeof(tmp));
 				ireaded -= cnt_pos;
 				memcpy(tmp, ireadbuf + cnt_pos, ireaded);
 				memcpy(ireadbuf, tmp, ireaded);
@@ -704,11 +705,6 @@ int skat_child
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
 	int ipipe_readed = 0;
-	if (ipipe_readbuf == NULL)
-	{
-		std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
-		exit(-1);
-	}
 	gp_nick.push_back(pub.keyid());
 	gp_name[pub.keyid()] = pub.name;
 	
@@ -987,7 +983,7 @@ int skat_child
 				std::cout << X << _("Execute control process") << " (" << ctl_pid << 
 					"): " << std::flush;
 				char buffer[1024];
-				bzero(buffer, sizeof(buffer));
+				memset(buffer, 0, sizeof(buffer));
 				ssize_t num = read(ctl_i, buffer, sizeof(buffer));
 				if (num > 0)
 					std::cout << buffer << std::flush;
@@ -1042,11 +1038,6 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 			if (readbuf.find(pi->second) == readbuf.end())
 			{
 				readbuf[pi->second] = new char[65536];
-				if (readbuf[pi->second] == NULL)
-				{
-					std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
-					exit(-1);
-				}
 				readed[pi->second] = 0;
 			}
 			ssize_t num = read(pi->second,
@@ -1066,12 +1057,12 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 					while (cnt_delim >= 2)
 					{
 						char tmp[65536];
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string rnk1 = tmp;
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
@@ -1085,7 +1076,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 					while (cnt_delim >= 1)
 					{
 						char tmp[65536];
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
@@ -1175,12 +1166,12 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 					while (cnt_delim >= 2)
 					{
 						char tmp[65536];
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string pki1 = tmp;
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
 							pos_delim[pos] - cnt_pos);
 						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
@@ -1205,7 +1196,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 					}
 				}
 				char tmp[65536];
-				bzero(tmp, sizeof(tmp));
+				memset(tmp, 0, sizeof(tmp));
 				readed[pi->second] -= cnt_pos;
 				memcpy(tmp, readbuf[pi->second] + cnt_pos, readed[pi->second]);
 				memcpy(readbuf[pi->second], tmp, readed[pi->second]);
@@ -2091,7 +2082,7 @@ void run_irc()
 					while (cnt_delim >= 1)
 					{
 						char tmp[65536];
-						bzero(tmp, sizeof(tmp));
+						memset(tmp, 0, sizeof(tmp));
 						memcpy(tmp, irc_readbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						irc_reply = tmp;
@@ -2614,7 +2605,7 @@ void run_irc()
 				
 					}
 					char tmp[65536];
-					bzero(tmp, sizeof(tmp));
+					memset(tmp, 0, sizeof(tmp));
 					irc_readed -= cnt_pos;
 					memcpy(tmp, irc_readbuf + cnt_pos, irc_readed);
 					memcpy(irc_readbuf, tmp, irc_readed);
@@ -2690,7 +2681,7 @@ void run_irc()
 								std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
-							bzero(command, 500);
+							memset(command, 0, 500);
 							strncat(command, "/skat ", 25);
 							strncat(command, ti->c_str(), 475);
 							process_line(command);
@@ -3051,7 +3042,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.15 2005/04/12 20:44:22 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.16 2005/04/21 22:58:46 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

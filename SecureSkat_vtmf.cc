@@ -1297,7 +1297,7 @@ int skat_game
 						while (cnt_delim >= 1)
 						{
 							char xtmp[65536];
-							bzero(xtmp, sizeof(xtmp));
+							memset(xtmp, 0, sizeof(xtmp));
 							memcpy(xtmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string cmd = xtmp;
@@ -2603,7 +2603,7 @@ int skat_game
 							// ----------------------------------------------------------------
 						}
 						char ytmp[65536];
-						bzero(ytmp, sizeof(ytmp));
+						memset(ytmp, 0, sizeof(ytmp));
 						ireaded -= cnt_pos;
 						memcpy(ytmp, ireadbuf + cnt_pos, ireaded);
 						memcpy(ireadbuf, ytmp, ireaded);

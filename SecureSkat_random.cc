@@ -126,7 +126,7 @@ int main (int argc, char **argv)
 				while (cnt_delim >= 1)
 				{
 					char xtmp[65536];
-					bzero(xtmp, sizeof(xtmp));
+					memset(xtmp, 0, sizeof(xtmp));
 					memcpy(xtmp, buffer + cnt_pos, pos_delim[pos] - cnt_pos);
 					--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 					string cmd = xtmp;
@@ -311,7 +311,7 @@ int main (int argc, char **argv)
 					}
 				}
 				char ytmp[65536];
-				bzero(ytmp, sizeof(ytmp));
+				memset(ytmp, 0, sizeof(ytmp));
 				readed -= cnt_pos;
 				memcpy(ytmp, buffer + cnt_pos, readed);
 				memcpy(buffer, ytmp, readed);
