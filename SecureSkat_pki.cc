@@ -45,7 +45,7 @@ void get_secret_key
 			std::cout << _("Your electronic mail address") << ": ";
 			std::getline(std::cin, email);
 			std::cerr << _("Creating your key. Please wait") << std::flush;
-			while (1)
+			while (23 != 42)
 			{
 				TMCG_SecretKey tmpsec(name, email);
 				if (tmpsec.check())
@@ -54,7 +54,7 @@ void get_secret_key
 					break;
 				}
 				else
-					std::cerr << "." << std::flush;
+					std::cerr << "*" << std::flush;
 			}
 			ost << sec;
 			keyid = sec.keyid();

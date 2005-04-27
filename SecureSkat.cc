@@ -24,12 +24,11 @@
 #endif
 
 // C and C++ header
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
 #include <cassert>
 #include <cstring>
-#include <strings.h>
 #include <csignal>
 #include <unistd.h>
 #include <ctime>
@@ -90,7 +89,7 @@
 #define CLEAR_TIMEOUT						60
 #define AUTOJOIN_TIMEOUT					75
 
-// define BOUNDS (in child processes)
+// define BOUNDS (in number of child processes)
 #define PKI_CHILDS							10
 #define RNK_CHILDS							5
 
@@ -157,7 +156,9 @@ sig_atomic_t								irc_quit = 0, sigchld_critical = 0;
 
 RETSIGTYPE sig_handler_quit(int sig)
 {
+#ifndef NDEBUG
 	std::cerr << "... SIGNAL " << sig << " RECEIVED ..." << std::endl;
+#endif
 	irc_quit = 1;
 }
 
@@ -281,7 +282,7 @@ RETSIGTYPE sig_handler_usr1(int sig)
 					WTERMSIG(status) << std::endl;
 			}
 			
-			// remove bad nick from player std::list
+			// remove bad nick from the players list
 			if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
 				bad_nick[nick_nick[chld_pid]] = 1;
 			else if (bad_nick[nick_nick[chld_pid]] <= 3)
@@ -480,7 +481,7 @@ void skat_connect
 		delete neighbor;
 		close(handle);
 		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1),	exit(-6);
+		sleep(1), exit(-6);
 	}
 	
 	// exchange secret keys for securesocketstreams
@@ -497,7 +498,7 @@ void skat_connect
 		delete [] key1, delete [] key2;
 		close(handle);
 		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1),	exit(-6);
+		sleep(1), exit(-6);
 	}
 	memcpy(key2, dv, TMCG_SAEP_S0);
 	delete neighbor;
@@ -552,6 +553,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 				{
 					iosocketstream *neighbor = new iosocketstream(handle);
 					TMCG_CardSecret cs(3, 5);
+					// create a nounce
 					t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 					*neighbor << cs << std::endl << std::flush;
 					char tmp[TMCG_MAX_CARD_CHARS];
@@ -852,9 +854,9 @@ int skat_child
 	std::ostringstream ost;
 	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
 	*out_pipe << ost.str() << std::flush;
-	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" << 
-		pkr.key[0].name << "', '" << 
-		pkr.key[1].name << "', '" << 
+	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" <<
+		pkr.key[0].name << "', '" <<
+		pkr.key[1].name << "', '" <<
 		pkr.key[2].name << "' " << _("ready") << "." << std::endl;
 	std::list<std::string> gp_rdport;
 	std::map<std::string, int> gp_ports;
@@ -897,12 +899,12 @@ int skat_child
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 		{
 			std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-			std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
+			std::string msg = cmd.substr(cmd.find(" ", 4) + 1,
 				cmd.length() - cmd.find(" ", 4) - 1);
 			if (msg.find("PORT ", 0) == 0)
 			{
 				std::string port = msg.substr(5, msg.length() - 5);
-				if ((std::find(gp_rdport.begin(), gp_rdport.end(), nick) 
+				if ((std::find(gp_rdport.begin(), gp_rdport.end(), nick)
 					== gp_rdport.end()))
 				{
 					gp_rdport.push_back(nick);
@@ -915,29 +917,29 @@ int skat_child
 		_("establishing secure channels") << " ..." << std::endl;
 	int connect_handle, accept_handle;
 	iosecuresocketstream *left_neighbor, *right_neighbor;
-	if (pkr_self == 0)
+	switch (pkr_self)
 	{
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 1,
-			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
-		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
-			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
-			ipipe_readbuf, ipipe_readed);
-	}
-	else if (pkr_self == 1)
-	{
-		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
-			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
-			ipipe_readbuf, ipipe_readed);
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 2,
-			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
-	}
-	else if (pkr_self == 2)
-	{
-		skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
-			right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
-			ipipe_readbuf, ipipe_readed);
-		skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 0,
-			left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+		case 0:
+			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 1,
+				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
+				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
+				ipipe_readbuf, ipipe_readed);
+			break;
+		case 1:
+			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
+				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
+				ipipe_readbuf, ipipe_readed);
+			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 2,
+				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+			break;
+		case 2:
+			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
+				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
+				ipipe_readbuf, ipipe_readed);
+			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 0,
+				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+			break;
 	}
 	skat_alive(out_pipe, nr, right_neighbor, left_neighbor);
 	if (neu)
@@ -1052,104 +1054,108 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				for (int i = 0; i < readed[pi->second]; i++)
 					if (readbuf[pi->second][i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
-				if (what == 1) // mutex update of ranking data from RNK childs
+				
+				switch (what)
 				{
-					while (cnt_delim >= 2)
-					{
-						char tmp[65536];
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
-							pos_delim[pos] - cnt_pos);
-						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string rnk1 = tmp;
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
-							pos_delim[pos] - cnt_pos);
-						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string rnk2 = tmp;
-						// do operation
-						rnk[rnk1] = rnk2;
-					}
-				}
-				else if (what == 2) // mutex IRC output from game childs
-				{
-					while (cnt_delim >= 1)
-					{
-						char tmp[65536];
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
-							pos_delim[pos] - cnt_pos);
-						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string irc1 = tmp;
+					case 1: // mutex update of ranking data from RNK childs
+						while (cnt_delim >= 2)
+						{
+							char tmp[65536];
+							std::memset(tmp, 0, sizeof(tmp));
+							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string rnk1 = tmp;
+							std::memset(tmp, 0, sizeof(tmp));
+							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string rnk2 = tmp;
+							// do operation
+							rnk[rnk1] = rnk2;
+						}
+						break;
+					case 2: // mutex IRC output from game childs
+						while (cnt_delim >= 1)
+						{
+							char tmp[65536];
+							std::memset(tmp, 0, sizeof(tmp));
+							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string irc1 = tmp;
 
 //std::cerr << "to IRC: " << irc1 << std::endl;
 
-						// do operation
-						if (strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
-						{
-							if (irc_paramvec(irc_params(irc1)) >= 2)
+							// do operation
+							if (std::strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
 							{
-								if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
-									(irc_parvec[0].length() > 10))
+								if (irc_paramvec(irc_params(irc1)) >= 2)
 								{
-									// sign message
-									*irc << "PRIVMSG " << irc_parvec[0] <<
-										" :" << irc_parvec[1] << "~~~" <<
-										sec.sign(irc_parvec[1]) << std::endl <<
-										std::flush;
-								}
-								else if (irc_parvec[0] == "#openSkat")
-								{
-									for (std::map<std::string, std::string>::const_iterator ni = 
-										nick_players.begin(); ni != nick_players.end(); ni++)
+									if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
+										(irc_parvec[0].length() > 10))
 									{
-										// send announcement PRIVMSG to each player
-										*irc << "PRIVMSG " << ni->first << " :" << 
-											irc_parvec[1] << std::endl << std::flush;
+										// sign message
+										*irc << "PRIVMSG " << irc_parvec[0] <<
+											" :" << irc_parvec[1] << "~~~" <<
+											sec.sign(irc_parvec[1]) << std::endl <<
+											std::flush;
 									}
-									
-									// process announcement PRIVMSG
-									size_t tabei1 = irc_parvec[1].find("|", 0);
-									size_t tabei2 = irc_parvec[1].find("~", 0);
-									size_t tabei3 = irc_parvec[1].find("!", 0);
-									if ((tabei1 != irc_parvec[1].npos) &&
-										(tabei2 != irc_parvec[1].npos) &&
-										(tabei3 != irc_parvec[1].npos) && 
-										(tabei1 < tabei2) && (tabei2 < tabei3))
+									else if (irc_parvec[0] == "#openSkat")
 									{
-										std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
-										std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
-											tabei2 - tabei1 - 1);
-										std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
-											tabei3 - tabei2 - 1);	
-										if ((std::find(tables.begin(), tables.end(), tabmsg1) 
-											== tables.end()) && (tabmsg2 != "0"))
+										for (std::map<std::string, std::string>::const_iterator ni = 
+											nick_players.begin(); ni != nick_players.end(); ni++)
 										{
-											// new table
-											tables.push_back(tabmsg1);
-											tables_p[tabmsg1] = atoi(tabmsg2.c_str());
-											tables_r[tabmsg1] = atoi(tabmsg3.c_str());
-											tables_u[tabmsg1] = tabmsg3;
-											tables_o[tabmsg1] = pub.keyid();
-										}	
-										else
+											// send announcement PRIVMSG to each player
+											*irc << "PRIVMSG " << ni->first << " :" << 
+												irc_parvec[1] << std::endl << std::flush;
+										}
+										
+										// process announcement PRIVMSG
+										size_t tabei1 = irc_parvec[1].find("|", 0);
+										size_t tabei2 = irc_parvec[1].find("~", 0);
+										size_t tabei3 = irc_parvec[1].find("!", 0);
+										if ((tabei1 != irc_parvec[1].npos) &&
+											(tabei2 != irc_parvec[1].npos) &&
+											(tabei3 != irc_parvec[1].npos) && 
+											(tabei1 < tabei2) && (tabei2 < tabei3))
 										{
-											if (tabmsg2 == "0")
+											std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
+											std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
+												tabei2 - tabei1 - 1);
+											std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
+												tabei3 - tabei2 - 1);	
+											if ((std::find(tables.begin(), tables.end(), tabmsg1) 
+												== tables.end()) && (tabmsg2 != "0"))
 											{
-												// remove table
-												tables_p.erase(tabmsg1), tables_r.erase(tabmsg1);
-												tables_u.erase(tabmsg1), tables_o.erase(tabmsg1);
-												tables.remove(tabmsg1);
-											}
-											else
-											{
-												// update table
+												// new table
+												tables.push_back(tabmsg1);
 												tables_p[tabmsg1] = atoi(tabmsg2.c_str());
 												tables_r[tabmsg1] = atoi(tabmsg3.c_str());
 												tables_u[tabmsg1] = tabmsg3;
+												tables_o[tabmsg1] = pub.keyid();
+											}
+											else
+											{
+												if (tabmsg2 == "0")
+												{
+													// remove table
+													tables_p.erase(tabmsg1), tables_r.erase(tabmsg1);
+													tables_u.erase(tabmsg1), tables_o.erase(tabmsg1);
+													tables.remove(tabmsg1);
+												}
+												else
+												{
+													// update table
+													tables_p[tabmsg1] = atoi(tabmsg2.c_str());
+													tables_r[tabmsg1] = atoi(tabmsg3.c_str());
+													tables_u[tabmsg1] = tabmsg3;
+												}
 											}
 										}
 									}
+									else
+										*irc << irc1 << std::endl << std::flush;
 								}
 								else
 									*irc << irc1 << std::endl << std::flush;
@@ -1157,49 +1163,48 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							else
 								*irc << irc1 << std::endl << std::flush;
 						}
-						else
-							*irc << irc1 << std::endl << std::flush;
-					}
-				}
-				else if (what == 3) // mutex import from PKI childs
-				{
-					while (cnt_delim >= 2)
-					{
-						char tmp[65536];
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
-							pos_delim[pos] - cnt_pos);
-						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string pki1 = tmp;
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, readbuf[pi->second] + cnt_pos, 
-							pos_delim[pos] - cnt_pos);
-						cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string pki2 = tmp;
-						// do operation
-						TMCG_PublicKey apkey;
-						if (!apkey.import(pki2))
+						break;
+					case 3: // mutex import from PKI childs
+						while (cnt_delim >= 2)
 						{
-							std::cerr << _("TMCG: public key corrupted") << std::endl;
+							char tmp[65536];
+							std::memset(tmp, 0, sizeof(tmp));
+							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string pki1 = tmp;
+							std::memset(tmp, 0, sizeof(tmp));
+							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string pki2 = tmp;
+							// do operation
+							TMCG_PublicKey apkey;
+							if (!apkey.import(pki2))
+							{
+								std::cerr << _("TMCG: public key corrupted") << std::endl;
+							}
+							else if (pki1 != apkey.keyid())
+							{
+								std::cerr << _("TMCG: wrong public key") << std::endl;
+							}
+							else
+							{
+								std::cout << X << "PKI " << _("identified") <<
+									" \"" << pki1 << "\" " << "aka \"" << apkey.name <<
+									"\" <" << apkey.email << ">" << std::endl;
+								nick_key[pki1] = apkey;
+							}
 						}
-						else if (pki1 != apkey.keyid())
-						{
-							std::cerr << _("TMCG: wrong public key") << std::endl;
-						}
-						else
-						{
-							std::cout << X << "PKI " << _("identified") << 
-								" \"" << pki1 << "\" " << "aka \"" << apkey.name << 
-								"\" <" << apkey.email << ">" << std::endl;
-							nick_key[pki1] = apkey;
-						}
-					}
-				}
+						break;
+					default:
+						break;
+				} // switch
 				char tmp[65536];
-				memset(tmp, 0, sizeof(tmp));
+				std::memset(tmp, 0, sizeof(tmp));
 				readed[pi->second] -= cnt_pos;
-				memcpy(tmp, readbuf[pi->second] + cnt_pos, readed[pi->second]);
-				memcpy(readbuf[pi->second], tmp, readed[pi->second]);
+				std::memcpy(tmp, readbuf[pi->second] + cnt_pos, readed[pi->second]);
+				std::memcpy(readbuf[pi->second], tmp, readed[pi->second]);
 			}
 		}
 	}
@@ -1490,7 +1495,7 @@ static void process_line(char *line)
 					pkt[j][gpi->first] += seeger;
 				}
 			}
-			// Ausgabe der Rangstd::listen mit eigener Beteiligung
+			// Ausgabe der Ranglisten mit eigener Beteiligung
 			for (std::map<std::string, long>::const_iterator gpi = pkt[0].begin();
 				gpi != pkt[0].end(); gpi++)
 			{
@@ -1936,7 +1941,7 @@ void run_irc()
 			// ----------------------------------------------------------------------
 			read_after_select(rfds, nick_pipe, 3);
 			
-			// RNK (export rank std::list on port 7773)
+			// RNK (export rank list on port 7773)
 			// ----------------------------------------------------------------------
 			if (FD_ISSET(rnk7773_handle, &rfds))
 			{
@@ -2785,7 +2790,7 @@ void run_irc()
 							}
 							iosocketstream *nrnk = new iosocketstream(nick_handle);
 							
-							// get RNK std::list
+							// get RNK list
 							char *tmp = new char[1000000L];
 							if (tmp == NULL)
 							{
@@ -2806,7 +2811,7 @@ void run_irc()
 							if (close(nick_handle) < 0)
 								perror("run_irc [RNK/child] (close)");
 							
-							// iterate RNK std::list
+							// iterate RNK list
 							for (std::vector<std::string>::const_iterator ri = rnk_idlist.begin();
 								ri != rnk_idlist.end(); ri++)
 							{
@@ -3042,7 +3047,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.16 2005/04/21 22:58:46 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.17 2005/04/27 21:42:11 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

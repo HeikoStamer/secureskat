@@ -92,7 +92,7 @@ AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h strings.h sys/socket.h sys/time.h termios.h unistd.h locale.h libintl.h])
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h locale.h libintl.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
