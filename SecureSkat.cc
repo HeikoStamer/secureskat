@@ -1088,7 +1088,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 //std::cerr << "to IRC: " << irc1 << std::endl;
 
 							// do operation
-							if (std::strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
+							if (strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
 							{
 								if (irc_paramvec(irc_params(irc1)) >= 2)
 								{
@@ -3047,7 +3047,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.17 2005/04/27 21:42:11 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.18 2005/04/29 07:38:17 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
