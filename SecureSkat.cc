@@ -1057,7 +1057,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				
 				switch (what)
 				{
-					case 1: // mutex update of ranking data from RNK childs
+					case 1: // update of ranking data from RNK childs
 						while (cnt_delim >= 2)
 						{
 							char tmp[65536];
@@ -1075,7 +1075,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							rnk[rnk1] = rnk2;
 						}
 						break;
-					case 2: // mutex IRC output from game childs
+					case 2: // IRC output from game childs
 						while (cnt_delim >= 1)
 						{
 							char tmp[65536];
@@ -1164,7 +1164,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 								*irc << irc1 << std::endl << std::flush;
 						}
 						break;
-					case 3: // mutex import from PKI childs
+					case 3: // import from PKI childs
 						while (cnt_delim >= 2)
 						{
 							char tmp[65536];
@@ -1417,7 +1417,6 @@ static void process_line(char *line)
 				}
 				else
 					continue;
-				
 				if ((tk_header != "prt") ||
 					(tk_nick[0] != pub.sigid(tk_sig1)) ||
 					(tk_nick[1] != pub.sigid(tk_sig2)) ||
@@ -2836,7 +2835,8 @@ void run_irc()
 									perror("run_irc [RNK2/child] (close)");
 							}
 							*npipe << "EOF" << std::endl << std::flush;
-							delete npipe, delete [] tmp;
+							delete npipe;
+							delete [] tmp;
 							if (close(fd_pipe[1]) < 0)
 								perror("run_irc (close)");
 							
@@ -2870,7 +2870,8 @@ void run_irc()
 					{
 						if (nick_pid == 0)
 						{
-							signal(SIGQUIT, SIG_DFL),	signal(SIGTERM, SIG_DFL);
+							signal(SIGQUIT, SIG_DFL);
+							signal(SIGTERM, SIG_DFL);
 							
 							// begin -- child code
 							sleep(1);
@@ -2901,7 +2902,8 @@ void run_irc()
 							public_key = tmp;
 							
 							// close TCP/IP connection
-							delete nkey, delete [] tmp;
+							delete nkey;
+							delete [] tmp;
 							if (close(nick_handle) < 0)
 								perror("run_irc [PKI/child] (close)");
 							
@@ -2964,8 +2966,12 @@ void run_irc()
 
 void done_irc()
 {
-	signal(SIGINT, SIG_IGN), signal(SIGQUIT, SIG_IGN), signal(SIGTERM, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN), signal(SIGPIPE, SIG_IGN), signal(SIGHUP, SIG_IGN);
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGTERM, SIG_IGN);
+	signal(SIGCHLD, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);
+	signal(SIGHUP, SIG_IGN);
 	*irc << "PART #openSkat" << std::endl << std::flush;
 	*irc << "QUIT :SecureSkat rulez!" << std::endl << std::flush;
 	for (std::map<pid_t, std::string>::const_iterator pidi = games_pid2tnr.begin();
@@ -3047,7 +3053,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.18 2005/04/29 07:38:17 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.19 2005/05/19 21:28:20 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

@@ -2838,7 +2838,7 @@ int skat_game
 					pkr.key[1].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 			right->getline(stmp, sizeof(stmp));
 			if (!pkr.key[2].verify(sig_data, stmp))
 			{
@@ -2846,7 +2846,7 @@ int skat_game
 					pkr.key[2].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 		}
 		else if (pkr_self == 1)
 		{
@@ -2857,7 +2857,7 @@ int skat_game
 					pkr.key[0].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
 			*left << sig << std::endl << std::flush;
@@ -2869,7 +2869,7 @@ int skat_game
 					pkr.key[2].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 		}
 		else if (pkr_self == 2)
 		{
@@ -2880,7 +2880,7 @@ int skat_game
 					pkr.key[0].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 			right->getline(stmp, sizeof(stmp));
 			if (!pkr.key[1].verify(sig_data, stmp))
 			{
@@ -2888,7 +2888,7 @@ int skat_game
 					pkr.key[1].name << "\" ungueltig" << std::endl;
 				return 30;
 			}
-			sig_protokoll << sig << "#";
+			sig_protokoll << stmp << "#";
 			sig = sec.sign(sig_data);
 			sig_protokoll << sig << "#";
 			*left << sig << std::endl << std::flush;

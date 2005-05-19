@@ -9,3 +9,5 @@ SecureSkat 2.4:
 		  These problems are issues of the library libTMCG. We announce them
 		  here to reach all possible users of SecureSkat.
 SecureSkat 2.5:
+		- a bug in the generation of the ranking data was fixed
+
