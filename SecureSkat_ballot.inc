@@ -339,7 +339,7 @@ int ballot_child
 				}
 				// establish connection
 				iosocketstream *neighbor = new iosocketstream(handle);
-				TMCG_CardSecret cs;
+				TMCG_CardSecret cs(gp_nick.size(), b);
 				ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 				*neighbor << cs << std::endl << std::flush;
 				char challenge_sig[TMCG_MAX_CARD_CHARS];
@@ -490,7 +490,7 @@ int ballot_child
 						
 						// authenticate connection
 						char tmp[TMCG_MAX_CARD_CHARS];
-						TMCG_CardSecret cs;
+						TMCG_CardSecret cs(gp_nick.size(), b);
 						// receive challenge
 						neighbor->getline(tmp, sizeof(tmp));
 						if (cs.import(tmp))
