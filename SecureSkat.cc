@@ -3053,7 +3053,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.19 2005/05/19 21:28:20 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.20 2005/05/22 10:22:15 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3103,21 +3103,23 @@ int main(int argc, char* argv[], char* envp[])
 		// initalize libTMCG
 		if (!init_libTMCG())
 		{
-			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
+			std::cerr << _("Initalization of the libTMCG failed!") << std::endl;
 			return -1;
 		}
 		
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
-		get_public_keys(cmd + ".pkr", nick_key);
 		get_secret_key(cmd + ".skr", sec, public_prefix);
-		pub = TMCG_PublicKey(sec);
+		pub = TMCG_PublicKey(sec); // extract the public part of the key
+		get_public_keys(cmd + ".pkr", nick_key);
 		
 		create_pki(pki7771_port, pki7771_handle);
 		create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
 		load_rnk(cmd + ".rnk", rnk);
 		create_irc(argv[1], irc_port);
 		init_irc();
-		std::cout << _("Usage: type /help for command list or read file README") << std::endl;
+		std::cout <<
+			_("Usage: type /help for the command list or read file README") <<
+			std::endl;
 #ifndef NOHUP
 		init_term();
 #endif

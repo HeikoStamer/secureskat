@@ -220,7 +220,7 @@ size_t skat_spitzen
 	if (skat_spiel2gwert(spiel) == 23)
 		return 0;
 	
-	// mit oder ohne Spitzen z?len
+	// mit oder ohne Spitzen zaehlen
 	if (os.find(0))
 	{
 		for (size_t sz = 0; sz < 11; sz++)
@@ -267,9 +267,9 @@ bool skat_rulectl
 	if (skat_spiel2gwert(spiel) == 23)
 		to = 0;	// Null: kein Trumpf
 	else if (skat_spiel2gwert(spiel) == 24)
-		to = 4;	// Grand: 4 Tr?pfe
+		to = 4;	// Grand: 4 Truempfe
 	else
-		to = 11;	// Farbspiele: 11 Tr?pfe
+		to = 11;	// Farbspiele: 11 Truempfe
 
 	if (skat_idx(co, 4, t, 0) != 99)
 	{
@@ -1374,7 +1374,7 @@ int skat_game
 						cmd.length() - cmd.find(" ", 4) - 1);
 					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0))
 					{
-						// VH passt (am Schlu?
+						// VH passt (am Schluss)
 						if (reiz_status == 10)
 						{
 							if (nick == nicks[vh])
@@ -2658,7 +2658,7 @@ int skat_game
 					}
 				}
 				
-				// Stapel des Alleinspielers um Skat vervollst?digen
+				// Stapel des Alleinspielers um Skat vervollstaendigen
 				for (size_t t = 0; t < 32; t++)
 				{
 					if (!os_rc[0].find(t) && !os_rc[1].find(t) && !os_rc[2].find(t))
@@ -2910,7 +2910,8 @@ int skat_game
 		opipestream *npipe = new opipestream(hpipe);
 		*npipe << hex_rnk_digest << std::endl << std::flush;
 		*npipe << spiel_protokoll.str() << std::endl << std::flush;
-		delete [] rnk_digest, delete [] hex_rnk_digest;
+		delete [] rnk_digest;
+		delete [] hex_rnk_digest;
 		delete npipe;
 	}
 	delete vtmf;

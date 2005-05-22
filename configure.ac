@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.25 $)
+AC_REVISION($Revision: 1.26 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.5, stamer@gaos.org)
@@ -108,6 +108,7 @@ AC_SYS_POSIX_TERMIOS
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
+AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname])
 

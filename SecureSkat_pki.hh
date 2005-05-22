@@ -32,13 +32,16 @@
 	#include <netdb.h>
 	#include <sys/socket.h>
 	#include <sys/stat.h>
-	#include <gdbm.h>
 	#include <clocale>
 	#include <libintl.h>
 	
 	#include <string>
 	#include <sstream>
 	#include <map>
+	
+	#include <gdbm.h>
+	#include <gcrypt.h>
+	#include <termios.h>
 	
 	#include <libTMCG.hh>
 	#include "SecureSkat_misc.hh"

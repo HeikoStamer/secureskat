@@ -25,7 +25,7 @@ Requirements
   You need the following libraries and appropriate header files to build
   (gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
 
-  * libTMCG, version >= 1.0.0
+  * Toolbox for Mental Card Games (libTMCG), version >= 1.0.0
     http://savannah.nongnu.org/projects/libtmcg/
 
   * GNU MP Library (libgmp), version >= 4.1
@@ -44,19 +44,19 @@ Requirements
   * GNU Database Manager (libgdbm), version >= 1.8.0
     http://www.gnu.org/
 
-  * ncurses Library (-lncurses)
+  * ncurses Library (libncurses)
 
-  * zlib Library (-lz)
+  * zlib Compression Library (libz)
 
   SecureSkat was tested (+ successful, - with errors) on following platforms:
 
   - GNU/Linux (Debian 2.2)      i686        gcc 2.95.2      (<sstream> missing)
   + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
   + GNU/Linux (Debian testing)  sparc       gcc 3.3.4
-  + GNU/Linux (Debian unstable) i686        gcc 3.4.x
+  + GNU/Linux (Debian unstable) i686        gcc 3.3.6
   + FreeBSD 4.0                 i386 (SMP)  gcc 2.95.2
   + FreeBSD 5.0 RC1             i686        gcc 3.2.1
-  + SunOS 5.8, Solaris 2.7      sparc       gcc 3.3.4
+  + SunOS 5.8, Solaris 2.7      sparc       gcc 3.2.4
   - GNU/Linux (Sharp Zaurus)    arm         zgcc 2.95.2     (--disable-shared)
   + Darwin 7.5.0                powerpc     gcc 3.3 (Apple Computer, Inc. build 1666)
 
@@ -78,29 +78,31 @@ Playing `SecureSkat' over an IRC network
     <IRC_PORT> is the TCP port number of this server, e.g. 6667,
     <SECURTIY> is your security parameter t, e.g. 16, (see introduction)
     <INTERFACE> is a interface control program, e.g. SecureSkat_random.
-    (Please give the full path to the binary file!)
+    (Please give the full path to the binary program file!)
 
-  The last three arguments are optional. In this case the security parameter 
-  is set to value 16 and the irc port number to 6667. Currently only one
-  control program is included:
-    SecureSkat_random : random computer player (maybe a bad opponent)
+  The last three arguments are optional. In such a case the security parameter 
+  is set to value 16 and the IRC port number to 6667. Currently only one
+  control program is included in this distribution:
+    SecureSkat_random : a random computer player (a weak opponent)
     
-  First time (file 'SecureSkat.skr' does not exists yet) you will be asked for
+  First time (if file 'SecureSkat.skr' does not exists yet) you will be
+  asked for
   
     Your nickname:
     Your electronic mail address:
   
-  You should input two non-empty strings, hopefully based on honest data.
+  You should input two non-empty strings, hopefully based on honest values.
   After this procedure your public and secret key is created and stored 
   in file 'SecureSkat.skr' (Protect this one, because it is NOT encrypted!).
   
-  Dependent on your hardware the key generation will take much time until
+  Dependent on your hardware the key generation will take a lot of time until
   the success message `PKI: cryptographic key ID5^????? created and stored'
-  is printed out. (? is here a wildcard for some random letters)
+  is printed out. ('?' is a wildcard for some random letters)
   
   Then you will registered at the IRC server with a strange nickname like
-  `ID5^z34g0' (based on key id from your public key). In large player networks
-  collisions become probable--- in such cases, please generate a new key.
+  `ID5^z34g0' (based on the key id of your public key). In large player
+  networks collisions become probable--- in such cases, please generate a
+  fresh key by deleting the file 'SecureSkat.skr'.
   
   Automagicly you are joined to channel #openSkat (The former name was kept
   to provide the compatibility with old versions.) and you can chat with
@@ -136,12 +138,12 @@ Playing `SecureSkat' over an IRC network
   The program try to exchange and check public keys automagically. Therefore
   SecureSkat binds three TCP-ports (free ports up from 7771): the first exports
   the public key, the second exports a table of stored ranking data, and the
-  third answers ranking data requests. The check whether any public key is valid
-  will done with non-interactive zero knowledge proofs (their soundness error
-  probability is currently fixed at 2^{-80}). Hence the execution can take
-  a lot of time until a success message `PKI identified ID5^????? aka ???...'
-  (? is a wildcard) is printed out or the child process aborts with an
-  appropriate error message.
+  third answers ranking data requests. The check whether any public key is
+  valid is now done with non-interactive zero knowledge proofs (their soundness
+  error probability is currently fixed at 2^{-80}). Hence the execution can
+  take a large amount of time until a success message `PKI identified ID5^?????
+  aka ???...' ('?' is again a wildcard) is printed or the child process aborts
+  with an appropriate error message.
 
   If the key exchange was successful, you can start a game by joining
   existing tables (/skat <table identifyer>) or by creating a new table

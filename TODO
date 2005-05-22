@@ -9,7 +9,6 @@ Copyright (c)  2002, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 Stuff that should be done (until first production release):
 
 + use GNU TLS for privacy and integrity protection
-+ encrypt the secret key database
 + replace (former) xskat GUI by native IRC server implementation
 + tunnel TCP connections via IRC (if requested, e.g. paranoid firewall)
 - for gcc: perror output with __FILE__::__FUNCTION__
