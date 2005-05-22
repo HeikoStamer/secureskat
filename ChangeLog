@@ -11,4 +11,4 @@ SecureSkat 2.4:
 SecureSkat 2.5:
 		- a bug in the generation of the ranking data was fixed
 		- important bugfixes for the secret voting facility
-		- protection of the secret key: encrypting with a user supplied pass phrase
+		- protecting the secret key: encryption with user supplied pass phrase
