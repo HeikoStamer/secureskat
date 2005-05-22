@@ -70,46 +70,50 @@ void get_secret_key
 			std::string pass_phrase =
 				get_passphrase(_("Enter the pass phrase to unlock your key"));
 			
-			assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-			char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
-				pass_phrase.c_str(), pass_phrase.length());
-			
-			gcry_cipher_hd_t handle;
-			gcry_error_t err = 0;
-			
-			err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
-				GCRY_CIPHER_MODE_CFB, 0);
-			if (err)
+			if (pass_phrase != "")
 			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): " <<
-					gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
+				assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+				char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+					pass_phrase.c_str(), pass_phrase.length());
+				
+				gcry_cipher_hd_t handle;
+				gcry_error_t err = 0;
+				
+				err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+					GCRY_CIPHER_MODE_CFB, 0);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				err = gcry_cipher_setkey(handle, pass_digest, 16);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr,
+					data.dsize, NULL, 0);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				gcry_cipher_close(handle);
+				delete [] pass_digest;
 			}
 			
-			err = gcry_cipher_setkey(handle, pass_digest, 16);
-			if (err)
-			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): " <<
-					gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
-			}
-			
-			err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr, data.dsize,
-				NULL, 0);
-			if (err)
-			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): " <<
-							gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
-			}
-
-			// convert decrypted secret key for importing by the TMCG data structure
+			// convert (decrypted) secret key for importing
 			ost << data.dptr;
 			key_str = key.dptr;
 			
-			gcry_cipher_close(handle);
-			delete [] pass_digest;
 			free(data.dptr);
 			free(key.dptr);
 		}
@@ -117,7 +121,7 @@ void get_secret_key
 		{
 			// sync the GDBM file physically
 			gdbm_sync(sec_db);
-		
+			
 			// create a fresh secret key
 			std::string name, email, keyid, osttmp;
 			std::cout << _("Your nickname") << ": ";
@@ -151,6 +155,12 @@ void get_secret_key
 			{
 				pass_phrase = 
 					get_passphrase(_("Enter a pass phrase to protect your secret key"));
+				if (pass_phrase == "")
+				{
+					std::cerr << _("Empty pass phrase. Encryption disabled!") <<
+						std::endl;
+					break;
+				}
 				pass_retyped =
 					get_passphrase(_("Retype your pass phrase"));
 				if (pass_phrase != pass_retyped)
@@ -158,57 +168,51 @@ void get_secret_key
 						_("Please repeat carefully!") << std::endl;
 			}
 			while (pass_phrase != pass_retyped);
-
-			assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-			char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
-				pass_phrase.c_str(), pass_phrase.length());
 			
-			gcry_cipher_hd_t handle;
-			gcry_error_t err = 0;
-			
-			err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
-				GCRY_CIPHER_MODE_CFB, 0);
-			if (err)
+			if (pass_phrase != "")
 			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): " <<
-					gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
+				assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+				char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+					pass_phrase.c_str(), pass_phrase.length());
+				
+				gcry_cipher_hd_t handle;
+				gcry_error_t err = 0;
+				
+				err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+					GCRY_CIPHER_MODE_CFB, 0);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				err = gcry_cipher_setkey(handle, pass_digest, 16);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr,
+					data.dsize, NULL, 0);
+				if (err)
+				{
+					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): "
+						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+					exit(-1);
+				}
+				
+				gcry_cipher_close(handle);
+				delete [] pass_digest;
 			}
-			
-			err = gcry_cipher_setkey(handle, pass_digest, 16);
-			if (err)
-			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): " <<
-					gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
-			}
-			
-			err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr, data.dsize,
-				NULL, 0);
-			if (err)
-			{
-				std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): " <<
-							gcry_strsource(err) << "/" << gcry_strerror(err) <<	std::endl;
-				exit(-1);
-			}
-			
-			gcry_cipher_close(handle);
-			delete [] pass_digest;
 			
 			// store the encrypted secret key in the GDBM file (first entry)
-			char *cp_keybuf = new char[key.dsize + 65536];
-			char *cp_databuf = new char[data.dsize + 65536];
-			memset(cp_keybuf, 0, key.dsize + 65536);
-			memset(cp_databuf, 0, data.dsize + 65536);
-			memcpy(cp_keybuf, key.dptr, key.dsize);
-			memcpy(cp_databuf, data.dptr, data.dsize);
-			key.dptr = cp_keybuf, data.dptr = cp_databuf;
 			gdbm_store(sec_db, key, data, GDBM_INSERT);
 			std::cout << _("PKI: cryptographic key") << " \"" << keyid <<
 				"\" " << _("created and stored") << std::endl;
-			delete [] cp_keybuf;
-			delete [] cp_databuf;
 		}
 		gdbm_close(sec_db);
 	}
