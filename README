@@ -85,7 +85,7 @@ Playing `SecureSkat' over an IRC network
   control program is included in this distribution:
     SecureSkat_random : a random computer player (a weak opponent)
     
-  First time (if file 'SecureSkat.skr' does not exists yet) you will be
+  First time (if the file 'SecureSkat.skr' does not exists yet) you will be
   asked for
   
     Your nickname:
@@ -93,7 +93,8 @@ Playing `SecureSkat' over an IRC network
   
   You should input two non-empty strings, hopefully based on honest values.
   After this procedure your public and secret key is created and stored 
-  in file 'SecureSkat.skr' (Protect this one, because it is NOT encrypted!).
+  in file 'SecureSkat.skr'. Later you have to supply a pass phrase to
+	protect	your secret key by encryption.
   
   Dependent on your hardware the key generation will take a lot of time until
   the success message `PKI: cryptographic key ID5^????? created and stored'
