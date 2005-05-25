@@ -430,24 +430,19 @@ void init_irc()
 	*irc << "NICK " << pub.keyid() << std::endl << std::flush;
 }
 
-void skat_connect
-	(opipestream *out_pipe, const std::string &nr, SchindelhauerTMCG *t,
+int skat_connect
+	(SchindelhauerTMCG *t,
 	size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
 	const TMCG_PublicKeyRing &pkr)
 {
 	// create TCP/IP connection
-	handle = ConnectToHost(
-		nick_players[vnicks[pkr_idx]].c_str(),
-		gp_ports[vnicks[pkr_idx]]
-	);
+	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(),
+		gp_ports[vnicks[pkr_idx]]);
 	if (handle < 0)
-	{
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1),	exit(-4);
-	}
+		return -4;
 	iosocketstream *neighbor = new iosocketstream(handle);
-
+	
 	// authenticate connection
 	char tmp[TMCG_MAX_CARD_CHARS];
 	TMCG_CardSecret cs(3, 5);
@@ -472,16 +467,14 @@ void skat_connect
 		{
 			delete neighbor;
 			close(handle);
-			*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-			sleep(1),	exit(-6);
+			return -6;
 		}
 	}
 	else
 	{
 		delete neighbor;
 		close(handle);
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1), exit(-6);
+		return -6;
 	}
 	
 	// exchange secret keys for securesocketstreams
@@ -497,31 +490,32 @@ void skat_connect
 		delete neighbor;
 		delete [] key1, delete [] key2;
 		close(handle);
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1), exit(-6);
+		return -6;
 	}
 	memcpy(key2, dv, TMCG_SAEP_S0);
 	delete neighbor;
 	secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
 	delete [] key1, delete [] key2, delete [] dv;
+	return 0;
 }
 
-void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r,
-	SchindelhauerTMCG *t, int pkr_self, int pkr_idx, 
-	iosecuresocketstream *&secure, int &handle, const std::vector<std::string> &vnicks,
-	const TMCG_PublicKeyRing &pkr, int gp_handle, bool neu, char *ireadbuf, int &ireaded)
+int skat_accept
+	(opipestream *out_pipe, int ipipe, const std::string &nr, int r,
+	SchindelhauerTMCG *t, int pkr_self, int pkr_idx,
+	iosecuresocketstream *&secure, int &handle,
+	const std::vector<std::string> &vnicks, const TMCG_PublicKeyRing &pkr,
+	int gp_handle, bool neu, char *ireadbuf, int &ireaded)
 {
 	struct hostent *hostinf;
 	struct sockaddr_in sin;
 	if ((hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str())) != NULL)
-	{ 
+	{
 		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
 	}
 	else
 	{
 		perror("skat_accept (gethostbyname)");
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1),	exit(-4);
+		return -4;
 	}
 	fd_set rfds;									// set of read descriptors
 	int mfds = 0;									// highest-numbered descriptor
@@ -543,17 +537,21 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 		{
 			struct sockaddr_in client_in;
 			socklen_t client_len = sizeof(client_in);
-			handle = accept(gp_handle, 
+			handle = accept(gp_handle,
 				(struct sockaddr*) &client_in, &client_len);
 			if (handle < 0)
+			{
 				perror("skat_accept (accept)");
+				return -4;
+			}
 			else
 			{
 				if (client_in.sin_addr.s_addr == sin.sin_addr.s_addr)
 				{
 					iosocketstream *neighbor = new iosocketstream(handle);
+					
+					// create a nonce
 					TMCG_CardSecret cs(3, 5);
-					// create a nounce
 					t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 					*neighbor << cs << std::endl << std::flush;
 					char tmp[TMCG_MAX_CARD_CHARS];
@@ -565,8 +563,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 					{
 						delete neighbor;
 						close(handle);
-						*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-						sleep(1),	exit(-6);
+						return -6;
 					}
 					else
 					{
@@ -587,8 +584,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 								delete neighbor;
 								delete [] key1, delete [] key2;
 								close(handle);
-								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-								sleep(1),	exit(-6);
+								return -6;
 							}
 							memcpy(key2, dv, TMCG_SAEP_S0);
 							
@@ -605,16 +601,14 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 						{
 							delete neighbor;
 							close(handle);
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-							sleep(1),	exit(-6);
+							return -6;
 						}
 					}
 				}
 				else
 				{
 					close(handle);
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-					sleep(1),	exit(-6);
+					return -6;
 				}
 			}
 		}
@@ -642,7 +636,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 					// do operation
 					if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 					{
-						exit(-1);
+						return -1;
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
@@ -665,10 +659,7 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 					{
 						std::string nick = cmd.substr(5, cmd.length() - 5);
 						if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
-						{
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-							sleep(1), exit(-5);
-						}
+							return -5;
 					}
 				}
 				char tmp[65536];
@@ -678,21 +669,32 @@ void skat_accept (opipestream *out_pipe, int ipipe, const std::string &nr, int r
 				memcpy(ireadbuf, tmp, ireaded);
 			}
 			if (num == 0)
-			{
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-				sleep(1), exit(-50);
-			}
+				return -50;
 		}
 	}
+	return 0;
 }
 
-void skat_alive(opipestream *out_pipe, const std::string &nr, 
-	iosecuresocketstream *r, iosecuresocketstream *l)
+int skat_alive
+	(iosecuresocketstream *r, iosecuresocketstream *l)
 {
 	if (!r->good() || !l->good())
+		return -5;
+	return 0;
+}
+
+void skat_error
+	(int error, opipestream *out_pipe, const std::string &nr)
+{
+	if (error)
 	{
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-		sleep(1), exit(-5);
+		if (error < -1)
+		{
+			*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+			sleep(1);		// The child has to sleep a second before it can exit,
+									// because the parent must process the PART message first.
+		}
+		exit(error);
 	}
 }
 
@@ -701,7 +703,7 @@ void skat_alive(opipestream *out_pipe, const std::string &nr,
 int skat_child
 	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe, const std::string &master)
 {
-	SchindelhauerTMCG *gp_tmcg = 
+	SchindelhauerTMCG *gp_tmcg =
 		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 2^5 = 32 cards
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
@@ -797,7 +799,7 @@ int skat_child
 			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(gp_nick.begin(), gp_nick.end(), nick)	!= gp_nick.end())
 			{
-				gp_nick.remove(nick),	gp_name.erase(nick);
+				gp_nick.remove(nick), gp_name.erase(nick);
 			}
 		}
 		if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
@@ -844,7 +846,7 @@ int skat_child
 		else
 			pkr.key[pkr_i++] = nick_key[*pi];
 	}
-	int gp_port = BindEmptyPort(7800), gp_handle;
+	int gp_handle, gp_port = BindEmptyPort(7800);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
 		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
@@ -915,33 +917,40 @@ int skat_child
 	}
 	std::cout << X << _("Table") << " " << nr << " " <<
 		_("establishing secure channels") << " ..." << std::endl;
-	int connect_handle, accept_handle;
+	int connect_handle, accept_handle, error = 0;
 	iosecuresocketstream *left_neighbor, *right_neighbor;
 	switch (pkr_self)
 	{
 		case 0:
-			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 1,
+			error = skat_connect(gp_tmcg, pkr_self, 1,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
-			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
+			skat_error(error, out_pipe, nr);
+			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
+			skat_error(error, out_pipe, nr);
 			break;
 		case 1:
-			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
+			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
-			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 2,
+			skat_error(error, out_pipe, nr);
+			error = skat_connect(gp_tmcg, pkr_self, 2,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+			skat_error(error, out_pipe, nr);
 			break;
 		case 2:
-			skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
+			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
-			skat_connect(out_pipe, nr, gp_tmcg, pkr_self, 0,
+			skat_error(error, out_pipe, nr);
+			error = skat_connect(gp_tmcg, pkr_self, 0,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
+			skat_error(error, out_pipe, nr);
 			break;
 	}
-	skat_alive(out_pipe, nr, right_neighbor, left_neighbor);
+	skat_error(skat_alive(right_neighbor, left_neighbor), out_pipe, nr);
+	
 	if (neu)
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << vnicks[0] << ", " <<
 			vnicks[1] << ", " << vnicks[2] << "!" << std::endl << std::flush;
@@ -960,6 +969,7 @@ int skat_child
 		{
 			if (ctl_pid == 0)
 			{
+				/* BEGIN child code (control program) */
 				if (dup2(pipe2fd[0], fileno(stdin)) < 0 ||
 					dup2(pipe1fd[1], fileno(stdout)) < 0)
 						perror("skat_child (dup2)");
@@ -972,9 +982,10 @@ int skat_child
 				game_arg[0] = (char*)game_ctl.c_str();
 				if (execve(game_ctl.c_str(), game_arg, game_env) < 0)
 					perror("skat_child (execve)");
-				// block child in this loop	
+				// block child in this loop
 				while (1) 
 					sleep(100);
+				/* END child code (control program) */
 			}
 			else
 			{
@@ -982,8 +993,8 @@ int skat_child
 				if ((close(pipe1fd[1]) < 0) || (close(pipe2fd[0]) < 0))
 					perror("skat_child (close)");
 				ctl_i = pipe1fd[0], ctl_o = pipe2fd[1];
-				std::cout << X << _("Execute control process") << " (" << ctl_pid << 
-					"): " << std::flush;
+				std::cout << X << _("Execute control process") <<
+					" (" << ctl_pid << "): " << std::flush;
 				char buffer[1024];
 				memset(buffer, 0, sizeof(buffer));
 				ssize_t num = read(ctl_i, buffer, sizeof(buffer));
@@ -995,12 +1006,12 @@ int skat_child
 		}
 	}
 	
-	// start game
+	// start the game
 	std::cout << X << _("Table") << " " << nr << " " << _("start the game.") << std::endl;
 	if (neu)
 	{
 		// set topic
-		*out_pipe << "TOPIC #openSkat_" << nr << " :" << PACKAGE_STRING	<<
+		*out_pipe << "TOPIC #openSkat_" << nr << " :" << PACKAGE_STRING <<
 			std::endl << std::flush;
 	}
 	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i,
@@ -1019,7 +1030,7 @@ int skat_child
 		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << r << "!" << 
 			std::endl << std::flush;
 	
-	// exit from game
+	// release the game
 	delete gp_tmcg, delete left_neighbor, delete right_neighbor;
 	close(connect_handle), close(accept_handle);
 	if (exit_code != 6)
@@ -1563,17 +1574,20 @@ static void process_line(char *line)
 						{
 							if (game_pid == 0)
 							{
-								signal(SIGQUIT, SIG_DFL), signal(SIGTERM, SIG_DFL);
+								/* BEGIN child code (game process) */
+								signal(SIGQUIT, SIG_DFL);
+								signal(SIGTERM, SIG_DFL);
 								if ((close(rnk_pipe[0]) < 0) || 
 									(close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 										perror("run_irc (close)");
-								int ret = skat_child(tnr, r, true, in_pipe[0], 
+								int ret = skat_child(tnr, r, true, in_pipe[0],
 									out_pipe[1], rnk_pipe[1], pub.keyid());
 								sleep(1);
 								if ((close(rnk_pipe[1]) < 0) || 
 									(close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 										perror("run_irc (close)");
 								exit(ret);
+								/* END child code (game process) */
 							}
 							else
 							{
@@ -1617,7 +1631,9 @@ static void process_line(char *line)
 							{
 								if (game_pid == 0)
 								{
-									signal(SIGQUIT, SIG_DFL), signal(SIGTERM, SIG_DFL);
+									/* BEGIN child code (game process) */
+									signal(SIGQUIT, SIG_DFL);
+									signal(SIGTERM, SIG_DFL);
 									if ((close(rnk_pipe[0]) < 0) || 
 										(close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 											perror("run_irc (close)");
@@ -1628,6 +1644,7 @@ static void process_line(char *line)
 										(close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 											perror("run_irc (close)");
 									exit(ret);
+									/* END child code (game process) */
 								}
 								else
 								{
@@ -1679,7 +1696,9 @@ static void process_line(char *line)
 						{
 							if (ballot_pid == 0)
 							{
-								signal(SIGQUIT, SIG_DFL), signal(SIGTERM, SIG_DFL);
+								/* BEGIN child code (ballot process) */
+								signal(SIGQUIT, SIG_DFL);
+								signal(SIGTERM, SIG_DFL);
 								if ((close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 									perror("run_irc (close)");
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
@@ -1688,6 +1707,7 @@ static void process_line(char *line)
 								if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 									perror("run_irc (close)");
 								exit(ret);
+								/* END child code (ballot process) */
 							}
 							else
 							{
@@ -1729,7 +1749,9 @@ static void process_line(char *line)
 							{
 								if (ballot_pid == 0)
 								{
-									signal(SIGQUIT, SIG_DFL), signal(SIGTERM, SIG_DFL);
+									/* BEGIN child code (ballot process) */
+									signal(SIGQUIT, SIG_DFL);
+									signal(SIGTERM, SIG_DFL);
 									if ((close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 										perror("run_irc (close)");
 									int ret = ballot_child(tnr, -tables_r[tnr], false,
@@ -1738,6 +1760,7 @@ static void process_line(char *line)
 									if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 										perror("run_irc (close)");
 									exit(ret);
+									/* END child code (ballot process) */
 								}
 								else
 								{
@@ -3053,7 +3076,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.20 2005/05/22 10:22:15 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.21 2005/05/25 21:20:14 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

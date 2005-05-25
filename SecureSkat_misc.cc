@@ -100,7 +100,7 @@ int ConnectToHost
 	struct sockaddr_in sin;
 	sin.sin_port = htons(port), sin.sin_family = AF_INET;
 	if ((hostinf = gethostbyname(host)) != NULL)
-	{ 
+	{
 		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
 	}
 	else
@@ -123,18 +123,18 @@ int ConnectToHost
 
 char *stripwhite(char *str)
 {
-  register char *s, *t;
-
-  for (s = str; whitespace(*s); s++)
-    ;
-
-  if (*s == 0)
-    return s;
-
-  t = s + strlen(s) - 1;
-  while (t > s && whitespace(*t))
-    t--;
-  *++t = '\0';
-
-  return s;
+	register char *s, *t;
+	
+	for (s = str; ((*s == ' ') || (*s == '\t')); s++)
+		;
+	
+	if (*s == 0)
+		return s;
+	
+	t = s + strlen(s) - 1;
+	while (t > s && ((*t == ' ') || (*t == '\t')))
+		t--;
+	*++t = '\0';
+	
+	return s;
 }

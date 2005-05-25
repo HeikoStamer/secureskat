@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 	#include <netinet/in.h>
 	#include <netdb.h>
 	#include <sys/socket.h>
-	
-	#include <readline/readline.h>
 	
 	int BindEmptyPort
 		(int start_port);
