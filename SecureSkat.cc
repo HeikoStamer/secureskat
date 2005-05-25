@@ -2046,9 +2046,10 @@ void run_irc()
 					{
 						if (client_pid == 0)
 						{
-							signal(SIGQUIT, SIG_DFL),	signal(SIGTERM, SIG_DFL);
+							signal(SIGQUIT, SIG_DFL);
+							signal(SIGTERM, SIG_DFL);
 							
-							// begin -- child code
+							/* BEGIN child code (ranking data) */
 							iosocketstream *client_ios = new iosocketstream(client_handle);
 							char *tmp = new char[100000L];
 							client_ios->getline(tmp, 100000L);
@@ -2059,7 +2060,7 @@ void run_irc()
 								*client_ios << std::endl << std::flush;
 							delete client_ios, delete [] tmp;
 							exit(0);
-							// end -- child code
+							/* END child code (ranking data) */
 						}
 						else
 						{
@@ -2190,7 +2191,7 @@ void run_irc()
 									host << ") " << _("joins") << " " << tb << std::endl;
 							}
 							else
-							{	
+							{
 								if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 								{
 									opipestream *npipe = 
@@ -2251,7 +2252,7 @@ void run_irc()
 							std::string tb = 
 								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
 								
-							if (nick.find(pub.keyid(), 0)	== 0)
+							if (nick.find(pub.keyid(), 0) == 0)
 							{
 								std::cout << X << _("you leave") << " " << tb << std::endl;
 							}
@@ -3076,7 +3077,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.21 2005/05/25 21:20:14 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.22 2005/05/25 21:36:41 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
