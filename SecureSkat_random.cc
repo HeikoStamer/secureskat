@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -78,19 +78,19 @@ void random_announce(const vector<size_t> &cards)
 
 int main (int argc, char **argv)
 {
-	cout << argv[0] << " (c) 2002 <stamer@gaos.org> " << endl;
-
+	cout << argv[0] << " (c) 2005 <stamer@gaos.org> " << endl;
+	
 	fd_set rfds;									// set of read descriptors
 	int mfds = 0;									// highest-numbered descriptor
 	struct timeval tv;						// timeout structure for select(2)
 	char buffer[1024];
 	int readed = 0;
-
+	
 	size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100, spiel_status = 0;
 	bool reize_dran = false, lege_dran = false, gepasst = false;
 	vector<string>			nicks, names;
 	vector<size_t>			cards, ocards, stich;
-
+	
 	srandom(time(NULL) + getpid() + getppid());
 	while (1)
 	{
@@ -132,6 +132,7 @@ int main (int argc, char **argv)
 					string cmd = xtmp;
 					size_t ei;
 					vector<string> par;
+//std::cerr << "parse_random: CMD = " << cmd << std::endl;
 					// parse params
 					while ((ei = cmd.find(" ", 0)) != cmd.npos)
 					{
@@ -146,11 +147,19 @@ int main (int argc, char **argv)
 							if (par[0] == nicks[j])
 								from = j;
 						
-						if ((par[1] == "INIT") && (par.size() == 4) && (nicks.size() < 3))
+						if ((par[1] == "INIT") && (par.size() >= 4) && (nicks.size() < 3))
 						{
 							if (par[2] == par[0])
 								pkr_self = nicks.size();
-							nicks.push_back(par[2]), names.push_back(par[3]);
+							nicks.push_back(par[2]);
+							string name;
+							for (size_t j = 0; j < (par.size() - 3); j++)
+							{
+								name += par[3 + j];
+								if (j < (par.size() - 4))
+									name += " ";
+							}
+							names.push_back(name);
 						}
 						if ((par[1] == "DONE") && (par.size() == 2) && (from == pkr_self))
 						{

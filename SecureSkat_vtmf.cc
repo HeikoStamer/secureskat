@@ -878,7 +878,8 @@ bool skat_mischen
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
 		const TMCG_Stack<VTMF_Card> &d, const TMCG_StackSecret<VTMF_CardSecret> &ss,
-		TMCG_Stack<VTMF_Card> &d0, TMCG_Stack<VTMF_Card> &d1, TMCG_Stack<VTMF_Card> &d2,
+		TMCG_Stack<VTMF_Card> &d0, TMCG_Stack<VTMF_Card> &d1,
+		TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
@@ -969,7 +970,8 @@ int skat_game
 		
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " <<
+				_("function CheckGroup() failed") << std::endl;
 			return 2;
 		}
 		
@@ -980,12 +982,14 @@ int skat_game
 		
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 		{
-			std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " <<
+				_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 			return 2;
 		}
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 		{
-			std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " <<
+				_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 			return 2;
 		}
 	}
@@ -1004,7 +1008,8 @@ int skat_game
 		
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " <<
+				_("function CheckGroup() failed") << std::endl;
 			return 2;
 		}
 		
@@ -1014,14 +1019,16 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " <<
+					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
 			vtmf->KeyGenerationProtocol_PublishKey(*right);
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " <<
+					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 				return 2;
 			}
 		}
@@ -1029,12 +1036,14 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " <<
+					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 				return 2;
 			}
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				std::cout << ">< Fehler in VTMF: UpdateKey() failed" << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " <<
+					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
@@ -1065,7 +1074,8 @@ int skat_game
 			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
 			d2.push(d);
 			tmcg->TMCG_CreateStackSecret(ss, false, d2.size(), vtmf);
-			std::cout << "><>< Mische Karten. Bitte warten ..." << std::flush;
+			std::cout << "><>< " << _("Shuffle the cards.") << " " <<
+				_("Please wait") << " ." << std::flush;
 			if (pctl)
 			{
 				std::ostringstream ost;
@@ -1079,6 +1089,7 @@ int skat_game
 					<< std::endl;
 				return 1;
 			}
+			std::cout << "." << std::flush;
 			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
@@ -1086,7 +1097,7 @@ int skat_game
 					<< std::endl;
 				return 2;
 			}
-			std::cout << "Fertig!" << std::endl;
+			std::cout << "." << _("Finished!") << std::endl;
 			
 #ifdef ABHEBEN
 			// Abheben (cyclic shift of stack) von HH
@@ -1272,37 +1283,45 @@ int skat_game
 				
 				// error occured
 				if (ret < 0)
+				{
 					if (errno != EINTR)
 						perror("SecureSkat_vtmf::skat_game (select)");
-				if (!(ret > 0))
+				}
+				if (ret <= 0)
 					continue;
-				else
+				
+				ssize_t num = 0;
+				// pipe request
+				if (FD_ISSET(ipipe, &rfds))
 				{
-					ssize_t num = 0;
-					// pipe request
-					if (FD_ISSET(ipipe, &rfds))
-						num = read(ipipe, ireadbuf + ireaded, 65536 - ireaded);
-					else if (pctl && FD_ISSET(ctl_i, &rfds))
-						num = read(ctl_i, ireadbuf + ireaded, 65536 - ireaded);
-					ireaded += num;
-					
-					if (ireaded > 0)
+					num = read(ipipe, ireadbuf + ireaded, 65536 - ireaded);
+//FIXME: Was passiert, wenn der Buffer von ipipe und ctl_i gefuellt wird?
+//std::cerr << "ipipe " << num << std::endl;
+				}
+				else if (pctl && FD_ISSET(ctl_i, &rfds))
+				{
+					num = read(ctl_i, ireadbuf + ireaded, 65536 - ireaded);
+//std::cerr << "ctl_i " << num << std::endl;
+				}
+				ireaded += num;
+				
+				if (ireaded > 0)
+				{
+					bool got_break = false;
+					std::vector<int> pos_delim;
+					int cnt_delim = 0, cnt_pos = 0, pos = 0;
+					for (int i = 0; i < ireaded; i++)
+						if (ireadbuf[i] == '\n')
+							cnt_delim++, pos_delim.push_back(i);
+					while (cnt_delim >= 1)
 					{
-						bool got_break = false;
-						std::vector<int> pos_delim;
-						int cnt_delim = 0, cnt_pos = 0, pos = 0;
-						for (int i = 0; i < ireaded; i++)
-							if (ireadbuf[i] == '\n')
-								cnt_delim++, pos_delim.push_back(i);
-						while (cnt_delim >= 1)
-						{
-							char xtmp[65536];
-							memset(xtmp, 0, sizeof(xtmp));
-							memcpy(xtmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
-							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-							std::string cmd = xtmp;
-							// do operation
-							// ---------------------------------------------------------------
+						char xtmp[65536];
+						memset(xtmp, 0, sizeof(xtmp));
+						memcpy(xtmp, ireadbuf + cnt_pos, pos_delim[pos] - cnt_pos);
+						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+						std::string cmd = xtmp;
+						// do operation
+						// ---------------------------------------------------------------
 				
 				if (!left->good() || !right->good())
 				{
@@ -1954,6 +1973,7 @@ int skat_game
 				if (cmd.find("CMD ", 0) == 0)
 				{
 					std::string msg = cmd.substr(4, cmd.length() - 4);
+//std::cerr << "parse: CMD = " << msg << std::endl;
 					
 					// trim spaces at end of std::string
 					while (msg.find(" ", msg.length() - 1) == (msg.length() - 1))
@@ -2363,7 +2383,7 @@ int skat_game
 							{
 								if (!hand_spiel)
 								{
-									std::string par = ""; 
+									std::string par = "";
 									size_t ei = par.npos;
 									if ((msg.find(" ", 0) == 7) && (msg.length() > 8))
 									{
@@ -2601,20 +2621,20 @@ int skat_game
 					}
 				}
 							// ----------------------------------------------------------------
-						}
-						char ytmp[65536];
-						memset(ytmp, 0, sizeof(ytmp));
-						ireaded -= cnt_pos;
-						memcpy(ytmp, ireadbuf + cnt_pos, ireaded);
-						memcpy(ireadbuf, ytmp, ireaded);
-						if (got_break)
-							break;
 					}
-					if (num == 0)
-					{
-						std::cout << ">< Verbindung zu Programmteilen zusammengebrochen" << std::endl;
-						return 5;
-					}
+					char ytmp[65536];
+					memset(ytmp, 0, sizeof(ytmp));
+					ireaded -= cnt_pos;
+					memcpy(ytmp, ireadbuf + cnt_pos, ireaded);
+					memcpy(ireadbuf, ytmp, ireaded);
+					if (got_break)
+						break;
+				}
+				if (num == 0)
+				{
+					std::cout << "><>< Verbindung zu Programmteilen zusammengebrochen" <<
+						std::endl;
+					return 5;
 				}
 			}
 			
