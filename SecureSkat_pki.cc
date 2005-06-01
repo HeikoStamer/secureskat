@@ -54,7 +54,7 @@ void get_secret_key
 	(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix)
 {
 	std::string key_str;
-	std::ostringstream ost;
+	std::ostringstream ost, ost2;
 	datum key, data;
 	GDBM_FILE sec_db = 
 		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
@@ -66,10 +66,16 @@ void get_secret_key
 			// fetch secret key from the GDBM file (first entry)
 			data = gdbm_fetch(sec_db, key);
 			
-			// decrypt the secret key with a pass phrase entered by the user
-			std::string pass_phrase =
-				get_passphrase(_("Enter the pass phrase to unlock your key"));
+			// encrypted?
+			std::string pass_phrase = "";
+			ost2 << data.dptr;
+			if (!sec.import(ost2.str()))
+			{
+				pass_phrase =
+					get_passphrase(_("Enter the pass phrase to unlock your key"));
+			}
 			
+			// decrypt the secret key with a pass phrase entered by the user
 			if (pass_phrase != "")
 			{
 				assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
