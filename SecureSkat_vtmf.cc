@@ -22,7 +22,7 @@
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
-// global return std::string
+// global return string
 std::string wstr;
 
 // values for biding
@@ -366,10 +366,11 @@ int skat_vkarte
 		iosecuresocketstream *right, iosecuresocketstream *left, bool rmv
 	)
 {
-	char *tmp = new char[TMCG_MAX_CARD_CHARS];
+	assert(pkr_self != pkr_who);
+	
 	int type = -1;
 	VTMF_Card c;
-	assert(pkr_self != pkr_who);
+	char *tmp = new char[TMCG_MAX_CARD_CHARS];
 	
 	try
 	{
@@ -1113,8 +1114,7 @@ int skat_game
 						d_mix[2].size());
 				}
 				while ((cyc <= 3) || (cyc >= 29));
-				std::cout << "[" << cyc << " Karten abgehoben]..."
-					<< std::flush;
+				std::cout << "[" << cyc << " Karten abgehoben]" << std::flush;
 				tmcg->TMCG_MixStack(d_mix[2], d_end, ab, vtmf);
 				*left << d_end << std::endl << std::flush;
 				*right << d_end << std::endl << std::flush;
@@ -1232,45 +1232,55 @@ int skat_game
 					std::cout << ">< Verbindung mit Spielpartner(n) zusammengebrochen" << std::endl;
 					return 5;
 				}
-				if (reiz_status == 11)
+				
+				bool brk = false;
+				switch (reiz_status)
 				{
-					reiz_status += 100;
-					std::cout << "><><>< Keiner reizt das Spiel. Neu geben!" << std::endl;
-					if (pctl)
-					{
-						std::ostringstream ost;
-						ost << nicks[pkr_self] << " RAMSCH" << std::endl;
-						*out_ctl << ost.str() << std::flush;
-					}
+					case 11:
+						reiz_status += 100;
+						std::cout << "><><>< Keiner reizt das Spiel. Neu geben!" << 
+							std::endl;
+						if (pctl)
+						{
+							std::ostringstream ost;
+							ost << nicks[pkr_self] << " RAMSCH" << std::endl;
+							*out_ctl << ost.str() << std::flush;
+						}
+						brk = true;
+						break;
+					case 12:
+						reiz_status += 100;
+						std::cout << "><><>< VH aka \"" << pkr.key[vh].name << 
+							"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << 
+							std::endl;
+						spiel_allein = vh;
+						if (pctl)
+							*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << 
+								std::flush;
+						break;
+					case 13:
+						reiz_status += 100;
+						std::cout << "><><>< MH aka \"" << pkr.key[mh].name << 
+							"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << 
+							std::endl;
+						spiel_allein = mh;
+						if (pctl)
+							*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << 
+								std::flush;
+						break;
+					case 14:
+						reiz_status += 100;
+						std::cout << "><><>< HH aka \"" << pkr.key[hh].name << 
+							"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << 
+							std::endl;
+						spiel_allein = hh;
+						if (pctl)
+							*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << 
+								std::flush;
+						break;
+				}
+				if (brk)
 					break;
-				}
-				if (reiz_status == 12)
-				{
-					reiz_status += 100;
-					std::cout << "><><>< VH aka \"" << pkr.key[vh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
-					spiel_allein = vh;
-					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
-				}
-				if (reiz_status == 13)
-				{
-					reiz_status += 100;
-					std::cout << "><><>< MH aka \"" << pkr.key[mh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
-					spiel_allein = mh;
-					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
-				}
-				if (reiz_status == 14)
-				{
-					reiz_status += 100;
-					std::cout << "><><>< HH aka \"" << pkr.key[hh].name << 
-						"\" bekommt das Spiel bei " << reiz_wert[reiz_counter] << std::endl;
-					spiel_allein = hh;
-					if (pctl)
-						*out_ctl << nicks[spiel_allein] << " SPIELT" << std::endl << std::flush;
-				}
 				
 				// select(2) -- initalize file descriptors
 				FD_ZERO(&rfds);
