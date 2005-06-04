@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.26 $)
+AC_REVISION($Revision: 1.27 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.5, stamer@gaos.org)
@@ -61,14 +61,17 @@ AC_PROG_LIBTOOL
 AC_PROG_LN_S
 
 # Checks for internationalization support.
-#AM_GNU_GETTEXT([external])
-#AM_GNU_GETTEXT_VERSION(0.11.1)
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.14.1])
 
 # Checks for libraries.
 AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 ##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
+AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
+AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
+AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([libz is needed]))
 
 AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
@@ -85,10 +88,6 @@ AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
 
 AM_PATH_LIBGNUTLS("1.2.0")
-
-AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
-AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
-AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([libz is needed]))
 
 # Checks for header files.
 AC_PATH_X
@@ -117,20 +116,20 @@ AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrc
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, socket, ac_need_libsocket=1, ac_try_nsl=1)
 if test x$ac_need_libsocket = x1; then
-    LIBS="$LIBS -lsocket"
+	LIBS="$LIBS -lsocket"
 fi
 if test x$ac_try_nsl = x1; then
-    AC_CHECK_LIB(nsl, gethostbyname, ac_need_libnsl=1)
-    if test x$ac_need_libnsl = x1
-    then
-        LIBS="$LIBS -lnsl"
-    fi
+	AC_CHECK_LIB(nsl, gethostbyname, ac_need_libnsl=1)
+	if test x$ac_need_libnsl = x1
+		then
+			LIBS="$LIBS -lnsl"
+	fi
 fi
 
 ##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 CXXFLAGS="$CXXFLAGS -O2 -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install SecureSkat."

@@ -14,3 +14,4 @@ SecureSkat 2.5:
 		- protecting the secret key: encryption with user supplied pass phrase
 		- a bug in the control program "SecureSkat_random" was fixed
 		  (it occured only if one uses a nickname with spaces)
+		- rudimentary internationalization support (GNU gettext) added

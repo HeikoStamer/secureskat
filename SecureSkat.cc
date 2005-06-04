@@ -3066,10 +3066,7 @@ void done_term()
 {
 	rl_callback_handler_remove();
 	if (tcsetattr(fileno(stdin), TCSANOW, &old_term) < 0)
-	{
 		perror("done_term (tcsetattr)");
-		exit(-1);
-	}
 }
 
 int main(int argc, char* argv[], char* envp[])
@@ -3077,7 +3074,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.22 2005/05/25 21:36:41 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.23 2005/06/04 10:46:49 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3095,33 +3092,22 @@ int main(int argc, char* argv[], char* envp[])
 		((argc == 3) && isdigit(argv[2][0])) ||
 		(argc == 2))
 	{
-		if (argc == 5)
+		// default values
+		irc_port = 6667;
+		security_level = 16;
+		game_ctl = "";
+		game_env = NULL;
+		
+		// command line switches
+		switch (argc)
 		{
-			irc_port = atoi(argv[2]);
-			security_level = atoi(argv[3]);
-			game_ctl = argv[4];
-			game_env = envp;
-		}
-		else if (argc == 4)
-		{
-			irc_port = atoi(argv[2]);
-			security_level = atoi(argv[3]);
-			game_ctl = "";
-			game_env = NULL;
-		}
-		else if (argc == 3)
-		{
-			irc_port = atoi(argv[2]);
-			security_level = 16;
-			game_ctl = "";
-			game_env = NULL;
-		}
-		else
-		{
-			irc_port = 6667;
-			security_level = 16;
-			game_ctl = "";
-			game_env = NULL;
+			case 5:
+				game_ctl = argv[4];
+				game_env = envp;
+			case 4:
+				security_level = atoi(argv[3]);
+			case 3:
+				irc_port = atoi(argv[2]);
 		}
 		
 		// initalize libTMCG
@@ -3142,7 +3128,7 @@ int main(int argc, char* argv[], char* envp[])
 		create_irc(argv[1], irc_port);
 		init_irc();
 		std::cout <<
-			_("Usage: type /help for the command list or read file README") <<
+			_("Usage: type /help for the command list or read the file README") <<
 			std::endl;
 #ifndef NOHUP
 		init_term();
@@ -3162,7 +3148,8 @@ int main(int argc, char* argv[], char* envp[])
 		return 0;
 	}
 	
-	std::cout << _("Usage: ") << cmd << " IRC_SERVER<string> [ IRC_PORT<int> " <<
+	std::cout << _("Usage") << ": " << cmd <<
+		" IRC_SERVER<string> [ IRC_PORT<int> " <<
 		"[ SECURITY_LEVEL<int> ..." << std::endl;
 	std::cout << "       " << " ... [ CONTROL_PROGRAM<string> ] ] ]" << std::endl;
 	return -1;
