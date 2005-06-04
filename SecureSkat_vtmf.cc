@@ -482,7 +482,7 @@ const char *skat_spiel2string
 	else if (skat_spiel2gwert(spiel) == 24)
 		wstr += "Grand (Gd)";
 	else
-		wstr += "Unbekannt";
+		wstr += _("unknown");
 	if (spiel > 1000)
 	{
 		wstr += " Hand";
@@ -491,9 +491,9 @@ const char *skat_spiel2string
 		if (((spiel % 1000) > 200) && !(skat_spiel2gwert(spiel) == 23))
 			wstr += " Schwarz";
 		if (((spiel % 1000) > 100) && !(skat_spiel2gwert(spiel) == 23))
-			wstr += " angesagt";
+			wstr += _(" announced");
 		if ((spiel % 1000) > 300)
-			wstr += " Ouvert (Offen)";
+			wstr += " Ouvert";
 	}
 	else
 	{
@@ -502,9 +502,9 @@ const char *skat_spiel2string
 		if ((spiel > 200) && !(skat_spiel2gwert(spiel) == 23))
 			wstr += " Schwarz";
 		if ((spiel > 100) && !(skat_spiel2gwert(spiel) == 23))
-			wstr += " angesagt";
+			wstr += _(" announced");
 		if (spiel > 300)
-			wstr += " Ouvert (Offen)";
+			wstr += " Ouvert";
 	}
 	return wstr.c_str();
 }
@@ -699,7 +699,7 @@ void skat_blatt
 	if (p == 2)
 		std::cout << "HH: ";
 	if (p == 10)
-		std::cout << "offengelegte Karten: ";
+		std::cout << _("revealed cards") << ": ";
 	for (std::vector<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
 		std::cout << skat_type2string(*wi);
 	if (p != 99)

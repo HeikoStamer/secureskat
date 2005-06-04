@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.27 $)
+AC_REVISION($Revision: 1.28 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.5, stamer@gaos.org)
@@ -12,10 +12,6 @@ AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE_NAME")
 AC_DEFINE_UNQUOTED(VERSION, "$PACKAGE_VERSION")
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
-
-ALL_LINGUAS="de"
-AC_DEFINE_UNQUOTED(LOCALEDIR, "${datadir}/locale", "/usr/local/share/locale")
-AC_SUBST(LOCALEDIR)
 
 # Check commandline switches
 AC_MSG_CHECKING([whether NOHUP behaviour is enabled])

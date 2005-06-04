@@ -20,3 +20,7 @@ SecureSkat_random_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
 	SecureSkat_random.cc
 
 ACLOCAL_AMFLAGS = -I m4
+
+datadir = @datadir@
+localedir = $(datadir)/locale
+DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@

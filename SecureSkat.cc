@@ -215,13 +215,13 @@ RETSIGTYPE sig_handler_usr1(int sig)
 						_("succeeded properly") << std::endl;
 				else
 					std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
-						_("failed. Error code: WEXITSTATUS ") << 
+						_("failed. Error code") << ": WEXITSTATUS " << 
 						WEXITSTATUS(status) << std::endl;
 			}
 			if (WIFSIGNALED(status))
 			{
 				std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
-					_("failed. Error code: WTERMSIG ") <<
+					_("failed. Error code") << ": WTERMSIG " <<
 					WTERMSIG(status) << std::endl;
 			}
 			games_tnr2pid.erase(games_pid2tnr[chld_pid]);
@@ -249,14 +249,14 @@ RETSIGTYPE sig_handler_usr1(int sig)
 				if (WEXITSTATUS(status) != 0)
 				{
 					std::cerr << X << "RNK (pid = " << chld_pid << ") " <<
-						_("failed. Error code: WEXITSTATUS ") << 
+						_("failed. Error code") << ": WEXITSTATUS " << 
 						WEXITSTATUS(status) << std::endl;
 				}
 			}
 			if (WIFSIGNALED(status))
 			{
 				std::cerr << X << "RNK (pid = " << chld_pid << ") " << 
-					_("failed. Error code: WTERMSIG ") << 
+					_("failed. Error code") << ": WTERMSIG " << 
 					WTERMSIG(status) << std::endl;
 			}
 			rnk_pids.remove(chld_pid);
@@ -271,14 +271,14 @@ RETSIGTYPE sig_handler_usr1(int sig)
 				if (WEXITSTATUS(status) != 0)
 				{
 					std::cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << 
-						" " << _("failed. Error code: WEXITSTATUS ") << 
+						" " << _("failed. Error code") << ": WEXITSTATUS " << 
 						WEXITSTATUS(status) << std::endl;
 				}
 			}
 			if (WIFSIGNALED(status))
 			{
 				std::cerr << X << "PKI " << chld_pid << "/" << nick_nick[chld_pid] <<
-					" " << _("failed. Error code: WTERMSIG ") << 
+					" " << _("failed. Error code") << ": WTERMSIG " << 
 					WTERMSIG(status) << std::endl;
 			}
 			
@@ -486,7 +486,7 @@ int skat_connect
 	neighbor->getline(tmp, sizeof(tmp));
 	if (!sec.decrypt(dv, tmp))
 	{
-		std::cerr << _("TMCG: *.decrypt() failed") << std::endl;
+		std::cerr << _("TMCG: decrypt() failed") << std::endl;
 		delete neighbor;
 		delete [] key1, delete [] key2;
 		close(handle);
@@ -580,7 +580,7 @@ int skat_accept
 							neighbor->getline(tmp, sizeof(tmp));
 							if (!sec.decrypt(dv, tmp))
 							{
-								std::cerr << _("TMCG: *.decrypt() failed") << std::endl;
+								std::cerr << _("TMCG: decrypt() failed") << std::endl;
 								delete neighbor;
 								delete [] key1, delete [] key2;
 								close(handle);
@@ -1218,7 +1218,7 @@ int ballot_child
 						neighbor->getline(tmp, sizeof(tmp));
 						if (!sec.decrypt(dv, tmp))
 						{
-							std::cerr << _("TMCG: DecryptValue() failed") << std::endl;
+							std::cerr << _("TMCG: decrypt() failed") << std::endl;
 							delete neighbor, delete [] key1, delete [] key2;
 							close(handle);
 							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
@@ -2565,14 +2565,14 @@ static void process_line(char *line)
 			std::cout << XX << _("/quit") << " -- " <<
 				_("quit SecureSkat") << std::endl;
 			std::cout << XX << _("/on") << " -- " <<
-				_("turn the output of IRC channel #openSkat on") << std::endl;
-			std::cout << XX << ("/off") << " -- " <<
-				_("turn the output of IRC channel #openSkat off") << std::endl;
-			std::cout << XX << ("/players") << " -- " <<
+				_("turn on the output of IRC channel #openSkat") << std::endl;
+			std::cout << XX << _("/off") << " -- " <<
+				_("turn off the output of IRC channel #openSkat") << std::endl;
+			std::cout << XX << _("/players") << " -- " <<
 				_("show the list of possible participants") << std::endl;
-			std::cout << XX << ("/tables") << " -- " <<
+			std::cout << XX << _("/tables") << " -- " <<
 				_("show the list of existing game tables") << std::endl;
-			std::cout << XX << ("/rooms") << " -- " <<
+			std::cout << XX << _("/rooms") << " -- " <<
 				_("show the list of existing voting rooms") << std::endl;
 			std::cout << XX << _("/rank") << " -- " <<
 				_("show your current rank in all score lists") << std::endl;
@@ -2589,7 +2589,7 @@ static void process_line(char *line)
 			std::cout << XX << "/skat <nr> -- " <<
 				_("join the game on table <nr>") << std::endl;
 			std::cout << XX << "/<nr> <cmd> -- " <<
-				_("execute the command <cmd> on table <nr>") << ":" << std::endl;
+				_("execute the command <cmd> on table <nr>") << std::endl;
 			std::cout << XXX << "/<nr> blatt --- " <<
 				_("show your own cards and additional information") << std::endl;
 			std::cout << XXX << "/<nr> reize --- " <<
@@ -3842,7 +3842,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.24 2005/06/04 11:21:57 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.25 2005/06/04 17:24:01 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3853,6 +3853,8 @@ int main(int argc, char* argv[], char* envp[])
 #endif
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
+	std::cout << "++ " << _("Internationalization support") << ": " <<
+		LOCALEDIR << std::endl;
 #endif
 	
 	if (((argc == 5) && isdigit(argv[2][0]) && isdigit(argv[3][0])) ||
@@ -3866,7 +3868,7 @@ int main(int argc, char* argv[], char* envp[])
 		game_ctl = "";
 		game_env = NULL;
 		
-		// command line switches
+		// evaluate the command line switches
 		switch (argc)
 		{
 			case 5:
@@ -3896,7 +3898,8 @@ int main(int argc, char* argv[], char* envp[])
 		create_irc(argv[1], irc_port);
 		init_irc();
 		std::cout <<
-			_("Usage: type /help for the command list or read the file README") <<
+			_("Usage") << ": " <<
+			_("type /help for the command list or read the file README") <<
 			std::endl;
 #ifndef NOHUP
 		init_term();
