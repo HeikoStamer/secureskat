@@ -424,7 +424,7 @@ msgstr "verläßt Kanal"
 
 #: SecureSkat.cc:3025
 msgid "you leave"
-msgstr "verlasse"
+msgstr "Sie verlassen"
 
 #: SecureSkat.cc:3039 SecureSkat.cc:3044
 msgid "leaves"
@@ -449,7 +449,7 @@ msgstr "wird verwiesen aus Kanal"
 
 #: SecureSkat.cc:3105
 msgid "you kicked from"
-msgstr "bin verwiesen aus"
+msgstr "Sie sind verwiesen aus"
 
 #: SecureSkat.cc:3121 SecureSkat.cc:3128
 msgid "kicked from"
@@ -457,7 +457,7 @@ msgstr "wird verwiesen aus"
 
 #: SecureSkat.cc:3139
 msgid "you quit SecureSkat"
-msgstr "beende SecureSkat"
+msgstr "Sie beenden SecureSkat"
 
 #: SecureSkat.cc:3158
 msgid "quits SecureSkat"
@@ -493,7 +493,7 @@ msgstr "TCMG: öffentlicher Schlüssel nicht verfügbar"
 
 #: SecureSkat.cc:3369
 msgid "announces unauthorized session"
-msgstr "bewirbt unerlaubt Sitzung"
+msgstr "bewirbt unerlaubt die Sitzung"
 
 #: SecureSkat.cc:3477
 msgid "MALLOC ERROR: out of memory"
