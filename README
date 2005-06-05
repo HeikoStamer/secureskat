@@ -114,7 +114,7 @@ Playing `SecureSkat' over an IRC network
     /ende         /quit      quits SecureSkat
     /an           /on        turns output of IRC channel #openSkat on
     /aus          /off       turns output of IRC channel #openSkat off
-    /spieler      /player    shows list of possible participants
+    /spieler      /players   shows list of possible participants
     /tische       /tables    shows list of existing game tables
     /raeume       /rooms     shows list of existing ballot rooms
     /rang         /rank      shows your current rank (Extended Seeger System)
