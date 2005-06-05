@@ -15,3 +15,4 @@ SecureSkat 2.5:
 		- a bug in the control program "SecureSkat_random" was fixed
 		  (it occured only if one uses a nickname with spaces)
 		- rudimentary internationalization support (GNU gettext) added
+SecureSkat 2.6:
