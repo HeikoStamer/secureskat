@@ -12,7 +12,6 @@ Stuff that should be done (until first production release):
 + replace (former) xskat GUI by native IRC server implementation
 + tunnel TCP connections via IRC (if requested, e.g. paranoid firewall)
 - for gcc: perror output with __FILE__::__FUNCTION__
-- do more internationalization support (in particular SecureSkat_vtmf.cc)
 - fix race conditions in parts of the voting system (or remove it completely)
 - fix race conditions in automatic player/table handshake
 - configuration and key databases in directory ~/.SecureSkat
