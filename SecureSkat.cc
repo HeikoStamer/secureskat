@@ -2034,8 +2034,8 @@ static void process_line(char *line)
 		}
 		else if ((cmd_argv[0] == "players") || (cmd_argv[0] == "spieler"))
 		{
-			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin();
-				ni != nick_players.end(); ni++)
+			for (std::map<std::string, std::string>::const_iterator ni = 
+				nick_players.begin(); ni != nick_players.end(); ni++)
 			{
 				std::string nick = ni->first, host = ni->second;
 				std::string name = "?", email = "?", type = "?";
@@ -2046,12 +2046,13 @@ static void process_line(char *line)
 					type = nick_key[nick].type;
 				}
 				std::cout << XX << nick << " (" << host << ":" << 
-					nick_p7771[nick] << ":" << nick_p7773[nick] << ":" <<
+					nick_p7771[nick] << ":" << nick_p7773[nick] << ":" << 
 					nick_p7774[nick] << ")" << std::endl;
-				std::cout << XX << "    aka " << name << " <" << email << "> " << std::endl;
+				std::cout << XX << "    aka " << name << " <" << email << "> " << 
+					std::endl;
 				std::cout << XX << "    " << "[ " << 
-					"SECURITY_LEVEL = " << nick_sl[nick] << ", " <<
-					"KEY_TYPE = " << type << " " <<
+					"SECURITY_LEVEL = " << nick_sl[nick] << ", " << 
+					"KEY_TYPE = " << type << " " << 
 					"]" << std::endl;
 			}
 		}
@@ -2065,15 +2066,16 @@ static void process_line(char *line)
 					if (tables_p[*ti] < 3)
 					{
 						std::cout << XX << _("table") << " <nr> = " << *ti << 
-							", " << _("rounds") << " <r> = " << tables_r[*ti] <<
-							", # " << _("players") << " = " << tables_p[*ti] <<
+							", " << _("round(s)") << " <r> = " << tables_r[*ti] << 
+							", # " << _("players") << " = " << tables_p[*ti] << 
 							", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 					}
 					else
 					{
 						std::cout << XX << _("table") << " <nr> = " << *ti << ", " << 
-							_("still") << " <r> = " << tables_r[*ti] << " " << _("rounds") <<
-							", " << _("owner") << " = " << tables_o[*ti] << std::endl;
+							_("still") << " <r> = " << tables_r[*ti] << " " << 
+							_("round(s)") << ", " << _("owner") << " = " << 
+							tables_o[*ti] << std::endl;
 					}
 				}
 			}
@@ -2096,11 +2098,11 @@ static void process_line(char *line)
 		{
 			std::list<std::string> rnk_nicktab, rnk_ranktab;
 			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
-						
+			
 			// Parsen der RNK Daten
 			nick_key[pub.keyid()] = pub;
-			for (std::map<std::string, std::string>::const_iterator ri = rnk.begin(); 
-				ri != rnk.end(); ri++)
+			for (std::map<std::string, std::string>::const_iterator ri = 
+				rnk.begin(); ri != rnk.end(); ri++)
 			{
 				std::string tk_sig1, tk_sig2, tk_sig3;
 				std::string tk_header, tk_table;
@@ -3842,7 +3844,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.25 2005/06/04 17:24:01 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.26 2005/06/05 08:07:11 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
