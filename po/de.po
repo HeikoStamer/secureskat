@@ -534,11 +534,11 @@ msgstr "Geben Sie die Passphrase ein, um Ihren Schlüssel zu verwenden"
 # ##############################################################################
 #: SecureSkat_pki.cc:133
 msgid "Your nickname"
-msgstr "Dein Spitzname"
+msgstr "Ihr Spitzname"
 
 #: SecureSkat_pki.cc:135
 msgid "Your electronic mail address"
-msgstr "Deine Email-Adresse"
+msgstr "Ihre Email-Adresse"
 
 #: SecureSkat_pki.cc:137
 msgid "Creating your key."
