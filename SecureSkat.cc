@@ -2578,8 +2578,8 @@ static void process_line(char *line)
 				_("show the list of existing voting rooms") << std::endl;
 			std::cout << XX << _("/rank") << " -- " <<
 				_("show your current rank in all score lists") << std::endl;
-			std::cout << XX << _("/ballot") << " <nr> <bits> -- " <<
-				_("create the room <nr> for voting between 2^<bits> values") << std::endl;
+			std::cout << XX << _("/ballot") << " <nr> <b> -- " <<
+				_("create the room <nr> for voting between 2^<b> values") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> -- " <<
 				_("join the voting in room <nr>") << std::endl;
 			std::cout << XXX << "/<nr> open -- " <<
@@ -2592,29 +2592,30 @@ static void process_line(char *line)
 				_("join the game on table <nr>") << std::endl;
 			std::cout << XX << "/<nr> <cmd> -- " <<
 				_("execute the command <cmd> on table <nr>") << std::endl;
-			std::cout << XXX << "/<nr> blatt --- " <<
+			std::cout << XXX << "/<nr> " << _("view") << " --- " <<
 				_("show your own cards and additional information") << std::endl;
-			std::cout << XXX << "/<nr> reize --- " <<
+			std::cout << XXX << "/<nr> " << _("bid") << " --- " <<
 				_("bid or justify a bid") << std::endl;
-			std::cout << XXX << "/<nr> passe --- " <<
+			std::cout << XXX << "/<nr> " << _("pass") << " --- " <<
 				_("pass the biding") << std::endl;
 			std::cout << XXX << "/<nr> hand --- " <<
 				_("play without taking the two cards") << std::endl;
 			std::cout << XXX << "/<nr> skat --- " <<
 				_("take the two cards and show them") << std::endl;
-			std::cout << XXX << "/<nr> druecke <k1> <k2> --- " <<
+			std::cout << XXX << "/<nr> " << _("push") << " <k1> <k2> --- " <<
 				_("put away the cards <k1> and <k2>") << std::endl;
-			std::cout << XXX << "/<nr> sagean <spiel> [zusatz] --- " <<
-				_("announce the game <spiel> ([zusatz] is optional)") << std::endl;
-			std::cout << XXX << "/<nr> lege <k1> --- " <<
+			std::cout << XXX << "/<nr> " << _("announce") << " <s> [op] --- " <<
+				_("announce the game <s> ([op] is optional)") << std::endl;
+			std::cout << XXX << "/<nr> " << _("play") << " <k1> --- " <<
 				_("play the card <k1>") << std::endl;
-			std::cout << XX << "<nr> " << _("arbitrary string") << std::endl;
-			std::cout << XX << "<r> " << _("unsigned integer") << std::endl;
-			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } || " <<
-				"{ 7, 8, 9, U, O, K, 10, A }" << std::endl;
-			std::cout << XXX << "<spiel> " << _("from") << " { Sc, Ro, Gr, Nu, Ei, Gd }"
-				<< std::endl;
-			std::cout << XXX << "[zusatz] " << _("from") << " { Sn, Sw, Ov }" << std::endl;
+			std::cout << XX << "<nr> " << _("is an arbitrary string") << std::endl;
+			std::cout << XX << "<r>, <b> " << _("are unsigned integers") << std::endl;
+			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } " <<
+				_("followed by") << " { 7, 8, 9, U, O, K, 10, A }" << std::endl;
+			std::cout << XXX << "<s> " << _("is from") <<
+				" { Sc, Ro, Gr, Nu, Ei, Gd }"	<< std::endl;
+			std::cout << XXX << "[op] " << _("is from") <<
+				" { Sn, Sw, Ov }" << std::endl;
 		}
 		else
 		{
@@ -3844,7 +3845,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.26 2005/06/05 08:07:11 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.27 2005/07/02 21:49:16 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

@@ -1411,7 +1411,8 @@ int skat_game
 							break;
 					}
 					
-					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0))
+					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0) ||
+						(msg.find("PASS", 0) == 0) || (msg.find("pass", 0) == 0))
 					{
 						if ((who_biding != 100) && (nick == nicks[who_biding]))
 						{
@@ -1460,7 +1461,8 @@ int skat_game
 							std::cout << ">< " << _("biding error") << ": " <<
 								_("pass action incorrect") << std::endl;
 					}
-					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0))
+					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0) ||
+						(msg.find("BID", 0) == 0) || (msg.find("bid", 0) == 0))
 					{
 						size_t rei = msg.find(" ", 6);
 						std::string srw = msg.substr(6, rei - 6);
@@ -1594,7 +1596,8 @@ int skat_game
 						}
 					}
 					else if ((msg.find("DRUECKE", 0) == 0) || 
-						(msg.find("druecke", 0) == 0))
+						(msg.find("druecke", 0) == 0) || (msg.find("PUSH", 0) == 0) || 
+						(msg.find("push", 0) == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
@@ -1611,17 +1614,17 @@ int skat_game
 										pkr.key[spiel_allein].name << 
 										"\" " << _("pushes the Skat") << std::endl;
 									if (pctl)
-										*out_ctl << nicks[spiel_allein] << " DRUECKE" <<
+										*out_ctl << nicks[spiel_allein] << " DRUECKE" << 
 											std::endl << std::flush;
-									if (((pkr_self == 0) && (spiel_allein == 1)) ||
-										((pkr_self == 1) && (spiel_allein == 2)) ||
+									if (((pkr_self == 0) && (spiel_allein == 1)) || 
+										((pkr_self == 1) && (spiel_allein == 2)) || 
 										((pkr_self == 2) && (spiel_allein == 0)))
 									{
 										left->getline(tmp1, TMCG_MAX_CARD_CHARS);
 										left->getline(tmp2, TMCG_MAX_CARD_CHARS);
 									}
-									else if (((pkr_self == 0) && (spiel_allein == 2)) ||
-										((pkr_self == 1) && (spiel_allein == 0)) ||
+									else if (((pkr_self == 0) && (spiel_allein == 2)) || 
+										((pkr_self == 1) && (spiel_allein == 0)) || 
 										((pkr_self == 2) && (spiel_allein == 1)))
 									{
 										right->getline(tmp1, TMCG_MAX_CARD_CHARS);
@@ -1661,7 +1664,8 @@ int skat_game
 						}
 					}
 					else if ((msg.find("SAGEAN", 0) == 0) || 
-						(msg.find("sagean", 0) == 0))
+						(msg.find("sagean", 0) == 0) || (msg.find("ANNOUNCE", 0) == 0) || 
+						(msg.find("announce", 0) == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -1731,7 +1735,8 @@ int skat_game
 						}
 					}	
 					else if ((msg.find("LEGE", 0) == 0) || 
-						(msg.find("lege", 0) == 0))
+						(msg.find("lege", 0) == 0) || (msg.find("PLAY", 0) == 0) || 
+						(msg.find("play", 0) == 0))
 					{
 						if (nick == nicks[spiel_who[spiel_dran]])
 						{
@@ -1802,7 +1807,8 @@ int skat_game
 					while (msg.find(" ", msg.length() - 1) == (msg.length() - 1))
 						msg = msg.substr(0, (msg.length() - 1));
 					
-					if ((msg.find("BLATT", 0) == 0) || (msg.find("blatt", 0) == 0))
+					if ((msg.find("BLATT", 0) == 0) || (msg.find("blatt", 0) == 0) || 
+						(msg.find("VIEW", 0) == 0) || (msg.find("view", 0) == 0))
 					{
 						skat_blatt((pkr_self + p) % 3, os);
 						if (os_ov.size() > 0)
@@ -1834,7 +1840,9 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0))
+					else if ((msg.find("PASSE", 0) == 0) ||
+						(msg.find("passe", 0) == 0) || (msg.find("PASS", 0) == 0) || 
+						(msg.find("pass", 0) == 0))
 					{
 						bool pass_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -1906,7 +1914,9 @@ int skat_game
 							std::cout << ">< " << _("biding error") << ": " << 
 								_("passing is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0))
+					else if ((msg.find("REIZE", 0) == 0) || 
+						(msg.find("reize", 0) == 0) || (msg.find("BID", 0) == 0) || 
+						(msg.find("bid", 0) == 0))
 					{
 					bool bid_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -2050,7 +2060,8 @@ int skat_game
 								_("taking the Skat is currently not allowed") << std::endl;
 					}
 					else if ((msg.find("DRUECKE", 0) == 0) || 
-						(msg.find("druecke", 0) == 0))
+						(msg.find("druecke", 0) == 0) || (msg.find("PUSH", 0) == 0) || 
+						(msg.find("push", 0) == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
@@ -2125,7 +2136,8 @@ int skat_game
 								_("pushing the Skat is currently not allowed") << std::endl;
 					}
 					else if ((msg.find("SAGEAN", 0) == 0) || 
-						(msg.find("sagean", 0) == 0))
+						(msg.find("sagean", 0) == 0) || (msg.find("ANNOUNCE", 0) == 0) || 
+						(msg.find("announce", 0) == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -2207,8 +2219,8 @@ int skat_game
 							std::cout << ">< " << 
 								_("announcing the game is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("LEGE", 0) == 0) || 
-						(msg.find("lege", 0) == 0))
+					else if ((msg.find("LEGE", 0) == 0) || (msg.find("lege", 0) == 0) || 
+						(msg.find("PLAY", 0) == 0) || (msg.find("play", 0) == 0))
 					{
 						if ((spiel_status > 0) && (pkr_self == spiel_who[spiel_dran]))
 						{
