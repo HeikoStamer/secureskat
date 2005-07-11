@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.32 $)
+AC_REVISION($Revision: 1.33 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -58,7 +58,7 @@ AC_PROG_LN_S
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.14.1])
+AM_GNU_GETTEXT_VERSION([0.14.4])
 
 # Checks for libraries.
 AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))

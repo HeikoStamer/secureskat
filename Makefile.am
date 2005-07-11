@@ -1,6 +1,6 @@
-SUBDIRS = m4  po
+SUBDIRS = po
 
-DIST_SUBDIRS = m4  po
+DIST_SUBDIRS = po
 
 EXTRA_DIST = config.rpath m4/ChangeLog  ABOUT-NLS aclocal.m4 config.guess config.h.in config.status\
 	config.sub configure configure.ac install-sh missing mkinstalldirs\
