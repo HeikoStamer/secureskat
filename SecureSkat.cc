@@ -1279,6 +1279,7 @@ int ballot_child
 				}
 			}
 		}
+		vtmf->KeyGenerationProtocol_Finalize();
 	}
 	else
 	{
@@ -1315,6 +1316,7 @@ int ballot_child
 				}
 			}
 		}
+		vtmf->KeyGenerationProtocol_Finalize();
 	}
 	
 	// create private card for ballot
@@ -3845,7 +3847,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.27 2005/07/02 21:49:16 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.28 2005/07/11 15:28:19 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

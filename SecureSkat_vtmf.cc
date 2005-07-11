@@ -1046,6 +1046,8 @@ int skat_game
 				_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
 			return 2;
 		}
+		
+		vtmf->KeyGenerationProtocol_Finalize();
 	}
 	else
 	{
@@ -1103,6 +1105,8 @@ int skat_game
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
 			vtmf->KeyGenerationProtocol_PublishKey(*right);
 		}
+		
+		vtmf->KeyGenerationProtocol_Finalize();
 	}
 	
 	for (size_t r = 0; r < rounds; r++)
