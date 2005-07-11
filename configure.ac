@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.30 $)
+AC_REVISION($Revision: 1.31 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -58,7 +58,7 @@ AC_PROG_LN_S
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.14.1)
+AM_GNU_GETTEXT_VERSION([0.14.1])
 
 # Checks for libraries.
 AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
@@ -125,7 +125,7 @@ fi
 ##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 CXXFLAGS="$CXXFLAGS -O2 -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
-AC_CONFIG_FILES([Makefile po/Makefile.in m4/Makefile ])
+AC_CONFIG_FILES([Makefile po/Makefile.in m4/Makefile])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install SecureSkat."
