@@ -1,5 +1,5 @@
 /*******************************************************************************
-   SecureSkat.cc, secure multiplayer implementation of german card game "Skat"
+   SecureSkat.cc, secure multiplayer implementation of the card game "Skat"
 
  Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
@@ -164,6 +164,9 @@ RETSIGTYPE sig_handler_quit(int sig)
 
 RETSIGTYPE sig_handler_skat_quit(int sig)
 {
+#ifndef NDEBUG
+	std::cerr << "!!! SIGNAL " << sig << " RECEIVED !!!" << std::endl;
+#endif
 	if (ctl_pid > 0)
 	{
 		if (kill(ctl_pid, SIGQUIT) < 0)
@@ -2985,7 +2988,7 @@ void run_irc()
 					(strncasecmp(irc_command(irc_reply), "405", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "475", 3) == 0))
 				{
-					std::cerr << "IRC ERROR: could not join to channel" << std::endl;
+					std::cerr << _("IRC ERROR: join to channel failed") << std::endl;
 					std::cerr << irc_reply << std::endl;
 				}
 				else if (strncasecmp(irc_command(irc_reply), "PART", 4) == 0)
@@ -3399,7 +3402,7 @@ void run_irc()
 				}
 				else
 				{ 
-					// unparsed IRC-message -- ignore this one
+					// unparsed IRC-message -- ignore it
 //std::cerr << "IRC: unparsed message:" << std::endl;
 //std::cerr << irc_reply << std::endl;
 				}
@@ -3417,10 +3420,10 @@ void run_irc()
 		// timeout occured
 		if (ret == 0)
 		{
-			// use signal blocking for atomic operations (dirty hack :-)
+			// use signal blocking for atomic operations (actually a dirty hack :-)
 			raise(SIGUSR1);
 			
-			// re-install signal handlers due to bug in some unices
+			// re-install signal handlers (because of a bug in some unices)
 			signal(SIGINT, sig_handler_quit);
 			signal(SIGQUIT, sig_handler_quit);
 			signal(SIGTERM, sig_handler_quit);
@@ -3847,7 +3850,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.28 2005/07/11 15:28:19 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.29 2005/07/13 19:06:01 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
