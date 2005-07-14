@@ -2074,16 +2074,18 @@ int skat_game
 								if (!hand_spiel)
 								{
 									std::string par = "";
-									size_t ei = par.npos;
-									if ((msg.find(" ", 0) == 7) && (msg.length() > 8))
+									size_t ei = par.npos, mi = msg.find(" ", 0);
+									
+									if ((mi != msg.npos) && (msg.length() > mi))
 									{
-										par = msg.substr(8, msg.length() - 8);
+										par = msg.substr(mi + 1, msg.length() - (mi + 1));
 										ei = par.find(" ", 0);
 									}
 									if ((ei != par.npos) && (par.length() > ei))
 									{
 										std::string cc1 = par.substr(0, ei);
-										std::string cc2 = par.substr(ei + 1, par.length() - ei - 1);
+										std::string cc2 = par.substr(ei + 1,
+											par.length() - (ei + 1));
 										
 										int tt1 = skat_wort2type(cc1), tt2 = skat_wort2type(cc2);
 										if ((tt1 != -1) && (tt2 != -1))
@@ -2148,20 +2150,21 @@ int skat_game
 						{
 							if (pkr_self == spiel_allein)
 							{
-								std::string par = ""; 
-								size_t ei = msg.find(" ", 0), zi = par.npos;
-								if ((ei == 6) && (msg.length() > 7))
+								std::string par = "";
+								size_t ei = par.npos, mi = msg.find(" ", 0);
+								
+								if ((mi != msg.npos) && (msg.length() > mi))
 								{
-									par = msg.substr(7, msg.length() - 7);
-									zi = par.find(" ", 0);
+									par = msg.substr(mi + 1, msg.length() - (mi + 1));
+									ei = par.find(" ", 0);
 								}
-								if ((ei != par.npos) && (par != ""))
+								if ((mi != msg.npos) && (par != ""))
 								{
 									std::string spiel = "", zusatz = "";
-									if (zi != par.npos)
+									if (ei != par.npos)
 									{
-										spiel = par.substr(0, zi);
-										zusatz = par.substr(zi + 1, par.length() - zi - 1);
+										spiel = par.substr(0, ei);
+										zusatz = par.substr(ei + 1, par.length() - (ei + 1));
 									}
 									else
 										spiel = par;
@@ -2214,7 +2217,7 @@ int skat_game
 											zusatz << "\"" << std::endl;
 								}
 								else
-									std::cout << ">< " << _("not enough parameter") << std::endl;
+									std::cout << ">< " << _("not enough parameters") << std::endl;
 							}
 							else
 								std::cout << ">< " << _("It's not your game.") << std::endl;
@@ -2228,8 +2231,12 @@ int skat_game
 					{
 						if ((spiel_status > 0) && (pkr_self == spiel_who[spiel_dran]))
 						{
-							std::string par = 
-								(msg.length() > 5) ? msg.substr(5, msg.length() - 5) : "";
+							std::string par = "";
+							size_t mi = msg.find(" ", 0);
+							
+							if ((mi != msg.npos) && (msg.length() > mi))
+								par = msg.substr(mi + 1, msg.length() - (mi + 1));
+							
 							if (par.length() > 0)
 							{
 								int tt = skat_wort2type(par);
