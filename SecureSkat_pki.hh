@@ -22,7 +22,7 @@
 	#define INCLUDED_SecureSkat_pki_HH
 	
 	// autoconf header
-	#if HAVE_CONFIG_H
+	#ifdef HAVE_CONFIG_H
 		#include "config.h"
 	#endif
 	

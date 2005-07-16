@@ -21,6 +21,11 @@
 #ifndef INCLUDED_SecureSkat_misc_HH
 	#define INCLUDED_SecureSkat_misc_HH
 	
+	// autoconf header
+	#ifdef HAVE_CONFIG_H
+		#include "config.h"
+	#endif
+	
 	#include <cstdio>
 	#include <cstdlib>
 	#include <unistd.h>

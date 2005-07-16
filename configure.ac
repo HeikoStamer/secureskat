@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.33 $)
+AC_REVISION($Revision: 1.34 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -45,7 +45,7 @@ AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
 	AC_DEFINE(COMMON_DDH_GROUP,
 	"143ftcwitk0hm5db6g2f4ltt0ln2k3khqfwy67mlw55lywuho9vlyqr4wzclztgy5d08649y20f8c24vntpupkmekxa0swsyjoppqvcc1ym3mqjwo0u498hy1kuytxxhyy2z4zq05ljdr0d27of35az8p8kjfnc1rb8wmd3t93gb64rpxiwfs8r9066ymm91kzjmk6b",
-	[safe prime p (1024 bit) of the common DDH-hard group G])
+	[Prime q (1024 bit) of the common DDH-hard group G])
 fi
 
 # Checks for programs.
@@ -59,6 +59,7 @@ AC_PROG_LN_S
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.14.4])
+#ALL_LINGUAS="de"
 
 # Checks for libraries.
 AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
@@ -71,14 +72,14 @@ AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([libz is needed]))
 
 AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
-  AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
+	AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
 fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
 AM_PATH_LIBTMCG("1.0.0")
 if test "x$LIBTMCG_LIBS" = "x"; then
-  AC_MSG_ERROR([libTMCG >= 1.0.0 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.0.0 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
@@ -125,7 +126,7 @@ fi
 ##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 CXXFLAGS="$CXXFLAGS -O2 -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
-AC_CONFIG_FILES([Makefile po/Makefile.in])
+AC_CONFIG_FILES([Makefile po/Makefile.in m4/Makefile])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and to install SecureSkat."

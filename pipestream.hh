@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 1999, 2000 Kevin Birch <kbirch@pobox.com>,
-               2002 -- 2004 Heiko Stamer <stamer@gaos.org>
+               2002, 2004 Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

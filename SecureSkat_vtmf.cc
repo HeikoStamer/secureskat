@@ -1827,7 +1827,7 @@ int skat_game
 								std::cout << "MH";
 							if ((reiz_status - 412) == 2)
 								std::cout << "HH";
-							std::cout << ") " << _("announces") << " \"" << 
+							std::cout << ") " << _("announced") << " \"" << 
 								skat_spiel2string(spiel_status) << "\"" << std::endl;
 							std::cout << "><><>< " << _("played cards") << ": ";
 							for (size_t i = 0; i < os_sp.size(); i++)
@@ -2249,7 +2249,7 @@ int skat_game
 											(!skat_rulectl(os_sp[0].first, tt, spiel_status, os)))
 										{
 											std::cout << ">< " << _("playing the card") << " \"" << 
-												par << "\" " << _("was not conform with the rules") << 
+												par << "\" " << _("is not conform with the rules") << 
 												std::endl;
 											continue;
 										}

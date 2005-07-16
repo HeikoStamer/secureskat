@@ -19,7 +19,7 @@
 *******************************************************************************/
 
 // autoconf header
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 	#include "config.h"
 #endif
 
@@ -1258,7 +1258,8 @@ int ballot_child
 #endif
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << 
+				_("function CheckGroup() failed") << std::endl;
 			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
@@ -1268,8 +1269,9 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					std::cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
-						") failed" << std::endl;
+					std::cout << ">< " << _("VTMF ERROR") << ": " << 
+						_("function KeyGenerationProtocol_UpdateKey() failed") << 
+						" " << _("for") << " " << vnicks[i]<< std::endl;
 					return -90;
 				}
 			}
@@ -1295,7 +1297,8 @@ int ballot_child
 #endif
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< Fehler in VTMF: CheckGroup() failed" << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << 
+				_("function CheckGroup() failed") << std::endl;
 			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
@@ -1305,8 +1308,9 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					std::cout << ">< Fehler in VTMF: UpdateKey(" << vnicks[i] <<
-						") failed" << std::endl;
+					std::cout << ">< " << _("VTMF ERROR") << ": " << 
+						_("function KeyGenerationProtocol_UpdateKey() failed") << 
+						" " << _("for") << " " << vnicks[i]<< std::endl;
 					return -90;
 				}
 			}
@@ -3393,7 +3397,8 @@ void run_irc()
 						}
 					}
 				}
-				else if (strncasecmp(irc_command(irc_reply), "NOTICE", 6) == 0)
+				else if ((strncasecmp(irc_command(irc_reply), "NOTICE", 6) == 0) || 
+					(strncasecmp(irc_command(irc_reply), "020", 3) == 0))
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 2)
 					{
@@ -3850,7 +3855,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.29 2005/07/13 19:06:01 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.30 2005/07/16 15:43:20 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
