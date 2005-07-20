@@ -3405,6 +3405,10 @@ void run_irc()
 						std::cout << "[NOTICE] " << irc_parvec[1] << std::endl;
 					}
 				}
+				else if (strncasecmp(irc_command(irc_reply), "ERROR", 5) == 0)
+				{
+					std::cerr << "[ERROR] " << irc_reply << std::endl;
+				}
 				else
 				{ 
 					// unparsed IRC-message -- ignore it
@@ -3855,7 +3859,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.30 2005/07/16 15:43:20 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.31 2005/07/20 22:08:03 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

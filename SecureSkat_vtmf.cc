@@ -2201,6 +2201,8 @@ int skat_game
 														" :OUVERT " << skat_type2string(os[i].first) <<
 														" " << hex_game_digest << std::endl << std::flush;
 													skat_okarte(tmcg, vtmf, os[i].second, right, left);
+													// sleep to prevent "Excess Flood" error
+													sleep(3);
 												}
 											}
 											std::cout << "><><>< " << _("player") << " \"" << 
