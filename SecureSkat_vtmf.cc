@@ -457,10 +457,16 @@ void skat_okarte
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
+	// use the non-interactiveness of the proof (only VTMF!)
+	std::stringstream proof;
+	tmcg->TMCG_ProveCardSecret(c, vtmf, proof, proof);
+	
 	*right << c << std::endl << std::flush;
-	tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
+	*right << proof.str() << std::flush;
+	//tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 	*left << c << std::endl << std::flush;
-	tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
+	*left << proof.str() << std::flush;
+	//tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 }
 
 const char *skat_spiel2string
@@ -2359,9 +2365,9 @@ int skat_game
 						pkt_gegner += pkt_wert[os_pkt[i][j].first];
 				pkt_allein = 120 - pkt_gegner;
 				std::cout << "><><>< " << _("card points") << " " <<
-					_("Alleinspieler") << " (" << pkr.key[spiel_allein].name << "): " << 
-					pkt_allein << ", " << _("card points") << " " << _("Gegenpartei") << 
-					": " << pkt_gegner << std::endl;
+					_("playing party") << " (" << pkr.key[spiel_allein].name << "): " << 
+					pkt_allein << ", " << _("card points") << " " << 
+					_("opponent party") << ": " << pkt_gegner << std::endl;
 				
 				if (pkt_allein > 60)
 					spiel_gewonnen = true;
@@ -2447,28 +2453,28 @@ int skat_game
 					// Schwarz gespielt (6)
 					if (os_pkt[spiel_allein].size() == 30)
 					{
-						std::cout << "><>< " << _("Gegenpartei") << " " << 
+						std::cout << "><>< " << _("opponent party") << " " << 
 							_("is") << " " << "Schwarz" << "!" << std::endl;
 						gstufen++;
 					}
 					// Schneider gespielt (7)
 					if (pkt_gegner < 31)
 					{
-						std::cout << "><>< " << _("Gegenpartei") << " " << 
+						std::cout << "><>< " << _("opponent party") << " " << 
 							_("is") << " " << "Schneider" << "!" << std::endl;
 						gstufen++;
 					}
 					// (selbst) Schwarz gespielt (6)
 					if (os_pkt[spiel_allein].size() == 0)
 					{
-						std::cout << "><>< " << _("Alleinspieler") << " " << _("is") << 
+						std::cout << "><>< " << _("playing party") << " " << _("is") << 
 							" " << "Schwarz" << ". " << _("Loosing the game!") << std::endl;
 						gstufen++, spiel_gewonnen = false;
 					}
 					// (selbst) Schneider gespielt (7)
 					if (pkt_allein < 31)
 					{
-						std::cout << "><>< " << _("Alleinspieler") << " " << _("is") << 
+						std::cout << "><>< " << _("playing party") << " " << _("is") << 
 							" " << "Schneider" << ". " << _("Loosing the game!") << std::endl;
 						gstufen++, spiel_gewonnen = false;
 					}
@@ -2477,7 +2483,7 @@ int skat_game
 				}
 				if (reiz_wert[reiz_counter] > (size_t)spiel_wert)
 				{
-					std::cout << "><>< " << _("Alleinspieler") << " " << 
+					std::cout << "><>< " << _("playing party") << " " << 
 						_("has bet to much") << ". " << _("Loosing the game!") << std::endl;
 					spiel_wert = 0;
 					while ((size_t)spiel_wert < reiz_wert[reiz_counter])
