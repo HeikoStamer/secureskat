@@ -50,11 +50,85 @@ std::string get_passphrase
 	return std::string(pass_phrase);
 }
 
+void decrypt_secret_key
+	(datum data, unsigned char *key)
+{
+	gcry_cipher_hd_t handle;
+	gcry_error_t err = 0;
+	
+	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+		GCRY_CIPHER_MODE_CFB, 0);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::decrypt_secret_key (gcry_cipher_open): "
+			<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	err = gcry_cipher_setkey(handle, key, 16);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::decrypt_secret_key (gcry_cipher_setkey): "
+			<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr,
+		data.dsize, NULL, 0);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::decrypt_secret_key (gcry_cipher_decrypt): "
+			<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	gcry_cipher_close(handle);
+}
+
+void encrypt_secret_key
+	(datum data, unsigned char *key)
+{
+	gcry_cipher_hd_t handle;
+	gcry_error_t err = 0;
+	
+	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+		GCRY_CIPHER_MODE_CFB, 0);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::encrypt_secret_key (gcry_cipher_open): "
+			<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	err = gcry_cipher_setkey(handle, key, 16);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::encrypt_secret_key (gcry_cipher_setkey): "
+			<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr,
+		data.dsize, NULL, 0);
+	if (err)
+	{
+		std::cerr << "SecureSkat_pki::encrypt_secret_key (gcry_cipher_encrypt): "
+				<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
+		exit(-1);
+	}
+	
+	gcry_cipher_close(handle);
+}
+
 void get_secret_key
 	(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix)
 {
+	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) >= 
+		gcry_cipher_get_algo_keylen(GCRY_CIPHER_BLOWFISH));
+	
 	std::string key_str;
-	std::ostringstream ost, ost2;
+	std::ostringstream ost, ost2, ost3;
 	datum key, data;
 	GDBM_FILE sec_db = 
 		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
@@ -65,6 +139,7 @@ void get_secret_key
 		{
 			// fetch secret key from the GDBM file (first entry)
 			data = gdbm_fetch(sec_db, key);
+			key_str = key.dptr;
 			
 			// encrypted?
 			std::string pass_phrase = "";
@@ -76,49 +151,45 @@ void get_secret_key
 			}
 			
 			// decrypt the secret key with a pass phrase entered by the user
+			// old key derivation function from SecureSkat 2.5
 			if (pass_phrase != "")
 			{
-				assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-				char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+				unsigned char *pass_digest = 
+					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
 				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
 					pass_phrase.c_str(), pass_phrase.length());
 				
-				gcry_cipher_hd_t handle;
-				gcry_error_t err = 0;
+				decrypt_secret_key(data, pass_digest);
+				ost3 << data.dptr;
 				
-				err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
-					GCRY_CIPHER_MODE_CFB, 0);
-				if (err)
+				// decrypt the secret key with a pass phrase entered by the user
+				// new key derivation function PBKDF1 from RCF2898 (SecureSkat >= 2.6)
+				if (!sec.import(ost3.str()))
 				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
+					// fetch secret key from the GDBM file (first entry) again
+					data = gdbm_fetch(sec_db, key);
+					
+					// PBKDF1, T_1 = password || salt
+					unsigned char *T_i = 
+						new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+					std::string T_1 = pass_phrase + key_str;
+					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i,
+						T_1.c_str(), T_1.length());
+					// PBKDF1 with interation count = 5000
+					for (size_t i = 1; i <= 5000; i++)
+					{
+						gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+							T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+						memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+					}
+					decrypt_secret_key(data, pass_digest);
+					delete [] T_i;
 				}
-				
-				err = gcry_cipher_setkey(handle, pass_digest, 16);
-				if (err)
-				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
-				}
-				
-				err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr,
-					data.dsize, NULL, 0);
-				if (err)
-				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
-				}
-				
-				gcry_cipher_close(handle);
 				delete [] pass_digest;
 			}
 			
 			// convert (decrypted) secret key for importing
 			ost << data.dptr;
-			key_str = key.dptr;
 			
 			free(data.dptr);
 			free(key.dptr);
@@ -176,43 +247,25 @@ void get_secret_key
 			}
 			while (pass_phrase != pass_retyped);
 			
+			// new key derivation function PBKDF1 from RCF2898 (SecureSkat >= 2.6)
 			if (pass_phrase != "")
 			{
-				assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-				char *pass_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
-					pass_phrase.c_str(), pass_phrase.length());
-				
-				gcry_cipher_hd_t handle;
-				gcry_error_t err = 0;
-				
-				err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
-					GCRY_CIPHER_MODE_CFB, 0);
-				if (err)
+				unsigned char *pass_digest = 
+					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+				// PBKDF1, T_1 = password || salt
+				unsigned char *T_i = 
+					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+				std::string T_1 = pass_phrase + keyid;
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, T_1.c_str(), T_1.length());
+				// PBKDF1 with interation count = 5000
+				for (size_t i = 1; i <= 5000; i++)
 				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_open): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
+					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+						T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+					memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 				}
-				
-				err = gcry_cipher_setkey(handle, pass_digest, 16);
-				if (err)
-				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_setkey): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
-				}
-				
-				err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr,
-					data.dsize, NULL, 0);
-				if (err)
-				{
-					std::cerr << "SecureSkat_pki::get_secret_key (gcry_cipher_decrypt): "
-						<< gcry_strsource(err) << "/" << gcry_strerror(err) << std::endl;
-					exit(-1);
-				}
-				
-				gcry_cipher_close(handle);
+				delete [] T_i;
+				encrypt_secret_key(data, pass_digest);
 				delete [] pass_digest;
 			}
 			
