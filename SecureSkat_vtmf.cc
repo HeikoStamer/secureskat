@@ -368,6 +368,10 @@ int skat_vkarte
 {
 	assert(pkr_self != pkr_who);
 	
+#ifndef NDEBUG
+	start_clock();
+#endif
+	
 	int type = -1;
 	VTMF_Card c;
 	char *tmp = new char[TMCG_MAX_CARD_CHARS];
@@ -447,6 +451,10 @@ int skat_vkarte
 	catch (int return_value)
 	{
 		delete [] tmp;
+#ifndef NDEBUG
+		stop_clock();
+		std::cerr << elapsed_time() << std::flush;
+#endif
 		return return_value;
 	}
 }
@@ -457,16 +465,22 @@ void skat_okarte
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
+#ifndef NDEBUG
+	start_clock();
+#endif
+	
 	// use the non-interactiveness of the proof (only VTMF!)
 	std::stringstream proof;
 	tmcg->TMCG_ProveCardSecret(c, vtmf, proof, proof);
-	
 	*right << c << std::endl << std::flush;
 	*right << proof.str() << std::flush;
-	//tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 	*left << c << std::endl << std::flush;
 	*left << proof.str() << std::flush;
-	//tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
+	
+#ifndef NDEBUG
+	stop_clock();
+	std::cerr << elapsed_time() << std::flush;
+#endif
 }
 
 const char *skat_spiel2string
@@ -1019,6 +1033,10 @@ int skat_game
 	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 2)
 	{
+#ifndef NDEBUG
+		start_clock();
+#endif
+		
 #ifdef COMMON_DDH_GROUP
 		std::stringstream ddh_group;
 		ddh_group << COMMON_DDH_GROUP << std::endl;
@@ -1054,9 +1072,18 @@ int skat_game
 		}
 		
 		vtmf->KeyGenerationProtocol_Finalize();
+		
+#ifndef NDEBUG
+		stop_clock();
+		std::cerr << "KeyGenerationProtocol: " << elapsed_time() << std::endl;
+#endif
 	}
 	else
 	{
+#ifndef NDEBUG
+		start_clock();
+#endif
+		
 #ifdef COMMON_DDH_GROUP
 		std::stringstream ddh_group;
 		ddh_group << COMMON_DDH_GROUP << std::endl;
@@ -1113,6 +1140,11 @@ int skat_game
 		}
 		
 		vtmf->KeyGenerationProtocol_Finalize();
+		
+#ifndef NDEBUG
+		stop_clock();
+		std::cerr << "KeyGenerationProtocol: " << elapsed_time() << std::endl;
+#endif
 	}
 	
 	for (size_t r = 0; r < rounds; r++)
@@ -1146,6 +1178,9 @@ int skat_game
 				ost << nicks[pkr_self] << " MISCHEN" << std::endl;
 				*out_ctl << ost.str() << std::flush;
 			}
+#ifndef NDEBUG
+			start_clock();
+#endif
 			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
@@ -1153,7 +1188,14 @@ int skat_game
 					_("bad stack format") << std::endl;
 				return 1;
 			}
+#ifndef NDEBUG
+			stop_clock();
+			std::cerr << elapsed_time() << std::flush;
+#endif
 			std::cout << "." << std::flush;
+#ifndef NDEBUG
+			start_clock();
+#endif
 			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
@@ -1161,12 +1203,19 @@ int skat_game
 					_("wrong ZK proof") << std::endl;
 				return 2;
 			}
+#ifndef NDEBUG
+			stop_clock();
+			std::cerr << elapsed_time() << std::flush;
+#endif
 			std::cout << "." << _("finished!") << std::endl;
 			
 #ifdef ABHEBEN
 			// Abheben (cyclic shift of stack) von HH
 			std::cout << "><>< " << _("HH cuts the deck.") << " " <<
 				_("Please wait") << "." << std::flush;
+#ifndef NDEBUG
+			start_clock();
+#endif
 			if (((pkr_self + p) % 3) == 2)
 			{
 				size_t cyc = 0;
@@ -1185,7 +1234,6 @@ int skat_game
 				std::cout << "." << std::flush;
 				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
 					*left, *left);
-				std::cout << "." << std::flush;
 				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
 					*right, *right);
 			}
@@ -1223,8 +1271,12 @@ int skat_game
 					delete [] tmp, return 2;
 				}
 				delete [] tmp;
-				std::cout << "." << std::flush;
 			}
+#ifndef NDEBUG
+			stop_clock();
+			std::cerr << elapsed_time() << std::flush;
+#endif
+			std::cout << "." << std::flush;
 			std::cout << _("finished!") << std::endl;
 #else
 			d_end = d_mix[2];
@@ -1253,6 +1305,9 @@ int skat_game
 				ost << nicks[pkr_self] << " GEBEN" << std::endl;
 				*out_ctl << ost.str() << std::flush;
 			}
+#ifndef NDEBUG
+			start_clock();
+#endif
 			TMCG_Stack<VTMF_Card> s[3], sk;
 			if (!skat_geben(tmcg, d_end, s[0], s[1], s[2], sk))
 			{
@@ -1269,6 +1324,10 @@ int skat_game
 					_("wrong ZK proof") << std::endl;
 				return 4;
 			}
+#ifndef NDEBUG
+			stop_clock();
+			std::cerr << elapsed_time() << std::flush;
+#endif
 			std::cout << "." << _("finished!") << std::endl;
 			for (size_t i = 0; pctl && (i < os.size()); i++)
 			{

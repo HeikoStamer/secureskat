@@ -16,7 +16,7 @@ SecureSkat_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
 	SecureSkat.cc
 
 SecureSkat_random_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
-	SecureSkat_vtmf.cc SecureSkat_vtmf.hh\
+	SecureSkat_vtmf.cc SecureSkat_vtmf.hh SecureSkat_misc.cc SecureSkat_misc.hh\
 	SecureSkat_random.cc
 
 ACLOCAL_AMFLAGS = -I m4

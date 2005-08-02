@@ -30,6 +30,7 @@
 	#include <cstdlib>
 	#include <unistd.h>
 	#include <cstring>
+	#include <ctime>
 	#include <netinet/in.h>
 	#include <netdb.h>
 	#include <sys/socket.h>
@@ -42,4 +43,10 @@
 		(const char *host, int port);
 	char *stripwhite
 		(char *str);
+	void start_clock
+		(void);
+	void stop_clock
+		(void);
+	char *elapsed_time
+		(void);
 #endif

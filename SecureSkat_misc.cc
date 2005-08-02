@@ -138,3 +138,26 @@ char *stripwhite(char *str)
 	
 	return s;
 }
+
+clock_t start_time, stop_time;
+char time_buffer[50];
+
+void start_clock
+	(void)
+{
+	start_time = stop_time = clock();
+}
+
+void stop_clock
+	(void)
+{
+	stop_time = clock();
+}
+
+char *elapsed_time
+	(void)
+{
+	snprintf(time_buffer, sizeof(time_buffer), "%8.0fms",
+		(((double) (stop_time - start_time)) / CLOCKS_PER_SEC) * 1000);
+	return time_buffer;
+}

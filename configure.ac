@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.37 $)
+AC_REVISION($Revision: 1.38 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -58,7 +58,7 @@ AC_PROG_LN_S
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
-#AM_GNU_GETTEXT_VERSION([0.14.4])
+AM_GNU_GETTEXT_VERSION([0.14.4])
 #ALL_LINGUAS="de"
 
 # Checks for libraries.
@@ -106,7 +106,7 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname])
+AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock])
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.

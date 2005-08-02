@@ -66,6 +66,8 @@
 	#include "securesocketstream.hh"
 	#include "pipestream.hh"
 	
+	#include "SecureSkat_misc.hh"
+	
 	#ifdef ENABLE_NLS
 		#define _(String) gettext(String)
 	#else
