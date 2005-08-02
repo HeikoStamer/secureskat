@@ -14,9 +14,9 @@ Stuff that should be done (until the first production release):
 - for gcc: perror output with __FILE__::__FUNCTION__
 - fix race conditions in parts of the voting system (or remove it completely)
 - fix race conditions in automatic player/table handshake
-- configuration and key databases in directory ~/.SecureSkat
-- add commands for manual key exchange (export/import)
-- provide nice libpopt commandline interface
+1 configuration and key databases in directory ~/.SecureSkat
+2 add commands for manual key exchange (export/import)
+3 provide nice libpopt commandline interface
 - use GcrySexp for ADTs/ store secrets via subkey in OpenPGP-impl.
 + documentation: doc subdir, manpage, texinfo, paper
 
