@@ -6,7 +6,7 @@ Copyright (c)  2002, 2004, 2005  Heiko Stamer <stamer@gaos.org>
   Texts. A copy of the license is included in the section entitled "GNU
   Free Documentation License" of the file "README".
 
-Stuff that should be done (until first production release):
+Stuff that should be done (until the first production release):
 
 + use GNU TLS for privacy and integrity protection
 + replace (former) xskat GUI by native IRC server implementation

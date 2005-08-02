@@ -95,18 +95,18 @@
 
 SchindelhauerTMCG							*tmcg;
 unsigned long int							security_level = 16;
-std::string									game_ctl;
-char										**game_env;
+std::string										game_ctl;
+char													**game_env, *home;
 TMCG_SecretKey								sec;
 TMCG_PublicKey								pub;
-std::map<int, char*>						readbuf;
-std::map<int, ssize_t>						readed;
+std::map<int, char*>					readbuf;
+std::map<int, ssize_t>				readed;
 
-std::string									secret_key, public_key, public_prefix;
+std::string										secret_key, public_key, public_prefix;
 std::list< std::pair<pid_t, int> >			usr1_stat;
 std::map<std::string, std::string>			nick_players;
-std::map<std::string, int>					nick_p7771, nick_p7772,
-											nick_p7773, nick_p7774, nick_sl;
+std::map<std::string, int>							nick_p7771, nick_p7772,
+																				nick_p7773, nick_p7774, nick_sl;
 std::map<std::string, TMCG_PublicKey>		nick_key;
 std::list<std::string>						tables;
 std::map<std::string, int>					tables_r, tables_p;
@@ -3859,7 +3859,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.31 2005/07/20 22:08:03 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.32 2005/08/02 21:45:33 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3870,9 +3870,15 @@ int main(int argc, char* argv[], char* envp[])
 #endif
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
-	std::cout << "++ " << _("Internationalization support") << ": " <<
+	std::cout << "++ " << _("Internationalization support") << ": " << 
 		LOCALEDIR << std::endl;
 #endif
+	
+	home = getenv("HOME");
+	if (home != NULL)
+	{
+		std::cout << "++ " << _("Home directory") << ": " << home << std::endl;
+	}
 	
 	if (((argc == 5) && isdigit(argv[2][0]) && isdigit(argv[3][0])) ||
 		((argc == 4) && isdigit(argv[2][0]) && isdigit(argv[3][0])) ||
@@ -3905,9 +3911,9 @@ int main(int argc, char* argv[], char* envp[])
 		}
 		
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
-		get_secret_key(cmd + ".skr", sec, public_prefix);
+		get_secret_key(cmd + ".skr", sec, public_prefix); // get sec and prefix
 		pub = TMCG_PublicKey(sec); // extract the public part of the key
-		get_public_keys(cmd + ".pkr", nick_key);
+		get_public_keys(cmd + ".pkr", nick_key); // get the other public keys
 		
 		create_pki(pki7771_port, pki7771_handle);
 		create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
