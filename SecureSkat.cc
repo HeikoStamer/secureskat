@@ -2010,7 +2010,6 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 
 static void process_line(char *line)
 {
-std::cerr << "in pl" << std::endl;
 	char *s;
 	if (line == NULL)
 		return;
@@ -3895,7 +3894,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.33 2005/08/03 21:26:53 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.34 2005/08/03 21:34:05 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
