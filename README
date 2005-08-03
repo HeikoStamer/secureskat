@@ -1,4 +1,4 @@
-Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer, <stamer@gaos.org>
+Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -23,7 +23,7 @@ Requirements
 ------------
 
   You need the following libraries and appropriate header files to build
-  (gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
+  (GNU gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
 
   * Toolbox for Mental Card Games (libTMCG), version >= 1.0.0
     http://savannah.nongnu.org/projects/libtmcg/
@@ -83,7 +83,8 @@ Playing `SecureSkat' over an IRC network
   The last three arguments are optional. In such a case the security parameter
   is set to the default value 16 and the IRC port number to 6667. Currently
   only one control program is included in this distribution:
-    SecureSkat_random : a random computer player (a very weak opponent)
+  
+    SecureSkat_random : the random computer player (a very weak opponent)
   
   The first time (if the file 'SecureSkat.skr' does not exists yet) you will
   asked for
@@ -111,48 +112,51 @@ Playing `SecureSkat' over an IRC network
   other players simply by typing lines of text. Commands are strings, where
   the first letter is a '/' (slash). '/help' prints the following help screen:
   
-    /ende         /quit      quits SecureSkat
-    /an           /on        turns output of IRC channel #openSkat on
-    /aus          /off       turns output of IRC channel #openSkat off
-    /spieler      /players   shows list of possible participants
-    /tische       /tables    shows list of existing game tables
-    /raeume       /rooms     shows list of existing ballot rooms
-    /rang         /rank      shows your current rank (Extended Seeger System)
-    /skat <nr> <r>           creates new table <nr> to play <r> rounds
-    /skat <nr>               start playing on table <nr>
-    /<nr> <cmd>              executes (following) command <cmd> on table <nr>
-      /<nr> blatt                    show own cards and additional information
-      /<nr> reize                    bid or justify a bid
-      /<nr> passe                    pass the biding process
-      /<nr> hand                     play without taking the Skat
-      /<nr> skat                     take the Skat and show these cards
-      /<nr> druecke <k1> <k2>        push card <k1> and <k2> to the Skat
-      /<nr> sagean <spiel> [zusatz]  announce game <spiel> (optional [zusatz])
-      /<nr> lege <k1>                play card <k1>
+    /quit               quits SecureSkat
+    /on                 turns the output of IRC channel #openSkat on
+    /off                turns the output of IRC channel #openSkat off
+    /players            shows the list of possible participants
+    /tables             shows the list of existing game tables
+    /rooms              shows the list of existing ballot rooms
+    /rank               computes your current rank (Extended Seeger System)
+    /export             exports your public key to the standard output
+    /import <key>       imports the given <key> to the database, if valid
+    /skat <nr> <r>      creates a new table <nr> to play <r> rounds
+    /skat <nr>          joins the existing game on table <nr>
+    /<nr> <cmd>         executes the following command <cmd> on table <nr>
+      /<nr> view               shows your cards and additional information
+      /<nr> bid                bids or justifies a bid
+      /<nr> pass               passes the current biding
+      /<nr> hand               leave the Skat untouched
+      /<nr> skat               takes the Skat and shows the two cards
+      /<nr> push <k1> <k2>     pushes the card <k1> and <k2> away
+      /<nr> announce <s> [op]  announces the game <s> ([op] is optional)
+      /<nr> play <k1>          playes the card <k1>
     
     <nr> is an arbitrary string (practically it should be a number, e.g. 001)
     <r>  is an unsigned integer (number of rounds to play, 1 round = 3 games)
     <k1>, <k2> ::= { Sc, Ro, Gr, Ei } || { 7, 8, 9, U, O, K, 10, A }
     (|| is here the concatenation of strings, e.g. Ro9 = red nine)
-    <spiel> from { Sc, Ro, Gr, Nu, Ei, Gd }  (Nu = Null, Gd = Grand)
-    [zusatz] from { Sn, Sw, Ov } (Schneider, Schwarz or Ouvert announced)
+    <s> from { Sc, Ro, Gr, Nu, Ei, Gd }  (Nu = Null, Gd = Grand)
+    [op] from { Sn, Sw, Ov } (Schneider, Schwarz or Ouvert announced)
 
-  The program tries to exchange and check public keys automagically. Therefore
-  SecureSkat binds three TCP-ports (free ports up from 7771): the first exports
-  the public key, the second exports a table of stored ranking data, and the
-  third answers ranking data requests. The check whether any public key is
-  valid is done now with non-interactive zero knowledge proofs (their soundness
+  SecureSkat tries to exchange and to check the public keys automagically.
+  Therefore it binds three TCP-ports (free ports up from 7771): the first
+  exports the public key, the second exports a table of stored ranking data,
+  and the third answers ranking data requests. The check of whether any public
+  key is valid is done with a non-interactive zero knowledge proof (soundness
   error probability is currently fixed at 2^{-80}). Hence the execution can
   take a large amount of time until a success message `PKI identified ID5^?????
   aka ???...' ('?' is again a wildcard) is printed or the child process aborts
-  with an appropriate error message.
+  with an appropriate error message. If anything went wrong you can exchange
+  the keys manually with the commands /export and /import.
 
   If the key exchange was successful, you can start a game by joining
   existing tables (/skat <table identifyer>) or by creating a new table
   (/skat <table identifyer> <number of rounds to play>) and waiting for
   participants. The command /tables prints out a short list of all existing
-  tables. During the session initalization of /skat a TCP/IP-connection with
-  your opponents will be established. Therefore (and for the key exchange)
+  tables. During the session initalization of the game a TCP/IP-connection
+  with your opponents will be established. Therefore (and for key exchange)
   your workstation should not be behind a (paranoid) firewall. Maybe you can
   convince your network administrator (with a bottle of famous german beer
   %-) to permit incoming TCP connections in the range of 7771:8000.
@@ -160,10 +164,10 @@ Playing `SecureSkat' over an IRC network
 Bugs, Contribution, CVS
 -----------------------
 
-  This is a (maybe instable) BETA version. If you want to contribute,
-  please send detailed bug reports to Heiko Stamer <stamer@gaos.org>.
+  This is a (perhaps instable) BETA version. If you want to contribute a bit,
+  please send your detailed bug reports to Heiko Stamer <stamer@gaos.org>.
 
-  You can get the latest sources from our CVS repository:
+  You can get the latest sources from our CVS repository at GNU/Savannah:
 
   cvs -z3 -d:ext:anoncvs@savannah.nongnu.org:/cvsroot/secureskat co secureskat
 

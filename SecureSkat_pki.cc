@@ -150,8 +150,8 @@ void get_secret_key
 					get_passphrase(_("Enter the pass phrase to unlock your key"));
 			}
 			
-			// decrypt the secret key with a pass phrase entered by the user
-			// old key derivation function from SecureSkat 2.5
+			// OBSOLETE: This old key derivation function from SecureSkat 2.5
+			// is kept for the reason of backward compatibility.
 			if (pass_phrase != "")
 			{
 				unsigned char *pass_digest = 

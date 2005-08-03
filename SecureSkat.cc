@@ -2010,6 +2010,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 
 static void process_line(char *line)
 {
+std::cerr << "in pl" << std::endl;
 	char *s;
 	if (line == NULL)
 		return;
@@ -2571,57 +2572,92 @@ static void process_line(char *line)
 				std::cout << X << _("wrong number of arguments") << ": " << cmd_argc << 
 					std::endl << X << _("/help shows the list of commands") << std::endl;
 		}
+		else if (cmd_argv[0] == "export")
+		{
+			std::cout << pub << std::endl;
+		}
+		else if (cmd_argv[0] == "import")
+		{
+			if (cmd_argc == 2)
+			{
+				TMCG_PublicKey apkey;
+				if (!apkey.import(cmd_argv[1]))
+				{
+					std::cerr << _("TMCG: public key corrupted") << std::endl;
+				}
+				else if (nick_key.find(apkey.keyid()) != nick_key.end())
+				{
+					std::cerr << _("TMCG: public key already present") << std::endl;
+				}
+				else
+				{
+					if (!apkey.check())
+					{
+						std::cerr << _("TMCG: invalid public key") << std::endl;
+					}
+					else
+						nick_key[apkey.keyid()] = apkey;
+				}
+			}
+			else
+				std::cout << X << _("wrong number of arguments") << ": " << 
+					cmd_argc << std::endl;
+		}
 		else if ((cmd_argv[0] == "help") || (cmd_argv[0] == "hilfe"))
 		{
-			std::cout << XX << _("/quit") << " -- " <<
+			std::cout << XX << _("/quit") << " -- " << 
 				_("quit SecureSkat") << std::endl;
-			std::cout << XX << _("/on") << " -- " <<
+			std::cout << XX << _("/on") << " -- " << 
 				_("turn on the output of IRC channel #openSkat") << std::endl;
-			std::cout << XX << _("/off") << " -- " <<
+			std::cout << XX << _("/off") << " -- " << 
 				_("turn off the output of IRC channel #openSkat") << std::endl;
-			std::cout << XX << _("/players") << " -- " <<
+			std::cout << XX << _("/players") << " -- " << 
 				_("show the list of possible participants") << std::endl;
-			std::cout << XX << _("/tables") << " -- " <<
+			std::cout << XX << _("/tables") << " -- " << 
 				_("show the list of existing game tables") << std::endl;
-			std::cout << XX << _("/rooms") << " -- " <<
+			std::cout << XX << _("/rooms") << " -- " << 
 				_("show the list of existing voting rooms") << std::endl;
-			std::cout << XX << _("/rank") << " -- " <<
+			std::cout << XX << _("/rank") << " -- " << 
 				_("show your current rank in all score lists") << std::endl;
+			std::cout << XX << _("/export") << " -- " << 
+				_("exports your public key to the standard output") << std::endl;
+			std::cout << XX << _("/import") << " <key> -- " << 
+				_("imports a valid given <key> to the database") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> <b> -- " <<
 				_("create the room <nr> for voting between 2^<b> values") << std::endl;
-			std::cout << XX << _("/ballot") << " <nr> -- " <<
+			std::cout << XX << _("/ballot") << " <nr> -- " << 
 				_("join the voting in room <nr>") << std::endl;
-			std::cout << XXX << "/<nr> open -- " <<
+			std::cout << XXX << "/<nr> open -- " << 
 				_("open the voting process in room <nr> (only owner)") << std::endl;
-			std::cout << XXX << "/<nr> vote <r> -- " <<
+			std::cout << XXX << "/<nr> vote <r> -- " << 
 				_("vote in room <nr> for value <r>") << std::endl;
-			std::cout << XX << "/skat <nr> <r> -- " <<
+			std::cout << XX << "/skat <nr> <r> -- " << 
 				_("create the table <nr> for playing <r> rounds") << std::endl;
-			std::cout << XX << "/skat <nr> -- " <<
+			std::cout << XX << "/skat <nr> -- " << 
 				_("join the game on table <nr>") << std::endl;
-			std::cout << XX << "/<nr> <cmd> -- " <<
+			std::cout << XX << "/<nr> <cmd> -- " << 
 				_("execute the command <cmd> on table <nr>") << std::endl;
-			std::cout << XXX << "/<nr> " << _("view") << " --- " <<
+			std::cout << XXX << "/<nr> " << _("view") << " --- " << 
 				_("show your own cards and additional information") << std::endl;
-			std::cout << XXX << "/<nr> " << _("bid") << " --- " <<
+			std::cout << XXX << "/<nr> " << _("bid") << " --- " << 
 				_("bid or justify a bid") << std::endl;
-			std::cout << XXX << "/<nr> " << _("pass") << " --- " <<
+			std::cout << XXX << "/<nr> " << _("pass") << " --- " << 
 				_("pass the biding") << std::endl;
-			std::cout << XXX << "/<nr> hand --- " <<
+			std::cout << XXX << "/<nr> hand --- " << 
 				_("play without taking the two cards") << std::endl;
-			std::cout << XXX << "/<nr> skat --- " <<
+			std::cout << XXX << "/<nr> skat --- " << 
 				_("take the two cards and show them") << std::endl;
-			std::cout << XXX << "/<nr> " << _("push") << " <k1> <k2> --- " <<
+			std::cout << XXX << "/<nr> " << _("push") << " <k1> <k2> --- " << 
 				_("put away the cards <k1> and <k2>") << std::endl;
-			std::cout << XXX << "/<nr> " << _("announce") << " <s> [op] --- " <<
+			std::cout << XXX << "/<nr> " << _("announce") << " <s> [op] --- " << 
 				_("announce the game <s> ([op] is optional)") << std::endl;
-			std::cout << XXX << "/<nr> " << _("play") << " <k1> --- " <<
+			std::cout << XXX << "/<nr> " << _("play") << " <k1> --- " << 
 				_("play the card <k1>") << std::endl;
 			std::cout << XX << "<nr> " << _("is an arbitrary string") << std::endl;
 			std::cout << XX << "<r>, <b> " << _("are unsigned integers") << std::endl;
-			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } " <<
+			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } " << 
 				_("followed by") << " { 7, 8, 9, U, O, K, 10, A }" << std::endl;
-			std::cout << XXX << "<s> " << _("is from") <<
+			std::cout << XXX << "<s> " << _("is from") << 
 				" { Sc, Ro, Gr, Nu, Ei, Gd }"	<< std::endl;
 			std::cout << XXX << "[op] " << _("is from") <<
 				" { Sn, Sw, Ov }" << std::endl;
@@ -3859,7 +3895,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.32 2005/08/02 21:45:33 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.33 2005/08/03 21:26:53 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3906,7 +3942,8 @@ int main(int argc, char* argv[], char* envp[])
 		// initalize libTMCG
 		if (!init_libTMCG())
 		{
-			std::cerr << _("Initalization of the libTMCG failed!") << std::endl;
+			std::cerr << 
+				_("Initalization of the library libTMCG failed!") << std::endl;
 			return -1;
 		}
 		
