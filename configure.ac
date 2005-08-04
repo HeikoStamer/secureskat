@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.38 $)
+AC_REVISION($Revision: 1.39 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -45,7 +45,7 @@ AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
 	AC_DEFINE(COMMON_DDH_GROUP,
 	"143ftcwitk0hm5db6g2f4ltt0ln2k3khqfwy67mlw55lywuho9vlyqr4wzclztgy5d08649y20f8c24vntpupkmekxa0swsyjoppqvcc1ym3mqjwo0u498hy1kuytxxhyy2z4zq05ljdr0d27of35az8p8kjfnc1rb8wmd3t93gb64rpxiwfs8r9066ymm91kzjmk6b",
-	[Prime q (1024 bit) of the common DDH-hard group G])
+	[Prime q (1023 bit) of the common DDH-hard group G])
 fi
 
 # Checks for programs.
@@ -91,7 +91,7 @@ AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h locale.h libintl.h])
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h arpa/inet.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h locale.h libintl.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

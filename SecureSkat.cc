@@ -39,6 +39,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <ctype.h>
 #include <termios.h>
@@ -439,6 +440,8 @@ int skat_connect
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
 	const TMCG_PublicKeyRing &pkr)
 {
+// redirect connection for measurements; first start rinetd on gaos.org
+//handle = ConnectToHost("gaos.org", gp_ports[vnicks[pkr_idx]]);
 	// create TCP/IP connection
 	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(),
 		gp_ports[vnicks[pkr_idx]]);
@@ -610,6 +613,8 @@ int skat_accept
 				}
 				else
 				{
+					std::cerr << _("Unexpected connection from") << ": " << 
+						inet_ntoa(client_in.sin_addr) << std::endl;
 					close(handle);
 					return -6;
 				}
@@ -3894,7 +3899,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.34 2005/08/03 21:34:05 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.35 2005/08/04 20:48:17 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
