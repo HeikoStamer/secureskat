@@ -16,5 +16,6 @@ SecureSkat 2.5:
 		  (it occured only, if one uses a nickname with spaces)
 		- rudimentary internationalization support (GNU gettext) added
 SecureSkat 2.6:
-		- bugfixes and new translations for the internationalization support
+		- bugfixes and some German translations (internationalization support)
 		- secret key protection: use the PBKDF1 from RFC2898 (salt and it.-count)
+		- user commands for manually public key export and import (file)

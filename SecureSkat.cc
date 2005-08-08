@@ -57,6 +57,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 // libTMCG
 #include <libTMCG.hh>
@@ -83,14 +84,18 @@
 	#endif
 #endif
 
+// define SIZES (in characters)
+#define KEY_SIZE								1000000L
+#define RNK_SIZE								1000000L
+
 // define TIMEOUT (in seconds)
 #define PKI_TIMEOUT							1500
 #define RNK_TIMEOUT							500
-#define ANNOUNCE_TIMEOUT					5
+#define ANNOUNCE_TIMEOUT				5
 #define CLEAR_TIMEOUT						60
-#define AUTOJOIN_TIMEOUT					75
+#define AUTOJOIN_TIMEOUT				75
 
-// define BOUNDS (in number of child processes)
+// define CHILDS (bound the number of child processes)
 #define PKI_CHILDS							10
 #define RNK_CHILDS							5
 
@@ -2578,34 +2583,103 @@ static void process_line(char *line)
 		}
 		else if (cmd_argv[0] == "export")
 		{
-			std::cout << pub << std::endl;
+			if (cmd_argc == 2)
+			{
+				std::ofstream ofs;
+				
+				ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+				try
+				{
+					ofs.open(cmd_argv[1].c_str(), 
+						std::ofstream::out | std::ofstream::trunc);
+					if (ofs.is_open())
+					{
+						ofs << pub << std::endl;
+						ofs.close();
+					}
+					else
+					{
+						std::cout << X << _("opening file") << " " << cmd_argv[1] << 
+							" " << _("failed") << std::endl;
+					}
+				}
+				catch (std::ofstream::failure e)
+				{
+					std::cout << X << _("writing file") << " " << cmd_argv[1] << 
+						" " << _("failed") << ": " << e.what() << std::endl;
+				}
+			}
+			else
+				std::cout << X << _("wrong number of arguments") << ": " << 
+					(cmd_argc - 1) << " " << _("instead of") << " 1" << std::endl;
 		}
 		else if (cmd_argv[0] == "import")
 		{
 			if (cmd_argc == 2)
 			{
 				TMCG_PublicKey apkey;
-				if (!apkey.import(cmd_argv[1]))
+				std::ifstream ifs;
+				char *buffer = new char[KEY_SIZE];
+				
+				if (buffer != NULL)
 				{
-					std::cerr << _("TMCG: public key corrupted") << std::endl;
-				}
-				else if (nick_key.find(apkey.keyid()) != nick_key.end())
-				{
-					std::cerr << _("TMCG: public key already present") << std::endl;
+					ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+					try
+					{
+						ifs.open(cmd_argv[1].c_str(), std::ifstream::in);
+						if (ifs.is_open())
+						{
+							ifs.getline(buffer, KEY_SIZE);
+							ifs.close();
+							
+							if (!apkey.import(buffer))
+							{
+								std::cout << X << _("TMCG: public key corrupted") << std::endl;
+							}
+							else if ((nick_key.find(apkey.keyid()) != nick_key.end()) ||
+								(apkey.keyid() == pub.keyid()))
+							{
+								std::cout << X << _("public key already present") << std::endl;
+							}
+							else
+							{
+								std::cout << X << _("Checking the key") << " \"" << 
+									apkey.keyid() << "\". " << _("Please wait") << "..." << 
+									std::endl;
+								if (!apkey.check())
+								{
+									std::cout << X << _("TMCG: invalid public key") << std::endl;
+								}
+								else
+								{
+									nick_key[apkey.keyid()] = apkey;
+									std::cout << X << "PKI " << _("imports") << 
+										" \"" << apkey.keyid() << "\" " << "aka \"" << 
+										apkey.name << "\" <" << apkey.email << ">" << std::endl;
+								}
+							}
+						}
+						else
+						{
+							std::cout << X << _("opening file") << " " << cmd_argv[1] << 
+								" " << _("failed") << std::endl;
+						}
+					}
+					catch (std::ifstream::failure e)
+					{
+						std::cout << X << _("reading file") << " " << cmd_argv[1] << 
+							" " << _("failed") << ": " << e.what() << std::endl;
+					}
+					delete [] buffer;
 				}
 				else
 				{
-					if (!apkey.check())
-					{
-						std::cerr << _("TMCG: invalid public key") << std::endl;
-					}
-					else
-						nick_key[apkey.keyid()] = apkey;
+					std::cout << X << _("out of memory") << std::endl;
 				}
 			}
 			else
 				std::cout << X << _("wrong number of arguments") << ": " << 
-					cmd_argc << std::endl;
+					(cmd_argc - 1) << " " << _("instead of") << " 1" << std::endl;
 		}
 		else if ((cmd_argv[0] == "help") || (cmd_argv[0] == "hilfe"))
 		{
@@ -2623,10 +2697,10 @@ static void process_line(char *line)
 				_("show the list of existing voting rooms") << std::endl;
 			std::cout << XX << _("/rank") << " -- " << 
 				_("show your current rank in all score lists") << std::endl;
-			std::cout << XX << _("/export") << " -- " << 
-				_("exports your public key to the standard output") << std::endl;
-			std::cout << XX << _("/import") << " <key> -- " << 
-				_("imports a valid given <key> to the database") << std::endl;
+			std::cout << XX << _("/export") << " <fn> -- " << 
+				_("exports your public key to file <fn>") << std::endl;
+			std::cout << XX << _("/import") << " <fn> -- " << 
+				_("imports a public key from file <fn>") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> <b> -- " <<
 				_("create the room <nr> for voting between 2^<b> values") << std::endl;
 			std::cout << XX << _("/ballot") << " <nr> -- " << 
@@ -2657,8 +2731,10 @@ static void process_line(char *line)
 				_("announce the game <s> ([op] is optional)") << std::endl;
 			std::cout << XXX << "/<nr> " << _("play") << " <k1> --- " << 
 				_("play the card <k1>") << std::endl;
-			std::cout << XX << "<nr> " << _("is an arbitrary string") << std::endl;
-			std::cout << XX << "<r>, <b> " << _("are unsigned integers") << std::endl;
+			std::cout << XX << "<nr>, <fn> " << 
+				_("are arbitrary strings") << std::endl;
+			std::cout << XX << "<r>, <b> " << 
+				_("are unsigned integers") << std::endl;
 			std::cout << XXX << "<k1>, <k2> ::= { Sc, Ro, Gr, Ei } " << 
 				_("followed by") << " { 7, 8, 9, U, O, K, 10, A }" << std::endl;
 			std::cout << XXX << "<s> " << _("is from") << 
@@ -3639,17 +3715,17 @@ void run_irc()
 							iosocketstream *nrnk = new iosocketstream(nick_handle);
 							
 							// get RNK list
-							char *tmp = new char[1000000L];
+							char *tmp = new char[RNK_SIZE];
 							if (tmp == NULL)
 							{
 								std::cerr << _("RNK ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
-							nrnk->getline(tmp, 1000000L);
+							nrnk->getline(tmp, RNK_SIZE);
 							rnk_idsize = strtoul(tmp, NULL, 10);
 							for (size_t i = 0; i < rnk_idsize; i++)
 							{
-								nrnk->getline(tmp, 1000000L);
+								nrnk->getline(tmp, RNK_SIZE);
 								if (rnk.find(tmp) == rnk.end())
 									rnk_idlist.push_back(tmp);
 							}
@@ -3674,7 +3750,7 @@ void run_irc()
 								
 								// get RNK data and send it to parent
 								*nrpl << *ri << std::endl << std::flush;
-								nrpl->getline(tmp, 1000000L);
+								nrpl->getline(tmp, RNK_SIZE);
 								*npipe << *ri << std::endl << std::flush;
 								*npipe << tmp << std::endl << std::flush;
 								
@@ -3741,13 +3817,13 @@ void run_irc()
 							iosocketstream *nkey = new iosocketstream(nick_handle);
 							
 							// get public key
-							char *tmp = new char[1000000L];
+							char *tmp = new char[KEY_SIZE];
 							if (tmp == NULL)
 							{
 								std::cerr << _("PKI ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
-							nkey->getline(tmp, 1000000L);
+							nkey->getline(tmp, KEY_SIZE);
 							public_key = tmp;
 							
 							// close TCP/IP connection
@@ -3899,7 +3975,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0];
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.35 2005/08/04 20:48:17 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.36 2005/08/08 21:29:55 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
