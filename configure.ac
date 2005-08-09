@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.39 $)
+AC_REVISION($Revision: 1.40 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -68,7 +68,7 @@ AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 ##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
 AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
-AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([libz is needed]))
+AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
 
 AM_PATH_LIBGCRYPT("1.2.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
@@ -91,7 +91,7 @@ AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h arpa/inet.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h locale.h libintl.h])
+AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h arpa/inet.h stdlib.h string.h sys/socket.h sys/time.h sys/stat.h termios.h unistd.h locale.h libintl.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -106,7 +106,7 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock])
+AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir getuid getenv strerror])
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.

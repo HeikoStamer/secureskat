@@ -33,11 +33,13 @@
 #include <unistd.h>
 #include <ctime>
 #include <cerrno>
+#include <clocale>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -45,8 +47,6 @@
 #include <termios.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <zlib.h>
-#include <clocale>
 #include <libintl.h>
 
 // STL classes
@@ -62,7 +62,10 @@
 // libTMCG
 #include <libTMCG.hh>
 
-// libgnutls
+// zlib
+#include <zlib.h>
+
+// GNU TLS
 #include <gnutls/gnutls.h>
 
 #include "socketstream.hh"
@@ -102,7 +105,7 @@
 SchindelhauerTMCG							*tmcg;
 unsigned long int							security_level = 16;
 std::string										game_ctl;
-char													**game_env, *home;
+char													**game_env;
 TMCG_SecretKey								sec;
 TMCG_PublicKey								pub;
 std::map<int, char*>					readbuf;
@@ -3972,10 +3975,11 @@ void done_term()
 
 int main(int argc, char* argv[], char* envp[])
 {
-	std::string cmd = argv[0];
+	char *home = NULL;
+	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.36 2005/08/08 21:29:55 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.37 2005/08/09 22:55:43 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -3990,15 +3994,58 @@ int main(int argc, char* argv[], char* envp[])
 		LOCALEDIR << std::endl;
 #endif
 	
+	// environment variable HOME
 	home = getenv("HOME");
 	if (home != NULL)
+		homedir = home, homedir += "/.SecureSkat/";
+	else
+		homedir = "~/.SecureSkat/";
+	std::cout << "++ " << _("PKI/RNK database directory") << ": " << 
+		homedir << std::endl;
+	
+	struct stat stat_buffer;
+	if (stat(homedir.c_str(), &stat_buffer))
 	{
-		std::cout << "++ " << _("Home directory") << ": " << home << std::endl;
+		if (errno == ENOENT)
+		{
+			// directory doesn't exist
+			if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
+			{
+				std::cerr << _("Can't create directory!") << " (" << 
+					strerror(errno) << ")" << std::endl;
+				return -1;
+			}
+		}
+		else
+		{
+			std::cerr << _("Can't get the status of the directory!") << " (" << 
+				strerror(errno) << ")" << std::endl;
+			return -1;
+		}
+	}
+	else
+	{
+		if (!S_ISDIR(stat_buffer.st_mode))
+		{
+			std::cerr << _("Path is not a directory!") << std::endl;
+			return -1;
+		}
+		if (stat_buffer.st_uid != getuid())
+		{
+			std::cerr << _("Wrong owner of the directory!") << std::endl;
+			return -1;
+		}
+		if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
+			(S_IRUSR | S_IWUSR | S_IXUSR))
+		{
+			std::cerr << _("Missing permissions on the directory!") << std::endl;
+			return -1;
+		}
 	}
 	
-	if (((argc == 5) && isdigit(argv[2][0]) && isdigit(argv[3][0])) ||
-		((argc == 4) && isdigit(argv[2][0]) && isdigit(argv[3][0])) ||
-		((argc == 3) && isdigit(argv[2][0])) ||
+	if (((argc == 5) && isdigit(argv[2][0]) && isdigit(argv[3][0])) || 
+		((argc == 4) && isdigit(argv[2][0]) && isdigit(argv[3][0])) || 
+		((argc == 3) && isdigit(argv[2][0])) || 
 		(argc == 2))
 	{
 		// default values
@@ -4022,19 +4069,18 @@ int main(int argc, char* argv[], char* envp[])
 		// initalize libTMCG
 		if (!init_libTMCG())
 		{
-			std::cerr << 
-				_("Initalization of the library libTMCG failed!") << std::endl;
+			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
 			return -1;
 		}
 		
 		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
-		get_secret_key(cmd + ".skr", sec, public_prefix); // get sec and prefix
-		pub = TMCG_PublicKey(sec); // extract the public part of the key
-		get_public_keys(cmd + ".pkr", nick_key); // get the other public keys
+		get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
+		pub = TMCG_PublicKey(sec); // extract the public part of the secret key
+		get_public_keys(homedir + "SecureSkat.pkr", nick_key); // get public keys
 		
 		create_pki(pki7771_port, pki7771_handle);
 		create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
-		load_rnk(cmd + ".rnk", rnk);
+		load_rnk(homedir + "SecureSkat.rnk", rnk);
 		create_irc(argv[1], irc_port);
 		init_irc();
 		std::cout <<
@@ -4050,10 +4096,10 @@ int main(int argc, char* argv[], char* envp[])
 #endif
 		done_irc();
 		release_irc();
-		save_rnk(cmd + ".rnk", rnk);
+		save_rnk(homedir + "SecureSkat.rnk", rnk);
 		release_rnk(rnk7773_handle, rnk7774_handle);
 		release_pki(pki7771_handle);
-		set_public_keys(cmd + ".pkr", nick_key);
+		set_public_keys(homedir + "SecureSkat.pkr", nick_key);
 		delete tmcg;
 		
 		return 0;

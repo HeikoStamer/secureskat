@@ -9,15 +9,20 @@ Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 Introduction
 ------------
 
-  SecureSkat is a network implementation of the german card game Skat
-  for multiple players over IRC (Internet Relay Chat). It uses the free
-  (like in speech) library libTMCG to ensure the fairness between
-  participants.
+  SecureSkat is a peer-to-peer implementation of the German card game Skat.
+  It supports multi player games which are initiated and negotiated over an
+  IRC channel (Internet Relay Chat). The free (like in speech) library
+  LibTMCG ensures a reasonable level of fairness between the participants.
 
-  All protocols work in the 'honest-but-curious' (or semi-honest)
-  adversary model, thus we do not care about robustness or availability.
-  The success of cheating players can be bound by a security parameter t,
-  such that this probability is less or equal than 2^{-t}.
+  SecureSkat is the first known practical software for playing a secure
+  electronic card game (Mental Poker problem) without a trusted third-party.
+
+  The cryptographic protocols are designed for the 'honest-but-curious'
+  (aka semi-honest) adversary model. Thus we don't care about robustness
+  or availability which are hard to achieve in a asynchronous environment.
+  The success (with respect to performed card and stack operations) of a
+  cheating player or coalition can be bound by a security parameter t,
+  i.e. the soundness error probability is less or equal than 2^{-t}.
 
 Requirements
 ------------
@@ -87,26 +92,24 @@ Playing SecureSkat over an IRC network
   
     SecureSkat_random : the random computer player (a very weak opponent)
   
-  The first time (if the file 'SecureSkat.skr' does not exists yet) you will
-  asked for
+  The first time (i.e. the file '~/.SecureSkat/SecureSkat.skr' does not
+  exists yet) the program ask you for your nickname and a mail address.
+  You have to type in two non-empty strings, hopefully honest information.
+  Afterwards your secret key is created and stored in the GDBM database
+  '~/.SecureSkat/SecureSkat.skr'. Next you can choose a pass phrase to
+  protect the key by encryption (Blowfish-128-CFB). This feature is turned
+  off (for the reason of backward compatibility), if an empty phrase is
+  provided. Additionally it may be a good idea to set appropriate file
+  permissions on the database.
   
-    Your nickname:
-    Your electronic mail address:
-  
-  You should input two non-empty strings, hopefully based on honest values.
-  After this procedure your public and secret key is created and stored
-  in file 'SecureSkat.skr'. You can choose a pass phrase to protect your
-  secret key by encryption (Blowfish-128-CFB). If an empty phrase is provided,
-  then this feature is turned off (for the reason of backward compatibility).
-  
-  Dependent on your hardware the key generation will take a lot of time until
+  Dependent on your hardware the key generation takes a lot of time until
   the success message `PKI: cryptographic key ID5^????? created and stored'
-  is printed out. ('?' is a wildcard for some random letters or digits)
+  is printed out. ('?' is a wildcard for some random letters and digits)
   
-  Then you will be registered at the IRC server with a strange nickname like
-  `ID5^z34g0' (based on the key id of your public key). In large player
-  networks collisions become probable--- in such cases, please generate a
-  fresh key by deleting the file 'SecureSkat.skr'.
+  Later you will be registered at the IRC server with a strange nickname
+  like `ID5^z34g0' (based on the key id of your public key). For large
+  groups collisions become probable--- in such a case, please generate a
+  fresh key by deleting the database file 'SecureSkat.skr'.
   
   Automagicly you are joined to channel #openSkat (The former name was kept
   to provide the compatibility with older versions.) and you can chat with
@@ -120,8 +123,8 @@ Playing SecureSkat over an IRC network
     /tables             shows the list of existing game tables
     /rooms              shows the list of existing ballot rooms
     /rank               computes your current rank (Extended Seeger System)
-    /export             exports your public key to the standard output
-    /import <key>       imports the given <key> to the database, if valid
+    /export <fn>        exports your public key to the file <fn>
+    /import <fn>        imports a valid public key from the file <fn>
     /skat <nr> <r>      creates a new table <nr> to play <r> rounds
     /skat <nr>          joins the existing game on table <nr>
     /<nr> <cmd>         executes the following command <cmd> on table <nr>
@@ -134,6 +137,7 @@ Playing SecureSkat over an IRC network
       /<nr> announce <s> [op]  announces the game <s> ([op] is optional)
       /<nr> play <k1>          playes the card <k1>
     
+    <fn> is a regular file name according to the used file system
     <nr> is an arbitrary string (practically it should be a number, e.g. 001)
     <r>  is an unsigned integer (number of rounds to play, 1 round = 3 games)
     <k1>, <k2> ::= { Sc, Ro, Gr, Ei } || { 7, 8, 9, U, O, K, 10, A }
@@ -141,26 +145,29 @@ Playing SecureSkat over an IRC network
     <s> from { Sc, Ro, Gr, Nu, Ei, Gd }  (Nu = Null, Gd = Grand)
     [op] from { Sn, Sw, Ov } (Schneider, Schwarz or Ouvert announced)
 
-  SecureSkat tries to exchange and to check the public keys automagically.
+  SecureSkat tries to exchange and to verify the public keys automagically.
   Therefore it binds three TCP-ports (free ports up from 7771): the first
   exports the public key, the second exports a table of stored ranking data,
-  and the third answers ranking data requests. The check of whether any public
+  and the third answers ranking data requests. The check of whether the public
   key is valid is done with a non-interactive zero knowledge proof (soundness
   error probability is currently fixed at 2^{-80}). Hence the execution can
-  take a large amount of time until a success message `PKI identified ID5^?????
-  aka ???...' ('?' is again a wildcard) is printed or the child process aborts
-  with an appropriate error message. If anything went wrong you can exchange
-  the keys manually with the commands /export and /import.
+  take a large amount of time and it continues in the background until a
+  success message `PKI identified ID5^????? aka ???...' ('?' is again a
+  wildcard) appears. Sometimes the background process is aborted with an
+  appropriate error message. Well, anything went really wrong and you have
+  to exchange the keys manually. Please use the commands /export <file name>
+  and /import <file name> in such a case.
 
-  If the key exchange was successful, you can start a game by joining
+  After a successful key exchange you can start playing Skat by joining
   existing tables (/skat <table identifyer>) or by creating a new table
-  (/skat <table identifyer> <number of rounds to play>) and waiting for
-  participants. The command /tables prints out a short list of all existing
-  tables. During the session initalization of the game a TCP/IP-connection
-  with your opponents will be established. Therefore (and for key exchange)
-  your workstation should not be behind a (paranoid) firewall. Maybe you can
-  convince your network administrator (with a bottle of famous german beer
-  %-) to permit incoming TCP connections in the range of 7771:8000.
+  (/skat <table identifyer> <number of rounds to play>). Of course, in the
+  latter case you have to wait for other participants. The command /tables
+  prints a short list of all existing tables. During the session
+  initalization of the game a TCP/IP-connection with your opponents will be
+  established. Therefore (and for the automatic key exchange) your workstation
+  should not be behind a (paranoid) firewall. Perhaps you can convince your
+  network administrator (e.g. with a bottle of famous german beer %-) such
+  that he permits incoming TCP connections in the range of 7771:8000.
 
 Bugs, Contribution, CVS
 -----------------------
@@ -172,7 +179,7 @@ Bugs, Contribution, CVS
 
   cvs -z3 -d:ext:anoncvs@savannah.nongnu.org:/cvsroot/secureskat co secureskat
 
-  Beware! Some parts of the SecureSkat are still quick'n'dirty code.
+  Beware! Many lines of the SecureSkat sources are pretty ugly code.
 
 Copyright and License of this software
 --------------------------------------
