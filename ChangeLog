@@ -19,4 +19,4 @@ SecureSkat 2.6:
 		- bugfixes and some German translations (internationalization support)
 		- secret key protection: use the PBKDF1 from RFC2898 (salt and it.-count)
 		- user commands for manually public key export and import (file)
-		- directory ~/.SecureSkat is used for the key and ranking databases
+		- directory ~/.SecureSkat is now used for the key and ranking databases
