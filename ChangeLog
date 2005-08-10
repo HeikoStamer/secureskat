@@ -17,6 +17,7 @@ SecureSkat 2.5:
 		- rudimentary internationalization support (GNU gettext) added
 SecureSkat 2.6:
 		- bugfixes and some German translations (internationalization support)
-		- secret key protection: use the PBKDF1 from RFC2898 (salt and it.-count)
+		- secret key protection: use the PBKDF1 from RFC 2898 (salt and it.-count)
 		- user commands for manually public key export and import (file)
 		- directory ~/.SecureSkat is now used for the key and ranking databases
+		- changed the COMMON_DDH_GROUP to the Well-Known MODP Group 2 of RFC 2412

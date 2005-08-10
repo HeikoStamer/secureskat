@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.40 $)
+AC_REVISION($Revision: 1.41 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.6, stamer@gaos.org)
@@ -44,8 +44,19 @@ AC_ARG_ENABLE(commongroup, [  --disable-commongroup   disable COMMON_DDH_GROUP b
 AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
 	AC_DEFINE(COMMON_DDH_GROUP,
-	"143ftcwitk0hm5db6g2f4ltt0ln2k3khqfwy67mlw55lywuho9vlyqr4wzclztgy5d08649y20f8c24vntpupkmekxa0swsyjoppqvcc1ym3mqjwo0u498hy1kuytxxhyy2z4zq05ljdr0d27of35az8p8kjfnc1rb8wmd3t93gb64rpxiwfs8r9066ymm91kzjmk6b",
-	[Prime q (1023 bit) of the common DDH-hard group G])
+	"n0p2ftq59aofqlrjexdmhww37nsdo5636jq09opxoq8amvlodjflhsspl5jzlgnlg0brgm9w9sp68emaygiqx98q8sfvbnnqfr9hifq3bwoac8up5642bi6c4ohsg0lk9623r7y6j0m4yj3304o731yt2xooyxw5npftk5yn9fj3m26mjjku1mbn3405h45cz8etbz",
+	[Prime q of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
+#
+# The above prime is used for the MODP Group 2 of the Oakley Protocol and IKE.
+# Orman, H., "The Oakley Key Determination Protocol", RFC 2412, November 1998.
+# p = 2^1024 - 2^960 - 1 + 2^64 * { [2^894 pi] + 129093 }
+# FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
+# 29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
+# EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
+# E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
+# EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
+# FFFFFFFF FFFFFFFF
+#
 fi
 
 # Checks for programs.
