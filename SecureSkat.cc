@@ -113,7 +113,7 @@ std::map<int, ssize_t>				readed;
 
 std::string										secret_key, public_key, public_prefix;
 std::list< std::pair<pid_t, int> >			usr1_stat;
-std::map<std::string, std::string>			nick_players;
+std::map<std::string, std::string>			nick_players, nick_package;
 std::map<std::string, int>							nick_p7771, nick_p7772,
 																				nick_p7773, nick_p7774, nick_sl;
 std::map<std::string, TMCG_PublicKey>		nick_key;
@@ -2070,9 +2070,10 @@ static void process_line(char *line)
 				std::cout << XX << nick << " (" << host << ":" << 
 					nick_p7771[nick] << ":" << nick_p7773[nick] << ":" << 
 					nick_p7774[nick] << ")" << std::endl;
-				std::cout << XX << "    aka " << name << " <" << email << "> " << 
-					std::endl;
-				std::cout << XX << "    " << "[ " << 
+				std::cout << XX << "   aka \"" << 
+					name << "\" <" << email << "> " << std::endl;
+				std::cout << XX << "   " << "[ " << 
+					nick_package[nick] << ", " << 
 					"SECURITY_LEVEL = " << nick_sl[nick] << ", " << 
 					"KEY_TYPE = " << type << " " << 
 					"]" << std::endl;
@@ -3309,17 +3310,19 @@ void run_irc()
 										std::cerr << _("WARNING: host of player") << " \"" <<
 											irc_parvec[5] << "\" " << 
 											_("has unqualified domain (no FQDN)") << std::endl;
-									std::string tmp = irc_parvec[7];
+									std::string tmp = irc_parvec[7], package = "unknown";
 									int p7771 = 0, p7772 = 0, p7773 = 0, p7774 = 0, sl = 0;
+									size_t a0 = tmp.find(" ", 0);
 									size_t ai = tmp.find("|", 0), bi = tmp.find("~", 0);
 									size_t ci = tmp.find("!", 0), di = tmp.find("#", 0);
 									size_t ei = tmp.find("?", 0), fi = tmp.find("/", 0);
-									if ((ai != tmp.npos) && (bi != tmp.npos) && 
-										(ci != tmp.npos) && (di != tmp.npos) &&
-										(ei != tmp.npos) && (fi != tmp.npos) &&
-										(ai < bi) && (bi < ci) && (ci < di) &&
-										(di < ei) && (ei < fi))
+									if ((a0 != tmp.npos) && (ai != tmp.npos) && 
+										(bi != tmp.npos) && (ci != tmp.npos) && 
+										(di != tmp.npos) && (ei != tmp.npos) && 
+										(fi != tmp.npos) && (a0 < ai) && (ai < bi) && 
+										(bi < ci) && (ci < di) && (di < ei) && (ei < fi))
 									{
+										package = tmp.substr(a0 + 1, ai - a0 - 1);
 										std::string ptmp7771 = tmp.substr(ai + 1, bi - ai - 1);
 										std::string ptmp7772 = tmp.substr(bi + 1, ci - bi - 1);
 										std::string ptmp7773 = tmp.substr(ci + 1, di - ci - 1);
@@ -3331,6 +3334,7 @@ void run_irc()
 										p7774 = atoi(ptmp7774.c_str());
 										sl = atoi(sltmp.c_str());
 									}
+									nick_package[irc_parvec[5]] = package;
 									nick_p7771[irc_parvec[5]] = p7771;
 									nick_p7772[irc_parvec[5]] = p7772;
 									nick_p7773[irc_parvec[5]] = p7773;
@@ -3979,7 +3983,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.37 2005/08/09 22:55:43 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.38 2005/08/11 06:37:16 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

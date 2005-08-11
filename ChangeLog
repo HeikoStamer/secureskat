@@ -21,3 +21,4 @@ SecureSkat 2.6:
 		- user commands for manually public key export and import (file)
 		- directory ~/.SecureSkat is now used for the key and ranking databases
 		- changed the COMMON_DDH_GROUP to the Well-Known MODP Group 2 of RFC 2412
+		- command /players shows now the package name and version
