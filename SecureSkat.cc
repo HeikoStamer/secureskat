@@ -1,5 +1,5 @@
 /*******************************************************************************
-   SecureSkat.cc, secure multiplayer implementation of the card game "Skat"
+   SecureSkat.cc, secure peer-to-peer implementation of the card game "Skat"
 
  Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
@@ -3983,7 +3983,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.38 2005/08/11 06:37:16 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.39 2005/08/17 17:25:53 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

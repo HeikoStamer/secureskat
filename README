@@ -10,19 +10,21 @@ Introduction
 ------------
 
   SecureSkat is a peer-to-peer implementation of the German card game Skat.
-  It supports multi player games which are initiated and negotiated over an
-  IRC channel (Internet Relay Chat). The free (like in speech) library
-  LibTMCG ensures a reasonable level of fairness between the participants.
+  The program negotiates possible players and sessions over an arbitrary
+  IRC network (Internet Relay Chat). Further it employs the free (like in
+  speech) library LibTMCG to ensure a reasonable level of fairness.
 
-  SecureSkat is the first known practical software for playing a secure
-  electronic card game (Mental Poker problem) without a trusted third-party.
+  LibTMCG is the first known practical solution for realizing a secure
+  electronic card game without the need for a trusted third-party. The
+  corresponding problem, actually called "Mental Poker", has been studied
+  since 1979 (Shamir, Rivest, and Adleman) by many authors.
 
   The cryptographic protocols are designed for the 'honest-but-curious'
   (aka semi-honest) adversary model. Thus we don't care about robustness
-  or availability which are hard to achieve in a asynchronous environment.
-  The success (with respect to performed card and stack operations) of a
-  cheating player or coalition can be bound by a security parameter t,
-  i.e. the soundness error probability is less or equal than 2^{-t}.
+  or strong availability which are hard to achieve in a asynchronous
+  environment. The success (w.r.t. the performed card operations) of a
+  cheating player or a coalition can be bound by the security parameter t,
+  i.e. the soundness error probability will be less or equal than 2^{-t}.
 
 Requirements
 ------------
