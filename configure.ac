@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.42 $)
+AC_REVISION($Revision: 1.43 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.7, stamer@gaos.org)
@@ -43,11 +43,18 @@ AC_ARG_ENABLE(commongroup, [  --disable-commongroup   disable COMMON_DDH_GROUP b
 	use_commongroup=no, use_commongroup=yes)
 AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
-	AC_DEFINE(COMMON_DDH_GROUP,
+	AC_DEFINE(COMMON_DDH_GROUP, , [Define to have the COMMON_DDH_GROUP behaviour])
+	AC_DEFINE(COMMON_DDH_GROUP_P,
+	"1a1e4vngailcvh7j2tur8zts6fbkrcac6d3g0jdfvdggl9r7cr2v6zllf6b3z6xb6w0nix8jsjlecgt8lwx1huihghkvqnbbgviiz0vg6ntckohpeac84n0co9czkw174ic47ifwd2189x26609ce63xm5vddxvsbbevn4bxaiv2784d9335o38na680ay8apygtmnz",
+	[Prime p of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
+	AC_DEFINE(COMMON_DDH_GROUP_Q,
 	"n0p2ftq59aofqlrjexdmhww37nsdo5636jq09opxoq8amvlodjflhsspl5jzlgnlg0brgm9w9sp68emaygiqx98q8sfvbnnqfr9hifq3bwoac8up5642bi6c4ohsg0lk9623r7y6j0m4yj3304o731yt2xooyxw5npftk5yn9fj3m26mjjku1mbn3405h45cz8etbz",
 	[Prime q of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
+	AC_DEFINE(COMMON_DDH_GROUP_G,
+	"2",
+	[Generator g of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
 #
-# The above prime is used for the MODP Group 2 of the Oakley Protocol and IKE.
+# The above numbers define the MODP Group 2 of the Oakley Protocol and IKE.
 # Orman, H., "The Oakley Key Determination Protocol", RFC 2412, November 1998.
 # p = 2^1024 - 2^960 - 1 + 2^64 * { [2^894 pi] + 129093 }
 # FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1

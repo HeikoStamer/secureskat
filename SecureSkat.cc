@@ -1254,15 +1254,18 @@ int ballot_child
 	} // while
 	
 	// VTMF initalization
-	BarnettSmartVTMF_dlog *vtmf;
+	BarnettSmartVTMF_dlog_GroupQR *vtmf;
 	if (pkr_self == 0)
 	{
 #ifdef COMMON_DDH_GROUP
 		std::stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << std::endl;
-		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
+		ddh_group << COMMON_DDH_GROUP_P << std::endl;
+		ddh_group << COMMON_DDH_GROUP_Q << std::endl;
+		ddh_group << COMMON_DDH_GROUP_G << std::endl;
+		ddh_group << "2" << std::endl;
+		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog();
+		vtmf = new BarnettSmartVTMF_dlog_GroupQR();
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
@@ -1303,10 +1306,13 @@ int ballot_child
 	{
 #ifdef COMMON_DDH_GROUP
 		std::stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP << std::endl;
-		vtmf = new BarnettSmartVTMF_dlog(ddh_group);
+		ddh_group << COMMON_DDH_GROUP_P << std::endl;
+		ddh_group << COMMON_DDH_GROUP_Q << std::endl;
+		ddh_group << COMMON_DDH_GROUP_G << std::endl;
+		ddh_group << "2" << std::endl;
+		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
+		vtmf = new BarnettSmartVTMF_dlog_GroupQR(*ios_in[vnicks[0]]);
 #endif
 		if (!vtmf->CheckGroup())
 		{
@@ -3983,7 +3989,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.39 2005/08/17 17:25:53 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.40 2005/08/18 22:19:28 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
