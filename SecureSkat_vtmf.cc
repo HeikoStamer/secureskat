@@ -374,7 +374,6 @@ int skat_vkarte
 	
 	int type = -1;
 	VTMF_Card c;
-	char *tmp = new char[TMCG_MAX_CARD_CHARS];
 	
 	try
 	{
@@ -382,8 +381,8 @@ int skat_vkarte
 			((pkr_self == 1) && (pkr_who == 2)) || 
 			((pkr_self == 2) && (pkr_who == 0)))
 		{
-			left->getline(tmp, TMCG_MAX_CARD_CHARS);
-			if (!c.import(tmp))
+			*left >> c;
+			if (!left->good())
 				throw -1;
 			if (!s.find(c))
 				throw -1;
@@ -416,8 +415,8 @@ int skat_vkarte
 			((pkr_self == 1) && (pkr_who == 0)) || 
 			((pkr_self == 2) && (pkr_who == 1)))
 		{
-			right->getline(tmp, TMCG_MAX_CARD_CHARS);
-			if (!c.import(tmp))
+			*right >> c;
+			if (!right->good())
 				throw -1;
 			if (!s.find(c))
 				throw -1;
@@ -450,7 +449,6 @@ int skat_vkarte
 	}
 	catch (int return_value)
 	{
-		delete [] tmp;
 #ifndef NDEBUG
 		stop_clock();
 		std::cerr << elapsed_time() << std::flush;
@@ -860,37 +858,39 @@ bool skat_geben
 bool skat_mischen_beweis
 	(
 		size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,
-		const TMCG_Stack<VTMF_Card> &d, const TMCG_StackSecret<VTMF_CardSecret> &ss,
-		const TMCG_Stack<VTMF_Card> &d0, const TMCG_Stack<VTMF_Card> &d1, const TMCG_Stack<VTMF_Card> &d2,
+		GrothVSSHE *vsshe, const TMCG_Stack<VTMF_Card> &d,
+		const TMCG_StackSecret<VTMF_CardSecret> &ss,
+		const TMCG_Stack<VTMF_Card> &d0, const TMCG_Stack<VTMF_Card> &d1,
+		const TMCG_Stack<VTMF_Card> &d2,
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
 	if (pkr_self == 0)
 	{
-		tmcg->TMCG_ProveStackEquality(d, d0, ss, false, vtmf, *left, *left);
-		tmcg->TMCG_ProveStackEquality(d, d0, ss, false, vtmf, *right, *right);
-		if (!tmcg->TMCG_VerifyStackEquality(d0, d1, false, vtmf, *left, *left))
+		tmcg->TMCG_ProveStackEquality_Groth(d, d0, ss, vtmf, vsshe, *left, *left);
+		tmcg->TMCG_ProveStackEquality_Groth(d, d0, ss, vtmf, vsshe, *right, *right);
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d0, d1, vtmf, vsshe, *left, *left))
 			return false;
-		if (!tmcg->TMCG_VerifyStackEquality(d1, d2, false, vtmf, *right, *right))
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d1, d2, vtmf, vsshe, *right, *right))
 			return false;
 	}
 	if (pkr_self == 1)
 	{
-		if (!tmcg->TMCG_VerifyStackEquality(d, d0, false, vtmf, *right, *right))
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d, d0, vtmf, vsshe, *right, *right))
 			return false;
-		tmcg->TMCG_ProveStackEquality(d0, d1, ss, false, vtmf, *right, *right);
-		tmcg->TMCG_ProveStackEquality(d0, d1, ss, false, vtmf, *left, *left);
-		if (!tmcg->TMCG_VerifyStackEquality(d1, d2, false, vtmf, *left, *left))
+		tmcg->TMCG_ProveStackEquality_Groth(d0, d1, ss, vtmf, vsshe, *right, *right);
+		tmcg->TMCG_ProveStackEquality_Groth(d0, d1, ss, vtmf, vsshe, *left, *left);
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d1, d2, vtmf, vsshe, *left, *left))
 			return false;
 	}
 	if (pkr_self == 2)
 	{
-		if (!tmcg->TMCG_VerifyStackEquality(d, d0, false, vtmf, *left, *left))
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d, d0, vtmf, vsshe, *left, *left))
 			return false;
-		if (!tmcg->TMCG_VerifyStackEquality(d0, d1, false, vtmf, *right, *right))
+		if (!tmcg->TMCG_VerifyStackEquality_Groth(d0, d1, vtmf, vsshe, *right, *right))
 			return false;
-		tmcg->TMCG_ProveStackEquality(d1, d2, ss, false, vtmf, *left, *left);
-		tmcg->TMCG_ProveStackEquality(d1, d2, ss, false, vtmf, *right, *right);
+		tmcg->TMCG_ProveStackEquality_Groth(d1, d2, ss, vtmf, vsshe, *left, *left);
+		tmcg->TMCG_ProveStackEquality_Groth(d1, d2, ss, vtmf, vsshe, *right, *right);
 	}
 	return true;
 }
@@ -904,53 +904,46 @@ bool skat_mischen
 		iosecuresocketstream *right, iosecuresocketstream *left
 	)
 {
-	char *tmp = new char[TMCG_MAX_STACK_CHARS];
+	if (pkr_self == 0)
+	{
+		tmcg->TMCG_MixStack(d, d0, ss, vtmf);
+		*right << d0 << std::endl << std::flush;
+		*left << d0 << std::endl << std::flush;
+		*left >> d1;
+		if (!left->good())
+			return false;
+		*right >> d2;
+		if (!right->good())
+			return false;
+	}
+	else if (pkr_self == 1)
+	{
+		*right >> d0;
+		if (!right->good())
+			return false;
+		tmcg->TMCG_MixStack(d0, d1, ss, vtmf);
+		*right << d1 << std::endl << std::flush;
+		*left << d1 << std::endl << std::flush;
+		*left >> d2;
+		if (!left->good())
+			return false;
+	}
+	else if (pkr_self == 2)
+	{
+		*left >> d0;
+		if (!left->good())
+			return false;
+		*right >> d1;
+		if (!right->good())
+			return false;
+		tmcg->TMCG_MixStack(d1, d2, ss, vtmf);
+		*right << d2 << std::endl << std::flush;
+		*left << d2 << std::endl << std::flush;
+	}
+	else
+		return false;
 	
-	try
-	{
-		if (pkr_self == 0)
-		{
-			tmcg->TMCG_MixStack(d, d0, ss, vtmf);
-			*right << d0 << std::endl << std::flush;
-			*left << d0 << std::endl << std::flush;
-			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d1.import(tmp))
-				throw false;
-			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d2.import(tmp))
-				throw false;
-		}
-		if (pkr_self == 1)
-		{
-			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d0.import(tmp))
-				throw false;
-			tmcg->TMCG_MixStack(d0, d1, ss, vtmf);
-			*right << d1 << std::endl << std::flush;
-			*left << d1 << std::endl << std::flush;
-			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d2.import(tmp))
-				throw false;
-		}
-		if (pkr_self == 2)
-		{
-			left->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d0.import(tmp))
-				throw false;
-			right->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (!d1.import(tmp))
-				throw false;
-			tmcg->TMCG_MixStack(d1, d2, ss, vtmf);
-			*right << d2 << std::endl << std::flush;
-			*left << d2 << std::endl << std::flush;
-		}
-		throw true;
-	}
-	catch (bool return_value)
-	{
-		delete [] tmp;
-		return return_value;
-	}
+	return true;
 }
 
 bool game_helper_1
@@ -1030,7 +1023,8 @@ int skat_game
 	}
 	
 	// VTMF initalization
-	BarnettSmartVTMF_dlog_GroupQR *vtmf;
+	BarnettSmartVTMF_dlog *vtmf;
+	
 	if (pkr_self == 2)
 	{
 #ifndef NDEBUG
@@ -1045,7 +1039,7 @@ int skat_game
 		ddh_group << "2" << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog_GroupQR();
+		vtmf = new BarnettSmartVTMF_dlog();
 		vtmf->PublishGroup(*left), vtmf->PublishGroup(*right);
 #endif
 		
@@ -1096,9 +1090,9 @@ int skat_game
 		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
 		if (pkr_self == 0)
-			vtmf = new BarnettSmartVTMF_dlog_GroupQR(*right);
+			vtmf = new BarnettSmartVTMF_dlog(*right);
 		else
-			vtmf = new BarnettSmartVTMF_dlog_GroupQR(*left);
+			vtmf = new BarnettSmartVTMF_dlog(*left);
 #endif
 		
 		if (!vtmf->CheckGroup())
@@ -1153,6 +1147,60 @@ int skat_game
 #endif
 	}
 	
+	// initalization for Groth's shuffle
+	GrothVSSHE *vsshe;
+	
+	if (pkr_self == 2)
+	{
+#ifndef NDEBUG
+		start_clock();
+#endif
+		
+		std::stringstream lej;
+		PedersenCommitmentScheme *com = 
+			new PedersenCommitmentScheme(32, vtmf->p, vtmf->q, vtmf->k);
+		lej << vtmf->p << std::endl << vtmf->q << std::endl << vtmf->g <<
+			std::endl << vtmf->h << std::endl;
+		com->PublishGroup(lej);
+		vsshe = new GrothVSSHE(32, lej);
+		vsshe->PublishGroup(*left), vsshe->PublishGroup(*right);
+		if (!vsshe->CheckGroup())
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("function CheckGroup() failed") << std::endl;
+			return 2;
+		}
+		delete com;
+		
+#ifndef NDEBUG
+		stop_clock();
+		std::cerr << "KeyGenerationProtocol2: " << elapsed_time() << std::endl;
+#endif
+	}
+	else
+	{
+#ifndef NDEBUG
+		start_clock();
+#endif
+		
+		if (pkr_self == 0)
+			vsshe = new GrothVSSHE(32, *right);
+		else
+			vsshe = new GrothVSSHE(32, *left);
+		if (!vsshe->CheckGroup())
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("function CheckGroup() failed") << std::endl;
+			return 2;
+		}
+		
+#ifndef NDEBUG
+		stop_clock();
+		std::cerr << "KeyGenerationProtocol2: " << elapsed_time() << std::endl;
+#endif
+	}
+	
+	// loop the given number of rounds
 	for (size_t r = 0; r < rounds; r++)
 	{
 		std::ostringstream spiel_protokoll;
@@ -1202,7 +1250,7 @@ int skat_game
 #ifndef NDEBUG
 			start_clock();
 #endif
-			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, d2, ss,
+			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
 				std::cout << ">< " << _("shuffling error") << ": " <<
@@ -1245,8 +1293,7 @@ int skat_game
 			}
 			else
 			{	
-				char *tmp = new char[TMCG_MAX_STACK_CHARS];
-				iosecuresocketstream *hhs;
+				iosecuresocketstream *hhs = NULL;
 				if ((pkr_self == 0) && (p == 0))
 					hhs = right;
 				else if ((pkr_self == 0) && (p == 1))
@@ -1260,13 +1307,13 @@ int skat_game
 				else if ((pkr_self == 2) && (p == 2))
 					hhs = left;
 				else
-					hhs = NULL;
-				hhs->getline(tmp, TMCG_MAX_STACK_CHARS);
-				if (!d_end.import(tmp))
+					return 1;
+				hhs >> d_end;
+				if (!hhs.good())
 				{
 					std::cout << ">< " << _("cutting error") << ": " <<
 						_("bad stack format") << std::endl;
-					delete [] tmp, return 1;
+					return 1;
 				}
 				std::cout << "." << std::flush;
 				if (!tmcg->TMCG_VerifyStackEquality(d_mix[2], d_end,
@@ -1274,9 +1321,8 @@ int skat_game
 				{
 					std::cout << ">< " << _("cutting error") << ": " <<
 						_("wrong ZK proof") << std::endl;
-					delete [] tmp, return 2;
+					return 2;
 				}
-				delete [] tmp;
 			}
 #ifndef NDEBUG
 			stop_clock();
@@ -1681,8 +1727,6 @@ int skat_game
 								if ((nick == nicks[spiel_allein]) && 
 									(pkr_self != spiel_allein))
 								{
-									char *tmp1 = new char[TMCG_MAX_CARD_CHARS];
-									char *tmp2 = new char[TMCG_MAX_CARD_CHARS];
 									VTMF_Card c1, c2;
 									reiz_status += 100;
 									std::cout << "><><>< " << _("player") << " \"" << 
@@ -1695,45 +1739,30 @@ int skat_game
 										((pkr_self == 1) && (spiel_allein == 2)) || 
 										((pkr_self == 2) && (spiel_allein == 0)))
 									{
-										left->getline(tmp1, TMCG_MAX_CARD_CHARS);
-										left->getline(tmp2, TMCG_MAX_CARD_CHARS);
+										*left >> c1 >> c2;
+										if (!left->good())
+											return 9;
 									}
 									else if (((pkr_self == 0) && (spiel_allein == 2)) || 
 										((pkr_self == 1) && (spiel_allein == 0)) || 
 										((pkr_self == 2) && (spiel_allein == 1)))
 									{
-										right->getline(tmp1, TMCG_MAX_CARD_CHARS);
-										right->getline(tmp2, TMCG_MAX_CARD_CHARS);
+										*right >> c1 >> c2;
+										if (!right->good())
+											return 9;
 									}
 									else
-									{
-										delete [] tmp1, delete [] tmp2;
 										return 9;
-									}
 									
 									// check and store pushed cards
-									if (!c1.import(tmp1))
-									{
-										delete [] tmp1, delete [] tmp2;
-										return 9;
-									}
-									if (!c2.import(tmp2))
-									{
-										delete [] tmp1, delete [] tmp2;
-										return 9;
-									}
-									if ((!s[spiel_allein].find(c1)) ||
+									if ((!s[spiel_allein].find(c1)) || 
 										(!s[spiel_allein].find(c2)))
-									{
-										delete [] tmp1, delete [] tmp2;
-										return 10;
-									}
+											return 10;
 									sk.clear();
 									s[spiel_allein].remove(c1);
 									sk.push(c1);
 									s[spiel_allein].remove(c2);
 									sk.push(c2);
-									delete [] tmp1, delete [] tmp2;
 								}
 							}
 						}
@@ -2721,7 +2750,7 @@ int skat_game
 		delete [] hex_rnk_digest;
 		delete npipe;
 	}
-	delete vtmf;
+	delete vsshe,	delete vtmf;
 	if (pctl)
 		*out_ctl << nicks[pkr_self] << " DONE" << std::endl << std::flush;
 	delete out_pipe;

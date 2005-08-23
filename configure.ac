@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.43 $)
+AC_REVISION($Revision: 1.44 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.7, stamer@gaos.org)
@@ -141,8 +141,8 @@ if test x$ac_try_nsl = x1; then
 	fi
 fi
 
-#CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-CXXFLAGS="$CXXFLAGS -O2 -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+#CXXFLAGS="$CXXFLAGS -O2 -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
