@@ -1170,6 +1170,19 @@ int skat_game
 				_("function CheckGroup() failed") << std::endl;
 			return 2;
 		}
+		if (mpz_cmp(vtmf->q, vsshe->com->q))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("subgroup order does not match") << std::endl;
+			return 2;
+		}
+		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || 
+			mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("encryption scheme does not match") << std::endl;
+			return 2;
+		}
 		delete com;
 		
 #ifndef NDEBUG
@@ -1191,6 +1204,19 @@ int skat_game
 		{
 			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
 				_("function CheckGroup() failed") << std::endl;
+			return 2;
+		}
+		if (mpz_cmp(vtmf->q, vsshe->com->q))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("subgroup order does not match") << std::endl;
+			return 2;
+		}
+		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || 
+			mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("encryption scheme does not match") << std::endl;
 			return 2;
 		}
 		

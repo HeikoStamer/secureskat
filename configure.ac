@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.44 $)
+AC_REVISION($Revision: 1.45 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.7, stamer@gaos.org)
@@ -39,8 +39,8 @@ if test "$use_abheben" = yes ; then
 fi
 
 AC_MSG_CHECKING([whether COMMON_DDH_GROUP behaviour is enabled])
-AC_ARG_ENABLE(commongroup, [  --disable-commongroup   disable COMMON_DDH_GROUP behaviour],
-	use_commongroup=no, use_commongroup=yes)
+AC_ARG_ENABLE(commongroup, [  --enable-commongroup   enable COMMON_DDH_GROUP behaviour],
+	use_commongroup=$enableval, use_commongroup=no)
 AC_MSG_RESULT($use_commongroup)
 if test "$use_commongroup" = yes ; then
 	AC_DEFINE(COMMON_DDH_GROUP, , [Define to have the COMMON_DDH_GROUP behaviour])

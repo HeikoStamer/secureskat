@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.7\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2005-08-23 17:00+0200\n"
+"POT-Creation-Date: 2005-08-23 22:03+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -114,7 +114,7 @@ msgid "VTMF ERROR"
 msgstr "VTMF FEHLER"
 
 #: SecureSkat.cc:1278 SecureSkat.cc:1320 SecureSkat_vtmf.cc:1049
-#: SecureSkat_vtmf.cc:1101 SecureSkat_vtmf.cc:1170 SecureSkat_vtmf.cc:1193
+#: SecureSkat_vtmf.cc:1101 SecureSkat_vtmf.cc:1170 SecureSkat_vtmf.cc:1206
 msgid "function CheckGroup() failed"
 msgstr "Funktion CheckGroup() fehlgeschlagen"
 
@@ -227,15 +227,15 @@ msgstr "existiert bereits"
 
 #: SecureSkat.cc:2464 SecureSkat.cc:3096 SecureSkat.cc:3143 SecureSkat.cc:3176
 #: SecureSkat.cc:3212 SecureSkat.cc:3258 SecureSkat.cc:3295 SecureSkat.cc:3353
-#: SecureSkat.cc:3382 SecureSkat.cc:3508 SecureSkat_vtmf.cc:1574
-#: SecureSkat_vtmf.cc:1649 SecureSkat_vtmf.cc:1671 SecureSkat_vtmf.cc:1687
-#: SecureSkat_vtmf.cc:1732 SecureSkat_vtmf.cc:1825 SecureSkat_vtmf.cc:1855
-#: SecureSkat_vtmf.cc:1876 SecureSkat_vtmf.cc:1922 SecureSkat_vtmf.cc:2008
-#: SecureSkat_vtmf.cc:2087 SecureSkat_vtmf.cc:2111 SecureSkat_vtmf.cc:2134
-#: SecureSkat_vtmf.cc:2200 SecureSkat_vtmf.cc:2302 SecureSkat_vtmf.cc:2358
-#: SecureSkat_vtmf.cc:2383 SecureSkat_vtmf.cc:2600 SecureSkat_vtmf.cc:2673
-#: SecureSkat_vtmf.cc:2681 SecureSkat_vtmf.cc:2692 SecureSkat_vtmf.cc:2704
-#: SecureSkat_vtmf.cc:2715 SecureSkat_vtmf.cc:2723
+#: SecureSkat.cc:3382 SecureSkat.cc:3508 SecureSkat_vtmf.cc:1600
+#: SecureSkat_vtmf.cc:1675 SecureSkat_vtmf.cc:1697 SecureSkat_vtmf.cc:1713
+#: SecureSkat_vtmf.cc:1758 SecureSkat_vtmf.cc:1851 SecureSkat_vtmf.cc:1881
+#: SecureSkat_vtmf.cc:1902 SecureSkat_vtmf.cc:1948 SecureSkat_vtmf.cc:2034
+#: SecureSkat_vtmf.cc:2113 SecureSkat_vtmf.cc:2137 SecureSkat_vtmf.cc:2160
+#: SecureSkat_vtmf.cc:2226 SecureSkat_vtmf.cc:2328 SecureSkat_vtmf.cc:2384
+#: SecureSkat_vtmf.cc:2409 SecureSkat_vtmf.cc:2626 SecureSkat_vtmf.cc:2699
+#: SecureSkat_vtmf.cc:2707 SecureSkat_vtmf.cc:2718 SecureSkat_vtmf.cc:2730
+#: SecureSkat_vtmf.cc:2741 SecureSkat_vtmf.cc:2749
 msgid "player"
 msgstr "Skatfreund"
 
@@ -299,8 +299,8 @@ msgstr "öffentlicher Schlüssel bereits vorhanden"
 msgid "Checking the key"
 msgstr "Überprüfe den Schlüssel"
 
-#: SecureSkat.cc:2657 SecureSkat_pki.cc:209 SecureSkat_vtmf.cc:1228
-#: SecureSkat_vtmf.cc:1269 SecureSkat_vtmf.cc:1353
+#: SecureSkat.cc:2657 SecureSkat_pki.cc:209 SecureSkat_vtmf.cc:1254
+#: SecureSkat_vtmf.cc:1295 SecureSkat_vtmf.cc:1379
 msgid "Please wait"
 msgstr "Bitte warten"
 
@@ -752,266 +752,275 @@ msgstr "Neu geben!"
 msgid "gets the game at"
 msgstr "bekommt das Spiel bei"
 
-#: SecureSkat_vtmf.cc:1169 SecureSkat_vtmf.cc:1192
+#: SecureSkat_vtmf.cc:1169 SecureSkat_vtmf.cc:1175 SecureSkat_vtmf.cc:1182
+#: SecureSkat_vtmf.cc:1205 SecureSkat_vtmf.cc:1211 SecureSkat_vtmf.cc:1218
 msgid "VSSHE ERROR"
 msgstr "VSSHE FEHLER"
 
-#: SecureSkat_vtmf.cc:1227
+#: SecureSkat_vtmf.cc:1176 SecureSkat_vtmf.cc:1212
+msgid "subgroup order does not match"
+msgstr "Untergruppenordnung passt nicht"
+
+#: SecureSkat_vtmf.cc:1183 SecureSkat_vtmf.cc:1219
+msgid "encryption scheme does not match"
+msgstr "Verschlüsselungsschema passt nicht"
+
+#: SecureSkat_vtmf.cc:1253
 msgid "Shuffle the cards."
 msgstr "Mischen der Karten."
 
-#: SecureSkat_vtmf.cc:1241 SecureSkat_vtmf.cc:1256
+#: SecureSkat_vtmf.cc:1267 SecureSkat_vtmf.cc:1282
 msgid "shuffling error"
 msgstr "Fehler beim Mischen"
 
-#: SecureSkat_vtmf.cc:1242 SecureSkat_vtmf.cc:1315
+#: SecureSkat_vtmf.cc:1268 SecureSkat_vtmf.cc:1341
 msgid "bad stack format"
 msgstr "falsches Stapelformat"
 
-#: SecureSkat_vtmf.cc:1257 SecureSkat_vtmf.cc:1323 SecureSkat_vtmf.cc:1376
-#: SecureSkat_vtmf.cc:1811 SecureSkat_vtmf.cc:1852 SecureSkat_vtmf.cc:2144
+#: SecureSkat_vtmf.cc:1283 SecureSkat_vtmf.cc:1349 SecureSkat_vtmf.cc:1402
+#: SecureSkat_vtmf.cc:1837 SecureSkat_vtmf.cc:1878 SecureSkat_vtmf.cc:2170
 msgid "wrong ZK proof"
 msgstr "fehlerhafter ZK-Beweis"
 
-#: SecureSkat_vtmf.cc:1264 SecureSkat_vtmf.cc:1332 SecureSkat_vtmf.cc:1383
+#: SecureSkat_vtmf.cc:1290 SecureSkat_vtmf.cc:1358 SecureSkat_vtmf.cc:1409
 msgid "finished!"
 msgstr "Fertig!"
 
-#: SecureSkat_vtmf.cc:1268
+#: SecureSkat_vtmf.cc:1294
 msgid "HH cuts the deck."
 msgstr "HH hebt Karten ab."
 
-#: SecureSkat_vtmf.cc:1283
+#: SecureSkat_vtmf.cc:1309
 msgid "cards cutted"
 msgstr "Karten abgehoben"
 
-#: SecureSkat_vtmf.cc:1314 SecureSkat_vtmf.cc:1322
+#: SecureSkat_vtmf.cc:1340 SecureSkat_vtmf.cc:1348
 msgid "cutting error"
 msgstr "Fehler beim Abheben"
 
-#: SecureSkat_vtmf.cc:1352
+#: SecureSkat_vtmf.cc:1378
 msgid "Dealing the cards."
 msgstr "Geben der Karten."
 
-#: SecureSkat_vtmf.cc:1366 SecureSkat_vtmf.cc:1375
+#: SecureSkat_vtmf.cc:1392 SecureSkat_vtmf.cc:1401
 msgid "dealing error"
 msgstr "Fehler beim Geben"
 
-#: SecureSkat_vtmf.cc:1367
+#: SecureSkat_vtmf.cc:1393
 msgid "not enough cards"
 msgstr "zu wenig Karten"
 
-#: SecureSkat_vtmf.cc:1414 SecureSkat_vtmf.cc:1476
+#: SecureSkat_vtmf.cc:1440 SecureSkat_vtmf.cc:1502
 msgid "connection with participating player(s) collapsed"
 msgstr "Verbindung mit Spielpartner(n) zusammengebrochen"
 
-#: SecureSkat_vtmf.cc:1575 SecureSkat_vtmf.cc:2009
+#: SecureSkat_vtmf.cc:1601 SecureSkat_vtmf.cc:2035
 msgid "passes at"
 msgstr "passt bei"
 
-#: SecureSkat_vtmf.cc:1582 SecureSkat_vtmf.cc:1661 SecureSkat_vtmf.cc:2018
-#: SecureSkat_vtmf.cc:2102
+#: SecureSkat_vtmf.cc:1608 SecureSkat_vtmf.cc:1687 SecureSkat_vtmf.cc:2044
+#: SecureSkat_vtmf.cc:2128
 msgid "biding error"
 msgstr "Fehler beim Reizen"
 
-#: SecureSkat_vtmf.cc:1583
+#: SecureSkat_vtmf.cc:1609
 msgid "pass action incorrect"
 msgstr "Passen war inkorrekt"
 
-#: SecureSkat_vtmf.cc:1650 SecureSkat_vtmf.cc:2088
+#: SecureSkat_vtmf.cc:1676 SecureSkat_vtmf.cc:2114
 msgid "bids"
 msgstr "reizt"
 
-#: SecureSkat_vtmf.cc:1662
+#: SecureSkat_vtmf.cc:1688
 msgid "bid action incorrect"
 msgstr "Reizen war inkorrekt"
 
-#: SecureSkat_vtmf.cc:1673 SecureSkat_vtmf.cc:2113
+#: SecureSkat_vtmf.cc:1699 SecureSkat_vtmf.cc:2139
 msgid "doesn't take the Skat"
 msgstr "spielt aus der Hand"
 
-#: SecureSkat_vtmf.cc:1689 SecureSkat_vtmf.cc:2136
+#: SecureSkat_vtmf.cc:1715 SecureSkat_vtmf.cc:2162
 msgid "takes the Skat"
 msgstr "nimmt den Skat auf"
 
-#: SecureSkat_vtmf.cc:1734
+#: SecureSkat_vtmf.cc:1760
 msgid "pushes the Skat"
 msgstr "drückt den Skat"
 
-#: SecureSkat_vtmf.cc:1810 SecureSkat_vtmf.cc:1851 SecureSkat_vtmf.cc:2143
+#: SecureSkat_vtmf.cc:1836 SecureSkat_vtmf.cc:1877 SecureSkat_vtmf.cc:2169
 msgid "card decryption error"
 msgstr "Fehler beim Aufdecken"
 
-#: SecureSkat_vtmf.cc:1826 SecureSkat_vtmf.cc:2303
+#: SecureSkat_vtmf.cc:1852 SecureSkat_vtmf.cc:2329
 msgid "announces"
 msgstr "sagt an"
 
-#: SecureSkat_vtmf.cc:1857 SecureSkat_vtmf.cc:2359
+#: SecureSkat_vtmf.cc:1883 SecureSkat_vtmf.cc:2385
 msgid "plays the card"
 msgstr "spielt die Karte"
 
-#: SecureSkat_vtmf.cc:1878 SecureSkat_vtmf.cc:2385
+#: SecureSkat_vtmf.cc:1904 SecureSkat_vtmf.cc:2411
 msgid "gets the trick"
 msgstr "bekommt den Stich"
 
-#: SecureSkat_vtmf.cc:1930
+#: SecureSkat_vtmf.cc:1956
 msgid "announced"
 msgstr "sagte an"
 
-#: SecureSkat_vtmf.cc:1932
+#: SecureSkat_vtmf.cc:1958
 msgid "played cards"
 msgstr "gespielte Karten"
 
-#: SecureSkat_vtmf.cc:1943
+#: SecureSkat_vtmf.cc:1969
 msgid "has to play"
 msgstr "muß spielen"
 
-#: SecureSkat_vtmf.cc:2019
+#: SecureSkat_vtmf.cc:2045
 msgid "passing is currently not allowed"
 msgstr "Passen ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2103
+#: SecureSkat_vtmf.cc:2129
 msgid "biding is currently not allowed"
 msgstr "Reizen ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2122 SecureSkat_vtmf.cc:2160 SecureSkat_vtmf.cc:2238
-#: SecureSkat_vtmf.cc:2325
+#: SecureSkat_vtmf.cc:2148 SecureSkat_vtmf.cc:2186 SecureSkat_vtmf.cc:2264
+#: SecureSkat_vtmf.cc:2351
 msgid "It's not your game."
 msgstr "Eine andere Partei macht das Spiel."
 
-#: SecureSkat_vtmf.cc:2126 SecureSkat_vtmf.cc:2164
+#: SecureSkat_vtmf.cc:2152 SecureSkat_vtmf.cc:2190
 msgid "taking the Skat is currently not allowed"
 msgstr "Skataufnahme ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2202
+#: SecureSkat_vtmf.cc:2228
 msgid "pushes"
 msgstr "drückt"
 
-#: SecureSkat_vtmf.cc:2219 SecureSkat_vtmf.cc:2412
+#: SecureSkat_vtmf.cc:2245 SecureSkat_vtmf.cc:2438
 msgid "card"
 msgstr "Karte"
 
-#: SecureSkat_vtmf.cc:2220 SecureSkat_vtmf.cc:2226 SecureSkat_vtmf.cc:2318
+#: SecureSkat_vtmf.cc:2246 SecureSkat_vtmf.cc:2252 SecureSkat_vtmf.cc:2344
 msgid "resp."
 msgstr "bzw."
 
-#: SecureSkat_vtmf.cc:2221 SecureSkat_vtmf.cc:2413
+#: SecureSkat_vtmf.cc:2247 SecureSkat_vtmf.cc:2439
 msgid "is not in your hands"
 msgstr "ist nicht in Ihrem Blatt"
 
-#: SecureSkat_vtmf.cc:2225 SecureSkat_vtmf.cc:2416
+#: SecureSkat_vtmf.cc:2251 SecureSkat_vtmf.cc:2442
 msgid "wrong card name"
 msgstr "falsche Kartenbezeichnung"
 
-#: SecureSkat_vtmf.cc:2230 SecureSkat_vtmf.cc:2420
+#: SecureSkat_vtmf.cc:2256 SecureSkat_vtmf.cc:2446
 msgid "not enough parameter"
 msgstr "unzureichende Parameteranzahl"
 
-#: SecureSkat_vtmf.cc:2234
+#: SecureSkat_vtmf.cc:2260
 msgid "You must play without the Skat."
 msgstr "Es wird aus der Hand (ohne Skat) gespielt."
 
-#: SecureSkat_vtmf.cc:2242
+#: SecureSkat_vtmf.cc:2268
 msgid "pushing the Skat is currently not allowed"
 msgstr "Skatablage ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2313
+#: SecureSkat_vtmf.cc:2339
 msgid "invalid announcement"
 msgstr "ungültige Spielansage"
 
-#: SecureSkat_vtmf.cc:2317
+#: SecureSkat_vtmf.cc:2343
 msgid "wrong name of announcement"
 msgstr "falsche Spiel- oder Zusatzbezeichnung"
 
-#: SecureSkat_vtmf.cc:2322
+#: SecureSkat_vtmf.cc:2348
 msgid "not enough parameters"
 msgstr "unzureichende Parameteranzahl"
 
-#: SecureSkat_vtmf.cc:2329
+#: SecureSkat_vtmf.cc:2355
 msgid "announcing the game is currently not allowed"
 msgstr "Spielansage ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2353
+#: SecureSkat_vtmf.cc:2379
 msgid "playing the card"
 msgstr "Ausspiel der Karte"
 
-#: SecureSkat_vtmf.cc:2354
+#: SecureSkat_vtmf.cc:2380
 msgid "is not conform with the rules"
 msgstr "ist nicht regelkonform"
 
-#: SecureSkat_vtmf.cc:2424
+#: SecureSkat_vtmf.cc:2450
 msgid "playing of cards is currently not allowed"
 msgstr "Ausspiel von Karten ist momentan nicht möglich"
 
-#: SecureSkat_vtmf.cc:2428
+#: SecureSkat_vtmf.cc:2454
 msgid "unknown table command"
 msgstr "unbekanntes Tischkommando"
 
-#: SecureSkat_vtmf.cc:2445
+#: SecureSkat_vtmf.cc:2471
 msgid "connection to program modules collapsed"
 msgstr "Verbindung mit Programmteil(en) zusammengebrochen"
 
-#: SecureSkat_vtmf.cc:2463 SecureSkat_vtmf.cc:2465
+#: SecureSkat_vtmf.cc:2489 SecureSkat_vtmf.cc:2491
 msgid "card points"
 msgstr "Augen"
 
-#: SecureSkat_vtmf.cc:2464 SecureSkat_vtmf.cc:2566 SecureSkat_vtmf.cc:2573
-#: SecureSkat_vtmf.cc:2582
+#: SecureSkat_vtmf.cc:2490 SecureSkat_vtmf.cc:2592 SecureSkat_vtmf.cc:2599
+#: SecureSkat_vtmf.cc:2608
 msgid "playing party"
 msgstr "Alleinspieler"
 
-#: SecureSkat_vtmf.cc:2466 SecureSkat_vtmf.cc:2552 SecureSkat_vtmf.cc:2559
+#: SecureSkat_vtmf.cc:2492 SecureSkat_vtmf.cc:2578 SecureSkat_vtmf.cc:2585
 msgid "opponent party"
 msgstr "Gegner"
 
-#: SecureSkat_vtmf.cc:2553 SecureSkat_vtmf.cc:2560 SecureSkat_vtmf.cc:2566
-#: SecureSkat_vtmf.cc:2573
+#: SecureSkat_vtmf.cc:2579 SecureSkat_vtmf.cc:2586 SecureSkat_vtmf.cc:2592
+#: SecureSkat_vtmf.cc:2599
 msgid "is"
 msgstr "ist"
 
-#: SecureSkat_vtmf.cc:2567 SecureSkat_vtmf.cc:2574 SecureSkat_vtmf.cc:2583
+#: SecureSkat_vtmf.cc:2593 SecureSkat_vtmf.cc:2600 SecureSkat_vtmf.cc:2609
 msgid "Loosing the game!"
 msgstr "Verloren!"
 
-#: SecureSkat_vtmf.cc:2583
+#: SecureSkat_vtmf.cc:2609
 msgid "has bet to much"
 msgstr "hat sich überreizt"
 
-#: SecureSkat_vtmf.cc:2601
+#: SecureSkat_vtmf.cc:2627
 msgid "has violated the rules."
 msgstr "hat nicht regelkonform gespielt."
 
-#: SecureSkat_vtmf.cc:2605
+#: SecureSkat_vtmf.cc:2631
 msgid "game points"
 msgstr "Spielwert"
 
-#: SecureSkat_vtmf.cc:2606
+#: SecureSkat_vtmf.cc:2632
 msgid "biding value"
 msgstr "Reizwert"
 
-#: SecureSkat_vtmf.cc:2607
+#: SecureSkat_vtmf.cc:2633
 msgid "game outcome"
 msgstr "Spielausgang"
 
-#: SecureSkat_vtmf.cc:2608
+#: SecureSkat_vtmf.cc:2634
 msgid "win"
 msgstr "gewonnen"
 
-#: SecureSkat_vtmf.cc:2608
+#: SecureSkat_vtmf.cc:2634
 msgid "loose"
 msgstr "verloren"
 
-#: SecureSkat_vtmf.cc:2654
+#: SecureSkat_vtmf.cc:2680
 msgid "game result"
 msgstr "Spielstand"
 
-#: SecureSkat_vtmf.cc:2673 SecureSkat_vtmf.cc:2681 SecureSkat_vtmf.cc:2692
-#: SecureSkat_vtmf.cc:2704 SecureSkat_vtmf.cc:2715 SecureSkat_vtmf.cc:2723
+#: SecureSkat_vtmf.cc:2699 SecureSkat_vtmf.cc:2707 SecureSkat_vtmf.cc:2718
+#: SecureSkat_vtmf.cc:2730 SecureSkat_vtmf.cc:2741 SecureSkat_vtmf.cc:2749
 msgid "Signature of"
 msgstr "Unterschrift von"
 
-#: SecureSkat_vtmf.cc:2674 SecureSkat_vtmf.cc:2682 SecureSkat_vtmf.cc:2693
-#: SecureSkat_vtmf.cc:2705 SecureSkat_vtmf.cc:2716 SecureSkat_vtmf.cc:2724
+#: SecureSkat_vtmf.cc:2700 SecureSkat_vtmf.cc:2708 SecureSkat_vtmf.cc:2719
+#: SecureSkat_vtmf.cc:2731 SecureSkat_vtmf.cc:2742 SecureSkat_vtmf.cc:2750
 msgid "is invalid"
 msgstr "ist ungültig"
 
