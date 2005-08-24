@@ -51,7 +51,8 @@ Requirements
   * GNU Database Manager (libgdbm), version >= 1.8.0
     http://www.gnu.org/
 
-  * ncurses Library (libncurses)
+  * ncurses Library (libncurses), version >= 5.0
+    ftp://ftp.gnu.org/gnu/ncurses/
 
   * zlib Compression Library (libz)
 
@@ -59,8 +60,8 @@ Requirements
 
   - GNU/Linux (Debian 2.2)      i686        gcc 2.95.2      (<sstream> missing)
   + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
-  + GNU/Linux (Debian 3.1)      i686        gcc 3.3.4
-  + GNU/Linux (Debian 3.1)      sparc       gcc 3.3.4
+  + GNU/Linux (Debian 3.1)      i686        gcc 3.3.5
+  + GNU/Linux (Debian testing)  sparc       gcc 3.3.4
   + GNU/Linux (Debian unstable) i686        gcc 4.0.2
   + FreeBSD 4.0                 i386 (SMP)  gcc 2.95.2
   + FreeBSD 5.0 RC1             i686        gcc 3.2.1
@@ -98,26 +99,26 @@ Playing SecureSkat over an IRC network
   exists yet) the program ask you for your nickname and a mail address.
   You have to type in two non-empty strings, hopefully honest information.
   Afterwards your secret key is created and stored in the GDBM database
-  '~/.SecureSkat/SecureSkat.skr'. Next you can choose a pass phrase to
-  protect the key by encryption (Blowfish-128-CFB). This feature is turned
+  '~/.SecureSkat/SecureSkat.skr'. You can choose a pass phrase to protect
+  the key by encryption (Blowfish-128, CFB mode). This feature is turned
   off (for the reason of backward compatibility), if an empty phrase is
   provided. Additionally it may be a good idea to set appropriate file
   permissions on the database.
   
-  Dependent on your hardware the key generation takes a lot of time until
-  the success message `PKI: cryptographic key ID5^????? created and stored'
-  is printed out. ('?' is a wildcard for some random letters and digits)
+  Dependent on your processor speed the key generation takes a lot of time
+  until the success message `PKI: cryptographic key ID5^????? created and
+  stored' is printed. ('?' is a wildcard for some random letters and digits)
   
   Later you will be registered at the IRC server with a strange nickname
   like `ID5^z34g0' (based on the key id of your public key). For large
-  groups collisions become probable--- in such a case, please generate a
-  fresh key by deleting the database file 'SecureSkat.skr'.
+  groups of participants collisions become probable--- in such a case,
+  please generate a fresh key by deleting the database 'SecureSkat.skr'.
   
   Automagicly you are joined to channel #openSkat (The former name was kept
   to provide the compatibility with older versions.) and you can chat with
-  other players simply by typing lines of text. Commands are strings, where
+  other players simply by typing lines of text. Commands are strings, wherein
   the first letter is a '/' (slash). '/help' prints the following help screen:
-  
+
     /quit               quits SecureSkat
     /on                 turns the output of IRC channel #openSkat on
     /off                turns the output of IRC channel #openSkat off
@@ -142,10 +143,10 @@ Playing SecureSkat over an IRC network
     <fn> is a regular file name according to the used file system
     <nr> is an arbitrary string (practically it should be a number, e.g. 001)
     <r>  is an unsigned integer (number of rounds to play, 1 round = 3 games)
-    <k1>, <k2> ::= { Sc, Ro, Gr, Ei } || { 7, 8, 9, U, O, K, 10, A }
-    (|| is here the concatenation of strings, e.g. Ro9 = red nine)
-    <s> from { Sc, Ro, Gr, Nu, Ei, Gd }  (Nu = Null, Gd = Grand)
-    [op] from { Sn, Sw, Ov } (Schneider, Schwarz or Ouvert announced)
+    <k1>, <k2> are from { Sc, Ro, Gr, Ei } || { 7, 8, 9, U, O, K, 10, A }
+    (|| denotes the concatenation of strings, e.g. Ro9 = red nine)
+    <s> is from { Sc, Ro, Gr, Nu, Ei, Gd }  (Nu = Null, Gd = Grand)
+    [op] is from { Sn, Sw, Ov } (Schneider, Schwarz or Ouvert announced)
 
   SecureSkat tries to exchange and to verify the public keys automagically.
   Therefore it binds three TCP-ports (free ports up from 7771): the first
@@ -156,32 +157,34 @@ Playing SecureSkat over an IRC network
   take a large amount of time and it continues in the background until a
   success message `PKI identified ID5^????? aka ???...' ('?' is again a
   wildcard) appears. Sometimes the background process is aborted with an
-  appropriate error message. Well, anything went really wrong and you have
-  to exchange the keys manually. Please use the commands /export <file name>
-  and /import <file name> in such a case.
+  appropriate error message. Well, if anything went wrong you may have to
+  exchange the keys manually. Please use the commands '/export <file name>'
+  and '/import <file name>' in such a undesired case.
 
-  After a successful key exchange you can start playing Skat by joining
-  existing tables (/skat <table identifyer>) or by creating a new table
-  (/skat <table identifyer> <number of rounds to play>). Of course, in the
-  latter case you have to wait for other participants. The command /tables
-  prints a short list of all existing tables. During the session
-  initalization of the game a TCP/IP-connection with your opponents will be
-  established. Therefore (and for the automatic key exchange) your workstation
-  should not be behind a (paranoid) firewall. Perhaps you can convince your
-  network administrator (e.g. with a bottle of famous german beer %-) such
-  that he permits incoming TCP connections in the range of 7771:8000.
+  After the successful key exchange you can start playing Skat by joining
+  existing tables ('/skat <table identifyer>') or by creating new tables
+  ('/skat <table identifyer> <number of rounds to play>'). Of course, in
+  both cases you have to wait for other participants. The command '/tables'
+  prints a short list of all existing tables and '/players' a list of the
+  registered players, respectively. During the actual session initalization
+  of the game a TCP/IP-connection with each of your opponents will be
+  established. Therefore (and further for the automatic key exchange) your
+  workstation should be not behind a (paranoid) firewall. Perhaps you can
+  convince your network administrator (e.g. with a bottle of famous german
+  beer %-) that he permits incoming TCP connections in the range 7771:8000.
 
 Bugs, Contribution, CVS
 -----------------------
 
-  This is a (perhaps instable) BETA version. If you want to contribute a bit,
+  This is a (perhaps instable) BETA version. If you want to contribute,
   please send your detailed bug reports to Heiko Stamer <stamer@gaos.org>.
 
   You can get the latest sources from our CVS repository at GNU/Savannah:
 
   cvs -z3 -d:ext:anoncvs@savannah.nongnu.org:/cvsroot/secureskat co secureskat
 
-  Beware! Many lines of the SecureSkat sources are pretty ugly code.
+  Beware! Some lines of the SecureSkat sources are still either pretty ugly
+  code or inelegant solutions, because they were written very quickly. :-(
 
 Copyright and License of this software
 --------------------------------------
@@ -195,7 +198,7 @@ References
 ----------
 
 [1] Heiko Stamer: "Kryptographische Skatrunde",
-    Offene Systeme, Issue 4, pp. 10--30, 2004, ISSN 1619-0114.
+    Offene Systeme, Number 4, pp. 10--30, 2004, ISSN 1619-0114.
     http://gaos.org/~stamer/OS-4-2004-openskat.pdf
 
 Appendix
