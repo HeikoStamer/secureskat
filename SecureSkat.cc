@@ -102,7 +102,6 @@
 #define PKI_CHILDS							10
 #define RNK_CHILDS							5
 
-SchindelhauerTMCG							*tmcg;
 unsigned long int							security_level = 16;
 std::string										game_ctl;
 char													**game_env;
@@ -187,6 +186,9 @@ RETSIGTYPE sig_handler_skat_quit(int sig)
 
 RETSIGTYPE sig_handler_ballot_quit(int sig)
 {
+#ifndef NDEBUG
+	std::cerr << "??? SIGNAL " << sig << " RECEIVED ???" << std::endl;
+#endif
 	exit(-100);
 }
 
@@ -443,8 +445,7 @@ void init_irc()
 }
 
 int skat_connect
-	(SchindelhauerTMCG *t,
-	size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
+	(size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
 	const TMCG_PublicKeyRing &pkr)
 {
@@ -456,28 +457,27 @@ int skat_connect
 	if (handle < 0)
 		return -4;
 	iosocketstream *neighbor = new iosocketstream(handle);
+	std::string tmp = "";
 	
-	// authenticate connection
-	char tmp[TMCG_MAX_CARD_CHARS];
-	TMCG_CardSecret cs(3, 5);
-	// receive challenge
-	neighbor->getline(tmp, sizeof(tmp));
-	if (cs.import(tmp))
+	// authenticate connection: receive the nonce
+	unsigned long int nonce_A = 0, nonce_B = 0;
+	*neighbor >> nonce_A;
+	neighbor->ignore(1, '\n');
+	if (neighbor->good())
 	{
-		std::string chlg1 = tmp, chlg2 = "";
-		chlg1 += "<>" + vnicks[pkr_idx];
-		// send signature
-		*neighbor << sec.sign(chlg1) << std::endl << std::flush;
-		// create new challenge
-		t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
+		std::ostringstream ost, ost2;
+		ost << nonce_A << "<>" << vnicks[pkr_idx];
+		// send the signature
+		*neighbor << sec.sign(ost.str()) << std::endl << std::flush;
+		// create a fresh nonce
+		nonce_B = mpz_srandom_ui();
 		// send challenge
-		*neighbor << cs << std::endl << std::flush;
-		// receive signature
-		neighbor->getline(tmp, sizeof(tmp));
-		// verify signature
-		std::ostringstream ost;
-		ost << cs, chlg2 = ost.str() + "<>" + vnicks[pkr_self];
-		if (!pkr.key[pkr_idx].verify(chlg2, tmp) || !neighbor->good())
+		*neighbor << nonce_B << std::endl << std::flush;
+		// receive the signature
+		std::getline(*neighbor, tmp);
+		// verify the signature
+		ost2 << nonce_B << "<>" << vnicks[pkr_self];
+		if (!pkr.key[pkr_idx].verify(ost2.str(), tmp) || !neighbor->good())
 		{
 			delete neighbor;
 			close(handle);
@@ -497,7 +497,7 @@ int skat_connect
 	gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 	*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
 	
-	neighbor->getline(tmp, sizeof(tmp));
+	std::getline(*neighbor, tmp);
 	if (!sec.decrypt(dv, tmp))
 	{
 		std::cerr << _("TMCG: decrypt() failed") << std::endl;
@@ -515,8 +515,7 @@ int skat_connect
 
 int skat_accept
 	(opipestream *out_pipe, int ipipe, const std::string &nr, int r,
-	SchindelhauerTMCG *t, int pkr_self, int pkr_idx,
-	iosecuresocketstream *&secure, int &handle,
+	int pkr_self, int pkr_idx, iosecuresocketstream *&secure, int &handle,
 	const std::vector<std::string> &vnicks, const TMCG_PublicKeyRing &pkr,
 	int gp_handle, bool neu, char *ireadbuf, int &ireaded)
 {
@@ -564,16 +563,16 @@ int skat_accept
 				{
 					iosocketstream *neighbor = new iosocketstream(handle);
 					
-					// create a nonce
-					TMCG_CardSecret cs(3, 5);
-					t->TMCG_CreateCardSecret(cs, pkr, pkr_self);
-					*neighbor << cs << std::endl << std::flush;
-					char tmp[TMCG_MAX_CARD_CHARS];
-					neighbor->getline(tmp, sizeof(tmp));
-					std::ostringstream ost;
-					ost << cs;
-					if (!pkr.key[pkr_idx].verify(ost.str() + "<>" +
-						vnicks[pkr_self], tmp) || !neighbor->good())
+					// create a fresh nonce
+					unsigned long int nonce_A = mpz_srandom_ui(), nonce_B = 0;
+					std::ostringstream ost, ost2;
+					std::string tmp;
+					*neighbor << nonce_A << std::endl << std::flush;
+					// receive the signature
+					std::getline(*neighbor, tmp);
+					// verify the signature
+					ost << nonce_A << "<>" << vnicks[pkr_self];
+					if (!pkr.key[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
 					{
 						delete neighbor;
 						close(handle);
@@ -581,17 +580,18 @@ int skat_accept
 					}
 					else
 					{
-						neighbor->getline(tmp, sizeof(tmp));
-						if (cs.import(tmp))
+						// receive the nonce
+						*neighbor >> nonce_B;
+						neighbor->ignore(1, '\n');
+						if (neighbor->good())
 						{
-							std::string st = tmp;
-							st += "<>" + vnicks[pkr_idx];
-							*neighbor << sec.sign(st) << std::endl << std::flush;
+							ost2 << nonce_B << "<>" << vnicks[pkr_idx];
+							*neighbor << sec.sign(ost2.str()) << std::endl << std::flush;
 							
-							// exchange secret keys for securesocketstreams
+							// exchange the secret keys for securesocketstream
 							char *key1 = new char[TMCG_SAEP_S0],
 								*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
-							neighbor->getline(tmp, sizeof(tmp));
+							std::getline(*neighbor, tmp);
 							if (!sec.decrypt(dv, tmp))
 							{
 								std::cerr << _("TMCG: decrypt() failed") << std::endl;
@@ -707,8 +707,8 @@ void skat_error
 		if (error < -1)
 		{
 			*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
-			sleep(1);		// The child has to sleep a second before it can exit,
-									// because the parent must process the PART message first.
+			sleep(1);		// The child has to sleep a second before quitting, because
+									// the parent must process the sended PART message first.
 		}
 		exit(error);
 	}
@@ -847,7 +847,7 @@ int ballot_child
 	}
 	std::cout << X << _("Room") << " " << nr << " " << _("preparing the ballot") << 
 		" ..." << std::endl;
-	// prepare ballot (create PKR, bind port for secure connection)
+	// prepare ballot (create PKR, bind port for secure connections)
 	assert(gp_nick.size() <= TMCG_MAX_PLAYERS);
 	assert(b <= TMCG_MAX_TYPEBITS);
 	SchindelhauerTMCG *ballot_tmcg = 							// n players, 2^b cards
@@ -1019,7 +1019,7 @@ int ballot_child
 				struct hostent *hostinf = 
 					gethostbyname(nick_players[vnicks[pkr_idx]].c_str());
 				if (hostinf != NULL)
-				{ 
+				{
 					memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
 				}
 				else
@@ -1033,8 +1033,9 @@ int ballot_child
 					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -71;
 				}
-				// establish connection
+				// establish and authenticate the connection
 				iosocketstream *neighbor = new iosocketstream(handle);
+				
 				TMCG_CardSecret cs(gp_nick.size(), b);
 				ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 				*neighbor << cs << std::endl << std::flush;
@@ -1080,11 +1081,13 @@ int ballot_child
 						
 						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
 							GCRY_STRONG_RANDOM);
-						*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl
-							<< std::flush;
-						iosecuresocketstream *secure =
+						*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << 
+							std::flush;
+						ios_in[vnicks[pkr_idx]] = 
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
-						ios_in[vnicks[pkr_idx]] = secure;
+#ifndef NDEBUG
+	std::cerr << "ios_in[" << vnicks[pkr_idx] << "]" << std::endl;
+#endif
 						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 						
 						pkr_idx++;
@@ -1241,9 +1244,11 @@ int ballot_child
 							return -84;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
-						iosecuresocketstream *secure =
+						ios_out[vnicks[i]] = 
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
-						ios_out[vnicks[i]] = secure;
+#ifndef NDEBUG
+	std::cerr << "ios_out[" << vnicks[i] << "]" << std::endl;
+#endif
 						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 					}
 				}
@@ -1254,7 +1259,7 @@ int ballot_child
 	} // while
 	
 	// VTMF initalization
-	BarnettSmartVTMF_dlog_GroupQR *vtmf;
+	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 0)
 	{
 #ifdef COMMON_DDH_GROUP
@@ -1265,7 +1270,7 @@ int ballot_child
 		ddh_group << "2" << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog_GroupQR();
+		vtmf = new BarnettSmartVTMF_dlog;
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
@@ -1312,14 +1317,16 @@ int ballot_child
 		ddh_group << "2" << std::endl;
 		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
 #else
-		vtmf = new BarnettSmartVTMF_dlog_GroupQR(*ios_in[vnicks[0]]);
+		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
 #endif
+		
 		if (!vtmf->CheckGroup())
 		{
 			std::cout << ">< " << _("VTMF ERROR") << ": " << 
 				_("function CheckGroup() failed") << std::endl;
 			return -90;
 		}
+		
 		vtmf->KeyGenerationProtocol_GenerateKey();
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
@@ -1350,7 +1357,6 @@ int ballot_child
 	VTMF_CardSecret vote_cs;
 	ballot_tmcg->TMCG_CreatePrivateCard(vote_c, vote_cs, vtmf, vote);
 	TMCG_Stack<VTMF_Card> s;
-	char *tmp = new char[TMCG_MAX_STACK_CHARS];
 	
 	// send and receive private cards for ballot
 	for (size_t i = 0; i < vnicks.size(); i++)
@@ -1358,15 +1364,16 @@ int ballot_child
 		if (i != pkr_self)
 		{
 			VTMF_Card c;
-			ios_in[vnicks[i]]->getline(tmp, TMCG_MAX_STACK_CHARS);
+			*ios_in[vnicks[i]] >> c;
 			
-			if (c.import(tmp))
+			if (ios_in[vnicks[i]]->good())
 			{
 				s.push(c);
 			}
 			else
 			{
-				std::cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << std::endl;
+				std::cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << 
+					std::endl;
 				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -85;
 			}
@@ -1377,7 +1384,7 @@ int ballot_child
 			for (size_t j = 0; j < vnicks.size(); j++)
 			{
 				if (j != pkr_self)
-					*(ios_out[vnicks[j]]) << vote_c << std::endl << std::flush;
+					*ios_out[vnicks[j]] << vote_c << std::endl << std::flush;
 			}
 		}
 	}
@@ -1387,16 +1394,16 @@ int ballot_child
 	TMCG_StackSecret<VTMF_CardSecret> ss;
 	ballot_tmcg->TMCG_CreateStackSecret(ss, false, s.size(), vtmf);
 	
-	// mix ballot stack
+	// mix the ballot stack
 	for (size_t i = 0; i < vnicks.size(); i++)
 	{
 		if (i != pkr_self)
 		{
-			ios_in[vnicks[i]]->getline(tmp, TMCG_MAX_STACK_CHARS);
-			if (s2.import(tmp))
+			*ios_in[vnicks[i]] >> s2;
+			if (ios_in[vnicks[i]]->good())
 			{
 				if (ballot_tmcg->TMCG_VerifyStackEquality(s, s2, false, vtmf,
-					*(ios_in[vnicks[i]]), *(ios_in[vnicks[i]])))
+					*ios_in[vnicks[i]], *ios_in[vnicks[i]]))
 				{
 					s.clear();
 					s = s2;
@@ -1411,7 +1418,8 @@ int ballot_child
 			}
 			else
 			{
-				std::cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << std::endl;
+				std::cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << 
+					std::endl;
 				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 				return -85;
 			}
@@ -1423,9 +1431,9 @@ int ballot_child
 			{
 				if (j != pkr_self)
 				{
-					*(ios_out[vnicks[j]]) << s2 << std::endl << std::flush;
+					*ios_out[vnicks[j]] << s2 << std::endl << std::flush;
 					ballot_tmcg->TMCG_ProveStackEquality(s, s2, ss, false, vtmf,
-						*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
+						*ios_out[vnicks[j]], *ios_out[vnicks[j]]);
 				}
 			}
 			s.clear();
@@ -1439,32 +1447,31 @@ int ballot_child
 	{
 		ballot_tmcg->TMCG_SelfCardSecret(s[k], vtmf);
 		
-		// open cards to get result of the ballot
+		// open cards to get result of the voting
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)
 			{
 				if (!ballot_tmcg->TMCG_VerifyCardSecret(s[k], vtmf,
-					*(ios_in[vnicks[i]]), *(ios_in[vnicks[i]])))
+					*ios_in[vnicks[i]], *ios_in[vnicks[i]]))
 				{
-					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
+					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << 
+						std::endl;
 					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -85;
 				}
 			}
 			else
 			{
+				std::stringstream proof;
+				ballot_tmcg->TMCG_ProveCardSecret(s[k], vtmf, proof, proof);
 				for (size_t j = 0; j < vnicks.size(); j++)
 				{
 					if (j != pkr_self)
-					{
-						ballot_tmcg->TMCG_ProveCardSecret(s[k], vtmf,
-							*(ios_out[vnicks[j]]), *(ios_out[vnicks[j]]));
-					}
+						*ios_out[vnicks[j]] << proof.str() << std::flush;
 				}
 			}
 		}
-		
 		br.push_back(ballot_tmcg->TMCG_TypeOfCard(s[k], vtmf));
 	}
 	
@@ -1478,8 +1485,6 @@ int ballot_child
 	}
 	std::cout << std::endl;
 	sleep(1);
-	
-	delete [] tmp;
 	
 	// announce table destruction
 	if (neu)
@@ -1497,7 +1502,8 @@ int ballot_child
 }
 
 int skat_child
-	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe, const std::string &master)
+	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe,
+	const std::string &master)
 {
 	SchindelhauerTMCG *gp_tmcg =
 		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 2^5 = 32 cards
@@ -1718,29 +1724,29 @@ int skat_child
 	switch (pkr_self)
 	{
 		case 0:
-			error = skat_connect(gp_tmcg, pkr_self, 1,
+			error = skat_connect(pkr_self, 1,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
 			skat_error(error, out_pipe, nr);
-			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 2,
+			error = skat_accept(out_pipe, ipipe, nr, r, pkr_self, 2,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
 			skat_error(error, out_pipe, nr);
 			break;
 		case 1:
-			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 0,
+			error = skat_accept(out_pipe, ipipe, nr, r, pkr_self, 0,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
 			skat_error(error, out_pipe, nr);
-			error = skat_connect(gp_tmcg, pkr_self, 2,
+			error = skat_connect(pkr_self, 2,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
 			skat_error(error, out_pipe, nr);
 			break;
 		case 2:
-			error = skat_accept(out_pipe, ipipe, nr, r, gp_tmcg, pkr_self, 1,
+			error = skat_accept(out_pipe, ipipe, nr, r, pkr_self, 1,
 				right_neighbor, accept_handle, vnicks, pkr, gp_handle, neu,
 				ipipe_readbuf, ipipe_readed);
 			skat_error(error, out_pipe, nr);
-			error = skat_connect(gp_tmcg, pkr_self, 0,
+			error = skat_connect(pkr_self, 0,
 				left_neighbor, connect_handle, gp_ports, vnicks, pkr);
 			skat_error(error, out_pipe, nr);
 			break;
@@ -2502,6 +2508,9 @@ static void process_line(char *line)
 									perror("run_irc (close)");
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
 									pub.keyid());
+#ifndef NDEBUG
+	std::cerr << "ballot_child() = " << ret << std::endl;
+#endif
 								sleep(1);
 								if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 									perror("run_irc (close)");
@@ -2555,6 +2564,9 @@ static void process_line(char *line)
 										perror("run_irc (close)");
 									int ret = ballot_child(tnr, -tables_r[tnr], false,
 										in_pipe[0], out_pipe[1], tables_o[tnr]);
+#ifndef NDEBUG
+	std::cerr << "ballot_child() = " << ret << std::endl;
+#endif
 									sleep(1);
 									if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
 										perror("run_irc (close)");
@@ -3577,7 +3589,7 @@ void run_irc()
 				char ptmp[100];
 				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
 					pki7771_port, pki7772_port, rnk7773_port, rnk7774_port,
-					(int)tmcg->TMCG_SecurityLevel);
+					(int)security_level);
 				std::string uname = pub.keyid();
 				if (uname.length() > 4)
 				{
@@ -3989,7 +4001,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.40 2005/08/18 22:19:28 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.41 2005/08/26 21:09:06 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -4083,7 +4095,6 @@ int main(int argc, char* argv[], char* envp[])
 			return -1;
 		}
 		
-		tmcg = new SchindelhauerTMCG(security_level, 3, 5); // 3 players, 32 cards
 		get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
 		pub = TMCG_PublicKey(sec); // extract the public part of the secret key
 		get_public_keys(homedir + "SecureSkat.pkr", nick_key); // get public keys
@@ -4110,7 +4121,6 @@ int main(int argc, char* argv[], char* envp[])
 		release_rnk(rnk7773_handle, rnk7774_handle);
 		release_pki(pki7771_handle);
 		set_public_keys(homedir + "SecureSkat.pkr", nick_key);
-		delete tmcg;
 		
 		return 0;
 	}
