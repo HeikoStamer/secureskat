@@ -184,7 +184,7 @@ Bugs, Contribution, CVS
   cvs -z3 -d:ext:anoncvs@savannah.nongnu.org:/cvsroot/secureskat co secureskat
 
   Beware! Some lines of the SecureSkat sources are still either pretty ugly
-  code or inelegant solutions, because they were written very quickly. :-(
+  code or inelegant solutions, because they were written very wearily. :-(
 
 Copyright and License of this software
 --------------------------------------
