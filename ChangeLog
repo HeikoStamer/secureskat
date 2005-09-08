@@ -23,3 +23,5 @@ SecureSkat 2.6:
 		- changed the COMMON_DDH_GROUP to the Well-Known MODP Group 2 of RFC 2412
 		- command /players shows now the package name and version
 SecureSkat 2.7:
+		- using Groth's protocol for the Verifiable Secret Shuffle
+		- Null-games are aborted immediately if lost by the playing party

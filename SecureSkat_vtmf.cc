@@ -1922,6 +1922,12 @@ int skat_game
 								spiel_who[1] = (spiel_who[0] + 1) % 3;
 								spiel_who[2] = (spiel_who[0] + 2) % 3;
 								spiel_dran = 0;
+								// Null-Spiele ggf. sofort abbrechen
+								if ((skat_spiel2gwert(spiel_status) == 23)
+									&& (os_pkt[spiel_allein].size() != 0))
+								{
+									s[0].clear(), s[1].clear(), s[2].clear();
+								}
 							}
 							else
 								spiel_dran += 1;
@@ -2430,6 +2436,12 @@ int skat_game
 											spiel_who[1] = (spiel_who[0] + 1) % 3;
 											spiel_who[2] = (spiel_who[0] + 2) % 3;
 											spiel_dran = 0;
+											// Null-Spiele ggf. sofort abbrechen
+											if ((skat_spiel2gwert(spiel_status) == 23)
+												&& (os_pkt[spiel_allein].size() != 0))
+											{
+												s[0].clear(), s[1].clear(), s[2].clear();
+											}
 										}
 										else
 											spiel_dran += 1;
@@ -2498,11 +2510,15 @@ int skat_game
 				
 				// nachtraegliche Regelkontrolle
 				bool rules_ok[3];
-				assert(os_st.size() == 10);
+				assert((os_st.size() == 10) ||
+					((skat_spiel2gwert(spiel_status) == 23)
+						&& (os_pkt[spiel_allein].size() != 0)));
 				for (size_t i = 0; i < 3; i++)
 				{
 					TMCG_OpenStack<VTMF_Card> gps;
-					assert(os_rc[i].size() == 10);
+					assert((os_rc[i].size() == 10) ||
+						((skat_spiel2gwert(spiel_status) == 23)
+							&& (os_pkt[spiel_allein].size() != 0)));
 					gps.push(os_rc[i]);
 					rules_ok[i] = true;
 					for (size_t j = 0; j < os_st.size(); j++)
