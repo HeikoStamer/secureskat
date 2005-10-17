@@ -41,7 +41,6 @@ std::string get_passphrase
 	}
 	std::cout << prompt.c_str() << ": ";
 	std::getline(std::cin, pass_phrase);
-	std::cout << std::endl;
 	if (tcsetattr(fileno(stdin), TCSANOW, &old_term) < 0)
 	{
 		perror("SecureSkat_pki::get_passphrase (tcsetattr)");
