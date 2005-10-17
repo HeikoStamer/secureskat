@@ -32,7 +32,8 @@ std::string get_passphrase
 		exit(-1);
 	}
 	new_term = old_term;
-	new_term.c_lflag &= ~(ECHO|ISIG);
+	new_term.c_lflag &= ~(ECHO | ISIG);
+	new_term.c_lflag |= ECHONL;
 	if (tcsetattr(fileno(stdin), TCSANOW, &new_term) < 0)
 	{
 		perror("SecureSkat_pki::get_passphrase (tcsetattr)");
