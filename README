@@ -66,6 +66,7 @@ Requirements
   + FreeBSD 4.0                 i386 (SMP)  gcc 2.95.2
   + FreeBSD 5.0 RC1             i686        gcc 3.2.1
   + SunOS 5.8, Solaris 2.7      sparc       gcc 3.2.4
+  + SunOS 5.10, Solaris 10      sparc       gcc 3.4.3
   - GNU/Linux (Sharp Zaurus)    arm         zgcc 2.95.2     (--disable-shared)
   + Darwin 7.5.0                powerpc     gcc 3.3 (Apple Computer, Inc. build 1666)
 
