@@ -658,7 +658,7 @@ int skat_accept
 					{
 						*out_pipe << "PRIVMSG #openSkat :" 
 							<< nr << "|3~" << r << "!" << std::endl << std::flush;
-					}	
+					}
 					if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 					{
 						std::string nick = cmd.substr(8, cmd.length() - 8);
@@ -903,7 +903,7 @@ int ballot_child
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() << 
 				"~" << -b << "!" << std::endl << std::flush;
-		}		
+		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
 			std::string nick = cmd.substr(5, cmd.length() - 5);
@@ -1678,7 +1678,7 @@ int skat_child
 		{
 			*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << r << "!" << 
 				std::endl << std::flush;
-		}		
+		}
 		if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 		{
 			std::string nick = cmd.substr(8, cmd.length() - 8);
@@ -1923,6 +1923,11 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 											*irc << "PRIVMSG " << ni->first << " :" << 
 												irc_parvec[1] << std::endl << std::flush;
 										}
+										// send announcement PRIVMSG to the channel
+										// necessary because some IRC servers (e.g. freenode.net)
+										// block the private messages of unregistered users
+										*irc << "PRIVMSG #openSkat :" << irc_parvec[1] << 
+											"~+~" << std::endl << std::flush;
 										
 										// process announcement PRIVMSG
 										size_t tabei1 = irc_parvec[1].find("|", 0);
@@ -3448,31 +3453,14 @@ void run_irc()
 								}
 							}
 						}
-						// chat messages
-						if (irc_stat && (irc_parvec[0] == "#openSkat"))
-						{
-							size_t tei = irc_parvec[1].find("~~~");
-							if ((nick.find(public_prefix, 0) == 0) &&
-								(nick_key.find(nick) != nick_key.end()) &&
-								(tei != irc_parvec[1].npos))
-							{
-								std::string realmsg = irc_parvec[1].substr(0, tei);
-								std::string sig = irc_parvec[1].substr(tei + 3, 
-									irc_parvec[1].length() - realmsg.length() - 3);
-								if (nick_key[nick].verify(realmsg, sig))
-								{
-									nick = nick_key[nick].name;
-									std::cout << "<" << nick << "> " << realmsg << std::endl;
-								}
-								else
-									std::cerr << _("TMCG: verify() failed") << std::endl;
-							}
-							else
-								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
-						} // announce and no channel messages
-						else if ((nick.find(public_prefix, 0) == 0) &&
-							((irc_parvec[0] == pub.keyid()) &&
-							(nick != pub.keyid())))
+						// announce and no channel messages
+						if (((irc_parvec[1].find("~+~") != irc_parvec[1].npos) && 
+								(irc_parvec[0] == "#openSkat"))
+							||
+							((irc_parvec[0] != "#openSkat") &&
+								(nick.find(public_prefix, 0) == 0) &&
+								((irc_parvec[0] == pub.keyid()) &&
+									(nick != pub.keyid()))))
 						{
 							size_t tabei1 = irc_parvec[1].find("|", 0);
 							size_t tabei2 = irc_parvec[1].find("~", 0);
@@ -3521,7 +3509,7 @@ void run_irc()
 											"\" (" << host << ") " << 
 											_("announces unauthorized session") << " " <<
 											tabmsg1 << std::endl;
-								}						
+								}
 							}
 							else if (irc_stat)
 							{
@@ -3529,7 +3517,28 @@ void run_irc()
 									nick = nick_key[nick].name;
 								std::cout << ">" << nick << "< " << irc_parvec[1] << std::endl;
 							}
-						}
+						}// chat messages
+						else if (irc_stat && (irc_parvec[0] == "#openSkat"))
+						{
+							size_t tei = irc_parvec[1].find("~~~");
+							if ((nick.find(public_prefix, 0) == 0) &&
+								(nick_key.find(nick) != nick_key.end()) &&
+								(tei != irc_parvec[1].npos))
+							{
+								std::string realmsg = irc_parvec[1].substr(0, tei);
+								std::string sig = irc_parvec[1].substr(tei + 3, 
+									irc_parvec[1].length() - realmsg.length() - 3);
+								if (nick_key[nick].verify(realmsg, sig))
+								{
+									nick = nick_key[nick].name;
+									std::cout << "<" << nick << "> " << realmsg << std::endl;
+								}
+								else
+									std::cerr << _("TMCG: verify() failed") << std::endl;
+							}
+							else
+								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
+						} // other messages
 						else if (irc_stat &&
 							((irc_parvec[0] == pub.keyid()) &&
 							(nick != pub.keyid())))
@@ -3551,10 +3560,10 @@ void run_irc()
 					std::cerr << "[ERROR] " << irc_reply << std::endl;
 				}
 				else
-				{ 
+				{
 					// unparsed IRC-message -- ignore it
 //std::cerr << "IRC: unparsed message:" << std::endl;
-//std::cerr << irc_reply << std::endl;
+//std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 				}
 				
 					}
@@ -4001,7 +4010,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.41 2005/08/26 21:09:06 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.42 2006/02/01 20:41:10 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
