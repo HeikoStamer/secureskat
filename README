@@ -182,15 +182,15 @@ Bugs, Contribution, CVS
 
   You can get the latest sources from our CVS repository at GNU/Savannah:
 
-  cvs -z3 -d:ext:anoncvs@savannah.nongnu.org:/cvsroot/secureskat co secureskat
+  cvs -d:pserver:anonymous@cvs.savannah.nongnu.org:/sources/secureskat co secureskat
 
   Beware! Some lines of the SecureSkat sources are still either pretty ugly
-  code or inelegant solutions, because they were written very wearily. :-(
+  code or inelegant solutions, because they were written very quickly. :-(
 
 Copyright and License of this software
 --------------------------------------
 
-  (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
+  (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
       GNU General Public License version 2
 
   Please have a look at the file 'COPYING' and http://www.fsf.org/.
