@@ -28,3 +28,4 @@ SecureSkat 2.7:
 		- Null-games are now aborted immediately, if lost by the playing party
 		- added an alternative table announcement (PRIVMSG to channel), because
 		  some IRC servers (e.g. freenode.net) are blocking PRIVMSG to users
+		- the command /players now additionally shows the key fingerprints

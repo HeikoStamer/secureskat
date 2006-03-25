@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with SecureSkat; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
 #include "SecureSkat_pki.hh"
@@ -56,7 +56,7 @@ void decrypt_secret_key
 	gcry_cipher_hd_t handle;
 	gcry_error_t err = 0;
 	
-	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH, 
 		GCRY_CIPHER_MODE_CFB, 0);
 	if (err)
 	{
@@ -73,7 +73,7 @@ void decrypt_secret_key
 		exit(-1);
 	}
 	
-	err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr,
+	err = gcry_cipher_decrypt(handle, (unsigned char*)data.dptr, 
 		data.dsize, NULL, 0);
 	if (err)
 	{
@@ -91,7 +91,7 @@ void encrypt_secret_key
 	gcry_cipher_hd_t handle;
 	gcry_error_t err = 0;
 	
-	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH,
+	err = gcry_cipher_open(&handle, GCRY_CIPHER_BLOWFISH, 
 		GCRY_CIPHER_MODE_CFB, 0);
 	if (err)
 	{
@@ -108,7 +108,7 @@ void encrypt_secret_key
 		exit(-1);
 	}
 	
-	err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr,
+	err = gcry_cipher_encrypt(handle, (unsigned char*)data.dptr, 
 		data.dsize, NULL, 0);
 	if (err)
 	{
@@ -175,10 +175,10 @@ void get_secret_key
 					std::string T_1 = pass_phrase + key_str;
 					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i,
 						T_1.c_str(), T_1.length());
-					// PBKDF1 with interation count = 5000
+					// PBKDF1 with iteration count = 5000
 					for (size_t i = 1; i <= 5000; i++)
 					{
-						gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+						gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
 							T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 						memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 					}
@@ -257,10 +257,10 @@ void get_secret_key
 					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
 				std::string T_1 = pass_phrase + keyid;
 				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, T_1.c_str(), T_1.length());
-				// PBKDF1 with interation count = 5000
+				// PBKDF1 with iteration count = 5000
 				for (size_t i = 1; i <= 5000; i++)
 				{
-					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
+					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
 						T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 					memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
 				}
@@ -286,9 +286,16 @@ void get_secret_key
 	
 	if (!sec.import(ost.str()))
 	{
-		std::cerr << _("PKI ERROR: secret key corrupted") <<
+		std::cerr << _("PKI ERROR: secret key corrupted") << 
 			" [" << key_str << "]" << std::endl;
 		exit(-1);
+	}
+	else
+	{
+#ifndef NDEBUG
+		std::cout << _("PKI: secret key successfully loaded") << 
+			" [" << key_str << "]" << std::endl;
+#endif
 	}
 	
 	prefix = sec.keyid();

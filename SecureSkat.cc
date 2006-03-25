@@ -1,7 +1,7 @@
 /*******************************************************************************
-   SecureSkat.cc, secure peer-to-peer implementation of the card game "Skat"
+   SecureSkat.cc, a secure peer-to-peer implementation of the card game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with SecureSkat; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
 // autoconf header
@@ -477,7 +477,7 @@ int skat_connect
 		std::getline(*neighbor, tmp);
 		// verify the signature
 		ost2 << nonce_B << "<>" << vnicks[pkr_self];
-		if (!pkr.key[pkr_idx].verify(ost2.str(), tmp) || !neighbor->good())
+		if (!pkr.keys[pkr_idx].verify(ost2.str(), tmp) || !neighbor->good())
 		{
 			delete neighbor;
 			close(handle);
@@ -493,16 +493,16 @@ int skat_connect
 	
 	// exchange secret keys for securesocketstreams
 	char *key1 = new char[TMCG_SAEP_S0], *key2 = new char[TMCG_SAEP_S0],
-		*dv = NULL;
+		*dv = new char[TMCG_SAEP_S0];
 	gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
-	*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << std::flush;
+	*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
 	
 	std::getline(*neighbor, tmp);
 	if (!sec.decrypt(dv, tmp))
 	{
 		std::cerr << _("TMCG: decrypt() failed") << std::endl;
 		delete neighbor;
-		delete [] key1, delete [] key2;
+		delete [] key1, delete [] key2, delete [] dv;
 		close(handle);
 		return -6;
 	}
@@ -572,7 +572,7 @@ int skat_accept
 					std::getline(*neighbor, tmp);
 					// verify the signature
 					ost << nonce_A << "<>" << vnicks[pkr_self];
-					if (!pkr.key[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
+					if (!pkr.keys[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
 					{
 						delete neighbor;
 						close(handle);
@@ -590,13 +590,13 @@ int skat_accept
 							
 							// exchange the secret keys for securesocketstream
 							char *key1 = new char[TMCG_SAEP_S0],
-								*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
+								*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
 							std::getline(*neighbor, tmp);
 							if (!sec.decrypt(dv, tmp))
 							{
 								std::cerr << _("TMCG: decrypt() failed") << std::endl;
 								delete neighbor;
-								delete [] key1, delete [] key2;
+								delete [] key1, delete [] key2, delete [] dv;
 								close(handle);
 								return -6;
 							}
@@ -604,7 +604,7 @@ int skat_accept
 							
 							gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
 								GCRY_STRONG_RANDOM);
-							*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl <<
+							*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl <<
 								std::flush;
 							delete neighbor;
 							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
@@ -863,10 +863,10 @@ int ballot_child
 		if (*pi == pub.keyid())
 		{
 			pkr_self = pkr_i;
-			pkr.key[pkr_i] = pub;
+			pkr.keys[pkr_i] = pub;
 		}
 		else
-			pkr.key[pkr_i] = nick_key[*pi];
+			pkr.keys[pkr_i] = nick_key[*pi];
 	}
 	int gp_handle, gp_port = BindEmptyPort(7900);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
@@ -879,7 +879,7 @@ int ballot_child
 	*out_pipe << ost.str() << std::flush;
 	std::cout << X << _("Room") << " " << nr << " " << _("with");
 	for (size_t i = 0; i < gp_nick.size(); i++)
-		std::cout << " '" << pkr.key[i].name << "'";
+		std::cout << " '" << pkr.keys[i].name << "'";
 	std::cout << " " << _("ready") << "." << std::endl;
 	std::cout << XX << _("BALLOT: please make your vote with command") << 
 		" /<nr> vote <r>" << std::endl;
@@ -1049,7 +1049,7 @@ int ballot_child
 					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 					return -72;
 				}
-				else if (!pkr.key[pkr_idx].verify(challenge.str(), challenge_sig))
+				else if (!pkr.keys[pkr_idx].verify(challenge.str(), challenge_sig))
 				{
 					delete neighbor, close(handle);
 					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
@@ -1066,13 +1066,13 @@ int ballot_child
 							std::endl << std::flush;
 						
 						// exchange secret keys for securesocketstreams
-						char *key1 = new char[TMCG_SAEP_S0],
-							*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
+						char *key1 = new char[TMCG_SAEP_S0], 
+							*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
 						neighbor->getline(challenge_sig, sizeof(challenge_sig));
 						if (!sec.decrypt(dv, challenge_sig))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete neighbor, delete [] key1, delete [] key2;
+							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 							close(handle);
 							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -74;
@@ -1081,7 +1081,7 @@ int ballot_child
 						
 						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
 							GCRY_STRONG_RANDOM);
-						*neighbor << pkr.key[pkr_idx].encrypt(key1) << std::endl << 
+						*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << 
 							std::flush;
 						ios_in[vnicks[pkr_idx]] = 
 							new iosecuresocketstream(handle, key1, 16, key2, 16);
@@ -1213,7 +1213,7 @@ int ballot_child
 								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 								return -80;
 							}
-							else if (!pkr.key[i].verify(response.str(), tmp))
+							else if (!pkr.keys[i].verify(response.str(), tmp))
 							{
 								delete neighbor, close(handle);
 								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
@@ -1229,16 +1229,16 @@ int ballot_child
 						
 						// exchange secret keys for securesocketstreams
 						char *key1 = new char[TMCG_SAEP_S0],
-							*key2 = new char[TMCG_SAEP_S0], *dv = NULL;
+							*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
 						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
 							GCRY_STRONG_RANDOM);
-						*neighbor << pkr.key[i].encrypt(key1) << std::endl << std::flush;
+						*neighbor << pkr.keys[i].encrypt(key1) << std::endl << std::flush;
 						
 						neighbor->getline(tmp, sizeof(tmp));
 						if (!sec.decrypt(dv, tmp))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete neighbor, delete [] key1, delete [] key2;
+							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 							close(handle);
 							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
 							return -84;
@@ -1643,10 +1643,10 @@ int skat_child
 		if (*pi == pub.keyid())
 		{
 			pkr_self = pkr_i;
-			pkr.key[pkr_i++] = pub;
+			pkr.keys[pkr_i++] = pub;
 		}
 		else
-			pkr.key[pkr_i++] = nick_key[*pi];
+			pkr.keys[pkr_i++] = nick_key[*pi];
 	}
 	int gp_handle, gp_port = BindEmptyPort(7800);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
@@ -1659,9 +1659,9 @@ int skat_child
 	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
 	*out_pipe << ost.str() << std::flush;
 	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" <<
-		pkr.key[0].name << "', '" <<
-		pkr.key[1].name << "', '" <<
-		pkr.key[2].name << "' " << _("ready") << "." << std::endl;
+		pkr.keys[0].name << "', '" <<
+		pkr.keys[1].name << "', '" <<
+		pkr.keys[2].name << "' " << _("ready") << "." << std::endl;
 	std::list<std::string> gp_rdport;
 	std::map<std::string, int> gp_ports;
 	while (gp_rdport.size() < 2)
@@ -2092,7 +2092,9 @@ static void process_line(char *line)
 				std::cout << XX << "   " << "[ " << 
 					nick_package[nick] << ", " << 
 					"SECURITY_LEVEL = " << nick_sl[nick] << ", " << 
-					"KEY_TYPE = " << type << " " << 
+					"KEY_TYPE = " << type << ", " << std::endl;
+				std::cout << XX << "     " << 
+					"KEY_FINGERPRINT = " << nick_key[nick].fingerprint() << 
 					"]" << std::endl;
 			}
 		}
@@ -4009,8 +4011,8 @@ int main(int argc, char* argv[], char* envp[])
 	char *home = NULL;
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
-		", (c) 2002, 2005  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.42 2006/02/01 20:41:10 stamer Exp $ " << std::endl;
+		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
+		" $Id: SecureSkat.cc,v 1.43 2006/03/25 19:49:47 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -4106,6 +4108,8 @@ int main(int argc, char* argv[], char* envp[])
 		
 		get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
 		pub = TMCG_PublicKey(sec); // extract the public part of the secret key
+		std::cout << _("Your key fingerprint") << ": " << pub.fingerprint() << 
+			std::endl;
 		get_public_keys(homedir + "SecureSkat.pkr", nick_key); // get public keys
 		
 		create_pki(pki7771_port, pki7771_handle);

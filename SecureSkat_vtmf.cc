@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004, 2005  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with SecureSkat; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
 #include "SecureSkat_vtmf.hh"
@@ -966,7 +966,7 @@ bool game_helper_1
 			return false;
 		case 12:
 			reiz_status += 100;
-			std::cout << "><><>< VH aka \"" << pkr.key[vh].name << 
+			std::cout << "><><>< VH aka \"" << pkr.keys[vh].name << 
 				"\" " << _("gets the game at") << " " << 
 				reiz_wert[reiz_counter] << std::endl;
 			spiel_allein = vh;
@@ -976,7 +976,7 @@ bool game_helper_1
 			return true;
 		case 13:
 			reiz_status += 100;
-			std::cout << "><><>< MH aka \"" << pkr.key[mh].name << 
+			std::cout << "><><>< MH aka \"" << pkr.keys[mh].name << 
 				"\" " << _("gets the game at") << " " << 
 				reiz_wert[reiz_counter] << std::endl;
 			spiel_allein = mh;
@@ -986,7 +986,7 @@ bool game_helper_1
 			return true;
 		case 14:
 			reiz_status += 100;
-			std::cout << "><><>< HH aka \"" << pkr.key[hh].name << 
+			std::cout << "><><>< HH aka \"" << pkr.keys[hh].name << 
 				"\" " << _("gets the game at") << " " << 
 				reiz_wert[reiz_counter] << std::endl;
 			spiel_allein = hh;
@@ -1018,7 +1018,7 @@ int skat_game
 	{
 		std::ostringstream ost;
 		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " << 
-			pkr.key[i].name << std::endl;
+			pkr.keys[i].name << std::endl;
 		*out_ctl << ost.str() << std::flush;
 	}
 	
@@ -1598,7 +1598,7 @@ int skat_game
 									break;
 							}
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[who_biding].name << "\" " << _("passes at") << " " << 
+								pkr.keys[who_biding].name << "\" " << _("passes at") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							if (pctl)
 								*out_ctl << nicks[who_biding] << " PASSE" << std::endl << 
@@ -1673,7 +1673,7 @@ int skat_game
 								
 							}
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[who_biding].name << "\" " << _("bids") << " " << 
+								pkr.keys[who_biding].name << "\" " << _("bids") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							if (pctl)
 							{
@@ -1695,7 +1695,7 @@ int skat_game
 							{
 								hand_spiel = true, reiz_status += 100;
 								std::cout << "><><>< " << _("player") << " \"" <<
-									pkr.key[spiel_allein].name << 
+									pkr.keys[spiel_allein].name << 
 									"\" " << _("doesn't take the Skat") << std::endl;
 								if (pctl)
 									*out_ctl << nicks[spiel_allein] << " HAND" << std::endl << 
@@ -1711,7 +1711,7 @@ int skat_game
 							{
 								hand_spiel = false, reiz_status += 100;
 								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.key[spiel_allein].name << 
+									pkr.keys[spiel_allein].name << 
 									"\" " << _("takes the Skat") << std::endl;
 								assert(sk.size() == 2);
 								s[spiel_allein].push(sk);
@@ -1756,7 +1756,7 @@ int skat_game
 									VTMF_Card c1, c2;
 									reiz_status += 100;
 									std::cout << "><><>< " << _("player") << " \"" << 
-										pkr.key[spiel_allein].name << 
+										pkr.keys[spiel_allein].name << 
 										"\" " << _("pushes the Skat") << std::endl;
 									if (pctl)
 										*out_ctl << nicks[spiel_allein] << " DRUECKE" << 
@@ -1849,7 +1849,7 @@ int skat_game
 									skat_blatt(10, os_ov);
 								}
 								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.key[spiel_allein].name << "\" " << _("announces") << 
+									pkr.keys[spiel_allein].name << "\" " << _("announces") << 
 									": " << skat_spiel2string(spiel_status) << std::endl;
 								if (pctl)
 								{
@@ -1879,7 +1879,7 @@ int skat_game
 								return 12;
 							}
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[spiel_who[spiel_dran]].name << "\" " << 
+								pkr.keys[spiel_who[spiel_dran]].name << "\" " << 
 								_("plays the card") << ": " <<
 								skat_type2string(type) << std::endl;
 							if (pctl)
@@ -1900,7 +1900,7 @@ int skat_game
 								int bk = skat_bstich(os_sp, spiel_status);
 								assert (bk != -1);
 								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.key[spiel_who[bk]].name << "\" " << 
+									pkr.keys[spiel_who[bk]].name << "\" " << 
 									_("gets the trick") << ": ";
 								for (size_t i = 0; i < os_sp.size(); i++)
 									std::cout << skat_type2string(os_sp[i].first);
@@ -1952,7 +1952,7 @@ int skat_game
 						if (spiel_status > 0)
 						{
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[spiel_allein].name << "\" (";
+								pkr.keys[spiel_allein].name << "\" (";
 							if ((reiz_status - 412) == 0)
 								std::cout << "VH";
 							if ((reiz_status - 412) == 1)
@@ -1967,11 +1967,11 @@ int skat_game
 								TMCG_OpenStack<VTMF_Card> os_sp2;
 								os_sp2.push(os_sp[i].first, os_sp[i].second);
 								skat_blatt(99, os_sp2);
-								std::cout << "(" << pkr.key[spiel_who[i]].name << ") ";
+								std::cout << "(" << pkr.keys[spiel_who[i]].name << ") ";
 							}
 							if (os_sp.size() < 3)
 							{
-								std::cout << " [" << pkr.key[spiel_who[spiel_dran]].name << 
+								std::cout << " [" << pkr.keys[spiel_who[spiel_dran]].name << 
 									" " << _("has to play") << "]" << std::endl;
 							}
 						}
@@ -2038,7 +2038,7 @@ int skat_game
 						if (pass_ok)
 						{
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[pkr_self].name << "\" " << _("passes at") << " " << 
+								pkr.keys[pkr_self].name << "\" " << _("passes at") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
 								hex_game_digest << std::endl << std::flush;
@@ -2117,7 +2117,7 @@ int skat_game
 						if (bid_ok)
 						{
 							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.key[pkr_self].name << "\" " << _("bids") << " " << 
+								pkr.keys[pkr_self].name << "\" " << _("bids") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
 								reiz_wert[reiz_counter] << " " << hex_game_digest << 
@@ -2141,7 +2141,7 @@ int skat_game
 							if ((reiz_status - 112) == ((pkr_self + p) % 3))
 							{
 								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.key[pkr_self].name << "\" " <<
+									pkr.keys[pkr_self].name << "\" " <<
 									_("doesn't take the Skat") << std::endl;
 								*out_pipe << "PRIVMSG #openSkat_" << nr << " :HAND " << 
 									hex_game_digest << std::endl << std::flush;
@@ -2164,7 +2164,7 @@ int skat_game
 							if (pkr_self == spiel_allein)
 							{
 								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.key[pkr_self].name << "\" " << 
+									pkr.keys[pkr_self].name << "\" " << 
 									_("takes the Skat") << std::endl;
 								*out_pipe << "PRIVMSG #openSkat_" << nr << " :SKAT " << 
 									hex_game_digest << std::endl << std::flush;
@@ -2230,7 +2230,7 @@ int skat_game
 												s[pkr_self].clear();
 												s[pkr_self].push(os);
 												std::cout << "><><>< " << _("player") << " \"" << 
-													pkr.key[pkr_self].name << 
+													pkr.keys[pkr_self].name << 
 													"\" " << _("pushes") << ": " << 
 													skat_type2string(tt1) << skat_type2string(tt2) << 
 													std::endl;
@@ -2332,7 +2332,7 @@ int skat_game
 												}
 											}
 											std::cout << "><><>< " << _("player") << " \"" << 
-												pkr.key[pkr_self].name << "\" " << _("announces") << 
+												pkr.keys[pkr_self].name << "\" " << _("announces") << 
 												": " << skat_spiel2string(spiel_status) << std::endl;
 											if (pctl)
 												*out_ctl << nicks[pkr_self] << " SAGEAN " <<
@@ -2388,7 +2388,7 @@ int skat_game
 											continue;
 										}
 										std::cout << "><><>< " << _("player") << " \"" << 
-											pkr.key[pkr_self].name << "\" " << _("plays the card") <<
+											pkr.keys[pkr_self].name << "\" " << _("plays the card") <<
 											": " << skat_type2string(tt) << std::endl;
 										*out_pipe << "PRIVMSG #openSkat_" << nr << " :LEGE " <<
 											skat_type2string(tt) << " " << hex_game_digest <<
@@ -2413,7 +2413,7 @@ int skat_game
 											int bk = skat_bstich(os_sp, spiel_status);
 											assert(bk != -1);
 											std::cout << "><><>< " << _("player") << " \"" << 
-												pkr.key[spiel_who[bk]].name << 
+												pkr.keys[spiel_who[bk]].name << 
 												"\" " << _("gets the trick") << ": ";
 											for (size_t i = 0; i < os_sp.size(); i++)
 												std::cout << skat_type2string(os_sp[i].first);
@@ -2499,7 +2499,7 @@ int skat_game
 						pkt_gegner += pkt_wert[os_pkt[i][j].first];
 				pkt_allein = 120 - pkt_gegner;
 				std::cout << "><><>< " << _("card points") << " " <<
-					_("playing party") << " (" << pkr.key[spiel_allein].name << "): " << 
+					_("playing party") << " (" << pkr.keys[spiel_allein].name << "): " << 
 					pkt_allein << ", " << _("card points") << " " << 
 					_("opponent party") << ": " << pkt_gegner << std::endl;
 				
@@ -2639,7 +2639,7 @@ int skat_game
 				{
 					if (!rules_ok[i])
 					{
-						std::cout << "><>< " << _("player") << " \"" << pkr.key[i].name << 
+						std::cout << "><>< " << _("player") << " \"" << pkr.keys[i].name << 
 							"\" " << _("has violated the rules.") << std::endl;
 						return 20;
 					}
@@ -2695,7 +2695,7 @@ int skat_game
 			
 			std::cout << "><><>< " << _("game result") << " <><><> ";
 			for (size_t i = 0; i < 3; i++)
-				std::cout << pkr.key[i].name << ": " << pkt_sum[i] << " ";
+				std::cout << pkr.keys[i].name << ": " << pkt_sum[i] << " ";
 			std::cout << std::endl;
 		}
 		
@@ -2710,18 +2710,18 @@ int skat_game
 			*left << sig << std::endl << std::flush;
 			*right << sig << std::endl << std::flush;
 			left->getline(stmp, sizeof(stmp));
-			if (!pkr.key[1].verify(sig_data, stmp))
+			if (!pkr.keys[1].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[1].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[1].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
 			right->getline(stmp, sizeof(stmp));
-			if (!pkr.key[2].verify(sig_data, stmp))
+			if (!pkr.keys[2].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[2].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[2].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2729,10 +2729,10 @@ int skat_game
 		else if (pkr_self == 1)
 		{
 			right->getline(stmp, sizeof(stmp));
-			if (!pkr.key[0].verify(sig_data, stmp))
+			if (!pkr.keys[0].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[0].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[0].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2741,10 +2741,10 @@ int skat_game
 			*left << sig << std::endl << std::flush;
 			*right << sig << std::endl << std::flush;
 			left->getline(stmp, sizeof(stmp));
-			if (!pkr.key[2].verify(sig_data, stmp))
+			if (!pkr.keys[2].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[2].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[2].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2752,18 +2752,18 @@ int skat_game
 		else if (pkr_self == 2)
 		{
 			left->getline(stmp, sizeof(stmp));
-			if (!pkr.key[0].verify(sig_data, stmp))
+			if (!pkr.keys[0].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[0].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[0].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
 			right->getline(stmp, sizeof(stmp));
-			if (!pkr.key[1].verify(sig_data, stmp))
+			if (!pkr.keys[1].verify(sig_data, stmp))
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
-					" \"" << pkr.key[1].name << "\" " << _("is invalid") << std::endl;
+					" \"" << pkr.keys[1].name << "\" " << _("is invalid") << std::endl;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
