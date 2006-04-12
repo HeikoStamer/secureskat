@@ -1,3 +1,4 @@
+SecureSkat 2.8:
 SecureSkat 2.7:
 		- now we're using Groth's protocol for the verifiable secret shuffle
 		  (improves the performance and communication complexity significantly)

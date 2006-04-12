@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.48 $)
+AC_REVISION($Revision: 1.49 $)
 AC_PREREQ(2.57)
 
-AC_INIT(SecureSkat, 2.7, stamer@gaos.org)
+AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
 AC_LANG(C++)
 AC_CONFIG_SRCDIR(SecureSkat.cc)
