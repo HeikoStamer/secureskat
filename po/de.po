@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.7\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2006-03-23 12:25+0100\n"
+"POT-Creation-Date: 2006-03-27 17:10+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -715,7 +715,7 @@ msgstr "PKI: kryptographischer Schlüssel"
 msgid "created and stored"
 msgstr "wurde erstellt und gespeichert"
 
-#: SecureSkat_pki.cc:281 SecureSkat_pki.cc:337 SecureSkat_pki.cc:372
+#: SecureSkat_pki.cc:281 SecureSkat_pki.cc:339 SecureSkat_pki.cc:374
 #: SecureSkat_rnk.cc:45 SecureSkat_rnk.cc:77
 msgid "GDBM ERROR"
 msgstr "GDBM FEHLER"
@@ -724,15 +724,15 @@ msgstr "GDBM FEHLER"
 msgid "PKI ERROR: secret key corrupted"
 msgstr "PKI FEHLER: geheimer Schlüssel beschädigt"
 
-#: SecureSkat_pki.cc:295
+#: SecureSkat_pki.cc:296
 msgid "PKI: secret key successfully loaded"
 msgstr "PKI: geheimer Schlüssel erfolgreich geladen"
 
-#: SecureSkat_pki.cc:303
+#: SecureSkat_pki.cc:305
 msgid "PKI ERROR: identification prefix unknown"
 msgstr "PKI FEHLER: Identifikationsmerkmal unbestimmt"
 
-#: SecureSkat_pki.cc:326
+#: SecureSkat_pki.cc:328
 msgid "PKI ERROR: public key corrupted"
 msgstr "PKI FEHLER: öffentlicher Schlüssel beschädigt"
 

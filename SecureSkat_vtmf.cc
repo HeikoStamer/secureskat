@@ -1158,7 +1158,8 @@ int skat_game
 		
 		std::stringstream lej;
 		PedersenCommitmentScheme *com = 
-			new PedersenCommitmentScheme(32, vtmf->p, vtmf->q, vtmf->k);
+			new PedersenCommitmentScheme(32, vtmf->p, vtmf->q, vtmf->k, 
+				vtmf->h);
 		lej << vtmf->p << std::endl << vtmf->q << std::endl << vtmf->g <<
 			std::endl << vtmf->h << std::endl;
 		com->PublishGroup(lej);
@@ -1168,6 +1169,12 @@ int skat_game
 		{
 			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
 				_("function CheckGroup() failed") << std::endl;
+			return 2;
+		}
+		if (mpz_cmp(vtmf->h, vsshe->com->h))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("common public key does not match") << std::endl;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->q, vsshe->com->q))
@@ -1204,6 +1211,12 @@ int skat_game
 		{
 			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
 				_("function CheckGroup() failed") << std::endl;
+			return 2;
+		}
+		if (mpz_cmp(vtmf->h, vsshe->com->h))
+		{
+			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
+				_("common public key does not match") << std::endl;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->q, vsshe->com->q))
