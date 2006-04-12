@@ -1156,14 +1156,8 @@ int skat_game
 		start_clock();
 #endif
 		
-		std::stringstream lej;
-		PedersenCommitmentScheme *com = 
-			new PedersenCommitmentScheme(32, vtmf->p, vtmf->q, vtmf->k, 
-				vtmf->h);
-		lej << vtmf->p << std::endl << vtmf->q << std::endl << vtmf->g <<
-			std::endl << vtmf->h << std::endl;
-		com->PublishGroup(lej);
-		vsshe = new GrothVSSHE(32, lej);
+		vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, 
+			vtmf->g, vtmf->h);
 		vsshe->PublishGroup(*left), vsshe->PublishGroup(*right);
 		if (!vsshe->CheckGroup())
 		{
@@ -1190,7 +1184,6 @@ int skat_game
 				_("encryption scheme does not match") << std::endl;
 			return 2;
 		}
-		delete com;
 		
 #ifndef NDEBUG
 		stop_clock();
