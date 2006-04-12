@@ -1,4 +1,4 @@
-Copyright (C)  2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
+Copyright (C)  2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -15,13 +15,13 @@ Introduction
   speech) library LibTMCG to ensure a reasonable level of fairness.
 
   LibTMCG is the first known practical solution for realizing a secure
-  electronic card game without the need for a trusted third-party. The
-  corresponding problem, actually called "Mental Poker", has been studied
+  electronic card game without trusted third-party (TTP). The corresponding
+  cryptographic problem, actually called "Mental Poker", has been studied
   since 1979 (Shamir, Rivest, and Adleman) by many authors.
 
   The cryptographic protocols are designed for the 'honest-but-curious'
   (aka semi-honest) adversary model. Thus we don't care about robustness
-  or strong availability which are hard to achieve in a asynchronous
+  and strong availability which are hard to achieve in a asynchronous
   environment. The success (w.r.t. the performed card operations) of a
   cheating player or a coalition can be bound by the security parameter t,
   i.e. the soundness error probability will be less or equal than 2^{-t}.
@@ -33,7 +33,7 @@ Requirements
   (GNU gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
 
   * Toolbox for Mental Card Games (libTMCG), version >= 1.0.0
-    http://savannah.nongnu.org/projects/libtmcg/
+    http://www.nongnu.org/libtmcg/
 
   * GNU Multiple Precision Arithmetic Library (libgmp), version >= 4.1
     http://www.swox.com/gmp/
@@ -156,7 +156,7 @@ Playing SecureSkat over an IRC network
   key is valid is done with a non-interactive zero knowledge proof (soundness
   error probability is currently fixed at 2^{-80}). Hence the execution can
   take a large amount of time and it continues in the background until a
-  success message `PKI identified ID5^????? aka ???...' ('?' is again a
+  success message `PKI identified ID?^????? aka ???...' ('?' is again a
   wildcard) appears. Sometimes the background process is aborted with an
   appropriate error message. Well, if anything went wrong you may have to
   exchange the keys manually. Please use the commands '/export <file name>'
@@ -183,9 +183,6 @@ Bugs, Contribution, CVS
   You can get the latest sources from our CVS repository at GNU/Savannah:
 
   cvs -d:pserver:anonymous@cvs.savannah.nongnu.org:/sources/secureskat co secureskat
-
-  Beware! Some lines of the SecureSkat sources are still either pretty ugly
-  code or inelegant solutions, because they were written very quickly. :-(
 
 Copyright and License of this software
 --------------------------------------

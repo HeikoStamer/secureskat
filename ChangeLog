@@ -1,5 +1,24 @@
-SecureSkat 2.3:
-		- initial GNU/Savannah release (no new features, but included libTMCG)
+SecureSkat 2.7:
+		- now we're using Groth's protocol for the verifiable secret shuffle
+		  (improves the performance and communication complexity significantly)
+		- Null-games are now aborted immediately, if lost by the playing party
+		- added an alternative table announcement (PRIVMSG to channel), because
+		  some IRC servers (e.g. freenode.net) are blocking PRIVMSG to users
+		- the command /players now additionally shows the key fingerprints
+SecureSkat 2.6:
+		- bugfixes and some German translations (internationalization support)
+		- secret key protection: use the PBKDF1 from RFC 2898 (salt and it.-count)
+		- user commands for manually public key export and import (file)
+		- directory ~/.SecureSkat is now used for the key and ranking databases
+		- changed the COMMON_DDH_GROUP to the well-known MODP group 2 of RFC 2412
+		- command /players now additionally shows the package name and version
+SecureSkat 2.5:
+		- a bug in the generation of the ranking data was fixed
+		- important bugfixes for the secret voting facility
+		- protecting the secret key: encryption with user-supplied pass phrase
+		- a bug in the control program "SecureSkat_random" was fixed
+		  (it occured only, if one uses a nickname with spaces)
+		- rudimentary internationalization support (GNU gettext) added
 SecureSkat 2.4:
 		- libTMCG is now separated from the SecureSkat package
 		  (http://savannah.nongnu.org/projects/libtmcg/)
@@ -8,24 +27,5 @@ SecureSkat 2.4:
 		  instantiation of mpz_shash on the verifier side permits cheating.
 		  These problems are issues of the library libTMCG. We announce them
 		  here to reach all affected users of libTMCG resp. SecureSkat.
-SecureSkat 2.5:
-		- a bug in the generation of the ranking data was fixed
-		- important bugfixes for the secret voting facility
-		- protecting the secret key: encryption with user-supplied pass phrase
-		- a bug in the control program "SecureSkat_random" was fixed
-		  (it occured only, if one uses a nickname with spaces)
-		- rudimentary internationalization support (GNU gettext) added
-SecureSkat 2.6:
-		- bugfixes and some German translations (internationalization support)
-		- secret key protection: use the PBKDF1 from RFC 2898 (salt and it.-count)
-		- user commands for manually public key export and import (file)
-		- directory ~/.SecureSkat is now used for the key and ranking databases
-		- changed the COMMON_DDH_GROUP to the well-known MODP group 2 of RFC 2412
-		- command /players now additionally shows the package name and version
-SecureSkat 2.7:
-		- now we're using Groth's protocol for the Verifiable Secret Shuffle
-		  (this improves the performance and communication complexity significantly)
-		- Null-games are now aborted immediately, if lost by the playing party
-		- added an alternative table announcement (PRIVMSG to channel), because
-		  some IRC servers (e.g. freenode.net) are blocking PRIVMSG to users
-		- the command /players now additionally shows the key fingerprints
+SecureSkat 2.3:
+		- initial GNU/Savannah release (no new features, but included libTMCG)
