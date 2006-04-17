@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -381,39 +381,13 @@ void set_public_keys
 void create_pki
 	(int &pki7771_port, int &pki7771_handle)
 {
-	long socket_option = 1;
-	struct sockaddr_in sin7771;
-	sin7771.sin_addr.s_addr = htonl(INADDR_ANY);
-	sin7771.sin_family = AF_INET;
-	
-	if ((pki7771_handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		perror("SecureSkat_pki::create_pki (socket)");
-		exit(-1);
-	}
-	if (setsockopt(pki7771_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option,
-		sizeof(socket_option)) < 0)
-	{
-		perror("SecureSkat_pki::create_pki (setsockopt)");
-		exit(-1);
-	}
 	pki7771_port = BindEmptyPort(7771);
-	sin7771.sin_port = htons(pki7771_port);
-	if (bind(pki7771_handle, (struct sockaddr*)&sin7771, sizeof(sin7771)) < 0)
-	{
-		perror("SecureSkat_pki::create_pki (bind)");
+	if ((pki7771_handle = ListenToPort(pki7771_port)) < 0)
 		exit(-1);
-	}
-	if (listen(pki7771_handle, SOMAXCONN) < 0)
-	{
-		perror("SecureSkat_pki::create_pki (listen)");
-		exit(-1);
-	}
 }
 
 void release_pki
 	(int pki7771_handle)
 {
-	if (close(pki7771_handle) < 0)
-		perror("SecureSkat_pki::release_pki (close)");
+	CloseHandle(pki7771_handle);
 }

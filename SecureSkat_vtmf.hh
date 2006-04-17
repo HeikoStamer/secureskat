@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004 Heiko Stamer, <stamer@gaos.org>
+ Copyright (C) 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with SecureSkat; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 #ifndef INCLUDED_SecureSkat_vtmf_HH
 	#define INCLUDED_SecureSkat_vtmf_HH
@@ -199,6 +199,7 @@
 			const TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
 			iosecuresocketstream *right, iosecuresocketstream *left,
 			const std::vector<std::string> &nicks, int hpipe, bool pctl,
-			char *ireadbuf, int &ireaded
+			char *ireadbuf, int &ireaded,
+			std::string main_channel, std::string main_channel_underscore
 		);
 #endif

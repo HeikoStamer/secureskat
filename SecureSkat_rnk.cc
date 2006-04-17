@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with SecureSkat; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
 #include "SecureSkat_rnk.hh"
@@ -85,67 +85,17 @@ void create_rnk
 	(int &rnk7773_port, int &rnk7774_port,
 	int &rnk7773_handle, int &rnk7774_handle)
 {
-	long socket_option = 1;
-	struct sockaddr_in sin7773;
-	sin7773.sin_addr.s_addr = htonl(INADDR_ANY);
-	sin7773.sin_family = AF_INET;
-	struct sockaddr_in sin7774;
-	sin7774.sin_addr.s_addr = htonl(INADDR_ANY);
-	sin7774.sin_family = AF_INET;
-	
-	if ((rnk7773_handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (socket)");
-		exit(-1);
-	}
-	if (setsockopt(rnk7773_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option,
-		sizeof(socket_option)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (setsockopt)");
-		exit(-1);
-	}
 	rnk7773_port = BindEmptyPort(7771);
-	sin7773.sin_port = htons(rnk7773_port);
-	if (bind(rnk7773_handle, (struct sockaddr*)&sin7773, sizeof(sin7773)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (bind)");
+	if ((rnk7773_handle = ListenToPort(rnk7773_port)) < 0)
 		exit(-1);
-	}
-	if (listen(rnk7773_handle, SOMAXCONN) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (listen)");
-		exit(-1);
-	}
-	if ((rnk7774_handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (socket)");
-		exit(-1);
-	}
-	if (setsockopt(rnk7774_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option,
-		sizeof(socket_option)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (setsockopt)");
-		exit(-1);
-	}
 	rnk7774_port = BindEmptyPort(7771);
-	sin7774.sin_port = htons(rnk7774_port);	
-	if (bind(rnk7774_handle, (struct sockaddr*)&sin7774, sizeof(sin7774)) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (bind)");
+	if ((rnk7774_handle = ListenToPort(rnk7774_port)) < 0)
 		exit(-1);
-	}
-	if (listen(rnk7774_handle, SOMAXCONN) < 0)
-	{
-		perror("SecureSkat_rnk::create_rnk (listen)");
-		exit(-1);
-	}
 }
 
 void release_rnk
 	(int rnk7773_handle, int rnk7774_handle)
 {
-	if (close(rnk7773_handle) < 0)
-		perror("SecureSkat_rnk::release_rnk (close)");
-	if (close(rnk7774_handle) < 0)
-		perror("SecureSkat_rnk::release_rnk (close)");
+	CloseHandle(rnk7773_handle);
+	CloseHandle(rnk7774_handle);
 }

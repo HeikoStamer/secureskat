@@ -1006,7 +1006,8 @@ int skat_game
 		const TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
 		iosecuresocketstream *right, iosecuresocketstream *left,
 		const std::vector<std::string> &nicks, int hpipe, bool pctl,
-		char *ireadbuf, int &ireaded
+		char *ireadbuf, int &ireaded,
+		std::string main_channel, std::string main_channel_underscore
 	)
 {
 	opipestream *out_pipe = new opipestream(opipe), *out_ctl = NULL;
@@ -1528,12 +1529,12 @@ int skat_game
 				}
 				if (master && started && (cmd.find("!ANNOUNCE", 0) == 0))
 				{
-					*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" <<
+					*out_pipe << "PRIVMSG " << main_channel << " :" << nr << "|3~" <<
 						(rounds - r) << "!" << std::endl << std::flush;
 				}	
 				if (cmd.find("IRC ", 0) == 0)
 				{
-					*out_pipe << "PRIVMSG #openSkat :" << 
+					*out_pipe << "PRIVMSG " << main_channel << " :" << 
 						cmd.substr(4, cmd.length() - 4) << std::endl << std::flush;
 				}
 				if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
@@ -2046,8 +2047,8 @@ int skat_game
 							std::cout << "><><>< " << _("player") << " \"" << 
 								pkr.keys[pkr_self].name << "\" " << _("passes at") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
-							*out_pipe << "PRIVMSG #openSkat_" << nr << " :PASSE " << 
-								hex_game_digest << std::endl << std::flush;
+							*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
+								" :PASSE " << hex_game_digest << std::endl << std::flush;
 							if (pctl)
 								*out_ctl << nicks[pkr_self] << " PASSE" << std::endl << 
 									std::flush;
@@ -2125,9 +2126,9 @@ int skat_game
 							std::cout << "><><>< " << _("player") << " \"" << 
 								pkr.keys[pkr_self].name << "\" " << _("bids") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
-							*out_pipe << "PRIVMSG #openSkat_" << nr << " :REIZE " << 
-								reiz_wert[reiz_counter] << " " << hex_game_digest << 
-								std::endl << std::flush;
+							*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
+								" :REIZE " << reiz_wert[reiz_counter] << " " << 
+								hex_game_digest << std::endl << std::flush;
 							if (pctl)
 							{
 								std::ostringstream ost;
@@ -2149,8 +2150,8 @@ int skat_game
 								std::cout << "><><>< " << _("player") << " \"" << 
 									pkr.keys[pkr_self].name << "\" " <<
 									_("doesn't take the Skat") << std::endl;
-								*out_pipe << "PRIVMSG #openSkat_" << nr << " :HAND " << 
-									hex_game_digest << std::endl << std::flush;
+								*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
+									" :HAND " << hex_game_digest << std::endl << std::flush;
 								hand_spiel = true, reiz_status += 100;
 								if (pctl)
 									*out_ctl << nicks[pkr_self] << " HAND" << std::endl << 
@@ -2172,8 +2173,8 @@ int skat_game
 								std::cout << "><><>< " << _("player") << " \"" << 
 									pkr.keys[pkr_self].name << "\" " << 
 									_("takes the Skat") << std::endl;
-								*out_pipe << "PRIVMSG #openSkat_" << nr << " :SKAT " << 
-									hex_game_digest << std::endl << std::flush;
+								*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
+									" :SKAT " << hex_game_digest << std::endl << std::flush;
 								hand_spiel = false, reiz_status += 100;
 								if (!skat_ssehen(pkr_self, tmcg, vtmf, os, sk,
 									right, left))
@@ -2240,8 +2241,8 @@ int skat_game
 													"\" " << _("pushes") << ": " << 
 													skat_type2string(tt1) << skat_type2string(tt2) << 
 													std::endl;
-												*out_pipe << "PRIVMSG #openSkat_" << nr << 
-													" :DRUECKE " << hex_game_digest << 
+												*out_pipe << "PRIVMSG " << main_channel_underscore << 
+													nr << " :DRUECKE " << hex_game_digest << 
 													std::endl << std::flush;
 												reiz_status += 100;
 												*right << sk[0] << std::endl << std::flush;
@@ -2317,8 +2318,8 @@ int skat_game
 										{
 											reiz_status += (hand_spiel ? 200 : 100);
 											spiel_status = sz;
-											*out_pipe << "PRIVMSG #openSkat_" << nr <<
-												" :SAGEAN " << skat_spiel2string(spiel_status) <<
+											*out_pipe << "PRIVMSG " << main_channel_underscore << 
+												nr << " :SAGEAN " << skat_spiel2string(spiel_status) << 
 												" " << hex_game_digest << std::endl << std::flush;
 											std::ostringstream ost;
 											ost << spiel_status << std::endl;
@@ -2329,9 +2330,10 @@ int skat_game
 											{
 												for (size_t i = 0; i < os.size(); i++)
 												{
-													*out_pipe << "PRIVMSG #openSkat_" << nr <<
-														" :OUVERT " << skat_type2string(os[i].first) <<
-														" " << hex_game_digest << std::endl << std::flush;
+													*out_pipe << "PRIVMSG " << main_channel_underscore << 
+														nr << " :OUVERT " << 
+														skat_type2string(os[i].first) << " " << 
+														hex_game_digest << std::endl << std::flush;
 													skat_okarte(tmcg, vtmf, os[i].second, right, left);
 													// sleep to prevent "Excess Flood" error
 													sleep(3);
@@ -2396,9 +2398,9 @@ int skat_game
 										std::cout << "><><>< " << _("player") << " \"" << 
 											pkr.keys[pkr_self].name << "\" " << _("plays the card") <<
 											": " << skat_type2string(tt) << std::endl;
-										*out_pipe << "PRIVMSG #openSkat_" << nr << " :LEGE " <<
-											skat_type2string(tt) << " " << hex_game_digest <<
-											std::endl << std::flush;
+										*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
+											" :LEGE " << skat_type2string(tt) << " " << 
+											hex_game_digest << std::endl << std::flush;
 										if (pctl)
 										{
 											std::ostringstream ost;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-   SecureSkat.cc, a secure peer-to-peer implementation of the card game "Skat"
+   SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
  Copyright (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
 
@@ -95,12 +95,15 @@
 #define PKI_TIMEOUT							1500
 #define RNK_TIMEOUT							500
 #define ANNOUNCE_TIMEOUT				5
-#define CLEAR_TIMEOUT						60
+#define CLEAR_TIMEOUT						30
 #define AUTOJOIN_TIMEOUT				75
 
 // define CHILDS (bound the number of child processes)
 #define PKI_CHILDS							10
 #define RNK_CHILDS							5
+
+#define MAIN_CHANNEL						"#openSkat"
+#define MAIN_CHANNEL_UNDERSCORE	"#openSkat_"
 
 unsigned long int							security_level = 16;
 std::string										game_ctl;
@@ -656,20 +659,22 @@ int skat_accept
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
-						*out_pipe << "PRIVMSG #openSkat :" 
+						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" 
 							<< nr << "|3~" << r << "!" << std::endl << std::flush;
 					}
 					if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 					{
 						std::string nick = cmd.substr(8, cmd.length() - 8);
-						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("observers currently not permitted") << std::endl << std::flush;
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+							nick << " :" << _("observers currently not permitted") << 
+							std::endl << std::flush;
 					}
 					if (neu && (cmd.find("JOIN ", 0) == 0))
 					{
 						std::string nick = cmd.substr(5, cmd.length() - 5);
-						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("table completely occupied") << std::endl << std::flush;
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+							nick << " :" << _("table completely occupied") << 
+							std::endl << std::flush;
 					}
 					if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 					{
@@ -706,7 +711,8 @@ void skat_error
 	{
 		if (error < -1)
 		{
-			*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+				std::endl << std::flush;
 			sleep(1);		// The child has to sleep a second before quitting, because
 									// the parent must process the sended PART message first.
 		}
@@ -747,7 +753,7 @@ int ballot_child
 	gp_nick.push_back(pub.keyid());
 	gp_name[pub.keyid()] = pub.name;
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|1~" << -b << "!" << 
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|1~" << -b << "!" << 
 			std::endl << std::flush;
 	
 	// wait for voters
@@ -763,7 +769,7 @@ int ballot_child
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
-			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << gp_nick.size() <<
 				"~" << -b << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
@@ -776,20 +782,23 @@ int ballot_child
 					if (gp_nick.size() < TMCG_MAX_PLAYERS)
 					{
 						gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
-						*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
+						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
 							gp_nick.size() << "~" << b << "!" << std::endl << std::flush;
 					}
 					else
-						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("room completely occupied") << std::endl << std::flush;
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+							nick << " :" << _("room completely occupied") << 
+							std::endl << std::flush;
 				}
 				else
-					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("voter was at room creation not present") << std::endl << std::flush;
+					*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+						nick << " :" << _("voter was at room creation not present") << 
+						std::endl << std::flush;
 			}
 			else
-				*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-					_("key exchange with owner is incomplete") << std::endl << std::flush;
+				*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+					nick << " :" << _("key exchange with owner is incomplete") << 
+					std::endl << std::flush;
 		}
 		if (!neu && ((cmd.find("JOIN ", 0) == 0) || (cmd.find("WHO ", 0) == 0)))
 		{
@@ -800,14 +809,16 @@ int ballot_child
 				if (nick_players.find(nick) != nick_players.end())
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 				else
-					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("voter was at room creation not present") << std::endl << std::flush;
+					*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+						nick << " :" << _("voter was at room creation not present") << 
+						std::endl << std::flush;
 			}
 			else
 			{
 				std::cout << X << _("key exchange with") << " " << nick << " " << 
 					_("is incomplete") << std::endl;
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -1;
 			}
 		}
@@ -838,15 +849,16 @@ int ballot_child
 			
 			if (neu && ((msg.find("OPEN", 0) == 0) || (msg.find("open", 0) == 0)))
 			{
-				*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-					"~" << b << "!" << std::endl << std::flush;
-				*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << std::endl << std::flush;
+				*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
+					gp_nick.size() << "~" << b << "!" << std::endl << std::flush;
+				*out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					" :!READY" << std::endl << std::flush;
 				break;
 			}
 		}
 	}
-	std::cout << X << _("Room") << " " << nr << " " << _("preparing the ballot") << 
-		" ..." << std::endl;
+	std::cout << X << _("Room") << " " << nr << " " << 
+		_("preparing the ballot") << " ..." << std::endl;
 	// prepare ballot (create PKR, bind port for secure connections)
 	assert(gp_nick.size() <= TMCG_MAX_PLAYERS);
 	assert(b <= TMCG_MAX_TYPEBITS);
@@ -871,11 +883,13 @@ int ballot_child
 	int gp_handle, gp_port = BindEmptyPort(7900);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+			std::endl << std::flush;
 		return -4;
 	}
 	std::ostringstream ost;
-	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
+	ost << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << " :PORT " << 
+		gp_port << std::endl;
 	*out_pipe << ost.str() << std::flush;
 	std::cout << X << _("Room") << " " << nr << " " << _("with");
 	for (size_t i = 0; i < gp_nick.size(); i++)
@@ -901,21 +915,22 @@ int ballot_child
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
-			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() << 
-				"~" << -b << "!" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
+				gp_nick.size() << "~" << -b << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
 			std::string nick = cmd.substr(5, cmd.length() - 5);
-			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("room completely occupied") << std::endl << std::flush;
+			*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << nick << 
+				" :" << _("room completely occupied") << std::endl << std::flush;
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
 			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -5;
 			}
 		}
@@ -958,13 +973,16 @@ int ballot_child
 				vote = atoi(vstr.c_str());
 				if  (!has_voted && (vote < b_pow))
 				{
-					std::cout << XX << _("BALLOT: you voted for value r = ") << vote << std::endl;
-					*out_pipe << "PRIVMSG #openSkat_" << nr << " :VOTE" << std::endl << std::flush;
+					std::cout << XX << _("BALLOT: you voted for value r = ") << 
+						vote << std::endl;
+					*out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						" :VOTE" << std::endl << std::flush;
 					gp_voters.push_back(vnicks[pkr_self]);
 					has_voted = true;
 				}
 				else
-					std::cout << XX << _("BALLOT ERROR: already voted or bad value <r> ") <<
+					std::cout << XX << 
+						_("BALLOT ERROR: already voted or bad value <r> ") << 
 						"(0 <= r < " << b_pow << ")" << std::endl;
 			}
 		}
@@ -1025,12 +1043,14 @@ int ballot_child
 				else
 				{
 					perror("ballot_child (gethostbyname)");
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -70;
 				}
 				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr)
 				{
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -71;
 				}
 				// establish and authenticate the connection
@@ -1046,13 +1066,15 @@ int ballot_child
 				if (!neighbor->good())
 				{
 					delete neighbor, close(handle);
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -72;
 				}
 				else if (!pkr.keys[pkr_idx].verify(challenge.str(), challenge_sig))
 				{
 					delete neighbor, close(handle);
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -73;
 				}
 				else
@@ -1074,7 +1096,8 @@ int ballot_child
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
 							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 							close(handle);
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+								std::endl << std::flush;
 							return -74;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
@@ -1096,7 +1119,8 @@ int ballot_child
 					{
 						delete neighbor;
 						close(handle);
-						*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+						*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+							std::endl << std::flush;
 						return -76;
 					}
 				}
@@ -1128,21 +1152,23 @@ int ballot_child
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
-						*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
+						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
 							gp_nick.size() << "~" << -b << "!" << std::endl << std::flush;
 					}
 					if (neu && (cmd.find("JOIN ", 0) == 0))
 					{
 						std::string nick = cmd.substr(5, cmd.length() - 5);
-						*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-							_("room completely occupied") << std::endl << std::flush;
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+							nick << " :" <<	_("room completely occupied") << std::endl << 
+							std::flush;
 					}
 					if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 					{
 						std::string nick = cmd.substr(5, cmd.length() - 5);
 						if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 						{
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+								std::endl << std::flush;
 							return -77;
 						}
 					}
@@ -1161,7 +1187,8 @@ int ballot_child
 			}
 			if (num == 0)
 			{
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -78;
 			}
 		}
@@ -1182,7 +1209,8 @@ int ballot_child
 						);
 						if (handle < 0)
 						{
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+								std::endl << std::flush;
 							return -79;
 						}
 						iosocketstream *neighbor = new iosocketstream(handle);
@@ -1210,20 +1238,23 @@ int ballot_child
 							if (!neighbor->good())
 							{
 								delete neighbor, close(handle);
-								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+								*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+									std::endl << std::flush;
 								return -80;
 							}
 							else if (!pkr.keys[i].verify(response.str(), tmp))
 							{
 								delete neighbor, close(handle);
-								*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+								*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+									std::endl << std::flush;
 								return -81;
 							}
 						}
 						else
 						{
 							delete neighbor, close(handle);
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+								std::endl << std::flush;
 							return -82;
 						}
 						
@@ -1240,7 +1271,8 @@ int ballot_child
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
 							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
 							close(handle);
-							*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+								std::endl << std::flush;
 							return -84;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
@@ -1374,7 +1406,8 @@ int ballot_child
 			{
 				std::cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << 
 					std::endl;
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -85;
 			}
 		}
@@ -1411,8 +1444,10 @@ int ballot_child
 				}
 				else
 				{
-					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << 
+						std::endl;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -85;
 				}
 			}
@@ -1420,7 +1455,8 @@ int ballot_child
 			{
 				std::cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << 
 					std::endl;
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -85;
 			}
 		}
@@ -1457,7 +1493,8 @@ int ballot_child
 				{
 					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << 
 						std::endl;
-					*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+						std::endl << std::flush;
 					return -85;
 				}
 			}
@@ -1480,7 +1517,7 @@ int ballot_child
 	for (size_t k = 0; k < br.size(); k++)
 	{
 		std::cout << br[k] << " ";
-		*out_pipe << "PRIVMSG #openSkat_" << nr << " :RESULT " <<
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << " :RESULT " << 
 			br[k] << std::endl << std::flush;
 	}
 	std::cout << std::endl;
@@ -1488,13 +1525,14 @@ int ballot_child
 	
 	// announce table destruction
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << -b << "!" <<
-			std::endl << std::flush;
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|0~" << -b << 
+			"!" << std::endl << std::flush;
 	
 	// exit from game
 	delete vtmf;
 	delete ballot_tmcg;
-	*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+	*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+		std::endl << std::flush;
 	delete in_pipe;
 	delete out_pipe;
 	
@@ -1532,8 +1570,8 @@ int skat_child
 	ipipestream *in_pipe = new ipipestream(ipipe);
 	
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-			"~" << r << "!" << std::endl << std::flush;
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
+			gp_nick.size() << "~" << r << "!" << std::endl << std::flush;
 	
 	// wait for players
 	while (1)
@@ -1548,14 +1586,15 @@ int skat_child
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
-			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-				"~" << r << "!" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
+				gp_nick.size() << "~" << r << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 		{
 			std::string nick = cmd.substr(8, cmd.length() - 8);
-			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("observers currently not permitted") << std::endl << std::flush;
+			*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << nick << 
+				" :" << _("observers currently not permitted") << std::endl << 
+				std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
@@ -1565,16 +1604,18 @@ int skat_child
 				if (nick_players.find(nick) != nick_players.end())
 				{
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
-					*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << 
+					*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
 						gp_nick.size() << "~" << r << "!" << std::endl << std::flush;
 				}
 				else
-					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("player was at table creation not present") << std::endl << std::flush;
+					*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+						nick << " :" << _("player was at table creation not present") << 
+						std::endl << std::flush;
 			}
 			else
-				*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-					_("key exchange with owner is incomplete") << std::endl << std::flush;
+				*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+					nick << " :" << _("key exchange with owner is incomplete") << 
+					std::endl << std::flush;
 		}
 		if (!neu && ((cmd.find("JOIN ", 0) == 0) || (cmd.find("WHO ", 0) == 0)))
 		{
@@ -1585,14 +1626,16 @@ int skat_child
 				if (nick_players.find(nick) != nick_players.end())
 					gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
 				else
-					*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-						_("player was at table creation not present") << std::endl << std::flush;
+					*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+						nick << " :" << _("player was at table creation not present") << 
+						std::endl << std::flush;
 			}
 			else
 			{
 				std::cerr << X << _("key exchange with") << " " << nick << " " << 
 					_("is incomplete") << std::endl;
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -1;
 			}
 		}
@@ -1615,9 +1658,10 @@ int skat_child
 		}
 		if (neu && (gp_nick.size() == 3))
 		{
-			*out_pipe << "PRIVMSG #openSkat :" << nr << "|" << gp_nick.size() <<
-				"~" << r << "!" << std::endl << std::flush;
-			*out_pipe << "PRIVMSG #openSkat_" << nr << " :!READY" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
+				gp_nick.size() << "~" << r << "!" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << 
+				" :!READY" <<  std::endl << std::flush;
 			break;
 		}
 	}
@@ -1629,7 +1673,8 @@ int skat_child
 	{
 		std::cerr << X << _("wrong number of players") << ": " << 
 			gp_nick.size() << std::endl;
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+			std::endl << std::flush;
 		return -2;
 	}
 	TMCG_PublicKeyRing pkr(gp_nick.size());
@@ -1651,12 +1696,14 @@ int skat_child
 	int gp_handle, gp_port = BindEmptyPort(7800);
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+			std::endl << std::flush;
 		return -4;
 	}
 	
 	std::ostringstream ost;
-	ost << "PRIVMSG #openSkat_" << nr << " :PORT " << gp_port << std::endl;
+	ost << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << " :PORT " << gp_port << 
+		std::endl;
 	*out_pipe << ost.str() << std::flush;
 	std::cout << X << _("Table") << " " << nr << " " << _("with") << " '" <<
 		pkr.keys[0].name << "', '" <<
@@ -1676,27 +1723,30 @@ int skat_child
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
-			*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << r << "!" << 
-				std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|3~" << r << 
+				"!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 		{
 			std::string nick = cmd.substr(8, cmd.length() - 8);
-			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("observers currently not permitted") << std::endl << std::flush;
+			*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+				nick << " :" << _("observers currently not permitted") << 
+				std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
 			std::string nick = cmd.substr(5, cmd.length() - 5);
-			*out_pipe << "KICK #openSkat_" << nr << " " << nick << " :" <<
-				_("table completely occupied") << std::endl << std::flush;
+			*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
+				nick << " :" << _("table completely occupied") << 
+				std::endl << std::flush;
 		}
 		if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
 		{
 			std::string nick = cmd.substr(5, cmd.length() - 5);
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
-				*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+					std::endl << std::flush;
 				return -5;
 			}
 		}
@@ -1754,8 +1804,9 @@ int skat_child
 	skat_error(skat_alive(right_neighbor, left_neighbor), out_pipe, nr);
 	
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|3~" << vnicks[0] << ", " <<
-			vnicks[1] << ", " << vnicks[2] << "!" << std::endl << std::flush;
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|3~" << 
+			vnicks[0] << ", " << vnicks[1] << ", " << vnicks[2] << "!" << 
+			std::endl << std::flush;
 	
 	// start gui or ai (control program)
 	int ctl_i = 0, ctl_o = 0;
@@ -1813,12 +1864,12 @@ int skat_child
 	if (neu)
 	{
 		// set topic
-		*out_pipe << "TOPIC #openSkat_" << nr << " :" << PACKAGE_STRING <<
-			std::endl << std::flush;
+		*out_pipe << "TOPIC " << MAIN_CHANNEL_UNDERSCORE << nr << " :" << 
+			PACKAGE_STRING << std::endl << std::flush;
 	}
 	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i,
 		gp_tmcg, pkr, sec, right_neighbor, left_neighbor, vnicks, hpipe, pctl,
-		ipipe_readbuf, ipipe_readed);
+		ipipe_readbuf, ipipe_readed, MAIN_CHANNEL, MAIN_CHANNEL_UNDERSCORE);
 	
 	// stop gui or ai (control program)
 	if (ctl_pid > 0)
@@ -1829,14 +1880,15 @@ int skat_child
 	}
 	
 	if (neu)
-		*out_pipe << "PRIVMSG #openSkat :" << nr << "|0~" << r << "!" << 
-			std::endl << std::flush;
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|0~" << r << 
+			"!" << std::endl << std::flush;
 	
 	// release the game
 	delete gp_tmcg, delete left_neighbor, delete right_neighbor;
 	close(connect_handle), close(accept_handle);
 	if (exit_code != 6)
-		*out_pipe << "PART #openSkat_" << nr << std::endl << std::flush;
+		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
+			std::endl << std::flush;
 	delete in_pipe, delete out_pipe;
 	delete [] ipipe_readbuf;
 	return exit_code;
@@ -1905,16 +1957,15 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							{
 								if (irc_paramvec(irc_params(irc1)) >= 2)
 								{
-									if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
-										(irc_parvec[0].length() > 10))
+									if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
+										(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
 									{
 										// sign message
-										*irc << "PRIVMSG " << irc_parvec[0] <<
-											" :" << irc_parvec[1] << "~~~" <<
-											sec.sign(irc_parvec[1]) << std::endl <<
-											std::flush;
+										*irc << "PRIVMSG " << irc_parvec[0] << " :" << 
+											irc_parvec[1] << "~~~" << sec.sign(irc_parvec[1]) << 
+											std::endl <<std::flush;
 									}
-									else if (irc_parvec[0] == "#openSkat")
+									else if (irc_parvec[0] == MAIN_CHANNEL)
 									{
 										for (std::map<std::string, std::string>::const_iterator ni = 
 											nick_players.begin(); ni != nick_players.end(); ni++)
@@ -1924,10 +1975,10 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 												irc_parvec[1] << std::endl << std::flush;
 										}
 										// send announcement PRIVMSG to the channel
-										// necessary because some IRC servers (e.g. freenode.net)
-										// block the private messages of unregistered users
-										*irc << "PRIVMSG #openSkat :" << irc_parvec[1] << 
-											"~+~" << std::endl << std::flush;
+										// reason: some IRC servers (e.g. freenode.net)
+										// block private messages of unregistered users
+										*irc << "PRIVMSG " << MAIN_CHANNEL << " :" << 
+											irc_parvec[1] << "~+~" << std::endl << std::flush;
 										
 										// process announcement PRIVMSG
 										size_t tabei1 = irc_parvec[1].find("|", 0);
@@ -2109,7 +2160,7 @@ static void process_line(char *line)
 					{
 						std::cout << XX << _("table") << " <nr> = " << *ti << 
 							", " << _("round(s)") << " <r> = " << tables_r[*ti] << 
-							", # " << _("players") << " = " << tables_p[*ti] << 
+							", #" << _("players") << " = " << tables_p[*ti] << 
 							", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 					}
 					else
@@ -2131,7 +2182,7 @@ static void process_line(char *line)
 				{
 					std::cout << XX << _("room") << " <nr> = " << *ti << 
 						", <bits> = " << -tables_r[*ti] <<
-						", # " << _("voters") << " = " << tables_p[*ti] <<
+						", #" << _("voters") << " = " << tables_p[*ti] <<
 						", " << _("owner") << " = " << tables_o[*ti] << std::endl;
 				}
 			}
@@ -2141,7 +2192,7 @@ static void process_line(char *line)
 			std::list<std::string> rnk_nicktab, rnk_ranktab;
 			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
 			
-			// Parsen der RNK Daten
+			// parsing RNK data
 			nick_key[pub.keyid()] = pub;
 			for (std::map<std::string, std::string>::const_iterator ri = 
 				rnk.begin(); ri != rnk.end(); ri++)
@@ -2411,7 +2462,8 @@ static void process_line(char *line)
 								games_rnkpipe[game_pid] = rnk_pipe[0];
 								games_opipe[game_pid] = out_pipe[0];
 								games_ipipe[game_pid] = in_pipe[1];
-								*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
+								*irc << "JOIN " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+									std::endl << std::flush;
 							}
 						}
 					}
@@ -2468,8 +2520,10 @@ static void process_line(char *line)
 									games_rnkpipe[game_pid] = rnk_pipe[0];
 									games_opipe[game_pid] = out_pipe[0];
 									games_ipipe[game_pid] = in_pipe[1];
-									*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
-									*irc << "WHO #openSkat_" << tnr << std::endl << std::flush;
+									*irc << "JOIN " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+										std::endl << std::flush;
+									*irc << "WHO " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+										std::endl << std::flush;
 								}
 							}
 						}
@@ -2533,7 +2587,8 @@ static void process_line(char *line)
 								games_rnkpipe[ballot_pid] = -1;
 								games_opipe[ballot_pid] = out_pipe[0];
 								games_ipipe[ballot_pid] = in_pipe[1];
-								*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
+								*irc << "JOIN " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+									std::endl << std::flush;
 							}
 						}
 					}
@@ -2589,8 +2644,10 @@ static void process_line(char *line)
 									games_rnkpipe[ballot_pid] = -1;
 									games_opipe[ballot_pid] = out_pipe[0];
 									games_ipipe[ballot_pid] = in_pipe[1];
-									*irc << "JOIN #openSkat_" << tnr << std::endl << std::flush;
-									*irc << "WHO #openSkat_" << tnr << std::endl << std::flush;
+									*irc << "JOIN " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+										std::endl << std::flush;
+									*irc << "WHO " << MAIN_CHANNEL_UNDERSCORE << tnr << 
+										std::endl << std::flush;
 								}
 							}
 						}
@@ -2715,9 +2772,11 @@ static void process_line(char *line)
 			std::cout << XX << _("/quit") << " -- " << 
 				_("quit SecureSkat") << std::endl;
 			std::cout << XX << _("/on") << " -- " << 
-				_("turn on the output of IRC channel #openSkat") << std::endl;
+				_("turn on the output of IRC channel") << 
+				" " << MAIN_CHANNEL << std::endl;
 			std::cout << XX << _("/off") << " -- " << 
-				_("turn off the output of IRC channel #openSkat") << std::endl;
+				_("turn off the output of IRC channel") <<
+				" " << MAIN_CHANNEL << std::endl;
 			std::cout << XX << _("/players") << " -- " << 
 				_("show the list of possible participants") << std::endl;
 			std::cout << XX << _("/tables") << " -- " << 
@@ -2798,7 +2857,7 @@ static void process_line(char *line)
 		if ((s != NULL) && (strlen(s) > 0))
 		{
 			// sign and send chat message
-			*irc << "PRIVMSG #openSkat :" << s << "~~~" <<
+			*irc << "PRIVMSG " << MAIN_CHANNEL << " :" << s << "~~~" << 
 				sec.sign(s) << std::endl << std::flush;
 			std::cout << "<" << pub.name << "> " << s << std::endl;
 		}
@@ -3072,7 +3131,7 @@ void run_irc()
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 1)
 					{
-						if (irc_parvec[0] == "#openSkat")
+						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
 							if (nick.find(pub.keyid(), 0) == 0)
 							{
@@ -3091,11 +3150,12 @@ void run_irc()
 										irc_parvec[0] << std::endl;
 							}
 						}
-						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
-							(irc_parvec[0].length() > 10))
+						else if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
+							(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
 						{
 							std::string tb = 
-								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
+								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
+								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							
 							if (nick.find(pub.keyid(), 0) == 0)
 							{
@@ -3144,7 +3204,7 @@ void run_irc()
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 1)
 					{
-						if (irc_parvec[0] == "#openSkat")
+						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
 							if (nick.find(pub.keyid(), 0) == 0)
 							{
@@ -3171,11 +3231,12 @@ void run_irc()
 										irc_parvec[0] << std::endl;
 							}
 						}
-						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) && 
-							(irc_parvec[0].length() > 10))
+						else if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
+							(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
 						{
 							std::string tb = 
-								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
+								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
+								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 								
 							if (nick.find(pub.keyid(), 0) == 0)
 							{
@@ -3208,7 +3269,7 @@ void run_irc()
 					int pvs = irc_paramvec(irc_params(irc_reply));
 					if (pvs >= 2)
 					{
-						if (irc_parvec[0] == "#openSkat")
+						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
 							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
 							{
@@ -3244,11 +3305,12 @@ void run_irc()
 									std::cout << X << _("reason") << ": " << irc_parvec[2] << std::endl;
 							}
 						}
-						else if ((irc_parvec[0].find("#openSkat_", 0) == 0) &&
-							(irc_parvec[0].length() > 10))
+						else if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) &&
+							(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
 						{
 							std::string tb = 
-								irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
+								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
+								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							
 							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
 							{
@@ -3327,7 +3389,7 @@ void run_irc()
 					{
 						if (irc_parvec[5] != pub.keyid())
 						{
-							if (irc_parvec[1] == "#openSkat")
+							if (irc_parvec[1] == MAIN_CHANNEL)
 							{
 								if (irc_parvec[5].find(public_prefix, 0) == 0)
 								{
@@ -3381,11 +3443,12 @@ void run_irc()
 											" " << irc_parvec[1] << std::endl;
 								}
 							}
-							else if ((irc_parvec[1].find("#openSkat_", 0) == 0) &&
-								(irc_parvec[1].length() > 10))
+							else if ((irc_parvec[1].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) &&
+								(irc_parvec[1].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
 							{
 								std::string tb = 
-									irc_parvec[1].substr(10, irc_parvec[1].length() - 10);
+									irc_parvec[1].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
+									irc_parvec[1].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 								if (irc_parvec[5].find(public_prefix, 0) == 0)
 								{
 									if (games_tnr2pid.find(tb) != games_tnr2pid.end())
@@ -3424,11 +3487,13 @@ void run_irc()
 					if (irc_paramvec(irc_params(irc_reply)) >= 2)
 					{
 						// control messages
-						if ((irc_parvec[0].find("#openSkat_", 0) == 0) &&
-							(irc_parvec[0].length() > 10) &&
+						if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
+							(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)) && 
 							(nick.find(public_prefix, 0) == 0))
 						{
-							std::string tb = irc_parvec[0].substr(10, irc_parvec[0].length() - 10);
+							std::string tb = 
+								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
+								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 							{
 								size_t tei = irc_parvec[1].find("~~~");
@@ -3457,9 +3522,9 @@ void run_irc()
 						}
 						// announce and no channel messages
 						if (((irc_parvec[1].find("~+~") != irc_parvec[1].npos) && 
-								(irc_parvec[0] == "#openSkat"))
+								(irc_parvec[0] == MAIN_CHANNEL))
 							||
-							((irc_parvec[0] != "#openSkat") &&
+							((irc_parvec[0] != MAIN_CHANNEL) &&
 								(nick.find(public_prefix, 0) == 0) &&
 								((irc_parvec[0] == pub.keyid()) &&
 									(nick != pub.keyid()))))
@@ -3520,7 +3585,7 @@ void run_irc()
 								std::cout << ">" << nick << "< " << irc_parvec[1] << std::endl;
 							}
 						}// chat messages
-						else if (irc_stat && (irc_parvec[0] == "#openSkat"))
+						else if (irc_stat && (irc_parvec[0] == MAIN_CHANNEL))
 						{
 							size_t tei = irc_parvec[1].find("~~~");
 							if ((nick.find(public_prefix, 0) == 0) &&
@@ -3581,10 +3646,10 @@ void run_irc()
 		// timeout occured
 		if (ret == 0)
 		{
-			// use signal blocking for atomic operations (actually a dirty hack :-)
+			// use signal blocking for atomic operations (really a dirty hack :-)
 			raise(SIGUSR1);
 			
-			// re-install signal handlers (because of a bug in some unices)
+			// re-install signal handlers (some unices do not restore them)
 			signal(SIGINT, sig_handler_quit);
 			signal(SIGQUIT, sig_handler_quit);
 			signal(SIGTERM, sig_handler_quit);
@@ -3624,8 +3689,8 @@ void run_irc()
 			}
 			else if (first_entry)
 			{
-				*irc << "JOIN #openSkat" << std::endl << std::flush;
-				*irc << "WHO #openSkat" << std::endl << std::flush;
+				*irc << "JOIN " << MAIN_CHANNEL << std::endl << std::flush;
+				*irc << "WHO " << MAIN_CHANNEL << std::endl << std::flush;
 				first_entry = false;
 			}
 			else if (entry_ok)
@@ -3637,7 +3702,7 @@ void run_irc()
 					for (std::list<std::string>::const_iterator ti = tables.begin(); 
 						ti != tables.end(); ti++)
 					{
-						// if not joined in game, do AUTOJOIN (greedy behaviour)
+						// if not joined in a game, do AUTOJOIN (greedy behaviour)
 						if (games_tnr2pid.find(*ti) == games_tnr2pid.end())
 						{
 							char *command = (char*)malloc(500);
@@ -3650,7 +3715,7 @@ void run_irc()
 							strncat(command, "/skat ", 25);
 							strncat(command, ti->c_str(), 475);
 							process_line(command);
-							// free(2) of 'command' is already done in 'process_line'
+							// free(command) is already done by process_line()
 						}
 					}
 					atj_counter = 0;
@@ -3658,19 +3723,18 @@ void run_irc()
 				else
 					atj_counter++;
 #endif
-				
-				// timer: announce table stats each ANNOUNCE_TIMEOUT seconds
+				// timer: clear all tables every CLEAR_TIMEOUT seconds
+				if (clr_counter >= CLEAR_TIMEOUT)
+				{
+					tables.clear();
+					clr_counter = 0;
+					ann_counter += ANNOUNCE_TIMEOUT;
+				}
+				else
+					clr_counter++;
+				// timer: announce own tables every ANNOUNCE_TIMEOUT seconds
 				if (ann_counter >= ANNOUNCE_TIMEOUT)
 				{
-					// timer: clear all tables each CLEAR_TIMEOUT seconds
-					if (clr_counter >= CLEAR_TIMEOUT)
-					{
-						tables.clear();
-						clr_counter = 0;
-					}
-					else
-						clr_counter++;
-					
 					for (std::map<pid_t, int>::const_iterator pi = games_ipipe.begin();
 						pi != games_ipipe.end(); ++pi)
 					{
@@ -3728,7 +3792,8 @@ void run_irc()
 					{
 						if (rnk_pid == 0)
 						{
-							signal(SIGQUIT, SIG_DFL), signal(SIGTERM, SIG_DFL);
+							signal(SIGQUIT, SIG_DFL);
+							signal(SIGTERM, SIG_DFL);
 							
 							// begin -- child code
 							sleep(1);
@@ -3933,7 +3998,7 @@ void done_irc()
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
-	*irc << "PART #openSkat" << std::endl << std::flush;
+	*irc << "PART " << MAIN_CHANNEL << std::endl << std::flush;
 	*irc << "QUIT :SecureSkat rulez!" << std::endl << std::flush;
 	for (std::map<pid_t, std::string>::const_iterator pidi = games_pid2tnr.begin();
 		pidi != games_pid2tnr.end(); pidi++)
@@ -4012,7 +4077,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.43 2006/03/25 19:49:47 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.44 2006/04/17 09:59:04 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -4124,7 +4189,7 @@ int main(int argc, char* argv[], char* envp[])
 #ifndef NOHUP
 		init_term();
 #endif
-		run_irc();
+		run_irc(); // main loop
 #ifndef NOHUP
 		done_term();
 #endif
