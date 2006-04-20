@@ -4077,7 +4077,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.44 2006/04/17 09:59:04 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.45 2006/04/20 06:24:42 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -4111,14 +4111,14 @@ int main(int argc, char* argv[], char* envp[])
 			{
 				std::cerr << _("Can't create directory!") << " (" << 
 					strerror(errno) << ")" << std::endl;
-				return -1;
+				return EXIT_FAILURE;
 			}
 		}
 		else
 		{
 			std::cerr << _("Can't get the status of the directory!") << " (" << 
 				strerror(errno) << ")" << std::endl;
-			return -1;
+			return EXIT_FAILURE;
 		}
 	}
 	else
@@ -4126,18 +4126,18 @@ int main(int argc, char* argv[], char* envp[])
 		if (!S_ISDIR(stat_buffer.st_mode))
 		{
 			std::cerr << _("Path is not a directory!") << std::endl;
-			return -1;
+			return EXIT_FAILURE;
 		}
 		if (stat_buffer.st_uid != getuid())
 		{
 			std::cerr << _("Wrong owner of the directory!") << std::endl;
-			return -1;
+			return EXIT_FAILURE;
 		}
 		if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
 			(S_IRUSR | S_IWUSR | S_IXUSR))
 		{
 			std::cerr << _("Missing permissions on the directory!") << std::endl;
-			return -1;
+			return EXIT_FAILURE;
 		}
 	}
 	
@@ -4168,7 +4168,7 @@ int main(int argc, char* argv[], char* envp[])
 		if (!init_libTMCG())
 		{
 			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
-			return -1;
+			return EXIT_FAILURE;
 		}
 		
 		get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
@@ -4200,12 +4200,12 @@ int main(int argc, char* argv[], char* envp[])
 		release_pki(pki7771_handle);
 		set_public_keys(homedir + "SecureSkat.pkr", nick_key);
 		
-		return 0;
+		return EXIT_SUCCESS;
 	}
 	
 	std::cout << _("Usage") << ": " << cmd <<
 		" IRC_SERVER<string> [ IRC_PORT<int> " <<
 		"[ SECURITY_LEVEL<int> ..." << std::endl;
 	std::cout << "       " << " ... [ CONTROL_PROGRAM<string> ] ] ]" << std::endl;
-	return -1;
+	return EXIT_FAILURE;
 }
