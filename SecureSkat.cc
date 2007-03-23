@@ -1,7 +1,8 @@
 /*******************************************************************************
    SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+               Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@
 #include <sstream>
 #include <fstream>
 
-// libTMCG
+// LibTMCG
 #include <libTMCG.hh>
 
 // zlib
@@ -2128,12 +2129,14 @@ static void process_line(char *line)
 				nick_players.begin(); ni != nick_players.end(); ni++)
 			{
 				std::string nick = ni->first, host = ni->second;
-				std::string name = "?", email = "?", type = "?";
+				std::string name = "?", email = "?", type = "?", fp = "?";
 				if (nick_key.find(nick) != nick_key.end())
 				{
+					// key was found for nick, now get the attributes
 					name = nick_key[nick].name;
 					email = nick_key[nick].email;
 					type = nick_key[nick].type;
+					fp = nick_key[nick].fingerprint();
 				}
 				std::cout << XX << nick << " (" << host << ":" << 
 					nick_p7771[nick] << ":" << nick_p7773[nick] << ":" << 
@@ -2145,8 +2148,7 @@ static void process_line(char *line)
 					"SECURITY_LEVEL = " << nick_sl[nick] << ", " << 
 					"KEY_TYPE = " << type << ", " << std::endl;
 				std::cout << XX << "     " << 
-					"KEY_FINGERPRINT = " << nick_key[nick].fingerprint() << 
-					"]" << std::endl;
+					"KEY_FINGERPRINT = " << fp << "]" << std::endl;
 			}
 		}
 		else if ((cmd_argv[0] == "tables") || (cmd_argv[0] == "tische"))
@@ -4077,7 +4079,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.45 2006/04/20 06:24:42 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.46 2007/03/23 22:50:03 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

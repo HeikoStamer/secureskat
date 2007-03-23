@@ -1,4 +1,5 @@
 SecureSkat 2.8:
+		- added a message delay to avoid kick off (e.g. irc.freenode.net)
 SecureSkat 2.7:
 		- now we're using Groth's protocol for the verifiable secret shuffle
 		  (improves the performance and communication complexity significantly)
@@ -21,12 +22,12 @@ SecureSkat 2.5:
 		  (it occured only, if one uses a nickname with spaces)
 		- rudimentary internationalization support (GNU gettext) added
 SecureSkat 2.4:
-		- libTMCG is now separated from the SecureSkat package
+		- LibTMCG is now separated from the SecureSkat package
 		  (http://savannah.nongnu.org/projects/libtmcg/)
 		- URGENT security fix: our implementation of a proof of knowledge
 		  (equality of discrete logarithms) was not sound, i.e. the missing
 		  instantiation of mpz_shash on the verifier side permits cheating.
-		  These problems are issues of the library libTMCG. We announce them
-		  here to reach all affected users of libTMCG resp. SecureSkat.
+		  These problems are issues of the library LibTMCG. We announce them
+		  here to reach all affected users of LibTMCG resp. SecureSkat.
 SecureSkat 2.3:
-		- initial GNU/Savannah release (no new features, but included libTMCG)
+		- initial GNU/Savannah release (no new features, but included LibTMCG)
