@@ -8,6 +8,8 @@ Copyright (c)  2002, 2004, 2005  Heiko Stamer <stamer@gaos.org>
 
 Stuff that should be done (until the first production release):
 
++ fix the 8-char limit bug (IRC nickname)
++ send channel announcements via P2P (not on IRC)
 + use GNU TLS for privacy and integrity protection
 + replace (former) xskat GUI by native IRC server implementation
 + tunnel TCP connections via IRC (if requested, e.g. paranoid firewall)
