@@ -75,7 +75,7 @@
 #include "SecureSkat_misc.hh"
 #include "SecureSkat_pki.hh"
 #include "SecureSkat_rnk.hh"
-#include "SecureSkat_vtmf.hh"
+#include "SecureSkat_game.hh"
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 #ifdef ENABLE_NLS
@@ -4079,7 +4079,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.46 2007/03/23 22:50:03 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.47 2007/04/09 12:14:33 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

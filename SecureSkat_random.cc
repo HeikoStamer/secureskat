@@ -42,7 +42,7 @@
 #include <vector>
 #include <iostream>
 
-#include "SecureSkat_vtmf.hh"
+#include "SecureSkat_game.hh"
 
 // old ANSI C++ namespace style (2.7/2.95)
 using namespace std;

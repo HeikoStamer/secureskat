@@ -17,8 +17,8 @@
    along with SecureSkat; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
-#ifndef INCLUDED_SecureSkat_vtmf_HH
-	#define INCLUDED_SecureSkat_vtmf_HH
+#ifndef INCLUDED_SecureSkat_game_HH
+	#define INCLUDED_SecureSkat_game_HH
 	
 	// autoconf header
 	#ifdef HAVE_CONFIG_H

@@ -9,12 +9,12 @@ LDADD = @LIBGCRYPT_LIBS@ @LIBTMCG_LIBS@
 bin_PROGRAMS = SecureSkat SecureSkat_random
 
 SecureSkat_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
-	SecureSkat_misc.cc SecureSkat_pki.cc SecureSkat_rnk.cc SecureSkat_vtmf.cc\
-	SecureSkat_misc.hh SecureSkat_pki.hh SecureSkat_rnk.hh SecureSkat_vtmf.hh\
+	SecureSkat_misc.cc SecureSkat_pki.cc SecureSkat_rnk.cc SecureSkat_game.cc\
+	SecureSkat_misc.hh SecureSkat_pki.hh SecureSkat_rnk.hh SecureSkat_game.hh\
 	SecureSkat.cc
 
 SecureSkat_random_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
-	SecureSkat_vtmf.cc SecureSkat_vtmf.hh SecureSkat_misc.cc SecureSkat_misc.hh\
+	SecureSkat_game.cc SecureSkat_game.hh SecureSkat_misc.cc SecureSkat_misc.hh\
 	SecureSkat_random.cc
 
 ACLOCAL_AMFLAGS = -I m4
