@@ -151,7 +151,7 @@ std::list<pid_t>							pkiprf_pid;
 
 std::map<std::string, int>					bad_nick;
 
-std::string									irc_reply, irc_pfx, irc_cmd, irc_par;
+std::string									irc_reply;
 int											irc_port, irc_handle, ctl_pid = 0;
 std::vector<std::string>					irc_parvec;
 bool										irc_stat = true;
@@ -353,83 +353,6 @@ void create_irc(const std::string &server, short int port)
 		exit(-1);
 	}
 	irc = new iosocketstream(irc_handle);
-}
-
-const char *irc_prefix(const std::string &input)
-{
-	irc_pfx = input;
-	if (irc_pfx.find(":", 0) == 0)
-		irc_pfx = irc_pfx.substr(1, irc_pfx.find(" ", 0) - 1);
-	else
-		irc_pfx = "";
-	return irc_pfx.c_str();
-}
-
-const char *irc_command(const std::string &input)
-{
-	irc_cmd = input;
-	// prefix?
-	if (irc_cmd.find(":", 0) == 0)
-	{
-		irc_cmd = irc_cmd.substr(irc_cmd.find(" ", 0) + 1,
-			irc_cmd.length() - irc_cmd.find(" ", 0) - 1);
-	}
-	// strip leading whitespaces
-	while (irc_cmd.find(" ", 0) == 0)
-		irc_cmd = irc_cmd.substr(1, irc_cmd.length() - 1);
-	if (irc_cmd.find(" ", 0) != irc_cmd.npos)
-		irc_cmd = irc_cmd.substr(0, irc_cmd.find(" ", 0));
-	return irc_cmd.c_str();
-}
-
-const char *irc_params(const std::string &input)
-{
-	irc_par = input;
-	if (irc_par.find(":", 0) == 0)
-	{
-		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1,
-			irc_par.length() - irc_par.find(" ", 0) - 1);
-	}
-	while (irc_par.find(" ", 0) == 0)
-		irc_par = irc_par.substr(1, irc_par.length() - 1);
-	if (irc_par.find(" ", 0) != irc_par.npos)
-		irc_par = irc_par.substr(irc_par.find(" ", 0) + 1,
-			irc_par.length() - irc_par.find(" ", 0) - 1);
-	else
-		irc_par = "";
-	return irc_par.c_str();
-}
-
-size_t irc_paramvec(std::string input)
-{
-	irc_parvec.clear();
-	while (input != "")
-	{
-		// strip whitespaces
-		while (input.find(" ", 0) == 0)
-			input = input.substr(1, input.length() - 1);
-		// escape sequence, last token
-		if (input.find(":", 0) == 0)
-		{ 
-			irc_parvec.push_back(input.substr(1, input.length() - 1));
-			break;
-		}
-		// next token
-		else if (input.find(" ", 0) != input.npos)
-		{
-			irc_parvec.push_back(input.substr(0, input.find(" ", 0)));
-			input = input.substr(input.find(" ", 0) + 1,
-				input.length() - input.find(" ", 0));
-		}
-		// last token
-		else
-		{
-			if (input != "")
-				irc_parvec.push_back(input);
-			break;
-		}
-	}
-	return irc_parvec.size();
 }
 
 void init_irc()
@@ -1936,9 +1859,9 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 //std::cerr << "to IRC: " << irc1 << std::endl;
 
 							// do operation
-							if (strncasecmp(irc_command(irc1), "PRIVMSG", 7) == 0)
+							if (irc_command_cmp(irc1, "PRIVMSG"))
 							{
-								if (irc_paramvec(irc_params(irc1)) >= 2)
+								if (irc_paramvec(irc_params(irc1), irc_parvec) >= 2)
 								{
 									if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
 										(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
@@ -2087,8 +2010,8 @@ static void process_line(char *line)
 	
 	if (s[0] == '/')
 	{
-		size_t cmd_argc = irc_paramvec(s + 1);
-		std::vector<std::string> cmd_argv = irc_parvec;
+		std::vector<std::string> cmd_argv;
+		size_t cmd_argc = irc_paramvec(s + 1, cmd_argv);
 		
 		if (cmd_argc == 0)
 			cmd_argv.push_back("help");
@@ -3094,32 +3017,32 @@ void run_irc()
 				}
 				
 				// process the IRC messages
-				if (strncasecmp(irc_command(irc_reply), "PING", 4) == 0)
+				if (irc_command_cmp(irc_reply, "PING"))
 				{
 					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
 				} // USER success reply
-				else if (strncasecmp(irc_command(irc_reply), "001", 3) == 0)
+				else if (irc_command_cmp(irc_reply, "001"))
 				{
 					entry_ok = true, first_entry = true;
 				} // NICK and USER error replies
-				else if ((strncasecmp(irc_command(irc_reply), "432", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "433", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "436", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "462", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "463", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "464", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "465", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "466", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "468", 3) == 0))
+				else if (irc_command_cmp(irc_reply, "432") ||
+					irc_command_cmp(irc_reply, "433") ||
+					irc_command_cmp(irc_reply, "436") ||
+					irc_command_cmp(irc_reply, "462") ||
+					irc_command_cmp(irc_reply, "463") ||
+					irc_command_cmp(irc_reply, "464") ||
+					irc_command_cmp(irc_reply, "465") ||
+					irc_command_cmp(irc_reply, "466") ||
+					irc_command_cmp(irc_reply, "468"))
 				{
 					std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
 					std::cerr << irc_reply << std::endl;
 					irc_quit = 1;
 					break;
 				}
-				else if (strncasecmp(irc_command(irc_reply), "JOIN", 4) == 0)
+				else if (irc_command_cmp(irc_reply, "JOIN"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 1)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 1)
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
@@ -3180,19 +3103,19 @@ void run_irc()
 						}
 					}
 				}
-				else if ((strncasecmp(irc_command(irc_reply), "471", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "473", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "474", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "403", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "405", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "475", 3) == 0))
+				else if (irc_command_cmp(irc_reply, "471") ||
+					irc_command_cmp(irc_reply, "473") ||
+					irc_command_cmp(irc_reply, "474") ||
+					irc_command_cmp(irc_reply, "403") ||
+					irc_command_cmp(irc_reply, "405") ||
+					irc_command_cmp(irc_reply, "475"))
 				{
 					std::cerr << _("IRC ERROR: join to channel failed") << std::endl;
 					std::cerr << irc_reply << std::endl;
 				}
-				else if (strncasecmp(irc_command(irc_reply), "PART", 4) == 0)
+				else if (irc_command_cmp(irc_reply, "PART"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 1)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 1)
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
@@ -3254,9 +3177,9 @@ void run_irc()
 						}
 					}
 				}
-				else if (strncasecmp(irc_command(irc_reply), "KICK", 4) == 0)
+				else if (irc_command_cmp(irc_reply, "KICK"))
 				{
-					int pvs = irc_paramvec(irc_params(irc_reply));
+					int pvs = irc_paramvec(irc_params(irc_reply), irc_parvec);
 					if (pvs >= 2)
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
@@ -3341,7 +3264,7 @@ void run_irc()
 						}
 					}
 				}
-				else if (strncasecmp(irc_command(irc_reply), "QUIT", 4) == 0)
+				else if (irc_command_cmp(irc_reply, "QUIT"))
 				{
 					if (nick.find(pub.keyid(5), 0) == 0)
 					{
@@ -3373,9 +3296,9 @@ void run_irc()
 								") " << _("quits IRC client") << std::endl;
 					}
 				}
-				else if (strncasecmp(irc_command(irc_reply), "352", 3) == 0)
+				else if (irc_command_cmp(irc_reply, "352"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 8)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 8)
 					{
 						if (irc_parvec[5] != pub.keyid(5))
 						{
@@ -3459,22 +3382,22 @@ void run_irc()
 						}
 					}	
 				} // MOTD start line and end line
-				else if ((strncasecmp(irc_command(irc_reply), "375", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "376", 3) == 0))
+				else if (irc_command_cmp(irc_reply, "375") ||
+					irc_command_cmp(irc_reply, "376"))
 				{
 					std::cout << std::endl;
 				} // MOTD text line
-				else if (strncasecmp(irc_command(irc_reply), "372", 3) == 0)
+				else if (irc_command_cmp(irc_reply, "372"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 2)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 2)
 					{
 						std::string tms = irc_parvec[1].substr(1, irc_parvec[1].length() - 1);
 						std::cout << X << tms << std::endl;
 					}
 				} // PRIVMSG
-				else if (strncasecmp(irc_command(irc_reply), "PRIVMSG", 7) == 0)
+				else if (irc_command_cmp(irc_reply, "PRIVMSG"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 2)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 2)
 					{
 						// control messages
 						if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
@@ -3604,22 +3527,21 @@ void run_irc()
 						}
 					}
 				}
-				else if ((strncasecmp(irc_command(irc_reply), "NOTICE", 6) == 0) || 
-					(strncasecmp(irc_command(irc_reply), "020", 3) == 0))
+				else if (irc_command_cmp(irc_reply, "NOTICE") || 
+					irc_command_cmp(irc_reply, "020"))
 				{
-					if (irc_paramvec(irc_params(irc_reply)) >= 2)
+					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 2)
 					{
 						std::cout << "[NOTICE] " << irc_parvec[1] << std::endl;
 					}
 				}
-				else if (strncasecmp(irc_command(irc_reply), "ERROR", 5) == 0)
+				else if (irc_command_cmp(irc_reply, "ERROR"))
 				{
 					std::cerr << "[ERROR] " << irc_reply << std::endl;
 				}
 				else
 				{
 					// unparsed IRC-message -- ignore it
-//std::cerr << "IRC: unparsed message:" << std::endl;
 std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 				}
 				
@@ -4067,7 +3989,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.50 2007/04/10 09:48:01 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.51 2007/04/10 18:14:53 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

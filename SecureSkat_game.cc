@@ -1010,11 +1010,15 @@ int skat_game
 		std::string main_channel, std::string main_channel_underscore
 	)
 {
+	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+
+	unsigned int dlen = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 	opipestream *out_pipe = new opipestream(opipe), *out_ctl = NULL;
 	if (pctl)
 		out_ctl = new opipestream(ctl_o);
-	
 	int pkt_sum[3] = { 0, 0, 0 };
+	
+	// send INIT messages to control interface
 	for (size_t i = 0; pctl && (i < 3); i++)
 	{
 		std::ostringstream ost;
@@ -1226,7 +1230,7 @@ int skat_game
 		// play three games in each round
 		for (size_t p = 0; p < 3; p++)
 		{
-			// create the deck (32 different cards)
+			// create the deck (containing 32 different cards)
 			TMCG_OpenStack<VTMF_Card> d;
 			for (int i = 0; i < 32; i++)
 			{
@@ -1284,13 +1288,12 @@ int skat_game
 			std::ostringstream game_stream;
 			game_stream << d_end << std::endl << std::flush;
 			std::string osttmp = game_stream.str();
-			assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-			char *game_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+
+			char *game_digest = new char[dlen];
 			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, game_digest,
 				osttmp.c_str(), osttmp.length());
-			char *hex_game_digest =
-				new char[2 * gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) + 1];
-			for (size_t i = 0; i < gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO); i++)
+			char *hex_game_digest =	new char[2 * dlen + 1];
+			for (size_t i = 0; i < dlen; i++)
 				snprintf(hex_game_digest + (2 * i), 3, "%02x",
 					(unsigned char)game_digest[i]);
 			
@@ -2697,13 +2700,11 @@ int skat_game
 		
 		// compute rnk_id aka hex_rnk_digest
 		std::string osttmp = spiel_protokoll.str();
-		assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-		char *rnk_digest = new char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
+		char *rnk_digest = new char[dlen];
 		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest,
 			osttmp.c_str(), osttmp.length());
-		char *hex_rnk_digest = 
-			new char[2 * gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) + 1];
-		for (size_t i = 0; i < gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO); i++)
+		char *hex_rnk_digest = new char[2 * dlen + 1];
+		for (size_t i = 0; i < dlen; i++)
 			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", 
 				(unsigned char)rnk_digest[i]);
 		opipestream *npipe = new opipestream(hpipe);

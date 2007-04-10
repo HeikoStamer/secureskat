@@ -35,6 +35,9 @@
 	#include <netdb.h>
 	#include <sys/socket.h>
 	
+	#include<string>
+	#include<vector>
+	
 	int BindEmptyPort
 		(int start_port);
 	int ListenToPort
@@ -43,8 +46,15 @@
 		(int handle);
 	int ConnectToHost
 		(const char *host, int port);
+
 	char *stripwhite
 		(char *str);
+	std::string irc_prefix(const std::string &input);
+	std::string irc_command(const std::string &input);
+	std::string irc_params(const std::string &input);
+	size_t irc_paramvec(std::string input, std::vector<std::string> &v);
+	bool irc_command_cmp(const std::string &input, const std::string &cmd);
+
 	void start_clock
 		(void);
 	void stop_clock
