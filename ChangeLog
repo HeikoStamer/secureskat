@@ -1,6 +1,6 @@
 SecureSkat 2.8:
 		- added a message delay to avoid kick off (e.g. irc.freenode.net)
-		- removed obolete stuff (ABHEBEN, COMMON_GROUP, old PBKDF)
+		- removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
 		- increased iteration count of PBKDF1 to 7000
 		
 SecureSkat 2.7:

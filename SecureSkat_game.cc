@@ -1032,17 +1032,8 @@ int skat_game
 		start_clock();
 #endif
 		
-#ifdef COMMON_DDH_GROUP
-		std::stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP_P << std::endl;
-		ddh_group << COMMON_DDH_GROUP_Q << std::endl;
-		ddh_group << COMMON_DDH_GROUP_G << std::endl;
-		ddh_group << "2" << std::endl;
-		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
-#else
 		vtmf = new BarnettSmartVTMF_dlog();
 		vtmf->PublishGroup(*left), vtmf->PublishGroup(*right);
-#endif
 		
 		if (!vtmf->CheckGroup())
 		{
@@ -1082,19 +1073,10 @@ int skat_game
 		start_clock();
 #endif
 		
-#ifdef COMMON_DDH_GROUP
-		std::stringstream ddh_group;
-		ddh_group << COMMON_DDH_GROUP_P << std::endl;
-		ddh_group << COMMON_DDH_GROUP_Q << std::endl;
-		ddh_group << COMMON_DDH_GROUP_G << std::endl;
-		ddh_group << "2" << std::endl;
-		vtmf = new BarnettSmartVTMF_dlog_GroupQR(ddh_group);
-#else
 		if (pkr_self == 0)
 			vtmf = new BarnettSmartVTMF_dlog(*right);
 		else
 			vtmf = new BarnettSmartVTMF_dlog(*left);
-#endif
 		
 		if (!vtmf->CheckGroup())
 		{

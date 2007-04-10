@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.51 $)
+AC_REVISION($Revision: 1.52 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -28,34 +28,6 @@ AC_ARG_ENABLE(autojoin, [  --enable-autojoin       enable AUTOJOIN behaviour],
 AC_MSG_RESULT($use_autojoin)
 if test "$use_autojoin" = yes ; then
 	AC_DEFINE(AUTOJOIN, , [Define to have the AUTOJOIN behaviour])
-fi
-
-AC_MSG_CHECKING([whether COMMON_DDH_GROUP behaviour is enabled])
-AC_ARG_ENABLE(commongroup, [  --enable-commongroup   enable COMMON_DDH_GROUP behaviour],
-	use_commongroup=$enableval, use_commongroup=no)
-AC_MSG_RESULT($use_commongroup)
-if test "$use_commongroup" = yes ; then
-	AC_DEFINE(COMMON_DDH_GROUP, , [Define to have the COMMON_DDH_GROUP behaviour])
-	AC_DEFINE(COMMON_DDH_GROUP_P,
-	"1a1e4vngailcvh7j2tur8zts6fbkrcac6d3g0jdfvdggl9r7cr2v6zllf6b3z6xb6w0nix8jsjlecgt8lwx1huihghkvqnbbgviiz0vg6ntckohpeac84n0co9czkw174ic47ifwd2189x26609ce63xm5vddxvsbbevn4bxaiv2784d9335o38na680ay8apygtmnz",
-	[Prime p of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
-	AC_DEFINE(COMMON_DDH_GROUP_Q,
-	"n0p2ftq59aofqlrjexdmhww37nsdo5636jq09opxoq8amvlodjflhsspl5jzlgnlg0brgm9w9sp68emaygiqx98q8sfvbnnqfr9hifq3bwoac8up5642bi6c4ohsg0lk9623r7y6j0m4yj3304o731yt2xooyxw5npftk5yn9fj3m26mjjku1mbn3405h45cz8etbz",
-	[Prime q of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
-	AC_DEFINE(COMMON_DDH_GROUP_G,
-	"2",
-	[Generator g of the common DDH-hard group G (Well-Known Group 2, RFC 2412)])
-#
-# The above numbers define the MODP Group 2 of the Oakley Protocol and IKE.
-# Orman, H., "The Oakley Key Determination Protocol", RFC 2412, November 1998.
-# p = 2^1024 - 2^960 - 1 + 2^64 * { [2^894 pi] + 129093 }
-# FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
-# 29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
-# EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
-# E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
-# EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
-# FFFFFFFF FFFFFFFF
-#
 fi
 
 # Checks for programs.
@@ -87,9 +59,9 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.0.0")
+AM_PATH_LIBTMCG("1.0.2")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.0.0 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.0.2 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
@@ -116,7 +88,7 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([dup2 gethostbyname memset select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir getuid getenv strerror])
+AC_CHECK_FUNCS([dup2 gethostbyname memset memcpy memcmp select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir getuid getenv strerror])
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.
@@ -140,4 +112,4 @@ echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
 
-echo "Now type 'make && make install' to build and to install SecureSkat."
+echo "Now type 'make && make install' to build and install SecureSkat."
