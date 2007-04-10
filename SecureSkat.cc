@@ -153,7 +153,6 @@ std::map<std::string, int>					bad_nick;
 
 std::string									irc_reply;
 int											irc_port, irc_handle, ctl_pid = 0;
-std::vector<std::string>					irc_parvec;
 bool										irc_stat = true;
 iosocketstream								*irc;
 
@@ -1859,6 +1858,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 //std::cerr << "to IRC: " << irc1 << std::endl;
 
 							// do operation
+							std::vector<std::string> irc_parvec;
 							if (irc_command_cmp(irc1, "PRIVMSG"))
 							{
 								if (irc_paramvec(irc_params(irc1), irc_parvec) >= 2)
@@ -3017,6 +3017,7 @@ void run_irc()
 				}
 				
 				// process the IRC messages
+				std::vector<std::string> irc_parvec;
 				if (irc_command_cmp(irc_reply, "PING"))
 				{
 					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
@@ -3989,7 +3990,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.51 2007/04/10 18:14:53 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.52 2007/04/10 20:17:34 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
