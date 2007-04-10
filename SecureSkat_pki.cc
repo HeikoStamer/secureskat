@@ -26,6 +26,7 @@ std::string get_passphrase
 	std::string pass_phrase;
 	struct termios old_term, new_term;
 	
+	// disable echo on stdin
 	if (tcgetattr(fileno(stdin), &old_term) < 0)
 	{
 		perror("SecureSkat_pki::get_passphrase (tcgetattr)");
@@ -39,8 +40,10 @@ std::string get_passphrase
 		perror("SecureSkat_pki::get_passphrase (tcsetattr)");
 		exit(-1);
 	}
+	// read pass phrase
 	std::cout << prompt.c_str() << ": ";
 	std::getline(std::cin, pass_phrase);
+	// enable echo on stdin
 	if (tcsetattr(fileno(stdin), TCSANOW, &old_term) < 0)
 	{
 		perror("SecureSkat_pki::get_passphrase (tcsetattr)");
@@ -128,67 +131,55 @@ void get_secret_key
 		gcry_cipher_get_algo_keylen(GCRY_CIPHER_BLOWFISH));
 	
 	std::string key_str;
-	std::ostringstream ost, ost2, ost3;
+	std::ostringstream ost;
 	datum key, data;
+	
+	// open GDBM file where the secret key is stored
 	GDBM_FILE sec_db = 
 		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
 	if (sec_db != NULL)
 	{
+		// key is stored at the first entry of the GDBM file
 		key = gdbm_firstkey(sec_db);
 		if (key.dptr)
 		{
-			// fetch secret key from the GDBM file (first entry)
+			// fetch entry from GDBM file
 			data = gdbm_fetch(sec_db, key);
+			// get the salt value
 			key_str = key.dptr;
 			
-			// encrypted?
+			// check whether the entry is encrypted
 			std::string pass_phrase = "";
-			ost2 << data.dptr;
-			if (!sec.import(ost2.str()))
-			{
-				pass_phrase =
-					get_passphrase(_("Enter the pass phrase to unlock your key"));
-			}
-			
-			// OBSOLETE: This old key derivation function from SecureSkat 2.5
-			// is kept for the reason of backward compatibility.
+			if (memcmp(data.dptr, "sec", 3))
+			    pass_phrase =
+				get_passphrase(_("Enter the pass phrase to unlock your key"));
+						
+			// decrypt entry with a pass phrase supplied by the user
 			if (pass_phrase != "")
 			{
-				unsigned char *pass_digest = 
-					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest,
-					pass_phrase.c_str(), pass_phrase.length());
+				unsigned int dlen = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
+				unsigned char *pass_digest = new unsigned char[dlen];
 				
-				decrypt_secret_key(data, pass_digest);
-				ost3 << data.dptr;
-				
-				// decrypt the secret key with a pass phrase entered by the user
-				// new key derivation function PBKDF1 from RCF2898 (SecureSkat >= 2.6)
-				if (!sec.import(ost3.str()))
+				// key derivation function PBKDF1 from RCF2898
+				// compute T_1 = hash(password || salt)
+				unsigned char *T_i = new unsigned char[dlen];
+				std::string input = pass_phrase + key_str;
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i,
+					input.c_str(), input.length());
+				// use PBKDF1 with iteration count = 7000
+				// compute T_2, ..., T_7000
+				for (size_t i = 1; i < 7000; i++)
 				{
-					// fetch secret key from the GDBM file (first entry) again
-					data = gdbm_fetch(sec_db, key);
-					
-					// PBKDF1, T_1 = password || salt
-					unsigned char *T_i = 
-						new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-					std::string T_1 = pass_phrase + key_str;
-					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i,
-						T_1.c_str(), T_1.length());
-					// PBKDF1 with iteration count = 5000
-					for (size_t i = 1; i <= 5000; i++)
-					{
-						gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
-							T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-						memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-					}
-					decrypt_secret_key(data, pass_digest);
-					delete [] T_i;
+				    gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
+					T_i, dlen);
+				    memcpy(T_i, pass_digest, dlen);
 				}
+				decrypt_secret_key(data, pass_digest);
+				delete [] T_i;
 				delete [] pass_digest;
 			}
 			
-			// convert (decrypted) secret key for importing
+			// convert (decrypted) entry for importing as key
 			ost << data.dptr;
 			
 			free(data.dptr);
@@ -196,10 +187,10 @@ void get_secret_key
 		}
 		else
 		{
-			// sync the GDBM file physically
+			// sync GDBM file physically
 			gdbm_sync(sec_db);
 			
-			// create a fresh secret key
+			// create a secret key
 			std::string name, email, keyid, osttmp;
 			std::cout << _("Your nickname") << ": ";
 			std::getline(std::cin, name);
@@ -215,19 +206,18 @@ void get_secret_key
 					sec = tmpsec;
 					break;
 				}
-				else
-					std::cerr << "*" << std::flush;
 			}
 			ost << sec;
 			
+			// set pointers of the new entry
 			keyid = sec.keyid();
-			key.dptr = (char*)keyid.c_str();
+			key.dptr = (char*)keyid.c_str(); // salt value
 			key.dsize = keyid.length() + 1;
 			osttmp = ost.str();
 			data.dptr = (char*)osttmp.c_str();
 			data.dsize = osttmp.length() + 1;
 			
-			// encrypt the secret key with a pass phrase entered by the user
+			// encrypt secret key with a pass phrase supplied by the user
 			std::string pass_phrase, pass_retyped;
 			do
 			{
@@ -240,36 +230,37 @@ void get_secret_key
 					break;
 				}
 				pass_retyped =
-					get_passphrase(_("Retype your pass phrase"));
+					get_passphrase(_("Repeat your pass phrase"));
 				if (pass_phrase != pass_retyped)
 					std::cerr << _("Your pass phrases differ.") << " " <<
 						_("Please repeat carefully!") << std::endl;
 			}
 			while (pass_phrase != pass_retyped);
 			
-			// new key derivation function PBKDF1 from RCF2898 (SecureSkat >= 2.6)
+			// use key derivation function PBKDF1 from RCF2898
 			if (pass_phrase != "")
 			{
-				unsigned char *pass_digest = 
-					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-				// PBKDF1, T_1 = password || salt
-				unsigned char *T_i = 
-					new unsigned char[gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO)];
-				std::string T_1 = pass_phrase + keyid;
-				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, T_1.c_str(), T_1.length());
-				// PBKDF1 with iteration count = 5000
-				for (size_t i = 1; i <= 5000; i++)
+				unsigned int dlen = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
+				unsigned char *pass_digest = new unsigned char[dlen];
+				// compute T_1 = hash(password || salt)
+				unsigned char *T_i = new unsigned char[dlen];
+				std::string input = pass_phrase + keyid;
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, 
+				    input.c_str(), input.length());
+				// use PBKDF1 with iteration count = 7000
+				// compute T_2, ..., T_7000
+				for (size_t i = 1; i < 7000; i++)
 				{
 					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
-						T_i, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-					memcpy(T_i, pass_digest, gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+						T_i, dlen);
+					memcpy(T_i, pass_digest, dlen);
 				}
 				delete [] T_i;
 				encrypt_secret_key(data, pass_digest);
 				delete [] pass_digest;
 			}
 			
-			// store the encrypted secret key in the GDBM file (first entry)
+			// store (encrypted) entry in GDBM file at the first position
 			gdbm_store(sec_db, key, data, GDBM_INSERT);
 			std::cout << _("PKI: cryptographic key") << " \"" << keyid <<
 				"\" " << _("created and stored") << std::endl;
