@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2005  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -94,11 +94,11 @@ int main (int argc, char **argv)
 	srandom(time(NULL) + getpid() + getppid());
 	while (1)
 	{
-		// select(2) -- initalize file descriptors
+		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
 		MFD_SET(fileno(stdin), &rfds);
 		
-		// select(2) -- initalize timeout
+		// select(2) -- initialize timeout
 		tv.tv_sec = 1L;							// seconds
 		tv.tv_usec = 0L;						// microseconds
 

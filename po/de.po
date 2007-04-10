@@ -655,8 +655,8 @@ msgid "Missing permissions on the directory!"
 msgstr "Fehlende Rechte am Verzeichnis!"
 
 #: SecureSkat.cc:4158
-msgid "Initalization of libTMCG failed!"
-msgstr "Initalisierung von libTMCG fehlgeschlagen!"
+msgid "Initialization of libTMCG failed!"
+msgstr "Initialisierung von libTMCG fehlgeschlagen!"
 
 #: SecureSkat.cc:4164
 msgid "Your key fingerprint"

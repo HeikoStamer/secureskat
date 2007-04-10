@@ -538,7 +538,7 @@ int skat_accept
 	int mfds = 0;									// highest-numbered descriptor
 	while (1)
 	{
-		// select(2) -- initalize file descriptors
+		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
 		MFD_SET(gp_handle, &rfds);
 		MFD_SET(ipipe, &rfds);
@@ -1002,12 +1002,12 @@ int ballot_child
 	std::map<std::string, iosecuresocketstream*>	ios_in, ios_out;
 	while (pkr_idx < gp_nick.size())
 	{
-		// select(2) -- initalize file descriptors
+		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
 		MFD_SET(gp_handle, &rfds);
 		MFD_SET(ipipe, &rfds);
 		
-		// select(2) -- initalize timeout
+		// select(2) -- initialize timeout
 		tv.tv_sec = 1L;			// seconds
 		tv.tv_usec = 0L;		// microseconds
 		
@@ -1291,7 +1291,7 @@ int ballot_child
 		}
 	} // while
 	
-	// VTMF initalization
+	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 0)
 	{
@@ -2883,7 +2883,7 @@ void run_irc()
 		
 	while (irc->good() && !irc_quit)
 	{
-		// select(2) -- initalize file descriptors
+		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
 #ifndef NOHUP
 		MFD_SET(fileno(stdin), &rfds);
@@ -2914,7 +2914,7 @@ void run_irc()
 			pi != games_opipe.end(); pi++)
 				MFD_SET(pi->second, &rfds);
 		
-		// select(2) -- initalize timeout
+		// select(2) -- initialize timeout
 		tv.tv_sec = 1L;			// seconds
 		tv.tv_usec = 0L;		// microseconds
 		
@@ -3111,17 +3111,23 @@ void run_irc()
 						pfx.length() - pfx.find("@", 0) - 1);
 				}
 				
+				// process the IRC messages
 				if (strncasecmp(irc_command(irc_reply), "PING", 4) == 0)
 				{
 					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
-				}
+				} // USER success reply
 				else if (strncasecmp(irc_command(irc_reply), "001", 3) == 0)
 				{
 					entry_ok = true, first_entry = true;
-				}
-				else if ((strncasecmp(irc_command(irc_reply), "436", 3) == 0) ||
-					(strncasecmp(irc_command(irc_reply), "462", 3) == 0) ||
+				} // NICK and USER error replies
+				else if ((strncasecmp(irc_command(irc_reply), "432", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "433", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "436", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "462", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "463", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "464", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "465", 3) == 0) ||
+					(strncasecmp(irc_command(irc_reply), "466", 3) == 0) ||
 					(strncasecmp(irc_command(irc_reply), "468", 3) == 0))
 				{
 					std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
@@ -3632,7 +3638,7 @@ void run_irc()
 				{
 					// unparsed IRC-message -- ignore it
 //std::cerr << "IRC: unparsed message:" << std::endl;
-//std::cerr << "[UNPARSED]" << irc_reply << std::endl;
+std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 				}
 				
 					}
@@ -4078,8 +4084,8 @@ int main(int argc, char* argv[], char* envp[])
 	char *home = NULL;
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
-		", (c) 2002 -- 2006  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.47 2007/04/09 12:14:33 stamer Exp $ " << std::endl;
+		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
+		" $Id: SecureSkat.cc,v 1.48 2007/04/10 06:13:43 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
@@ -4088,13 +4094,14 @@ int main(int argc, char* argv[], char* envp[])
 #else
 	setlocale(LC_ALL, "");
 #endif
+	// enable native language support
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	std::cout << "++ " << _("Internationalization support") << ": " << 
 		LOCALEDIR << std::endl;
 #endif
 	
-	// environment variable HOME
+	// process environment variable HOME
 	home = getenv("HOME");
 	if (home != NULL)
 		homedir = home, homedir += "/.SecureSkat/";
@@ -4143,6 +4150,7 @@ int main(int argc, char* argv[], char* envp[])
 		}
 	}
 	
+	// process commandline arguments
 	if (((argc == 5) && isdigit(argv[2][0]) && isdigit(argv[3][0])) || 
 		((argc == 4) && isdigit(argv[2][0]) && isdigit(argv[3][0])) || 
 		((argc == 3) && isdigit(argv[2][0])) || 
@@ -4166,10 +4174,10 @@ int main(int argc, char* argv[], char* envp[])
 				irc_port = atoi(argv[2]);
 		}
 		
-		// initalize libTMCG
+		// initialize LibTMCG
 		if (!init_libTMCG())
 		{
-			std::cerr << _("Initalization of libTMCG failed!") << std::endl;
+			std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
 			return EXIT_FAILURE;
 		}
 		

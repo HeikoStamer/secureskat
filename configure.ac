@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.50 $)
+AC_REVISION($Revision: 1.51 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -28,14 +28,6 @@ AC_ARG_ENABLE(autojoin, [  --enable-autojoin       enable AUTOJOIN behaviour],
 AC_MSG_RESULT($use_autojoin)
 if test "$use_autojoin" = yes ; then
 	AC_DEFINE(AUTOJOIN, , [Define to have the AUTOJOIN behaviour])
-fi
-
-AC_MSG_CHECKING([whether ABHEBEN behaviour is enabled])
-AC_ARG_ENABLE(abheben, [  --enable-abheben        enable ABHEBEN behaviour],
-	use_abheben=$enableval, use_abheben=no)
-AC_MSG_RESULT($use_abheben)
-if test "$use_abheben" = yes ; then
-	AC_DEFINE(ABHEBEN, , [Define to have the ABHEBEN behaviour])
 fi
 
 AC_MSG_CHECKING([whether COMMON_DDH_GROUP behaviour is enabled])

@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1023,7 +1023,7 @@ int skat_game
 		*out_ctl << ost.str() << std::flush;
 	}
 	
-	// VTMF initalization
+	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
 	
 	if (pkr_self == 2)
@@ -1148,7 +1148,7 @@ int skat_game
 #endif
 	}
 	
-	// initalization for Groth's shuffle
+	// initialization for Groth's shuffle
 	GrothVSSHE *vsshe;
 	
 	if (pkr_self == 2)
@@ -1244,7 +1244,7 @@ int skat_game
 		// play three games in each round
 		for (size_t p = 0; p < 3; p++)
 		{
-			// Skatblatt mit 32 (verschiedenen) Karten erstellen
+			// create the deck (32 different cards)
 			TMCG_OpenStack<VTMF_Card> d;
 			for (int i = 0; i < 32; i++)
 			{
@@ -1252,7 +1252,7 @@ int skat_game
 				tmcg->TMCG_CreateOpenCard(c, vtmf, i);
 				d.push(i, c);
 			}
-			// Mischen
+			// shuffle the deck
 			TMCG_Stack<VTMF_Card> d2, d_mix[3], d_end;
 			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
 			d2.push(d);
@@ -1295,77 +1295,8 @@ int skat_game
 			std::cerr << elapsed_time() << std::flush;
 #endif
 			std::cout << "." << _("finished!") << std::endl;
-			
-#ifdef ABHEBEN
-			// Abheben (cyclic shift of stack) von HH
-			std::cout << "><>< " << _("HH cuts the deck.") << " " <<
-				_("Please wait") << "." << std::flush;
-#ifndef NDEBUG
-			start_clock();
-#endif
-			if (((pkr_self + p) % 3) == 2)
-			{
-				size_t cyc = 0;
-				do
-				{
-					ab.clear();
-					cyc = tmcg->TMCG_CreateStackSecret(ab, true, vtmf,
-						d_mix[2].size());
-				}
-				while ((cyc <= 3) || (cyc >= 29));
-				std::cout << "[" << cyc << " " << _("cards cutted") <<
-					"]" << std::flush;
-				tmcg->TMCG_MixStack(d_mix[2], d_end, ab, vtmf);
-				*left << d_end << std::endl << std::flush;
-				*right << d_end << std::endl << std::flush;
-				std::cout << "." << std::flush;
-				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
-					*left, *left);
-				tmcg->TMCG_ProveStackEquality(d_mix[2], d_end, ab, true, vtmf,
-					*right, *right);
-			}
-			else
-			{	
-				iosecuresocketstream *hhs = NULL;
-				if ((pkr_self == 0) && (p == 0))
-					hhs = right;
-				else if ((pkr_self == 0) && (p == 1))
-					hhs = left;
-				else if ((pkr_self == 1) && (p == 0))
-					hhs = left;
-				else if ((pkr_self == 1) && (p == 2))
-					hhs = right;
-				else if ((pkr_self == 2) && (p == 1))
-					hhs = right;
-				else if ((pkr_self == 2) && (p == 2))
-					hhs = left;
-				else
-					return 1;
-				hhs >> d_end;
-				if (!hhs.good())
-				{
-					std::cout << ">< " << _("cutting error") << ": " <<
-						_("bad stack format") << std::endl;
-					return 1;
-				}
-				std::cout << "." << std::flush;
-				if (!tmcg->TMCG_VerifyStackEquality(d_mix[2], d_end,
-					true, vtmf, *hhs, *hhs))
-				{
-					std::cout << ">< " << _("cutting error") << ": " <<
-						_("wrong ZK proof") << std::endl;
-					return 2;
-				}
-			}
-#ifndef NDEBUG
-			stop_clock();
-			std::cerr << elapsed_time() << std::flush;
-#endif
-			std::cout << "." << std::flush;
-			std::cout << _("finished!") << std::endl;
-#else
 			d_end = d_mix[2];
-#endif
+
 			
 			// compute unique game ID (aka hex_game_digest)
 			std::ostringstream game_stream;
@@ -1381,7 +1312,7 @@ int skat_game
 				snprintf(hex_game_digest + (2 * i), 3, "%02x",
 					(unsigned char)game_digest[i]);
 			
-			// Geben
+			// dealing the cards
 			std::cout << "><>< " << _("Dealing the cards.") << " " <<
 				_("Please wait") << "." << std::flush;
 			if (pctl)
@@ -1452,7 +1383,7 @@ int skat_game
 					reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
 						break;
 				
-				// select(2) -- initalize file descriptors
+				// select(2) -- initialize file descriptors
 				FD_ZERO(&rfds);
 				MFD_SET(ipipe, &rfds);
 				if (pctl)
