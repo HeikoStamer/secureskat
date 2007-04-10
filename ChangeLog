@@ -1,7 +1,8 @@
 SecureSkat 2.8:
 		- added a message delay to avoid kick off (e.g. irc.freenode.net)
 		- removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
-		- increased iteration count of PBKDF1 to 7000
+		- increased iteration count of PBKDF1 to 7000 (key file encryption)
+		- limit key identifier to 5 chars (conformacne RFC: nick length)
 		
 SecureSkat 2.7:
 		- now we're using Groth's protocol for the verifiable secret shuffle
