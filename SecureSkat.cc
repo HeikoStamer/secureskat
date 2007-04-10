@@ -445,7 +445,7 @@ void init_irc()
 #endif
 	signal(SIGUSR1, sig_handler_usr1);
 	// send NICKname
-	*irc << "NICK " << pub.keyid() << std::endl << std::flush;
+	*irc << "NICK " << pub.keyid(5) << std::endl << std::flush;
 }
 
 int skat_connect
@@ -751,8 +751,8 @@ int ballot_child
 		b_pow *= 2;
 	
 	// announce table construction
-	gp_nick.push_back(pub.keyid());
-	gp_name[pub.keyid()] = pub.name;
+	gp_nick.push_back(pub.keyid(5));
+	gp_name[pub.keyid(5)] = pub.name;
 	if (neu)
 		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|1~" << -b << "!" << 
 			std::endl << std::flush;
@@ -873,7 +873,7 @@ int ballot_child
 		pi != gp_nick.end(); pi++, pkr_i++)
 	{
 		vnicks.push_back(*pi);
-		if (*pi == pub.keyid())
+		if (*pi == pub.keyid(5))
 		{
 			pkr_self = pkr_i;
 			pkr.keys[pkr_i] = pub;
@@ -1532,8 +1532,8 @@ int skat_child
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
 	int ipipe_readed = 0;
-	gp_nick.push_back(pub.keyid());
-	gp_name[pub.keyid()] = pub.name;
+	gp_nick.push_back(pub.keyid(5));
+	gp_name[pub.keyid(5)] = pub.name;
 	
 	// install old signal handlers
 	signal(SIGINT, sig_handler_skat_quit);
@@ -1652,7 +1652,7 @@ int skat_child
 		" ..." << std::endl;
 	// prepare game (check number of players, create PKR, create connections)
 	if ((gp_nick.size() != 3) || (std::find(gp_nick.begin(), gp_nick.end(),
-		pub.keyid()) == gp_nick.end()))
+		pub.keyid(5)) == gp_nick.end()))
 	{
 		std::cerr << X << _("wrong number of players") << ": " << 
 			gp_nick.size() << std::endl;
@@ -1668,7 +1668,7 @@ int skat_child
 		pi != gp_nick.end(); pi++)
 	{
 		vnicks.push_back(*pi);
-		if (*pi == pub.keyid())
+		if (*pi == pub.keyid(5))
 		{
 			pkr_self = pkr_i;
 			pkr.keys[pkr_i++] = pub;
@@ -1985,7 +1985,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 												tables_p[tabmsg1] = atoi(tabmsg2.c_str());
 												tables_r[tabmsg1] = atoi(tabmsg3.c_str());
 												tables_u[tabmsg1] = tabmsg3;
-												tables_o[tabmsg1] = pub.keyid();
+												tables_o[tabmsg1] = pub.keyid(5);
 											}
 											else
 											{
@@ -2036,7 +2036,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							{
 								std::cerr << _("TMCG: public key corrupted") << std::endl;
 							}
-							else if (pki1 != apkey.keyid())
+							else if (pki1 != apkey.keyid(5))
 							{
 								std::cerr << _("TMCG: wrong public key") << std::endl;
 							}
@@ -2177,7 +2177,7 @@ static void process_line(char *line)
 			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
 			
 			// parsing RNK data
-			nick_key[pub.keyid()] = pub;
+			nick_key[pub.keyid(5)] = pub;
 			for (std::map<std::string, std::string>::const_iterator ri = 
 				rnk.begin(); ri != rnk.end(); ri++)
 			{
@@ -2366,7 +2366,7 @@ static void process_line(char *line)
 					gp_w = gp_w.substr(ei + 1, gp_w.length() - ei - 1);
 				}
 				// eigene Beteiligung?
-				if ((gp.find(pub.keyid(), 0) != gp.npos) && 
+				if ((gp.find(pub.keyid(5), 0) != gp.npos) && 
 					(gp_p.size() == 3))
 				{
 					// naives sortieren
@@ -2399,7 +2399,7 @@ static void process_line(char *line)
 					std::cout << "+----+ " << std::endl;
 				}
 			}
-			nick_key.erase(pub.keyid());
+			nick_key.erase(pub.keyid(5));
 		}
 		else if (cmd_argv[0] == "skat")
 		{
@@ -2428,7 +2428,7 @@ static void process_line(char *line)
 									(close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 										perror("run_irc (close)");
 								int ret = skat_child(tnr, r, true, in_pipe[0],
-									out_pipe[1], rnk_pipe[1], pub.keyid());
+									out_pipe[1], rnk_pipe[1], pub.keyid(5));
 								sleep(1);
 								if ((close(rnk_pipe[1]) < 0) || 
 									(close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -2552,7 +2552,7 @@ static void process_line(char *line)
 								if ((close(out_pipe[0]) < 0) || (close(in_pipe[1]) < 0))
 									perror("run_irc (close)");
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
-									pub.keyid());
+									pub.keyid(5));
 #ifndef NDEBUG
 	std::cerr << "ballot_child() = " << ret << std::endl;
 #endif
@@ -2706,15 +2706,15 @@ static void process_line(char *line)
 							{
 								std::cout << X << _("TMCG: public key corrupted") << std::endl;
 							}
-							else if ((nick_key.find(apkey.keyid()) != nick_key.end()) ||
-								(apkey.keyid() == pub.keyid()))
+							else if ((nick_key.find(apkey.keyid(5)) != nick_key.end()) ||
+								(apkey.keyid(5) == pub.keyid(5)))
 							{
 								std::cout << X << _("public key already present") << std::endl;
 							}
 							else
 							{
 								std::cout << X << _("Checking the key") << " \"" << 
-									apkey.keyid() << "\". " << _("Please wait") << "..." << 
+									apkey.keyid(5) << "\". " << _("Please wait") << "..." << 
 									std::endl;
 								if (!apkey.check())
 								{
@@ -2722,9 +2722,9 @@ static void process_line(char *line)
 								}
 								else
 								{
-									nick_key[apkey.keyid()] = apkey;
+									nick_key[apkey.keyid(5)] = apkey;
 									std::cout << X << "PKI " << _("imports") << 
-										" \"" << apkey.keyid() << "\" " << "aka \"" << 
+										" \"" << apkey.keyid(5) << "\" " << "aka \"" << 
 										apkey.name << "\" <" << apkey.email << ">" << std::endl;
 								}
 							}
@@ -3123,7 +3123,7 @@ void run_irc()
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
-							if (nick.find(pub.keyid(), 0) == 0)
+							if (nick.find(pub.keyid(5), 0) == 0)
 							{
 								std::cout << X << _("you join channel") << " " << 
 									irc_parvec[0] << std::endl;
@@ -3147,7 +3147,7 @@ void run_irc()
 								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
 								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							
-							if (nick.find(pub.keyid(), 0) == 0)
+							if (nick.find(pub.keyid(5), 0) == 0)
 							{
 								std::cout << X << _("you join") << " " << tb << std::endl;
 							}
@@ -3196,7 +3196,7 @@ void run_irc()
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
-							if (nick.find(pub.keyid(), 0) == 0)
+							if (nick.find(pub.keyid(5), 0) == 0)
 							{
 								std::cout << X << _("you leave channel") << " " <<
 									irc_parvec[0] << std::endl;
@@ -3228,7 +3228,7 @@ void run_irc()
 								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
 								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 								
-							if (nick.find(pub.keyid(), 0) == 0)
+							if (nick.find(pub.keyid(5), 0) == 0)
 							{
 								std::cout << X << _("you leave") << " " << tb << std::endl;
 							}
@@ -3261,7 +3261,7 @@ void run_irc()
 					{
 						if (irc_parvec[0] == MAIN_CHANNEL)
 						{
-							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
+							if (irc_parvec[1].find(pub.keyid(5), 0) == 0)
 							{
 								std::cout << X << _("you kicked from channel") << " " << 
 									irc_parvec[0] << " " << _("by operator") << " " << 
@@ -3302,7 +3302,7 @@ void run_irc()
 								irc_parvec[0].substr(strlen(MAIN_CHANNEL_UNDERSCORE), 
 								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							
-							if (irc_parvec[1].find(pub.keyid(), 0) == 0)
+							if (irc_parvec[1].find(pub.keyid(5), 0) == 0)
 							{
 								if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 								{
@@ -3343,7 +3343,7 @@ void run_irc()
 				}
 				else if (strncasecmp(irc_command(irc_reply), "QUIT", 4) == 0)
 				{
-					if (nick.find(pub.keyid(), 0) == 0)
+					if (nick.find(pub.keyid(5), 0) == 0)
 					{
 						std::cout << X << _("you quit SecureSkat") << std::endl;
 					}
@@ -3377,7 +3377,7 @@ void run_irc()
 				{
 					if (irc_paramvec(irc_params(irc_reply)) >= 8)
 					{
-						if (irc_parvec[5] != pub.keyid())
+						if (irc_parvec[5] != pub.keyid(5))
 						{
 							if (irc_parvec[1] == MAIN_CHANNEL)
 							{
@@ -3516,8 +3516,8 @@ void run_irc()
 							||
 							((irc_parvec[0] != MAIN_CHANNEL) &&
 								(nick.find(public_prefix, 0) == 0) &&
-								((irc_parvec[0] == pub.keyid()) &&
-									(nick != pub.keyid()))))
+								((irc_parvec[0] == pub.keyid(5)) &&
+									(nick != pub.keyid(5)))))
 						{
 							size_t tabei1 = irc_parvec[1].find("|", 0);
 							size_t tabei2 = irc_parvec[1].find("~", 0);
@@ -3597,8 +3597,8 @@ void run_irc()
 								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
 						} // other messages
 						else if (irc_stat &&
-							((irc_parvec[0] == pub.keyid()) &&
-							(nick != pub.keyid())))
+							((irc_parvec[0] == pub.keyid(5)) &&
+							(nick != pub.keyid(5))))
 						{
 							std::cout << ">?" << nick << "?< " << irc_parvec[1] << std::endl;
 						}
@@ -3656,7 +3656,7 @@ std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
 					pki7771_port, pki7772_port, rnk7773_port, rnk7774_port,
 					(int)security_level);
-				std::string uname = pub.keyid();
+				std::string uname = pub.keyid(5);
 				if (uname.length() > 4)
 				{
 					std::string uname2 = "os";
@@ -3932,7 +3932,7 @@ std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 							}
 							
 							// check keyID
-							if (nick != pkey.keyid())
+							if (nick != pkey.keyid(5))
 							{
 								std::cerr << _("TMCG: wrong public key") << std::endl;
 								exit(-3);
@@ -4067,7 +4067,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.49 2007/04/10 09:23:44 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.50 2007/04/10 09:48:01 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

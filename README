@@ -1,4 +1,4 @@
-Copyright (C)  2002, 2003, 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
+Copyright (C)  2002, 2003, 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -30,9 +30,9 @@ Requirements
 ------------
 
   You need the following libraries and appropriate header files to build
-  (GNU gcc version >= 3.3.x is recommended) `SecureSkat' successfully:
+  (GCC version >= 3.3.x is recommended) `SecureSkat' successfully:
 
-  * Toolbox for Mental Card Games (libTMCG), version >= 1.0.0
+  * Toolbox for Mental Card Games (LibTMCG), version >= 1.0.2
     http://www.nongnu.org/libtmcg/
 
   * GNU Multiple Precision Arithmetic Library (libgmp), version >= 4.1
@@ -58,17 +58,9 @@ Requirements
 
   SecureSkat was tested (+ successful, - with errors) on following platforms:
 
-  - GNU/Linux (Debian 2.2)      i686        gcc 2.95.2      (<sstream> missing)
-  + GNU/Linux (Debian 3.0)      i686        gcc 2.95.4
   + GNU/Linux (Debian 3.1)      i686        gcc 3.3.5
-  + GNU/Linux (Debian testing)  sparc       gcc 3.3.4
-  + GNU/Linux (Debian unstable) i686        gcc 4.0.2
-  + FreeBSD 4.0                 i386 (SMP)  gcc 2.95.2
-  + FreeBSD 5.0 RC1             i686        gcc 3.2.1
-  + SunOS 5.8, Solaris 2.7      sparc       gcc 3.2.4
+  + GNU/Linux (Debian 4.0)      i686        gcc 4.1.2
   + SunOS 5.10, Solaris 10      sparc       gcc 3.4.3
-  - GNU/Linux (Sharp Zaurus)    arm         zgcc 2.95.2     (--disable-shared)
-  + Darwin 7.5.0                powerpc     gcc 3.3 (Apple Computer, Inc. build 1666)
 
 Build & Install
 ---------------

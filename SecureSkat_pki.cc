@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ void get_secret_key
 			ost << sec;
 			
 			// set pointers of the new entry
-			keyid = sec.keyid();
+			keyid = sec.keyid(5);
 			key.dptr = (char*)keyid.c_str(); // salt value
 			key.dsize = keyid.length() + 1;
 			osttmp = ost.str();
@@ -289,7 +289,7 @@ void get_secret_key
 #endif
 	}
 	
-	prefix = sec.keyid();
+	prefix = sec.keyid(5);
 	size_t ei = prefix.find("^", 0);
 	if (ei == prefix.npos)
 	{
