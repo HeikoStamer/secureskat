@@ -1018,7 +1018,7 @@ int skat_game
 		out_ctl = new opipestream(ctl_o);
 	int pkt_sum[3] = { 0, 0, 0 };
 	
-	// send INIT messages to control interface
+	// send INIT messages to control program
 	for (size_t i = 0; pctl && (i < 3); i++)
 	{
 		std::ostringstream ost;
@@ -1134,7 +1134,7 @@ int skat_game
 #endif
 	}
 	
-	// initialization for Groth's shuffle
+	// initialization for Groth's shuffle argument
 	GrothVSSHE *vsshe;
 	
 	if (pkr_self == 2)

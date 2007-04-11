@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.52 $)
+AC_REVISION($Revision: 1.53 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -59,7 +59,7 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.0.2")
+AM_PATH_LIBTMCG("1.0.0")
 if test "x$LIBTMCG_LIBS" = "x"; then
 	AC_MSG_ERROR([libTMCG >= 1.0.2 is needed])
 fi

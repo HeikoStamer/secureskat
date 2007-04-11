@@ -21,7 +21,7 @@
 
 // autoconf header
 #ifdef HAVE_CONFIG_H
-	#include "config.h"
+    #include "config.h"
 #endif
 
 // C and C++ header
@@ -69,6 +69,7 @@
 // GNU TLS
 #include <gnutls/gnutls.h>
 
+// SecureSkat package
 #include "socketstream.hh"
 #include "securesocketstream.hh"
 #include "pipestream.hh"
@@ -79,126 +80,127 @@
 
 #define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 #ifdef ENABLE_NLS
-	#ifndef _
-		#define _(Foo) gettext(Foo)
-	#endif
+    #ifndef _
+	#define _(Foo) gettext(Foo)
+    #endif
 #else
-	#ifndef _
-		#define _(Bar) Bar
-	#endif
+    #ifndef _
+	#define _(Bar) Bar
+    #endif
 #endif
 
-// define SIZES (in characters)
-#define KEY_SIZE								1000000L
-#define RNK_SIZE								1000000L
+// define different sizes (in characters)
+#define KEY_SIZE 1000000L
+#define RNK_SIZE 1000000L
 
-// define TIMEOUT (in seconds)
-#define PKI_TIMEOUT							1500
-#define RNK_TIMEOUT							500
-#define ANNOUNCE_TIMEOUT				5
-#define CLEAR_TIMEOUT						30
-#define AUTOJOIN_TIMEOUT				75
+// define different timeouts (in seconds)
+#define PKI_TIMEOUT      1500
+#define RNK_TIMEOUT      500
+#define ANNOUNCE_TIMEOUT 5
+#define CLEAR_TIMEOUT    30
+#define AUTOJOIN_TIMEOUT 75
 
-// define CHILDS (bound the number of child processes)
-#define PKI_CHILDS							10
-#define RNK_CHILDS							5
+// define different limits (number of child processes)
+#define PKI_CHILDS 10
+#define RNK_CHILDS 5
 
-#define MAIN_CHANNEL						"#openSkat"
+// define names of used IRC channels
+#define MAIN_CHANNEL "#openSkat"
 #define MAIN_CHANNEL_UNDERSCORE	"#openSkat_"
 
-unsigned long int							security_level = 16;
-std::string										game_ctl;
-char													**game_env;
-TMCG_SecretKey								sec;
-TMCG_PublicKey								pub;
-std::map<int, char*>					readbuf;
-std::map<int, ssize_t>				readed;
+// global variables
+unsigned long int security_level = 16;
+std::string game_ctl;
+char **game_env;
+TMCG_SecretKey sec;
+TMCG_PublicKey pub;
+std::map<int, char*> readbuf;
+std::map<int, ssize_t> readed;
 
-std::string										secret_key, public_key, public_prefix;
-std::list< std::pair<pid_t, int> >			usr1_stat;
-std::map<std::string, std::string>			nick_players, nick_package;
-std::map<std::string, int>							nick_p7771, nick_p7772,
-																				nick_p7773, nick_p7774, nick_sl;
-std::map<std::string, TMCG_PublicKey>		nick_key;
-std::list<std::string>						tables;
-std::map<std::string, int>					tables_r, tables_p;
-std::map<std::string, std::string>			tables_u, tables_o;
-pid_t										game_pid, ballot_pid;
-std::map<std::string, pid_t>				games_tnr2pid;
-std::map<pid_t, std::string>				games_pid2tnr;
-std::map<pid_t, int>						games_rnkpipe, games_opipe, games_ipipe;
+std::string secret_key, public_key, public_prefix;
+std::list< std::pair<pid_t, int> > usr1_stat;
+std::map<std::string, std::string> nick_players, nick_package;
+std::map<std::string, int> nick_p7771, nick_p7772, nick_p7773, nick_p7774, nick_sl;
+std::map<std::string, TMCG_PublicKey> nick_key;
+std::list<std::string> tables;
+std::map<std::string, int> tables_r, tables_p;
+std::map<std::string, std::string> tables_u, tables_o;
+pid_t game_pid, ballot_pid;
+std::map<std::string, pid_t> games_tnr2pid;
+std::map<pid_t, std::string> games_pid2tnr;
+std::map<pid_t, int> games_rnkpipe, games_opipe, games_ipipe;
 
-pid_t										nick_pid;
-std::list<pid_t>							nick_pids;
-std::list<std::string>						nick_ninf;
-std::map<std::string, int>					nick_ncnt;
-std::map<pid_t, std::string>				nick_nick, nick_host;
-std::map<pid_t, int>						nick_pipe;
+pid_t nick_pid;
+std::list<pid_t> nick_pids;
+std::list<std::string> nick_ninf;
+std::map<std::string, int> nick_ncnt;
+std::map<pid_t, std::string> nick_nick, nick_host;
+std::map<pid_t, int> nick_pipe;
 
-std::list<pid_t>							rnk_pids, rnkrpl_pid;
-pid_t										rnk_pid;
-std::map<std::string, std::string>			rnk;
-std::map<std::string, int>					nick_rnkcnt, nick_rcnt;
-std::map<std::string, pid_t>				nick_rnkpid;
-std::map<pid_t, std::string>				rnk_nick;
-std::map<pid_t, int>						rnk_pipe;
+std::list<pid_t> rnk_pids, rnkrpl_pid;
+pid_t rnk_pid;
+std::map<std::string, std::string> rnk;
+std::map<std::string, int> nick_rnkcnt, nick_rcnt;
+std::map<std::string, pid_t> nick_rnkpid;
+std::map<pid_t, std::string> rnk_nick;
+std::map<pid_t, int> rnk_pipe;
 
-int											pki7771_port, pki7772_port, 
-											rnk7773_port, rnk7774_port;
-int											pki7771_handle, pki7772_handle,
-											rnk7773_handle, rnk7774_handle;
-std::list<pid_t>							pkiprf_pid;
+int pki7771_port, pki7772_port, rnk7773_port, rnk7774_port;
+int pki7771_handle, pki7772_handle, rnk7773_handle, rnk7774_handle;
+std::list<pid_t> pkiprf_pid;
 
-std::map<std::string, int>					bad_nick;
+std::map<std::string, int> bad_nick;
 
-std::string									irc_reply;
-int											irc_port, irc_handle, ctl_pid = 0;
-bool										irc_stat = true;
-iosocketstream								*irc;
+std::string irc_reply;
+int irc_port, irc_handle, ctl_pid = 0;
+bool irc_stat = true;
+iosocketstream *irc;
 
-std::string									X = ">< ", XX = "><>< ", XXX = "><><>< ";
-struct termios									old_term, new_term;
+std::string X = ">< ", XX = "><>< ", XXX = "><><>< ";
+struct termios old_term, new_term;
 
-sig_atomic_t								irc_quit = 0, sigchld_critical = 0;
+volatile sig_atomic_t irc_quit = 0, sigchld_critical = 0;
 
 #ifndef RETSIGTYPE
-	#define RETSIGTYPE void
+ #define RETSIGTYPE void
 #endif
 
 RETSIGTYPE sig_handler_quit(int sig)
 {
 #ifndef NDEBUG
-	std::cerr << "... SIGNAL " << sig << " RECEIVED ..." << std::endl;
+    std::cerr << "sig_handler_quit: got signal " << sig << std::endl;
 #endif
-	irc_quit = 1;
+    irc_quit = 1;
 }
 
 RETSIGTYPE sig_handler_skat_quit(int sig)
 {
 #ifndef NDEBUG
-	std::cerr << "!!! SIGNAL " << sig << " RECEIVED !!!" << std::endl;
+    std::cerr << "sig_handler_skat_quit: got signal " << sig << std::endl;
 #endif
-	if (ctl_pid > 0)
-	{
-		if (kill(ctl_pid, SIGQUIT) < 0)
-			perror("sig_handler_skat_quit (kill)");
-		waitpid(ctl_pid, NULL, 0);
-	}
-	exit(-100);
+    if (ctl_pid > 0)
+    {
+	// send SIGQUIT to the running control program
+	if (kill(ctl_pid, SIGQUIT) < 0)
+	    perror("sig_handler_skat_quit (kill)");
+	waitpid(ctl_pid, NULL, 0);
+    }
+    exit(-100);
 }
 
 RETSIGTYPE sig_handler_ballot_quit(int sig)
 {
 #ifndef NDEBUG
-	std::cerr << "??? SIGNAL " << sig << " RECEIVED ???" << std::endl;
+    std::cerr << "signal_handler_ballot_quit: got signal " << sig << std::endl;
 #endif
-	exit(-100);
+    exit(-100);
 }
 
 RETSIGTYPE sig_handler_pipe(int sig)
 {
 }
 
+// extensive signal magic to make SecureSkat looking single threaded
 RETSIGTYPE sig_handler_usr1(int sig)
 {
 	sigset_t sigset;
@@ -215,6 +217,7 @@ RETSIGTYPE sig_handler_usr1(int sig)
 	while (sigchld_critical)
 		usleep(100);
 	
+	// process data updates
 	while (!usr1_stat.empty())
 	{
 		std::pair <pid_t, int> chld_stat = usr1_stat.front();
@@ -330,6 +333,7 @@ RETSIGTYPE sig_handler_usr1(int sig)
 		perror("sig_handler_usr1 (sigprocmask)");
 }
 
+// Assumption: further SIGCHLD signals are queued and processed sequentially
 RETSIGTYPE sig_handler_chld(int sig)
 {
 	sigchld_critical = 1;
@@ -3990,7 +3994,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.52 2007/04/10 20:17:34 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.53 2007/04/11 13:59:30 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES
