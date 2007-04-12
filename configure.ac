@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.55 $)
+AC_REVISION($Revision: 1.56 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -68,6 +68,21 @@ AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
 
 AM_PATH_LIBGNUTLS("1.2.0")
 
+# Solaris needs -lsocket and -lnsl. Unisys system includes
+# gethostbyname in libsocket but needs libnsl for socket.
+AC_CHECK_LIB(nsl, gethostbyname)
+AC_CHECK_LIB(socket, socket, ac_need_libsocket=1, ac_try_nsl=1)
+if test x$ac_need_libsocket = x1; then
+	LIBS="$LIBS -lsocket"
+fi
+if test x$ac_try_nsl = x1; then
+	AC_CHECK_LIB(nsl, gethostbyname, ac_need_libnsl=1)
+	if test x$ac_need_libnsl = x1
+		then
+			LIBS="$LIBS -lnsl"
+	fi
+fi
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
@@ -97,24 +112,9 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
  recv], , AC_MSG_ERROR([functions are missing]))
 
-# Solaris needs -lsocket and -lnsl. Unisys system includes
-# gethostbyname in libsocket but needs libnsl for socket.
-AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_LIB(socket, socket, ac_need_libsocket=1, ac_try_nsl=1)
-if test x$ac_need_libsocket = x1; then
-	LIBS="$LIBS -lsocket"
-fi
-if test x$ac_try_nsl = x1; then
-	AC_CHECK_LIB(nsl, gethostbyname, ac_need_libnsl=1)
-	if test x$ac_need_libnsl = x1
-		then
-			LIBS="$LIBS -lnsl"
-	fi
-fi
-
-CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
-##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+#CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+#echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
