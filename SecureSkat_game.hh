@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004, 2005, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,59 +20,8 @@
 #ifndef INCLUDED_SecureSkat_game_HH
 	#define INCLUDED_SecureSkat_game_HH
 	
-	// autoconf header
-	#ifdef HAVE_CONFIG_H
-		#include "config.h"
-	#endif
-	
-	// C++/C header
-	#include <cstdio>
-	#include <cstdlib>
-	#include <cstdarg>
-	#include <cassert>
-	#include <cstring>
-	#include <strings.h>
-	#include <csignal>
-	#include <unistd.h>
-	#include <ctime>
-	#include <cerrno>
-	#include <fcntl.h>
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <sys/time.h>
-	#include <sys/socket.h>
-	#include <sys/wait.h>
-	#include <sys/un.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <ctype.h>
-	#include <zlib.h>
-	#include <clocale>
-	#include <libintl.h>
-	
-	// STL classes
-	#include <string>
-	#include <map>
-	#include <vector>
-	#include <algorithm>
-	#include <iostream>
-	#include <sstream>
-	
-	// GNU crypto library
-	#include <gcrypt.h> 
-	
-	// libTMCG
-	#include <libTMCG.hh>
-	#include "securesocketstream.hh"
-	#include "pipestream.hh"
-	
+	#include "SecureSkat_defs.hh"
 	#include "SecureSkat_misc.hh"
-	
-	#ifdef ENABLE_NLS
-		#define _(String) gettext(String)
-	#else
-		#define _(String) String
-	#endif
 	
 	size_t skat_idx
 		(
@@ -119,7 +68,7 @@
 			iosecuresocketstream *right, iosecuresocketstream *left
 		);
 	
-	const char *skat_spiel2string
+	std::string skat_spiel2string
 		(
 			size_t spiel
 		);
@@ -147,7 +96,7 @@
 			const std::string &wort
 		);
 	
-	const char *skat_type2string
+	std::string skat_type2string
 		(
 			size_t type
 		);

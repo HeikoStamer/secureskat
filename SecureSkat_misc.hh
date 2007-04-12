@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,23 +21,8 @@
 #ifndef INCLUDED_SecureSkat_misc_HH
 	#define INCLUDED_SecureSkat_misc_HH
 	
-	// autoconf header
-	#ifdef HAVE_CONFIG_H
-		#include "config.h"
-	#endif
-	
-	#include <cstdio>
-	#include <cstdlib>
-	#include <unistd.h>
-	#include <cstring>
-	#include <ctime>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <sys/socket.h>
-	
-	#include<string>
-	#include<vector>
-	
+	#include "SecureSkat_defs.hh"
+		
 	int BindEmptyPort
 		(int start_port);
 	int ListenToPort

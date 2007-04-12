@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006, 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,22 +18,13 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
-#ifndef INCLUDED_SecureSkat_pki_HH
-	#define INCLUDED_SecureSkat_pki_HH
+#ifndef INCLUDED_SecureSkat_vote_HH
+	#define INCLUDED_SecureSkat_vote_HH
 	
 	#include "SecureSkat_defs.hh"
 	#include "SecureSkat_misc.hh"
 	
-	void get_secret_key
-		(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix);
-	void get_public_keys
-		(const std::string &filename,
-		std::map<std::string, TMCG_PublicKey> &keys);
-	void set_public_keys
-		(const std::string &filename,
-		const std::map<std::string, TMCG_PublicKey> &keys);
-	void create_pki
-		(int &pki7771_port, int &pki7771_handle);
-	void release_pki
-		(int pki7771_handle);
+	int ballot_child
+	    (const std::string &nr, int b, bool neu, int ipipe, int opipe,
+	    const std::string &master);
 #endif

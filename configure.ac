@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.53 $)
+AC_REVISION($Revision: 1.54 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -73,7 +73,11 @@ AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h arpa/inet.h stdlib.h string.h sys/socket.h sys/time.h sys/stat.h termios.h unistd.h locale.h libintl.h])
+AC_CHECK_HEADERS([arpa/inet.h cassert cctype cerrno csignal cstdio cstdlib\
+ cstdarg cstring ctime fcntl.h netdb.h netinet/in.h sys/socket.h sys/stat.h\
+ sys/wait.h termios.h unistd.h algorithm fstream iostream list map sstream\
+ string vector zlib.h gdbm.h readline/readline.h readline/history.h], ,\
+ AC_MSG_ERROR([headers are missing]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -84,11 +88,15 @@ AC_SYS_POSIX_TERMIOS
 
 # Checks for library functions.
 AC_FUNC_FORK
+AC_FUNC_STAT
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([dup2 gethostbyname memset memcpy memcmp select socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir getuid getenv strerror])
+AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
+ strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir\
+ getuid getenv strerror snprintf pipe perror waitpid close read write send\
+ recv], , AC_MSG_ERROR([functions are missing]))
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.

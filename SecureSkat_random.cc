@@ -18,33 +18,8 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 *******************************************************************************/
 
-// autoconf header
-#ifdef HAVE_CONFIG_H
-	#include "config.h"
-#endif
-
-// C++/C header
-#include <cstdio>
-#include <cstdlib>
-#include <cstdarg>
-#include <cassert>
-#include <cstring>
-#include <csignal>
-#include <unistd.h>
-#include <ctime>
-#include <cerrno>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/time.h>
-
-// STL classes
-#include <string>
-#include <vector>
-#include <iostream>
-
+#include "SecureSkat_defs.hh"
 #include "SecureSkat_game.hh"
-
-#define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
 
 void random_announce(const std::vector<size_t> &cards)
 {

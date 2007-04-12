@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,33 +21,9 @@
 #ifndef INCLUDED_SecureSkat_rnk_HH
 	#define INCLUDED_SecureSkat_rnk_HH
 	
-	// autoconf header
-	#ifdef HAVE_CONFIG_H
-		#include "config.h"
-	#endif
-	
-	#include <cstdio>
-	#include <unistd.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <sys/socket.h>
-	#include <sys/stat.h>
-	#include <gdbm.h>
-	#include <clocale>
-	#include <libintl.h>
-	
-	#include <string>
-	#include <iostream>
-	#include <map>
-	
+	#include "SecureSkat_defs.hh"	
 	#include "SecureSkat_misc.hh"
-	
-	#ifdef ENABLE_NLS
-		#define _(String) gettext(String)
-	#else
-		#define _(String) String
-	#endif
-	
+		
 	void load_rnk
 		(const std::string &filename, std::map<std::string, std::string> &rnk);
 	void save_rnk

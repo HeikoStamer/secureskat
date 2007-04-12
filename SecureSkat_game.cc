@@ -20,11 +20,6 @@
 
 #include "SecureSkat_game.hh"
 
-#define MFD_SET(fd, where) { FD_SET(fd, where); mfds = (fd > mfds) ? fd : mfds; }
-
-// global return string
-std::string wstr;
-
 // values for biding
 size_t reiz_wert[] =
 	{
@@ -481,12 +476,12 @@ void skat_okarte
 #endif
 }
 
-const char *skat_spiel2string
+std::string skat_spiel2string
 	(
 		size_t spiel
 	)
 {
-	wstr = "";
+	std::string wstr = "";
 	if (skat_spiel2gwert(spiel) == 9)
 		wstr += "Schellen (Sc)";
 	else if (skat_spiel2gwert(spiel) == 10)
@@ -524,7 +519,7 @@ const char *skat_spiel2string
 		if (spiel > 300)
 			wstr += " Ouvert";
 	}
-	return wstr.c_str();
+	return std::string(wstr);
 }
 
 int skat_wort2spiel
@@ -652,12 +647,12 @@ int skat_wort2type
 	}
 }
 
-const char *skat_type2string
+std::string skat_type2string
 	(
 		size_t type
 	)
 {
-	wstr = "";
+	std::string wstr = "";
 	// Wenzel
 	if (type == 0)
 		wstr += "EiU ";
@@ -695,7 +690,7 @@ const char *skat_type2string
 		else if (ww == 6)
 			wstr += "7 ";
 	}
-	return wstr.c_str();
+	return std::string(wstr);
 }
 
 void skat_blatt
