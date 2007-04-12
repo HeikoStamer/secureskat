@@ -95,6 +95,11 @@
     #include "socketstream.hh"
     #include "securesocketstream.hh"
     #include "pipestream.hh"
+    
+    // define RETSIGTYPE
+    #ifndef RETSIGTYPE
+	#define RETSIGTYPE void
+    #endif
 
     // define helper for select(2)
     #define MFD_SET(fd, where) { FD_SET(fd, where);\
