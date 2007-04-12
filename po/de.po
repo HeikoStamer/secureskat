@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.8\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2007-04-12 12:02+0200\n"
+"POT-Creation-Date: 2007-04-12 12:43+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -30,7 +30,8 @@ msgstr "ordnungsgemäß beendet."
 msgid "failed. Error code"
 msgstr "fehlgeschlagen. Fehlerstatus"
 
-#: SecureSkat.cc:341 SecureSkat.cc:435
+#: SecureSkat.cc:341 SecureSkat.cc:435 SecureSkat_vote.cc:411
+#: SecureSkat_vote.cc:586
 msgid "TMCG: decrypt() failed"
 msgstr "TMCG: decrypt() [Entschlüsselung] fehlgeschlagen"
 
@@ -50,15 +51,15 @@ msgstr "Tisch ist vollständig besetzt"
 msgid "player was at table creation not present"
 msgstr "Spieler war bei Tischerstellung nicht anwesend"
 
-#: SecureSkat.cc:633
+#: SecureSkat.cc:633 SecureSkat_vote.cc:115
 msgid "key exchange with owner is incomplete"
 msgstr "Schlüsselaustausch mit Eigentümer unvollständig"
 
-#: SecureSkat.cc:651
+#: SecureSkat.cc:651 SecureSkat_vote.cc:133
 msgid "key exchange with"
 msgstr "Schlüsselaustausch mit"
 
-#: SecureSkat.cc:652
+#: SecureSkat.cc:652 SecureSkat_vote.cc:134
 msgid "is incomplete"
 msgstr "unvollständig"
 
@@ -74,15 +75,15 @@ msgstr "bereitet sich vor"
 msgid "wrong number of players"
 msgstr "falsche Spieleranzahl"
 
-#: SecureSkat.cc:724
+#: SecureSkat.cc:724 SecureSkat_vote.cc:209
 msgid "with"
 msgstr "mit"
 
-#: SecureSkat.cc:727
+#: SecureSkat.cc:727 SecureSkat_vote.cc:212
 msgid "ready"
 msgstr "bereit"
 
-#: SecureSkat.cc:787
+#: SecureSkat.cc:787 SecureSkat_vote.cc:306
 msgid "establishing secure channels"
 msgstr "richtet sichere Kanäle ein"
 
@@ -687,17 +688,19 @@ msgstr "bekommt das Spiel bei"
 
 #: SecureSkat_game.cc:1039 SecureSkat_game.cc:1051 SecureSkat_game.cc:1057
 #: SecureSkat_game.cc:1082 SecureSkat_game.cc:1093 SecureSkat_game.cc:1101
-#: SecureSkat_game.cc:1110 SecureSkat_game.cc:1116
+#: SecureSkat_game.cc:1110 SecureSkat_game.cc:1116 SecureSkat_vote.cc:620
+#: SecureSkat_vote.cc:631 SecureSkat_vote.cc:654 SecureSkat_vote.cc:666
 msgid "VTMF ERROR"
 msgstr "VTMF FEHLER"
 
 #: SecureSkat_game.cc:1040 SecureSkat_game.cc:1083 SecureSkat_game.cc:1147
-#: SecureSkat_game.cc:1188
+#: SecureSkat_game.cc:1188 SecureSkat_vote.cc:621 SecureSkat_vote.cc:655
 msgid "function CheckGroup() failed"
 msgstr "Funktion CheckGroup() fehlgeschlagen"
 
 #: SecureSkat_game.cc:1052 SecureSkat_game.cc:1058 SecureSkat_game.cc:1094
 #: SecureSkat_game.cc:1102 SecureSkat_game.cc:1111 SecureSkat_game.cc:1117
+#: SecureSkat_vote.cc:632 SecureSkat_vote.cc:667
 msgid "function KeyGenerationProtocol_UpdateKey() failed"
 msgstr "Funktion KeyGenerationProtocol_UpdateKey() fehlgeschlagen"
 
@@ -966,47 +969,61 @@ msgstr "Unterschrift von"
 msgid "is invalid"
 msgstr "ist ungültig"
 
-#~ msgid "room completely occupied"
-#~ msgstr "Raum ist vollständig belegt"
+#: SecureSkat_vote.cc:105 SecureSkat_vote.cc:240 SecureSkat_vote.cc:477
+msgid "room completely occupied"
+msgstr "Raum ist vollständig belegt"
 
-#~ msgid "voter was at room creation not present"
-#~ msgstr "Wähler war bei Raumerstellung nicht anwesend"
+#: SecureSkat_vote.cc:110 SecureSkat_vote.cc:128
+msgid "voter was at room creation not present"
+msgstr "Wähler war bei Raumerstellung nicht anwesend"
 
-#~ msgid "Room"
-#~ msgstr "Raum"
+#: SecureSkat_vote.cc:175 SecureSkat_vote.cc:209 SecureSkat_vote.cc:305
+msgid "Room"
+msgstr "Raum"
 
-#~ msgid "preparing the ballot"
-#~ msgstr "bereitet Abstimmung vor"
+#: SecureSkat_vote.cc:176
+msgid "preparing the ballot"
+msgstr "bereitet Abstimmung vor"
 
-#~ msgid "BALLOT: please make your vote with command"
-#~ msgstr "ABSTIMMUNG: bitte stimmen Sie mit dem Kommando"
+#: SecureSkat_vote.cc:213
+msgid "BALLOT: please make your vote with command"
+msgstr "ABSTIMMUNG: bitte stimmen Sie mit dem Kommando"
 
-#~ msgid "BALLOT"
-#~ msgstr "ABSTIMMUNG"
+#: SecureSkat_vote.cc:275
+msgid "BALLOT"
+msgstr "ABSTIMMUNG"
 
-#~ msgid "has voted"
-#~ msgstr "hat gestimmt"
+#: SecureSkat_vote.cc:276
+msgid "has voted"
+msgstr "hat gestimmt"
 
-#~ msgid "BALLOT: you voted for value r = "
-#~ msgstr "ABSTIMMUNG: Sie haben gestimmt für r = "
+#: SecureSkat_vote.cc:291
+msgid "BALLOT: you voted for value r = "
+msgstr "ABSTIMMUNG: Sie haben gestimmt für r = "
 
-#~ msgid "BALLOT ERROR: already voted or bad value <r> "
-#~ msgstr "BALLOT FEHLER: bereits gestimmt oder fehlerhafter Wert <r> "
+#: SecureSkat_vote.cc:300
+msgid "BALLOT ERROR: already voted or bad value <r> "
+msgstr "BALLOT FEHLER: bereits gestimmt oder fehlerhafter Wert <r> "
 
-#~ msgid "for"
-#~ msgstr "für"
+#: SecureSkat_vote.cc:633 SecureSkat_vote.cc:668
+msgid "for"
+msgstr "für"
 
-#~ msgid "BALLOT ERROR: bad card from "
-#~ msgstr "BALLOT FEHLER: fehlerhafte Karte von "
+#: SecureSkat_vote.cc:704
+msgid "BALLOT ERROR: bad card from "
+msgstr "BALLOT FEHLER: fehlerhafte Karte von "
 
-#~ msgid "BALLOT ERROR: bad ZNP from "
-#~ msgstr "BALLOT FEHLER: fehlerhafter ZN-Beweis von "
+#: SecureSkat_vote.cc:744 SecureSkat_vote.cc:791
+msgid "BALLOT ERROR: bad ZNP from "
+msgstr "BALLOT FEHLER: fehlerhafter ZN-Beweis von "
 
-#~ msgid "BALLOT ERROR: bad stack from "
-#~ msgstr "BALLOT FEHLER: fehlerhafter Stapel von "
+#: SecureSkat_vote.cc:753
+msgid "BALLOT ERROR: bad stack from "
+msgstr "BALLOT FEHLER: fehlerhafter Stapel von "
 
-#~ msgid "BALLOT RESULT:"
-#~ msgstr "ABSTIMMUNGSERGEBNIS:"
+#: SecureSkat_vote.cc:813
+msgid "BALLOT RESULT:"
+msgstr "ABSTIMMUNGSERGEBNIS:"
 
 #~ msgid "Home directory"
 #~ msgstr "Heimatverzeichnis"
