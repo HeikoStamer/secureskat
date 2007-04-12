@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.54 $)
+AC_REVISION($Revision: 1.55 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.8, stamer@gaos.org)
@@ -69,7 +69,6 @@ AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
 AM_PATH_LIBGNUTLS("1.2.0")
 
 # Checks for header files.
-AC_PATH_X
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
