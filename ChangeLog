@@ -3,7 +3,8 @@ SecureSkat 2.8:
     - removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
     - increased iteration count of PBKDF1 to 7000 (key file encryption)
     - key identifier has now only 5 characters (RFC: nick length 9 char)
-    -		
+    - using non-NIZK keys (need LibTMCG 1.1.0) for faster key generation
+    -
 SecureSkat 2.7:
     - now we're using Groth's protocol for the verifiable secret shuffle
       (improves the performance and communication complexity significantly)

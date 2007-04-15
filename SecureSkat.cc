@@ -464,6 +464,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 static void process_line(char *line)
 {
 	char *s;
+	
 	if (line == NULL)
 		return;
 	s = stripwhite(line);
@@ -2010,7 +2011,7 @@ void run_irc()
 				else
 				{
 					// unparsed IRC-message -- ignore it
-std::cerr << "[UNPARSED]" << irc_reply << std::endl;
+//std::cerr << "[UNPARSED]" << irc_reply << std::endl;
 				}
 				
 					}
@@ -2469,7 +2470,7 @@ int main(int argc, char* argv[], char* envp[])
 	std::string cmd = argv[0], homedir = "";
 	std::cout << PACKAGE_STRING <<
 		", (c) 2002, 2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << std::endl <<
-		" $Id: SecureSkat.cc,v 1.55 2007/04/12 15:19:26 stamer Exp $ " << std::endl;
+		" $Id: SecureSkat.cc,v 1.56 2007/04/15 17:31:49 stamer Exp $ " << std::endl;
 	
 #ifdef ENABLE_NLS
 #ifdef HAVE_LC_MESSAGES

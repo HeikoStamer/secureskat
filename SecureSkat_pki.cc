@@ -200,7 +200,8 @@ void get_secret_key
 				_("Please wait") << std::flush;
 			while (1)
 			{
-				TMCG_SecretKey tmpsec(name, email);
+				// create a 1024-bit non-NIZK TMCG key
+				TMCG_SecretKey tmpsec(name, email, 1024, false);
 				if (tmpsec.check())
 				{
 					sec = tmpsec;
