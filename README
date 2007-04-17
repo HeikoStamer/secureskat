@@ -9,22 +9,19 @@ Copyright (C)  2002, 2003, 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org
 Introduction
 ------------
 
-  SecureSkat is a peer-to-peer implementation of the German card game Skat.
+  SecureSkat is a peer-to-peer implementation of the card game Skat.
+  
   The program negotiates possible players and sessions over an arbitrary
-  IRC network (Internet Relay Chat). Further it employs the free (like in
-  speech) library LibTMCG to ensure a reasonable level of fairness.
+  IRC network (Internet Relay Chat). It uses the C++ library LibTMCG to
+  ensure a reasonable level of fairness. Furthermore, SecureSkat provides
+  simple electronic voting capabilies based on playing card encoding.
 
-  LibTMCG is the first known practical solution for realizing a secure
-  electronic card game without trusted third-party (TTP). The corresponding
+  LibTMCG provides tools for realizing secure and fair online card games
+  without depending on a trusted third-party (TTP). The corresponding
   cryptographic problem, actually called "Mental Poker", has been studied
   since 1979 (Shamir, Rivest, and Adleman) by many authors.
+                      (see http://www.nongnu.org/libtmcg for more details)
 
-  The cryptographic protocols are designed for the 'honest-but-curious'
-  (aka semi-honest) adversary model. Thus we don't care about robustness
-  and strong availability which are hard to achieve in a asynchronous
-  environment. The success (w.r.t. the performed card operations) of a
-  cheating player or a coalition can be bound by the security parameter t,
-  i.e. the soundness error probability will be less or equal than 2^{-t}.
 
 Requirements
 ------------
@@ -74,23 +71,22 @@ Build & Install
 Playing SecureSkat over an IRC network
 --------------------------------------
 
-  Please run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<SECURITY> [<INTERFACE>]]]',
+  Please run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<CTRL_PROGRAM>]]',
   where
     <IRC_SERVER> is the hostname of an RFC1459 conform IRC server,
-    <IRC_PORT> is the TCP port number of this server, e.g. 6667,
-    <SECURTIY> is your security parameter t, e.g. 16, (see introduction)
-    <INTERFACE> is a interface control program, e.g. SecureSkat_random.
-    (Please give the full path to the binary program file!)
+    <IRC_PORT> is the TCP port number of this server, e.g. 6667, and
+    <CTRL_PROGRAM> is a interface control program, e.g. SecureSkat_random.
+    (Note: Please give always the full path to the binary file here!)
 
-  The last three arguments are optional. In such a case the security parameter
-  is set to the default value 16 and the IRC port number to 6667. Currently
-  only one control program is included in this distribution:
+  The last two arguments are optional. In this case IRC port number
+  is set to 6667 and no interface control program will be used.
+  Currently, only one control program is included in this distribution:
   
     SecureSkat_random : the random computer player (a very weak opponent)
   
-  The first time (i.e. the file '~/.SecureSkat/SecureSkat.skr' does not
-  exists yet) the program ask you for your nickname and a mail address.
-  You have to type in two non-empty strings, hopefully honest information.
+  At first time (i.e. the file '~/.SecureSkat/SecureSkat.skr' does not
+  exist yet) the program will ask you for a nickname and a mail address.
+  You have to provide two non-empty strings, hopefully honest information.
   Afterwards your secret key is created and stored in the GDBM database
   '~/.SecureSkat/SecureSkat.skr'. You can choose a pass phrase to protect
   the key by encryption (Blowfish-128, CFB mode). This feature is turned
@@ -103,14 +99,14 @@ Playing SecureSkat over an IRC network
   stored' is printed. ('?' is a wildcard for some random letters and digits)
   
   Later you will be registered at the IRC server with a strange nickname
-  like `ID5^z34g0' (based on the key id of your public key). For large
+  like `ID5^z34g0' (based on the key id from your public key). For large
   groups of participants collisions become probable--- in such a case,
   please generate a fresh key by deleting the database 'SecureSkat.skr'.
   
-  Automagicly you are joined to channel #openSkat (The former name was kept
-  to provide the compatibility with older versions.) and you can chat with
-  other players simply by typing lines of text. Commands are strings, wherein
-  the first letter is a '/' (slash). '/help' prints the following help screen:
+  Now you will be joined to channel #openSkat (The old name was kept to
+  provide compatibility with older versions.) and you can chat with other
+  players simply by typing lines of text. Commands are strings, wherein
+  the first letter is a '/' (slash). '/help' prints a short help screen:
 
     /quit               quits SecureSkat
     /on                 turns the output of IRC channel #openSkat on
@@ -152,9 +148,9 @@ Playing SecureSkat over an IRC network
   wildcard) appears. Sometimes the background process is aborted with an
   appropriate error message. Well, if anything went wrong you may have to
   exchange the keys manually. Please use the commands '/export <file name>'
-  and '/import <file name>' in such a undesired case.
+  resp. '/import <file name>' and file a bug report in such a case.
 
-  After the successful key exchange you can start playing Skat by joining
+  After a successful key exchange you can start playing Skat by joining
   existing tables ('/skat <table identifyer>') or by creating new tables
   ('/skat <table identifyer> <number of rounds to play>'). Of course, in
   both cases you have to wait for other participants. The command '/tables'

@@ -37,7 +37,6 @@ RETSIGTYPE sig_handler_skat_quit(int sig)
     exit(-100);
 }
 
-extern unsigned long int security_level;
 extern TMCG_SecretKey sec;
 extern TMCG_PublicKey pub;
 extern std::map<std::string, TMCG_PublicKey> nick_key;
@@ -323,7 +322,7 @@ int skat_child
 	const std::string &master)
 {
 	SchindelhauerTMCG *gp_tmcg =
-		new SchindelhauerTMCG(security_level, 3, 5);	// 3 players, 2^5 = 32 cards
+		new SchindelhauerTMCG(80, 3, 5);	// 3 players, 2^5 = 32 cards
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];

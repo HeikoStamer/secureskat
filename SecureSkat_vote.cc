@@ -28,7 +28,6 @@ RETSIGTYPE sig_handler_ballot_quit(int sig)
     exit(-100);
 }
 
-extern unsigned long int security_level;
 extern TMCG_SecretKey sec;
 extern TMCG_PublicKey pub;
 extern std::map<std::string, TMCG_PublicKey> nick_key;
@@ -178,7 +177,7 @@ int ballot_child
 	assert(gp_nick.size() <= TMCG_MAX_PLAYERS);
 	assert(b <= TMCG_MAX_TYPEBITS);
 	SchindelhauerTMCG *ballot_tmcg = 							// n players, 2^b cards
-		new SchindelhauerTMCG(security_level, gp_nick.size(), b);
+		new SchindelhauerTMCG(80, gp_nick.size(), b);
 	TMCG_PublicKeyRing pkr(gp_nick.size());
 	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
