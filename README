@@ -14,7 +14,7 @@ Introduction
   The program negotiates possible players and sessions over an arbitrary
   IRC network (Internet Relay Chat). It uses the C++ library LibTMCG to
   ensure a reasonable level of fairness. Furthermore, SecureSkat provides
-  simple electronic voting capabilies based on playing card encoding.
+  simple electronic voting capabilities based on a playing card encoding.
 
   LibTMCG provides tools for realizing secure and fair online card games
   without depending on a trusted third-party (TTP). The corresponding
@@ -127,7 +127,7 @@ Playing SecureSkat over an IRC network
       /<nr> skat               takes the Skat and shows the two cards
       /<nr> push <k1> <k2>     pushes the card <k1> and <k2> away
       /<nr> announce <s> [op]  announces the game <s> ([op] is optional)
-      /<nr> play <k1>          playes the card <k1>
+      /<nr> play <k1>          plays the card <k1>
     
     <fn> is a regular file name according to the used file system
     <nr> is an arbitrary string (practically it should be a number, e.g. 001)
@@ -151,26 +151,25 @@ Playing SecureSkat over an IRC network
   resp. '/import <file name>' and file a bug report in such a case.
 
   After a successful key exchange you can start playing Skat by joining
-  existing tables ('/skat <table identifyer>') or by creating new tables
-  ('/skat <table identifyer> <number of rounds to play>'). Of course, in
+  existing tables ('/skat <table identifier>') or by creating new tables
+  ('/skat <table identifier> <number of rounds to play>'). Of course, in
   both cases you have to wait for other participants. The command '/tables'
   prints a short list of all existing tables and '/players' a list of the
-  registered players, respectively. During the actual session initalization
+  registered players, respectively. During the actual session initialization
   of the game a TCP/IP-connection with each of your opponents will be
   established. Therefore (and further for the automatic key exchange) your
   workstation should be not behind a (paranoid) firewall. Perhaps you can
-  convince your network administrator (e.g. with a bottle of famous german
+  convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
 
 Bugs, Contribution, CVS
 -----------------------
 
-  This is a (perhaps instable) BETA version. If you want to contribute,
-  please send your detailed bug reports to Heiko Stamer <stamer@gaos.org>.
+  If you want to contribute, please send your detailed bug reports to
+  Heiko Stamer <stamer@gaos.org>.
 
-  You can get the latest sources from our CVS repository at GNU/Savannah:
+  You can get the latest sources from our CVS repository at GNU/Savannah.
 
-  cvs -d:pserver:anonymous@cvs.savannah.nongnu.org:/sources/secureskat co secureskat
 
 Copyright and License of this software
 --------------------------------------
