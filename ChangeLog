@@ -1,3 +1,5 @@
+SecureSkat 2.9:
+    - 
 SecureSkat 2.8:
     - added a message delay to avoid kick off (e.g. irc.freenode.net)
     - removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
@@ -5,7 +7,6 @@ SecureSkat 2.8:
     - key identifier has now only 5 characters (RFC: nick length 9 char)
     - using non-NIZK keys (need LibTMCG 1.1.0) for faster key generation
     - removed obsolete command line argument SECURITY_LEVEL (default=80)
-    -
 SecureSkat 2.7:
     - now we're using Groth's protocol for the verifiable secret shuffle
       (improves the performance and communication complexity significantly)
