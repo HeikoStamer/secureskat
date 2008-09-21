@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.60 $)
+AC_REVISION($Revision: 1.61 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.9, stamer@gaos.org)
@@ -44,12 +44,12 @@ AM_GNU_GETTEXT_VERSION([0.16.1])
 #ALL_LINGUAS="de"
 
 # Checks for libraries.
-AC_CHECK_LIB(gdbm, main, , AC_MSG_ERROR([libgdbm is needed]))
+AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 ##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
-AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
-AC_CHECK_LIB(readline, main, , AC_MSG_ERROR([libreadline is needed]))
+###AC_CHECK_LIB(ncurses, main, , AC_MSG_ERROR([libncurses is needed]))
+AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
 
 AM_PATH_LIBGCRYPT("1.2.0")
