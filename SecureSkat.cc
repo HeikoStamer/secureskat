@@ -2028,7 +2028,7 @@ void run_irc()
 			// use signal blocking for atomic operations (avoid mutex)
 			raise(SIGUSR1);
 			
-			// re-install signal handlers (some unices do not restore them)
+			// re-install signal handlers (some unices do not restore them properly)
 			signal(SIGINT, sig_handler_quit);
 			signal(SIGQUIT, sig_handler_quit);
 			signal(SIGTERM, sig_handler_quit);
@@ -2039,7 +2039,7 @@ void run_irc()
 #endif
 			signal(SIGUSR1, sig_handler_usr1);
 			
-			// other delayed stuff
+			// do other delayed stuff
 			if (first_command)
 			{
 				char ptmp[100];
@@ -2368,6 +2368,12 @@ void run_irc()
 	}
 	if (!irc->good())
 		std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
+  // free allocated memory
+  for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); 
+    rbi != readbuf.end(); rbi++)
+  {
+    delete [] rbi->second;
+  }
 }
 
 void done_irc()
@@ -2461,7 +2467,7 @@ int main(int argc, char* argv[], char* envp[])
     std::cout << PACKAGE_STRING <<
 	", (c) 2002--2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << 
 	std::endl <<
-	" $Id: SecureSkat.cc,v 1.57 2007/04/17 17:07:45 stamer Exp $ " << 
+	" $Id: SecureSkat.cc,v 1.58 2009/05/15 18:31:39 stamer Exp $ " << 
 	std::endl;
 	
 #ifdef ENABLE_NLS
