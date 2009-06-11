@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.62 $)
+AC_REVISION($Revision: 1.63 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.9, stamer@gaos.org)
@@ -41,13 +41,11 @@ AC_PROG_LN_S
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.16.1])
-#ALL_LINGUAS="de"
 
 # Checks for libraries.
 AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
-##AC_CHECK_LIB(gmpxx, __gmpz_set_str, , AC_MSG_ERROR([libgmpxx (C++ support) >= 4.1 is needed]))
 AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
@@ -65,8 +63,6 @@ if test "x$LIBTMCG_LIBS" = "x"; then
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
-
-AM_PATH_LIBGNUTLS("1.2.0")
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.

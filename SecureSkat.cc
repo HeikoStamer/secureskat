@@ -1,7 +1,7 @@
 /*******************************************************************************
    SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+ Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009
                Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
@@ -19,215 +19,205 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 *******************************************************************************/
 
+// Note for the curious reader: The really interesting stuff is in LibTMCG.
+
+// To be (included), or not to be (included) ...
 #include "SecureSkat_defs.hh"
 #include "SecureSkat_misc.hh"
 #include "SecureSkat_pki.hh"
 #include "SecureSkat_rnk.hh"
+#include "SecureSkat_irc.hh"
 #include "SecureSkat_vote.hh"
 #include "SecureSkat_skat.hh"
 
-// global variables
-std::string game_ctl;
-char **game_env;
-TMCG_SecretKey sec;
-TMCG_PublicKey pub;
-std::map<int, char*> readbuf;
-std::map<int, ssize_t> readed;
+volatile sig_atomic_t irc_quit = 0, sigchld_critical = 0;   // atomic flags
 
-std::string secret_key, public_key, public_prefix;
-std::list< std::pair<pid_t, int> > usr1_stat;
-std::map<std::string, std::string> nick_players, nick_package;
-std::map<std::string, int> nick_p7771, nick_p7772, nick_p7773, nick_p7774, nick_sl;
-std::map<std::string, TMCG_PublicKey> nick_key;
-std::list<std::string> tables;
-std::map<std::string, int> tables_r, tables_p;
-std::map<std::string, std::string> tables_u, tables_o;
-pid_t game_pid, ballot_pid;
-std::map<std::string, pid_t> games_tnr2pid;
-std::map<pid_t, std::string> games_pid2tnr;
-std::map<pid_t, int> games_rnkpipe, games_opipe, games_ipipe;
-
-pid_t nick_pid;
-std::list<pid_t> nick_pids;
-std::list<std::string> nick_ninf;
-std::map<std::string, int> nick_ncnt;
-std::map<pid_t, std::string> nick_nick, nick_host;
-std::map<pid_t, int> nick_pipe;
-
-std::list<pid_t> rnk_pids, rnkrpl_pid;
-pid_t rnk_pid;
-std::map<std::string, std::string> rnk;
-std::map<std::string, int> nick_rnkcnt, nick_rcnt;
-std::map<std::string, pid_t> nick_rnkpid;
-std::map<pid_t, std::string> rnk_nick;
-std::map<pid_t, int> rnk_pipe;
-
-int pki7771_port, pki7772_port, rnk7773_port, rnk7774_port;
-int pki7771_handle, pki7772_handle, rnk7773_handle, rnk7774_handle;
-
-std::map<std::string, int> bad_nick;
-
-std::string irc_reply;
-int irc_port, irc_handle;
-bool irc_stat = true;
-iosocketstream *irc;
-
-std::string X = ">< ", XX = "><>< ", XXX = "><><>< ";
-struct termios old_term;
-
-volatile sig_atomic_t irc_quit = 0, sigchld_critical = 0;
-
+// This is the signal handler called when receiving SIGINT, (SIGHUP), SIGQUIT,
+// and SIGTERM, respectively.
 RETSIGTYPE sig_handler_quit(int sig)
 {
 #ifndef NDEBUG
-    std::cerr << "sig_handler_quit: got signal " << sig << std::endl;
+    std::cerr << "sig_handler_quit(): got signal " << sig << std::endl;
 #endif
+    // set the 'quit flag'
     irc_quit = 1;
 }
 
+// This is the signal handler called when receiving SIGPIPE.
 RETSIGTYPE sig_handler_pipe(int sig)
 {
 }
 
-// extensive signal magic to make SecureSkat looking single threaded
+// We do a lot of 'signal magic' such that SecureSkat appears to be single
+// threaded when accessing shared data. In particular, we avoid expensive
+// (dead) locking mechanisms to control concurrent write attemps to common
+// data structures. However, it would be convenient to get rid of this hack.
+// Main assumption: all SIGCHLD requests are queued and processed sequentially.
+std::list< std::pair<pid_t, int> > usr1_stat;   // list of (child PID, exitcode)
+std::map<std::string, pid_t> games_tnr2pid;     // map: table name => game PID
+std::map<pid_t, std::string> games_pid2tnr;     // map: game PID => table name
+std::list<pid_t> rnkrpl_pid;                    // list: PIDs of RNK replies
+std::list<pid_t> rnk_pids;                      // list: PIDs of RNK requests
+std::map<std::string, int> nick_rnkcnt;         // map: nick name => time ticks
+std::map<std::string, pid_t> nick_rnkpid;       // map: nick name => RNK PID
+std::map<pid_t, std::string> rnk_nick;          // map: RNK PID => nick name
+std::map<pid_t, std::string> nick_nick;         // map: PKI PID => nick name
+std::map<std::string, int> bad_nick;            // map: nick name => PKI attemps
+std::list<pid_t> nick_pids;                     // list: PIDs of PKI requests
+
+// FIXME: put all player data into a single structure
+std::map<std::string, std::string> nick_players;
+std::map<std::string, std::string> nick_package;
+std::map<std::string, int> nick_p7771, nick_p7772, nick_p7773, nick_p7774;
+std::map<std::string, int> nick_sl;
+std::list<std::string> nick_ninf;
+std::map<std::string, int> nick_ncnt;
+std::map<pid_t, std::string> nick_host;
+
+// This is the signal handler called when receiving SIGUSR1.
 RETSIGTYPE sig_handler_usr1(int sig)
 {
     sigset_t sigset;
 
     // block SIGCHLD temporarily
     if (sigemptyset(&sigset) < 0)
-	perror("sig_handler_usr1 (sigemptyset)");
+        perror("sig_handler_usr1 (sigemptyset)");
     if (sigaddset(&sigset, SIGCHLD) < 0)
-	perror("sig_handler_usr1 (sigaddset)");
+        perror("sig_handler_usr1 (sigaddset)");
     if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
-	perror("sig_handler_usr1 (sigprocmask)");
+        perror("sig_handler_usr1 (sigprocmask)");
 	
     // wait until the critical section of the SIGCHLD handler is safe
     while (sigchld_critical)
-	usleep(100);
+        usleep(100);
 	
-    // process all data updates
+    // process all data updates sequentially
     while (!usr1_stat.empty())
     {
-	std::pair <pid_t, int> chld_stat = usr1_stat.front();
-	pid_t chld_pid = chld_stat.first;
-	int status = chld_stat.second;
+        std::pair <pid_t, int> chld_stat = usr1_stat.front();
+        pid_t chld_pid = chld_stat.first;
+        int status = chld_stat.second;
 		
-	// remove entry from queue
-	usr1_stat.pop_front();
+        // remove current entry from queue
+        usr1_stat.pop_front();
 	
-	// process entry
-	if (games_pid2tnr.find(chld_pid) != games_pid2tnr.end())
-	{
-	    std::string tnr = games_pid2tnr[chld_pid];
-	    if (WIFEXITED(status))
-	    {
-		// print success or error message
-		if (WEXITSTATUS(status) == 0)
-		    std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
-			_("succeeded properly") << std::endl;
-		else
-		    std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
-			_("failed. Error code") << ": WEXITSTATUS " << 
-			WEXITSTATUS(status) << std::endl;
-	    }
-	    if (WIFSIGNALED(status))
-	    {
-		// print error message
-		std::cerr << X << _("Session") << " \"" << tnr << "\" " << 
-		    _("failed. Error code") << ": WTERMSIG " <<
-		    WTERMSIG(status) << std::endl;
-	    }
-	    // remove data
-	    games_tnr2pid.erase(tnr);
-	    games_pid2tnr.erase(chld_pid);
-	}
-	else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) !=
-	    rnkrpl_pid.end())
-	{
-	    // print success message
-	    std::cerr << X << "RNK (pid = " << chld_pid << ") " << 
-		_("succeeded properly") << std::endl;
-	    // remove data
-	    rnkrpl_pid.remove(chld_pid);
-	}
-	else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) !=
-	    rnk_pids.end())
-	{
-	    if (WIFEXITED(status))
-	    {
-		// print error message
-		if (WEXITSTATUS(status) != 0)
-		{
-		    std::cerr << X << "RNK (pid = " << chld_pid << ") " <<
-			_("failed. Error code") << ": WEXITSTATUS " << 
-			WEXITSTATUS(status) << std::endl;
-		}
-	    }
-	    if (WIFSIGNALED(status))
-	    {
-		// print error message
-		std::cerr << X << "RNK (pid = " << chld_pid << ") " << 
-		    _("failed. Error code") << ": WTERMSIG " << 
-		    WTERMSIG(status) << std::endl;
-	    }
-	    // remove data
-	    rnk_pids.remove(chld_pid);
-	    nick_rnkcnt.erase(rnk_nick[chld_pid]);
-	    nick_rnkpid.erase(rnk_nick[chld_pid]);
-	    rnk_nick.erase(chld_pid);
-	}
-	else
-	{
-	    if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
-	    {
-		// print error message
-		std::cerr << X << "PKI " << chld_pid << "/" << 
-		    nick_nick[chld_pid] << " " << _("failed. Error code") << 
-		    ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
-	    }
-	    if (WIFSIGNALED(status))
-	    {
-		// print error message
-		std::cerr << X << "PKI " << chld_pid << "/" << 
-		    nick_nick[chld_pid] << " " << _("failed. Error code") << 
-		    ": WTERMSIG " << WTERMSIG(status) << std::endl;
-	    }
-	    // remove bad nick (DoS attack on PKI) from the players list
-	    if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
-		bad_nick[nick_nick[chld_pid]] = 1;
-	    else if (bad_nick[nick_nick[chld_pid]] <= 3)
-		bad_nick[nick_nick[chld_pid]] += 1;
-	    else if (bad_nick[nick_nick[chld_pid]] > 3)
-	    {
-		if (nick_players.find(nick_nick[chld_pid]) != nick_players.end())
-		{
-		    nick_players.erase(nick_nick[chld_pid]);
-		    nick_p7771.erase(nick_nick[chld_pid]);
-		    nick_p7772.erase(nick_nick[chld_pid]);
-		    nick_p7773.erase(nick_nick[chld_pid]);
-		    nick_p7774.erase(nick_nick[chld_pid]);
-		    nick_sl.erase(nick_nick[chld_pid]);
-		}
-	    }
-	    // remove data		
-	    nick_ncnt.erase(nick_nick[chld_pid]);
-	    nick_ninf.remove(nick_nick[chld_pid]);
-	    nick_pids.remove(chld_pid);
-	    nick_nick.erase(chld_pid);
-	    nick_host.erase(chld_pid);
-	}
-    } // while
+        // process current entry, if PID is found
+        if (games_pid2tnr.find(chld_pid) != games_pid2tnr.end())
+        {
+            std::string tnr = games_pid2tnr[chld_pid];
+            if (WIFEXITED(status))
+            {
+                // print success resp. error message
+                if (WEXITSTATUS(status) == 0)
+                    std::cerr << ">< " << _("Session") << " \"" << tnr << 
+                        "\" " << _("succeeded properly") << std::endl;
+                else
+                    std::cerr << ">< " << _("Session") << " \"" << tnr << 
+                        "\" " << _("failed. Error code") << ": WEXITSTATUS " << 
+                        WEXITSTATUS(status) << std::endl;
+            }
+            if (WIFSIGNALED(status))
+            {
+                // print error message
+                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << 
+                    _("failed. Error code") << ": WTERMSIG " <<
+                WTERMSIG(status) << std::endl;
+            }
+            // remove associated data
+            games_tnr2pid.erase(tnr);
+            games_pid2tnr.erase(chld_pid);
+        }
+        else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) !=
+            rnkrpl_pid.end())
+        {
+            // print success message
+            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << 
+                _("succeeded properly") << std::endl;
+            // remove associated data
+            rnkrpl_pid.remove(chld_pid);
+        }
+        else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) !=
+            rnk_pids.end())
+        {
+            if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
+            {
+                // print error message
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+                    _("failed. Error code") << ": WEXITSTATUS " << 
+                    WEXITSTATUS(status) << std::endl;
+            }
+            if (WIFSIGNALED(status))
+            {
+                // print error message
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << 
+                    _("failed. Error code") << ": WTERMSIG " << 
+                    WTERMSIG(status) << std::endl;
+            }
+            // remove associated data
+            rnk_pids.remove(chld_pid);
+            nick_rnkcnt.erase(rnk_nick[chld_pid]);
+            nick_rnkpid.erase(rnk_nick[chld_pid]);
+            rnk_nick.erase(chld_pid);
+        }
+        else if (nick_nick.find(chld_pid) != nick_nick.end())
+        {
+            if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
+            {
+                // print error message
+                std::cerr << ">< " << "PKI " << chld_pid << "/" << 
+                    nick_nick[chld_pid] << " " << _("failed. Error code") << 
+                    ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
+            }
+            if (WIFSIGNALED(status))
+            {
+                // print error message
+                std::cerr << ">< " << "PKI " << chld_pid << "/" << 
+                    nick_nick[chld_pid] << " " << _("failed. Error code") << 
+                    ": WTERMSIG " << WTERMSIG(status) << std::endl;
+            }
+            // remove a bad nick (i.e. DoS attack on PKI) from the players list
+            if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
+                bad_nick[nick_nick[chld_pid]] = 1;
+            else if (bad_nick[nick_nick[chld_pid]] <= 3)
+                bad_nick[nick_nick[chld_pid]] += 1;
+            else if (bad_nick[nick_nick[chld_pid]] > 3)
+            {
+                if (nick_players.find(nick_nick[chld_pid]) != nick_players.end())
+                {
+                    nick_players.erase(nick_nick[chld_pid]);
+                    nick_package.erase(nick_nick[chld_pid]);
+                    nick_p7771.erase(nick_nick[chld_pid]);
+                    nick_p7772.erase(nick_nick[chld_pid]);
+                    nick_p7773.erase(nick_nick[chld_pid]);
+                    nick_p7774.erase(nick_nick[chld_pid]);
+                    nick_sl.erase(nick_nick[chld_pid]);
+                }
+            }
+            // remove associated data		
+            nick_ncnt.erase(nick_nick[chld_pid]);
+            nick_ninf.remove(nick_nick[chld_pid]);
+            nick_pids.remove(chld_pid);
+            nick_nick.erase(chld_pid);
+            nick_host.erase(chld_pid);
+        }
+        else
+        {
+#ifndef NDEBUG
+            std::cerr << "sig_handler_usr1(): unknown child with PID " << 
+                chld_pid << std::endl;
+#endif
+        }
+    } // end of while body
 	
     // unblock SIGCHLD
     if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) < 0)
-	perror("sig_handler_usr1 (sigprocmask)");
+        perror("sig_handler_usr1 (sigprocmask)");
 }
 
-// Assumption: other SIGCHLD requests are queued and processed sequentially
+// This is the signal handler called when receiving SIGCHLD.
 RETSIGTYPE sig_handler_chld(int sig)
 {
-    sigchld_critical = 1;
+    sigchld_critical = 1;   // enter critical section
     
     // look for died children (zombies) and evaluate their exit code
     std::pair<pid_t, int> chld_stat;
@@ -235,185 +225,203 @@ RETSIGTYPE sig_handler_chld(int sig)
     chld_stat.first = wait(&status), chld_stat.second = status;
     usr1_stat.push_back(chld_stat);
 	
-    sigchld_critical = 0;
+    sigchld_critical = 0;   // leave critical section
 }
 
-void create_irc(const std::string &server, short int port)
-{
-    // establish TCP/IP connection to IRC server
-    irc_handle = ConnectToHost(server.c_str(), port);
-    if (irc_handle < 0)
-	exit(irc_handle); // abort with error code
-    irc = new iosocketstream(irc_handle);
-}
+// -----------------------------------------------------------------------------
 
-void init_irc()
+// Global variables are extremely ugly, however, they still necessary :-(
+std::string game_ctl;           // name and path of the game control program
+char **game_env;                // pointer to the pointer of the environment
+TMCG_SecretKey sec;             // secret key of the player
+TMCG_PublicKey pub;             // public key of the player
+std::map<int, char*> readbuf;   // map of pointers to some read buffers
+std::map<int, ssize_t> readed;  // map of counters of those read buffers
+
+std::string secret_key, public_key, public_prefix;
+std::map<std::string, TMCG_PublicKey> nick_key;
+std::list<std::string> tables;
+std::map<std::string, int> tables_r, tables_p;
+std::map<std::string, std::string> tables_u, tables_o;
+pid_t game_pid, ballot_pid;
+std::map<pid_t, int> games_rnkpipe, games_opipe, games_ipipe;
+
+pid_t nick_pid;
+std::map<pid_t, int> nick_pipe;
+
+pid_t rnk_pid;
+std::map<std::string, std::string> rnk;
+std::map<std::string, int> nick_rcnt;
+std::map<pid_t, int> rnk_pipe;
+
+int pki7771_port, rnk7773_port, rnk7774_port;           // used port numbers
+int pki7771_handle, rnk7773_handle, rnk7774_handle;     // file descriptors
+
+int irc_handle;
+bool irc_stat = true;
+iosocketstream *irc;
+
+std::string X = ">< ", XX = "><>< ", XXX = "><><>< ";
+
+// The following functions are written quick'n'dirty. Be warned!
+void pipe_irc(const std::string &irc_message)
 {
-    // install signal handlers
-    signal(SIGINT, sig_handler_quit);
-    signal(SIGQUIT, sig_handler_quit);
-    signal(SIGTERM, sig_handler_quit);
-    signal(SIGPIPE, sig_handler_pipe);
-    signal(SIGCHLD, sig_handler_chld);
-#ifdef NOHUP
-    signal(SIGHUP, SIG_IGN);
-#endif
-    signal(SIGUSR1, sig_handler_usr1);
-    // send NICK message
-    *irc << "NICK " << pub.keyid(5) << std::endl << std::flush;
+    std::vector<std::string> irc_parvec;
+    if (irc_command_cmp(irc_message, "PRIVMSG"))
+    {
+        if (irc_paramvec(irc_params(irc_message), irc_parvec) >= 2)
+        {
+            if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
+                (irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
+            {
+                // send the signed message to the chat channel
+                *irc << "PRIVMSG " << irc_parvec[0] << " :" << irc_parvec[1] << 
+                    "~~~" << sec.sign(irc_parvec[1]) << std::endl <<std::flush;
+            }
+            else if (irc_parvec[0] == MAIN_CHANNEL)
+            {
+                for (std::map<std::string, std::string>::const_iterator ni = 
+                    nick_players.begin(); ni != nick_players.end(); ni++)
+                {
+                    // First of all, send the announcement to each player.
+                    *irc << "PRIVMSG " << ni->first << " :" << irc_parvec[1] << 
+                        std::endl << std::flush;
+                }
+                // Additionally, send the announcement to the main channel,
+				// because some IRC servers (e.g. freenode.net) may block
+                // private messages of unregistered users.
+                *irc << "PRIVMSG " << MAIN_CHANNEL << " :" << irc_parvec[1] << 
+                    "~+~" << std::endl << std::flush;
+										
+                // Finally, process the announcement PRIVMSG internally.
+                size_t tabei1 = irc_parvec[1].find("|", 0);
+                size_t tabei2 = irc_parvec[1].find("~", 0);
+                size_t tabei3 = irc_parvec[1].find("!", 0);
+                if ((tabei1 != irc_parvec[1].npos) &&
+                    (tabei2 != irc_parvec[1].npos) &&
+                    (tabei3 != irc_parvec[1].npos) && 
+                    (tabei1 < tabei2) && (tabei2 < tabei3))
+                {
+                    std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
+                    std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
+                        tabei2 - tabei1 - 1);
+                    std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
+                        tabei3 - tabei2 - 1);	
+                    if ((std::find(tables.begin(), tables.end(), tabmsg1) 
+                        == tables.end()) && (tabmsg2 != "0"))
+                    {
+                        // create a new table
+                        tables.push_back(tabmsg1);
+                        tables_p[tabmsg1] = atoi(tabmsg2.c_str());
+                        tables_r[tabmsg1] = atoi(tabmsg3.c_str());
+                        tables_u[tabmsg1] = tabmsg3;
+                        tables_o[tabmsg1] = pub.keyid(5);
+                    }
+                    else
+                    {
+                        if (tabmsg2 == "0")
+                        {
+                            // remove a table
+                            tables_p.erase(tabmsg1), tables_r.erase(tabmsg1);
+                            tables_u.erase(tabmsg1), tables_o.erase(tabmsg1);
+                            tables.remove(tabmsg1);
+                        }
+                        else
+                        {
+                            // update a table
+                            tables_p[tabmsg1] = atoi(tabmsg2.c_str());
+                            tables_r[tabmsg1] = atoi(tabmsg3.c_str());
+                            tables_u[tabmsg1] = tabmsg3;
+                        }
+                    }
+                }
+            }
+            else
+                *irc << irc_message << std::endl << std::flush;
+        }
+        else
+            *irc << irc_message << std::endl << std::flush;
+    }
+    else
+        *irc << irc_message << std::endl << std::flush;
 }
 
 void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 {
-	std::vector<pid_t> del_pipe;
-	for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); 
-		pi != read_pipe.end(); pi++)
+    std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed
+    for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); 
+        pi != read_pipe.end(); pi++)
 	{
-		if ((pi->second >= 0) && FD_ISSET(pi->second, &rfds))
-		{
-			if (readbuf.find(pi->second) == readbuf.end())
+        int fd = pi->second;    // file descriptor of the pipe
+        size_t rbs = 65536;     // size of the read buffer
+        if ((fd >= 0) && FD_ISSET(fd, &rfds))
+        {
+            if (readbuf.find(fd) == readbuf.end())
 			{
-				readbuf[pi->second] = new char[65536];
-				readed[pi->second] = 0;
-			}
-			ssize_t num = read(pi->second,
-				readbuf[pi->second] + readed[pi->second], 65536 - readed[pi->second]);
-			readed[pi->second] += num;
-			if (num == 0)
-				del_pipe.push_back(pi->first);
-			if (readed[pi->second] > 0)
-			{
-				std::vector<int> pos_delim;
-				int cnt_delim = 0, cnt_pos = 0, pos = 0;
-				for (int i = 0; i < readed[pi->second]; i++)
-					if (readbuf[pi->second][i] == '\n')
-						cnt_delim++, pos_delim.push_back(i);
-				
-				switch (what)
-				{
-					case 1: // update of ranking data from RNK childs
-						while (cnt_delim >= 2)
-						{
-							char tmp[65536];
-							std::memset(tmp, 0, sizeof(tmp));
-							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
-								pos_delim[pos] - cnt_pos);
-							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-							std::string rnk1 = tmp;
-							std::memset(tmp, 0, sizeof(tmp));
-							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+                // allocate a new read buffer for the pipe, if not exists
+                readbuf[fd] = new char[rbs];
+                // read buffer offset
+                readed[fd] = 0;
+            }
+			ssize_t num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
+            readed[fd] += num;
+            if (num == 0)
+                del_pipe.push_back(pi->first); // close this pipe later
+            if (readed[fd] > 0)
+            {
+                std::vector<int> pos_delim; // positions of line delimiters
+                int cnt_delim = 0, cnt_pos = 0, pos = 0;
+                for (int i = 0; i < readed[fd]; i++)
+                    if (readbuf[fd][i] == '\n')
+                        cnt_delim++, pos_delim.push_back(i);
+                switch (what)
+                {
+                    case 1: // update of ranking data from RNK childs
+                        while (cnt_delim >= 2)
+                        {
+                            char *tmp = new char[rbs];
+                            std::memset(tmp, 0, rbs);
+                            std::memcpy(tmp, readbuf[fd] + cnt_pos,
+                                pos_delim[pos] - cnt_pos);
+                            --cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+                            std::string rnk1 = tmp;
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
 								pos_delim[pos] - cnt_pos);
 							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string rnk2 = tmp;
 							// do operation
 							rnk[rnk1] = rnk2;
+                            delete [] tmp;
 						}
 						break;
 					case 2: // IRC output from game childs
 						while (cnt_delim >= 1)
 						{
-							char tmp[65536];
-							std::memset(tmp, 0, sizeof(tmp));
-							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+							char *tmp = new char[rbs];
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
 								pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string irc1 = tmp;
 
 //std::cerr << "to IRC: " << irc1 << std::endl;
 
-							// do operation
-							std::vector<std::string> irc_parvec;
-							if (irc_command_cmp(irc1, "PRIVMSG"))
-							{
-								if (irc_paramvec(irc_params(irc1), irc_parvec) >= 2)
-								{
-									if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
-										(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)))
-									{
-										// sign message
-										*irc << "PRIVMSG " << irc_parvec[0] << " :" << 
-											irc_parvec[1] << "~~~" << sec.sign(irc_parvec[1]) << 
-											std::endl <<std::flush;
-									}
-									else if (irc_parvec[0] == MAIN_CHANNEL)
-									{
-										for (std::map<std::string, std::string>::const_iterator ni = 
-											nick_players.begin(); ni != nick_players.end(); ni++)
-										{
-											// send announcement PRIVMSG to each player
-											*irc << "PRIVMSG " << ni->first << " :" << 
-												irc_parvec[1] << std::endl << std::flush;
-										}
-										// send announcement PRIVMSG to the channel
-										// reason: some IRC servers (e.g. freenode.net)
-										// block private messages of unregistered users
-										*irc << "PRIVMSG " << MAIN_CHANNEL << " :" << 
-											irc_parvec[1] << "~+~" << std::endl << std::flush;
-										
-										// process announcement PRIVMSG
-										size_t tabei1 = irc_parvec[1].find("|", 0);
-										size_t tabei2 = irc_parvec[1].find("~", 0);
-										size_t tabei3 = irc_parvec[1].find("!", 0);
-										if ((tabei1 != irc_parvec[1].npos) &&
-											(tabei2 != irc_parvec[1].npos) &&
-											(tabei3 != irc_parvec[1].npos) && 
-											(tabei1 < tabei2) && (tabei2 < tabei3))
-										{
-											std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
-											std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
-												tabei2 - tabei1 - 1);
-											std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
-												tabei3 - tabei2 - 1);	
-											if ((std::find(tables.begin(), tables.end(), tabmsg1) 
-												== tables.end()) && (tabmsg2 != "0"))
-											{
-												// new table
-												tables.push_back(tabmsg1);
-												tables_p[tabmsg1] = atoi(tabmsg2.c_str());
-												tables_r[tabmsg1] = atoi(tabmsg3.c_str());
-												tables_u[tabmsg1] = tabmsg3;
-												tables_o[tabmsg1] = pub.keyid(5);
-											}
-											else
-											{
-												if (tabmsg2 == "0")
-												{
-													// remove table
-													tables_p.erase(tabmsg1), tables_r.erase(tabmsg1);
-													tables_u.erase(tabmsg1), tables_o.erase(tabmsg1);
-													tables.remove(tabmsg1);
-												}
-												else
-												{
-													// update table
-													tables_p[tabmsg1] = atoi(tabmsg2.c_str());
-													tables_r[tabmsg1] = atoi(tabmsg3.c_str());
-													tables_u[tabmsg1] = tabmsg3;
-												}
-											}
-										}
-									}
-									else
-										*irc << irc1 << std::endl << std::flush;
-								}
-								else
-									*irc << irc1 << std::endl << std::flush;
-							}
-							else
-								*irc << irc1 << std::endl << std::flush;
+							pipe_irc(irc1);
+                            delete [] tmp;
 						}
 						break;
 					case 3: // import from PKI childs
 						while (cnt_delim >= 2)
 						{
-							char tmp[65536];
-							std::memset(tmp, 0, sizeof(tmp));
-							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+							char *tmp = new char[rbs];
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
 								pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string pki1 = tmp;
-							std::memset(tmp, 0, sizeof(tmp));
-							std::memcpy(tmp, readbuf[pi->second] + cnt_pos,
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
 								pos_delim[pos] - cnt_pos);
 							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string pki2 = tmp;
@@ -421,39 +429,48 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							TMCG_PublicKey apkey;
 							if (!apkey.import(pki2))
 							{
-								std::cerr << _("TMCG: public key corrupted") << std::endl;
+								std::cerr << _("TMCG: public key corrupted") <<
+                                    std::endl;
 							}
 							else if (pki1 != apkey.keyid(5))
 							{
-								std::cerr << _("TMCG: wrong public key") << std::endl;
+								std::cerr << _("TMCG: wrong public key") <<
+                                    std::endl;
+                                std::cerr << pki1 << " vs. " << 
+                                    apkey.keyid(5) << std::endl;
 							}
 							else
 							{
 								std::cout << X << "PKI " << _("identified") <<
-									" \"" << pki1 << "\" " << "aka \"" << apkey.name <<
-									"\" <" << apkey.email << ">" << std::endl;
+									" \"" << pki1 << "\" " << "aka \"" << 
+                                    apkey.name << "\" <" << apkey.email << 
+                                    ">" << std::endl;
 								nick_key[pki1] = apkey;
 							}
+                            delete [] tmp;
 						}
 						break;
 					default:
 						break;
-				} // switch
-				char tmp[65536];
-				std::memset(tmp, 0, sizeof(tmp));
-				readed[pi->second] -= cnt_pos;
-				std::memcpy(tmp, readbuf[pi->second] + cnt_pos, readed[pi->second]);
-				std::memcpy(readbuf[pi->second], tmp, readed[pi->second]);
+				} // end of switch
+				char *tmp = new char[rbs];
+				std::memset(tmp, 0, rbs);
+				readed[fd] -= cnt_pos;
+				std::memcpy(tmp, readbuf[fd] + cnt_pos, readed[fd]);
+				std::memcpy(readbuf[fd], tmp, readed[fd]);
+                delete [] tmp;
 			}
 		}
 	}
+    // close dead pipes
 	for (size_t i = 0; i < del_pipe.size(); i++)
 	{
-		if (close(read_pipe[del_pipe[i]]) < 0)
+        int fd = read_pipe[del_pipe[i]]; // file descriptor of the pipe
+		if (close(fd) < 0)
 			perror("read_after_select (close)");
-		delete [] readbuf[read_pipe[del_pipe[i]]];
-		readbuf.erase(read_pipe[del_pipe[i]]);
-		readed.erase(read_pipe[del_pipe[i]]);
+		delete [] readbuf[fd];
+		readbuf.erase(fd);
+		readed.erase(fd);
 		read_pipe.erase(del_pipe[i]);
 	}
 	del_pipe.clear();
@@ -476,22 +493,22 @@ static void process_line(char *line)
 	if (s[0] == '/')
 	{
 		std::vector<std::string> cmd_argv;
-		size_t cmd_argc = irc_paramvec(s + 1, cmd_argv);
+		size_t cmd_argc = irc_paramvec(s + 1, cmd_argv); // recognize arguments
 		
 		if (cmd_argc == 0)
-			cmd_argv.push_back("help");
+			cmd_argv.push_back("help"); // print help, if no command is supplied
 		
 		if ((cmd_argv[0] == "quit") || (cmd_argv[0] == "ende"))
 		{
-			irc_quit = 1;
+			irc_quit = 1; // toggle quit flag
 		}
 		else if ((cmd_argv[0] == "on") || (cmd_argv[0] == "an"))
 		{
-			irc_stat = true;
+			irc_stat = true; // turn output of chat messages on
 		}	
 		else if ((cmd_argv[0] == "off") || (cmd_argv[0] == "aus"))
 		{
-			irc_stat = false;
+			irc_stat = false; // turn output of chat messages off
 		}
 		else if ((cmd_argv[0] == "players") || (cmd_argv[0] == "spieler"))
 		{
@@ -502,7 +519,7 @@ static void process_line(char *line)
 				std::string name = "?", email = "?", type = "?", fp = "?";
 				if (nick_key.find(nick) != nick_key.end())
 				{
-					// key was found for nick, now get the attributes
+					// A key was found for nick, now get the attributes ...
 					name = nick_key[nick].name;
 					email = nick_key[nick].email;
 					type = nick_key[nick].type;
@@ -563,9 +580,11 @@ static void process_line(char *line)
 		{
 			std::list<std::string> rnk_nicktab, rnk_ranktab;
 			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
-			
-			// parsing RNK data
+			size_t prt_counter = 0, prt_counter_valid = 0;
+            
+			// temporarily add the own public key
 			nick_key[pub.keyid(5)] = pub;
+            // parse the obtained RNK data
 			for (std::map<std::string, std::string>::const_iterator ri = 
 				rnk.begin(); ri != rnk.end(); ri++)
 			{
@@ -575,6 +594,7 @@ static void process_line(char *line)
 				std::string s = ri->second;
 				size_t ei;
 				
+                prt_counter++;
 				// header
 				if ((ei = s.find("#", 0)) != s.npos)
 				{
@@ -664,9 +684,10 @@ static void process_line(char *line)
 				else
 					continue;
 				if ((tk_header != "prt") ||
-					(tk_nick[0] != pub.sigid(tk_sig1)) ||
-					(tk_nick[1] != pub.sigid(tk_sig2)) ||
-					(tk_nick[2] != pub.sigid(tk_sig3)) ||
+                    // FIXME: sigid is ID8, but nick is ID5
+					//(tk_nick[0] != pub.sigid(tk_sig1)) ||
+					//(tk_nick[1] != pub.sigid(tk_sig2)) ||
+					//(tk_nick[2] != pub.sigid(tk_sig3)) ||
 					(nick_key.find(tk_nick[0]) == nick_key.end()) ||
 					(nick_key.find(tk_nick[1]) == nick_key.end()) ||
 					(nick_key.find(tk_nick[2]) == nick_key.end()))
@@ -680,6 +701,7 @@ static void process_line(char *line)
 					continue;
 				if (!nick_key[tk_nick[2]].verify(sig_data, tk_sig3))
 					continue;
+                prt_counter_valid++;
 				std::list<std::string> gp_l;
 				std::string gp_s = "";
 				for (size_t j = 0; j < 3; j++)
@@ -725,6 +747,8 @@ static void process_line(char *line)
 					}
 				}
 			}
+            std::cout << prt_counter_valid << " out of " << prt_counter <<
+                " game protocols are valid." << std::endl;
 			// Berechnen der Leistungspunkte (Erweitertes Seeger-System)
 			for (size_t j = 0; j < 3; j++)
 			{
@@ -787,6 +811,7 @@ static void process_line(char *line)
 					std::cout << "+----+ " << std::endl;
 				}
 			}
+            // remove the temporarily added key
 			nick_key.erase(pub.keyid(5));
 		}
 		else if (cmd_argv[0] == "skat")
@@ -942,7 +967,8 @@ static void process_line(char *line)
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
 									pub.keyid(5));
 #ifndef NDEBUG
-	std::cerr << "ballot_child() = " << ret << std::endl;
+                                std::cerr << "ballot_child() = " << ret << 
+                                    std::endl;
 #endif
 								sleep(1);
 								if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -999,7 +1025,8 @@ static void process_line(char *line)
 									int ret = ballot_child(tnr, -tables_r[tnr], false,
 										in_pipe[0], out_pipe[1], tables_o[tnr]);
 #ifndef NDEBUG
-	std::cerr << "ballot_child() = " << ret << std::endl;
+                                    std::cerr << "ballot_child() = " << ret << 
+                                        std::endl;
 #endif
 									sleep(1);
 									if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -1228,7 +1255,7 @@ static void process_line(char *line)
 	{
 		if ((s != NULL) && (strlen(s) > 0))
 		{
-			// sign and send PRIVMSG message (chat)
+			// sign and send PRIVMSG message (chat at main channel)
 			*irc << "PRIVMSG " << MAIN_CHANNEL << " :" << s << "~~~" << 
 				sec.sign(s) << std::endl << std::flush;
 			std::cout << "<" << pub.name << "> " << s << std::endl;
@@ -1239,16 +1266,16 @@ static void process_line(char *line)
 
 void run_irc()
 {
-	bool first_command = true, first_entry = false, entry_ok = false;
-	fd_set rfds;										// set of read descriptors
-	int mfds = 0;										// highest-numbered descriptor
-	struct timeval tv;							// timeout structure for select(2)
-	char irc_readbuf[32768]; // read buffer
-	int irc_readed = 0;							// read pointer
-	unsigned long ann_counter = 0;	// announcement counter
-	unsigned long clr_counter = 0;	// clear tables counter
+    bool first_command = true, first_entry = false, entry_ok = false;
+    fd_set rfds;                    // set of read descriptors
+	int mfds = 0;                   // highest-numbered descriptor
+	struct timeval tv;              // timeout structure for select(2)
+	char irc_readbuf[32768];        // read buffer
+	int irc_readed = 0;             // read pointer
+	unsigned long ann_counter = 0;  // announcement counter
+	unsigned long clr_counter = 0;  // clear tables counter
 #ifdef AUTOJOIN
-	unsigned long atj_counter = 0;	// autojoin counter
+	unsigned long atj_counter = 0;  // autojoin counter
 #endif
 		
 	while (irc->good() && !irc_quit)
@@ -1347,8 +1374,8 @@ void run_irc()
 				}
 			}
 			
-			// PKI (export public key on port 7771)
-			// ----------------------------------------------------------------------
+            // PKI (export public key on port 7771)
+            // -----------------------------------------------------------------
 			if (FD_ISSET(pki7771_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1370,8 +1397,8 @@ void run_irc()
 				}
 			}
 			
-			// RNK (get rank entry on port 7774)
-			// ----------------------------------------------------------------------
+            // RNK (get rank entry on port 7774)
+            // -----------------------------------------------------------------
 			if (FD_ISSET(rnk7774_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1407,12 +1434,14 @@ void run_irc()
 							signal(SIGTERM, SIG_DFL);
 							
 							/* BEGIN child code (ranking data) */
-							iosocketstream *client_ios = new iosocketstream(client_handle);
+							iosocketstream *client_ios =
+                                new iosocketstream(client_handle);
 							char *tmp = new char[100000L];
 							client_ios->getline(tmp, 100000L);
 							
 							if (rnk.find(tmp) != rnk.end())
-								*client_ios << rnk[tmp] << std::endl << std::flush;
+								*client_ios << rnk[tmp] << std::endl << 
+                                    std::flush;
 							else
 								*client_ios << std::endl << std::flush;
 							delete client_ios, delete [] tmp;
@@ -1430,16 +1459,16 @@ void run_irc()
 			}
 			
 #ifndef NOHUP
-			// read from stdin
-			// ----------------------------------------------------------------------
+            // read from stdin
+            // -----------------------------------------------------------------
 			if (FD_ISSET(fileno(stdin), &rfds))
 			{
 				rl_callback_read_char();
 			}
 #endif
 			
-			// read from IRC connection
-			// ----------------------------------------------------------------------
+            // read from IRC connection
+            // -----------------------------------------------------------------
 			if (FD_ISSET(irc_handle, &rfds))
 			{
 				ssize_t num = read(irc_handle, irc_readbuf + irc_readed, 
@@ -1448,8 +1477,9 @@ void run_irc()
 				
 				if (num == 0)
 				{
-					std::cerr << _("IRC ERROR: connection with server collapsed") <<
-						std::endl;
+					std::cerr <<
+                        _("IRC ERROR: connection with server collapsed") <<
+                        std::endl;
 					break;
 				}
 				
@@ -1462,20 +1492,23 @@ void run_irc()
 						if (irc_readbuf[i] == '\n')
 							cnt_delim++, pos_delim.push_back(i);
 						if (irc_readbuf[i] == '\015')
-							irc_readbuf[i] = '\n', cnt_delim++, pos_delim.push_back(i);
+							irc_readbuf[i] = '\n', cnt_delim++, 
+                                pos_delim.push_back(i);
 					}
 					while (cnt_delim >= 1)
 					{
 						char tmp[65536];
 						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, irc_readbuf + cnt_pos, pos_delim[pos] - cnt_pos);
+						memcpy(tmp, irc_readbuf + cnt_pos, 
+                               pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						irc_reply = tmp;
+						std::string irc_reply = tmp;
 				
 				// parse NICK and HOST from IRC prefix
 				std::string pfx = irc_prefix(irc_reply);
 				std::string nick = "?", host = "?";
-				if ((pfx.find("!", 0) != pfx.npos) && (pfx.find("@", 0) != pfx.npos))
+				if ((pfx.find("!", 0) != pfx.npos) && 
+                    (pfx.find("@", 0) != pfx.npos))
 				{
 					nick = pfx.substr(0, pfx.find("!", 0));
 					host = pfx.substr(pfx.find("@", 0) + 1, 
@@ -1486,7 +1519,8 @@ void run_irc()
 				std::vector<std::string> irc_parvec;
 				if (irc_command_cmp(irc_reply, "PING"))
 				{
-					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
+					*irc << "PONG " << irc_params(irc_reply) << std::endl <<
+                        std::flush;
 				} // USER success reply
 				else if (irc_command_cmp(irc_reply, "001"))
 				{
@@ -1502,7 +1536,9 @@ void run_irc()
 					irc_command_cmp(irc_reply, "466") ||
 					irc_command_cmp(irc_reply, "468"))
 				{
-					std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
+					std::cerr << 
+                        _("IRC ERROR: not registered at IRC server") << 
+                        std::endl;
 					std::cerr << irc_reply << std::endl;
 					irc_quit = 1;
 					break;
@@ -1515,18 +1551,20 @@ void run_irc()
 						{
 							if (nick.find(pub.keyid(5), 0) == 0)
 							{
-								std::cout << X << _("you join channel") << " " << 
-									irc_parvec[0] << std::endl;
+								std::cout << X << _("you join channel") << 
+                                    " " << irc_parvec[0] << std::endl;
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
-								*irc << "WHO " << irc_parvec[0] << std::endl << std::flush;
+								*irc << "WHO " << irc_parvec[0] << std::endl << 
+                                    std::flush;
 							}
 							else
 							{
 								if (irc_stat)
-									std::cout << X << _("observer") << " \"" << nick << "\" ("
-										<< host << ") " << _("joins channel") << " " << 
+									std::cout << X << _("observer") << " \"" << 
+                                        nick << "\" (" << host << ") " << 
+                                        _("joins channel") << " " << 
 										irc_parvec[0] << std::endl;
 							}
 						}
@@ -1964,7 +2002,7 @@ void run_irc()
 									nick = nick_key[nick].name;
 								std::cout << ">" << nick << "< " << irc_parvec[1] << std::endl;
 							}
-						}// chat messages
+						} // chat messages
 						else if (irc_stat && (irc_parvec[0] == MAIN_CHANNEL))
 						{
 							size_t tei = irc_parvec[1].find("~~~");
@@ -2022,10 +2060,10 @@ void run_irc()
 			}
 		}
 		
-		// timeout occured
+		// the timeout occured
 		if (ret == 0)
 		{
-			// use signal blocking for atomic operations (avoid mutex)
+			// We use signal blocking for serializing access (a serious hack!).
 			raise(SIGUSR1);
 			
 			// re-install signal handlers (some unices do not restore them properly)
@@ -2036,17 +2074,19 @@ void run_irc()
 			signal(SIGCHLD, sig_handler_chld);
 #ifdef NOHUP
 			signal(SIGHUP, SIG_IGN);
+#else
+            signal(SIGHUP, sig_handler_quit);
 #endif
 			signal(SIGUSR1, sig_handler_usr1);
 			
-			// do other delayed stuff
+			// do other delayed stuff, i.e., register at IRC server and join
 			if (first_command)
 			{
 				char ptmp[100];
 				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
-					pki7771_port, pki7772_port, rnk7773_port, rnk7774_port,
-					80);
+					pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
 				std::string uname = pub.keyid(5);
+                // create a "unique" username based on the nickname
 				if (uname.length() > 4)
 				{
 					std::string uname2 = "os";
@@ -2128,7 +2168,7 @@ void run_irc()
 					ann_counter++;
 			}
 			
-			// send SIGQUIT to all PKI processes -- PKI TIMEMOUT
+			// send SIGQUIT to all PKI processes -- PKI TIMEMOUT exceeded
 			for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
 				pidi != nick_pids.end(); pidi++)
 			{
@@ -2137,7 +2177,7 @@ void run_irc()
 						perror("run_irc (kill)");
 			}
 			
-			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT
+			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT exceeded
 			for (std::list<pid_t>::const_iterator pidi = rnk_pids.begin();
 				pidi != rnk_pids.end(); pidi++)
 			{
@@ -2146,13 +2186,13 @@ void run_irc()
 						perror("run_irc (kill)");
 			}
 			
-			// start RNK or PKI process
+			// start RNK or PKI processes
 			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin();
 					ni != nick_players.end(); ni++)
 			{
 				std::string nick = ni->first, host = ni->second;
 				
-				// RNK
+				// RNK (obtain ranking data from other players)
 				if (nick_rcnt.find(nick) == nick_rcnt.end())
 					nick_rcnt[nick] = RNK_TIMEOUT;
 				else
@@ -2262,7 +2302,7 @@ void run_irc()
 					}
 				}
 				
-				// PKI
+				// PKI (obtain and verify public keys of other players)
 				if ((nick_key.find(nick) == nick_key.end()) && 
 					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) 
 					== nick_ninf.end()))
@@ -2288,7 +2328,7 @@ void run_irc()
 							}
 							opipestream *npipe = new opipestream(fd_pipe[1]);
 							
-							// create TCP/IP connection
+							// create the TCP/IP connection
 							int nick_handle = ConnectToHost(host.c_str(), nick_p7771[nick]);
 							if (nick_handle < 0)
 							{
@@ -2297,7 +2337,7 @@ void run_irc()
 							}
 							iosocketstream *nkey = new iosocketstream(nick_handle);
 							
-							// get public key
+							// get the public key
 							char *tmp = new char[KEY_SIZE];
 							if (tmp == NULL)
 							{
@@ -2307,13 +2347,13 @@ void run_irc()
 							nkey->getline(tmp, KEY_SIZE);
 							public_key = tmp;
 							
-							// close TCP/IP connection
+							// close the TCP/IP connection
 							delete nkey;
 							delete [] tmp;
 							if (close(nick_handle) < 0)
 								perror("run_irc [PKI/child] (close)");
 							
-							// import public key
+							// import the public key
 							TMCG_PublicKey pkey;
 							if (!pkey.import(public_key))
 							{
@@ -2321,21 +2361,21 @@ void run_irc()
 								exit(-2);
 							}
 							
-							// check keyID
+							// check the keyID
 							if (nick != pkey.keyid(5))
 							{
 								std::cerr << _("TMCG: wrong public key") << std::endl;
 								exit(-3);
 							}
 							
-							// check NIZK
+							// check the NIZK
 							if (!pkey.check())
 							{
 								std::cerr << _("TMCG: invalid public key") << std::endl;
 								exit(-4);
 							}
 							
-							// send valid public key to parent
+							// send the valid public key to our parent
 							*npipe << nick << std::endl << std::flush;
 							*npipe << public_key << std::endl << std::flush;
 							
@@ -2366,81 +2406,66 @@ void run_irc()
 			}
 		}
 	}
-	if (!irc->good())
-		std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
-  // free allocated memory
-  for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); 
-    rbi != readbuf.end(); rbi++)
-  {
-    delete [] rbi->second;
-  }
+    // check whether the IRC connection still exists
+    if (!irc->good())
+        std::cerr << _("IRC ERROR: connection with server collapsed") <<
+            std::endl;
+
+    // free the previously allocated memory (read buffers)
+    for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); 
+        rbi != readbuf.end(); rbi++)
+    {
+        delete [] rbi->second;
+    }
 }
 
-void done_irc()
+void cleanup()
 {
-    // ignore remaining signals
-    signal(SIGINT, SIG_IGN);
-    signal(SIGQUIT, SIG_IGN);
-    signal(SIGTERM, SIG_IGN);
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-	
-    // leave main channel and quit
-    *irc << "PART " << MAIN_CHANNEL << std::endl << std::flush;
-    *irc << "QUIT :SecureSkat rulez!" << std::endl << std::flush;
-	
-    // send SIGQUIT to all child processes and remove data
+    // send SIGQUIT to all child processes and wait for them
     for (std::map<pid_t, std::string>::const_iterator pidi = 
-	games_pid2tnr.begin(); pidi != games_pid2tnr.end(); pidi++)
+        games_pid2tnr.begin(); pidi != games_pid2tnr.end(); pidi++)
     {
-	if (kill(pidi->first, SIGQUIT) < 0)
-	    perror("done_irc (kill)");
-	waitpid(pidi->first, NULL, 0);
+        if (kill(pidi->first, SIGQUIT) < 0)
+            perror("cleanup (kill)");
+        waitpid(pidi->first, NULL, 0);
     }
     games_pid2tnr.clear(), games_tnr2pid.clear();
     for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
-	pidi != nick_pids.end(); pidi++)
+        pidi != nick_pids.end(); pidi++)
     {
-	if (kill(*pidi, SIGQUIT) < 0)
-	    perror("done_irc (kill)");
-	waitpid(*pidi, NULL, 0);
+        if (kill(*pidi, SIGQUIT) < 0)
+            perror("cleanup (kill)");
+        waitpid(*pidi, NULL, 0);
     }
     nick_pids.clear(), nick_nick.clear(), nick_host.clear(),
-	nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
+        nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
     for (std::list<pid_t>::const_iterator pidi = rnkrpl_pid.begin();
-	pidi != rnkrpl_pid.end(); pidi++)
+        pidi != rnkrpl_pid.end(); pidi++)
     {
-	if (kill(*pidi, SIGQUIT) < 0)
-	    perror("done_irc (kill)");
-	waitpid(*pidi, NULL, 0);
+        if (kill(*pidi, SIGQUIT) < 0)
+            perror("cleanup (kill)");
+        waitpid(*pidi, NULL, 0);
     }
     rnkrpl_pid.clear();
 }
 
-void release_irc()
-{
-    delete irc;
-    CloseHandle(irc_handle);
-}
-
-void init_term()
+void init_term(struct termios &old_term)
 {
     struct termios new_term;
     
-    // save old terminal settings
+    // save the old terminal settings
     if (tcgetattr(fileno(stdin), &old_term) < 0)
     {
-	perror("init_term (tcgetattr)");
-	exit(-1);
+        perror("init_term (tcgetattr)");
+        exit(-1);
     }
-    // set new terminal settings
+    // set the new terminal settings
     new_term = old_term;
     new_term.c_lflag &= ~ICANON, new_term.c_cc[VTIME] = 1;
     if (tcsetattr(fileno(stdin), TCSANOW, &new_term) < 0)
     {
-	perror("init_term (tcsetattr)");
-	exit(-1);
+        perror("init_term (tcsetattr)");
+        exit(-1);
     }
     // install readline callback handler
     rl_readline_name = "SecureSkat";
@@ -2451,151 +2476,181 @@ void init_term()
 #endif
 }
 
-void done_term()
+void done_term(struct termios &old_term)
 {
     // remove readline callback handler
     rl_callback_handler_remove();
     // restore old terminal settings
     if (tcsetattr(fileno(stdin), TCSANOW, &old_term) < 0)
-	perror("done_term (tcsetattr)");
+        perror("done_term (tcsetattr)");
 }
 
 int main(int argc, char* argv[], char* envp[])
 {
     char *home = NULL;
-    std::string cmd = argv[0], homedir = "";
+    std::string homedir = "";
     std::cout << PACKAGE_STRING <<
-	", (c) 2002--2007  Heiko Stamer <stamer@gaos.org>, GNU GPL" << 
-	std::endl <<
-	" $Id: SecureSkat.cc,v 1.58 2009/05/15 18:31:39 stamer Exp $ " << 
-	std::endl;
+        ", (c) 2002--2009  Heiko Stamer <stamer@gaos.org>, License: GPLv2" << 
+        std::endl <<
+        " $Id: SecureSkat.cc,v 1.59 2009/06/11 08:27:45 stamer Exp $ " << 
+        std::endl;
 	
 #ifdef ENABLE_NLS
-    // set locales
+    // set the locales
 #ifdef HAVE_LC_MESSAGES
     setlocale(LC_TIME, "");
     setlocale(LC_MESSAGES, "");
 #else
     setlocale(LC_ALL, "");
 #endif
-    // enable native language support
+    // enable the native language support
     bindtextdomain(PACKAGE, LOCALEDIR);
     textdomain(PACKAGE);
     std::cout << "++ " << _("Internationalization support") << ": " << 
-	LOCALEDIR << std::endl;
+        LOCALEDIR << std::endl;
 #endif
 	
-    // evaluate environment variable HOME
+    // evaluate the environment variable HOME
     home = getenv("HOME");
     if (home != NULL)
-	homedir = home, homedir += "/.SecureSkat/";
+        homedir = home, homedir += "/.SecureSkat/";
     else
-	homedir = "~/.SecureSkat/";
+        homedir = "~/.SecureSkat/";
     std::cout << "++ " << _("PKI/RNK database directory") << ": " << 
-	homedir << std::endl;
-    // check existance and permissions of home directory
+        homedir << std::endl;
+    
+    // check existance and permissions of the home directory
     struct stat stat_buffer;
     if (stat(homedir.c_str(), &stat_buffer))
     {
-	if (errno == ENOENT)
-	{
-	    // directory doesn't exist
-	    if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
-	    {
-		std::cerr << _("Can't create directory!") << " (" << 
-		    strerror(errno) << ")" << std::endl;
-		return EXIT_FAILURE;
-	    }
-	}
-	else
-	{
-	    // print error message
-	    std::cerr << _("Can't get the status of the directory!") << 
-		" (" << strerror(errno) << ")" << std::endl;
-	    return EXIT_FAILURE;
-	}
+        if (errno == ENOENT)
+        {
+            // create directory, if it doesn't exist
+            if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
+            {
+                std::cerr << _("Can't create directory!") << " (" << 
+                    strerror(errno) << ")" << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            // print error message
+            std::cerr << _("Can't get the status of the directory!") << 
+                " (" << strerror(errno) << ")" << std::endl;
+            return EXIT_FAILURE;
+        }
     }
     else
     {
-	if (!S_ISDIR(stat_buffer.st_mode))
-	{
-	    std::cerr << _("Path is not a directory!") << std::endl;
-	    return EXIT_FAILURE;
-	}
-	if (stat_buffer.st_uid != getuid())
-	{
-	    std::cerr << _("Wrong owner of the directory!") << std::endl;
-	    return EXIT_FAILURE;
-	}
-	if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
-	    (S_IRUSR | S_IWUSR | S_IXUSR))
-	{
-	    std::cerr << _("Missing permissions on the directory!") << std::endl;
-	    return EXIT_FAILURE;
-	}
+        if (!S_ISDIR(stat_buffer.st_mode))
+        {
+            std::cerr << _("Path is not a directory!") << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (stat_buffer.st_uid != getuid())
+        {
+            std::cerr << _("Wrong owner of the directory!") << std::endl;
+            return EXIT_FAILURE;
+        }
+        if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
+            (S_IRUSR | S_IWUSR | S_IXUSR))
+        {
+            std::cerr << _("Missing permissions for directory!") << std::endl;
+            return EXIT_FAILURE;
+        }
     }
 	
-    // process commandline arguments
+    // process the command line arguments
     if (((argc == 4) && isdigit(argv[2][0])) ||
-	((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
+        ((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
     {
-	// set default values
-	irc_port = 6667;
-	game_ctl = "";
-	game_env = NULL;
-		
-	// evaluate the command line switches
-	switch (argc)
-	{
-	    case 4:
-		game_ctl = argv[3];
-		game_env = envp;
-	    case 3:
-		irc_port = atoi(argv[2]);
-	}
+        struct termios old_term;
+        int irc_port = 6667;
 
-	// initialize LibTMCG
-	if (!init_libTMCG())
-	{
-	    std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
-	    return EXIT_FAILURE;
-	}
+        // set the default values
+        game_ctl = "";
+        game_env = NULL;
+		
+        // evaluate the provided command switches to override the defaults
+        switch (argc)
+        {
+            case 4:
+                game_ctl = argv[3];
+                game_env = envp;
+            case 3:
+                irc_port = atoi(argv[2]);
+        }
 
-	// key management		
-	get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
-	pub = TMCG_PublicKey(sec); // extract the public part of the secret key
-	std::cout << _("Your key fingerprint") << ": " << 
-	    pub.fingerprint() << std::endl;
-	get_public_keys(homedir + "SecureSkat.pkr", nick_key); // load pub keys
+        // initialize LibTMCG
+        if (!init_libTMCG())
+        {
+            std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        // key management		
+        get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
+        pub = TMCG_PublicKey(sec); // extract the public part of the secret key
+        std::cout << _("Your key fingerprint") << ": " << 
+            pub.fingerprint() << std::endl;
+        get_public_keys(homedir + "SecureSkat.pkr", nick_key); // load pub keys
 		
-	create_pki(pki7771_port, pki7771_handle);
-	create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
-	load_rnk(homedir + "SecureSkat.rnk", rnk); // load ranking data
-	create_irc(argv[1], irc_port);
-	init_irc();
-	std::cout << _("Usage") << ": " <<
-	    _("type /help for the command list or read the file README") <<
-	    std::endl;
-#ifndef NOHUP
-	init_term();
+        create_pki(pki7771_port, pki7771_handle);
+        create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
+        load_rnk(homedir + "SecureSkat.rnk", rnk); // load ranking data
+        
+        // open an IRC connection
+        irc_handle = create_irc(argv[1], irc_port, &irc);
+
+        // install several signal handlers
+        signal(SIGINT, sig_handler_quit);
+        signal(SIGQUIT, sig_handler_quit);
+        signal(SIGTERM, sig_handler_quit);
+        signal(SIGPIPE, sig_handler_pipe);
+        signal(SIGCHLD, sig_handler_chld);
+#ifdef NOHUP
+        signal(SIGHUP, SIG_IGN);
+#else
+        signal(SIGHUP, sig_handler_quit);
 #endif
-	run_irc(); // main loop
+        signal(SIGUSR1, sig_handler_usr1);
+
+        init_irc(irc, pub.keyid(5));
+        std::cout << _("Usage") << ": " <<
+            _("type /help for the command list or read the file README") <<
+            std::endl;
 #ifndef NOHUP
-	done_term();
+        init_term(old_term);
 #endif
-	done_irc();
-	release_irc();
-	save_rnk(homedir + "SecureSkat.rnk", rnk); // save ranking data
-	release_rnk(rnk7773_handle, rnk7774_handle);
-	release_pki(pki7771_handle);
-	set_public_keys(homedir + "SecureSkat.pkr", nick_key); // save pub keys
+        run_irc(); // main loop
+#ifndef NOHUP
+        done_term(old_term);
+#endif
+    
+        // ignore the remaining signals
+        signal(SIGINT, SIG_IGN);
+        signal(SIGQUIT, SIG_IGN);
+        signal(SIGTERM, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
+        signal(SIGPIPE, SIG_IGN);
+        signal(SIGHUP, SIG_IGN);
+
+        // stop and release everything
+        done_irc(irc);
+        cleanup(); // kill, wait, and reload^Hclear
+        release_irc(irc_handle, irc); // close IRC connection
+        save_rnk(homedir + "SecureSkat.rnk", rnk); // save ranking data
+        release_rnk(rnk7773_handle, rnk7774_handle);
+        release_pki(pki7771_handle);
+        set_public_keys(homedir + "SecureSkat.pkr", nick_key); // save pub keys
 		
-	return EXIT_SUCCESS;
+        return EXIT_SUCCESS;
     }
 
-    // print a short help message and exit
-    std::cout << _("Usage") << ": " << cmd <<
-	" IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" << 
-	std::endl;
+    // print a short usage message and exit with failure
+    std::cout << _("Usage") << ": " << argv[0] <<
+        " IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" << 
+        std::endl;
     return EXIT_FAILURE;
 }

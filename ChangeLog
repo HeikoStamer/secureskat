@@ -1,14 +1,15 @@
 SecureSkat 2.9:
-    - 
+    - massive code cleanup
+    -
 SecureSkat 2.8:
     - added a message delay to avoid kick off (e.g. irc.freenode.net)
     - removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
     - increased iteration count of PBKDF1 to 7000 (key file encryption)
-    - key identifier has now only 5 characters (RFC: nick length 9 char)
+    - key identifier has now only 5 characters (RFC: nick length 9 chars)
     - using non-NIZK keys (need LibTMCG 1.1.0) for faster key generation
     - removed obsolete command line argument SECURITY_LEVEL (default=80)
 SecureSkat 2.7:
-    - now we're using Groth's protocol for the verifiable secret shuffle
+    - we're now using Groth's protocol for the verifiable secret shuffle
       (improves the performance and communication complexity significantly)
     - Null-games are now aborted immediately, if lost by the playing party
     - added an alternative table announcement (PRIVMSG to channel), because

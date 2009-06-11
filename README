@@ -1,4 +1,4 @@
-Copyright (C)  2002, 2003, 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
+Copyright (C)  2002,2003,2004,2005,2006,2007,2009 Heiko Stamer <stamer@gaos.org>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -16,7 +16,7 @@ Introduction
   ensure a reasonable level of fairness. Furthermore, SecureSkat provides
   simple electronic voting capabilities based on a playing card encoding.
 
-  LibTMCG provides tools for realizing secure and fair online card games
+  LibTMCG provides functions for creating secure and fair online card games
   without depending on a trusted third-party (TTP). The corresponding
   cryptographic problem, actually called "Mental Poker", has been studied
   since 1979 (Shamir, Rivest, and Adleman) by many authors.
@@ -38,9 +38,6 @@ Requirements
 
   * GNU Crypto Library (libgcrypt), version >= 1.2.0
     ftp://ftp.gnupg.org/gcrypt/libgcrypt/
-
-  * GNU Transport Layer Security Library (gnutls), version >= 1.2.0
-    http://www.gnu.org/software/gnutls/
 
   * GNU Readline Library (libreadline), version >= 4.3
     http://www.gnu.org/
@@ -100,7 +97,7 @@ Playing SecureSkat over an IRC network
   
   Later you will be registered at the IRC server with a strange nickname
   like `ID5^z34g0' (based on the key id from your public key). For large
-  groups of participants collisions become probable--- in such a case,
+  groups of participants collisions become probable--- in such a rare case,
   please generate a fresh key by deleting the database 'SecureSkat.skr'.
   
   Now you will be joined to channel #openSkat (The old name was kept to
@@ -174,7 +171,7 @@ Bugs, Contribution, CVS
 Copyright and License of this software
 --------------------------------------
 
-  (C) 2002, 2003, 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
+  (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009  Heiko Stamer <stamer@gaos.org>
       GNU General Public License version 2
 
   Please have a look at the file 'COPYING' and http://www.fsf.org/.

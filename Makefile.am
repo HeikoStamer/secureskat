@@ -9,8 +9,10 @@ LDADD = @LIBGCRYPT_LIBS@ @LIBTMCG_LIBS@
 bin_PROGRAMS = SecureSkat SecureSkat_random
 
 SecureSkat_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
-	SecureSkat_misc.cc SecureSkat_pki.cc SecureSkat_rnk.cc SecureSkat_game.cc\
-	SecureSkat_misc.hh SecureSkat_pki.hh SecureSkat_rnk.hh SecureSkat_game.hh\
+	SecureSkat_misc.cc SecureSkat_pki.cc SecureSkat_rnk.cc SecureSkat_irc.cc\
+    SecureSkat_game.cc\
+	SecureSkat_misc.hh SecureSkat_pki.hh SecureSkat_rnk.hh SecureSkat_irc.hh\
+    SecureSkat_game.hh\
 	SecureSkat_vote.hh SecureSkat_vote.cc SecureSkat_skat.hh SecureSkat_skat.cc\
 	SecureSkat_defs.hh SecureSkat.cc
 

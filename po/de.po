@@ -509,7 +509,7 @@ msgid "Wrong owner of the directory!"
 msgstr "Falscher Eigentümer des Verzeichnisses!"
 
 #: SecureSkat.cc:2527
-msgid "Missing permissions on the directory!"
+msgid "Missing permissions for directory!"
 msgstr "Fehlende Rechte am Verzeichnis!"
 
 #: SecureSkat.cc:2554

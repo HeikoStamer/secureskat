@@ -20,7 +20,7 @@
 
 #include "SecureSkat_skat.hh"
 
-int ctl_pid = 0;
+int ctl_pid = 0; // PID of the running control program
 
 RETSIGTYPE sig_handler_skat_quit(int sig)
 {
