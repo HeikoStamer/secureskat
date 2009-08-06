@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.9\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2007-05-09 20:23+0200\n"
+"POT-Creation-Date: 2009-08-06 10:05+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -17,75 +17,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: SecureSkat.cc:127 SecureSkat.cc:130 SecureSkat.cc:137
+#: SecureSkat.cc:112 SecureSkat.cc:115 SecureSkat.cc:122
 msgid "Session"
 msgstr "Sitzung"
 
-#: SecureSkat.cc:128 SecureSkat.cc:150
+#: SecureSkat.cc:113 SecureSkat.cc:135
 msgid "succeeded properly"
 msgstr "ordnungsgemäß beendet."
 
-#: SecureSkat.cc:131 SecureSkat.cc:138 SecureSkat.cc:163 SecureSkat.cc:171
-#: SecureSkat.cc:186 SecureSkat.cc:193
+#: SecureSkat.cc:116 SecureSkat.cc:123 SecureSkat.cc:146 SecureSkat.cc:153
+#: SecureSkat.cc:168 SecureSkat.cc:175
 msgid "failed. Error code"
 msgstr "fehlgeschlagen. Fehlerstatus"
 
-#: SecureSkat.cc:424 SecureSkat.cc:1095 SecureSkat.cc:2320
+#: SecureSkat.cc:432 SecureSkat.cc:1122 SecureSkat.cc:2360
 msgid "TMCG: public key corrupted"
 msgstr "TMCG: öffentlicher Schlüssel beschädigt"
 
-#: SecureSkat.cc:428 SecureSkat.cc:2327
+#: SecureSkat.cc:437 SecureSkat.cc:2367
 msgid "TMCG: wrong public key"
 msgstr "TMCG: öffentlicher Schlüssel unpassend"
 
-#: SecureSkat.cc:432
+#: SecureSkat.cc:444
 msgid "identified"
 msgstr "identifiziert"
 
-#: SecureSkat.cc:533 SecureSkat.cc:540 SecureSkat.cc:847 SecureSkat.cc:907
-#: SecureSkat.cc:911
+#: SecureSkat.cc:550 SecureSkat.cc:557 SecureSkat.cc:872 SecureSkat.cc:932
+#: SecureSkat.cc:936
 msgid "table"
 msgstr "Tisch"
 
-#: SecureSkat.cc:534 SecureSkat.cc:542
+#: SecureSkat.cc:551 SecureSkat.cc:559
 msgid "round(s)"
 msgstr "Runde(n)"
 
-#: SecureSkat.cc:535
+#: SecureSkat.cc:552
 msgid "players"
 msgstr "Spieler"
 
-#: SecureSkat.cc:536 SecureSkat.cc:542 SecureSkat.cc:558
+#: SecureSkat.cc:553 SecureSkat.cc:559 SecureSkat.cc:575
 msgid "owner"
 msgstr "Eigentümer"
 
-#: SecureSkat.cc:541
+#: SecureSkat.cc:558
 msgid "still"
 msgstr "noch"
 
-#: SecureSkat.cc:555 SecureSkat.cc:972 SecureSkat.cc:1031 SecureSkat.cc:1035
+#: SecureSkat.cc:572 SecureSkat.cc:998 SecureSkat.cc:1058 SecureSkat.cc:1062
 msgid "room"
 msgstr "Raum"
 
-#: SecureSkat.cc:557
+#: SecureSkat.cc:574
 msgid "voters"
 msgstr "Wähler"
 
-#: SecureSkat.cc:782 SecureSkat.cc:784 SecureSkat.cc:786
+#: SecureSkat.cc:806 SecureSkat.cc:808 SecureSkat.cc:810
 msgid "score points"
 msgstr "Wertungspunkte"
 
-#: SecureSkat.cc:843
+#: SecureSkat.cc:868
 msgid "wrong number of rounds"
 msgstr "falsche Rundenanzahl"
 
-#: SecureSkat.cc:848 SecureSkat.cc:973
+#: SecureSkat.cc:873 SecureSkat.cc:999
 msgid "already exists"
 msgstr "existiert bereits"
 
-#: SecureSkat.cc:903 SecureSkat.cc:1555 SecureSkat.cc:1602 SecureSkat.cc:1636
-#: SecureSkat.cc:1672 SecureSkat.cc:1719 SecureSkat.cc:1756 SecureSkat.cc:1814
-#: SecureSkat.cc:1844 SecureSkat.cc:1955 SecureSkat_game.cc:1518
+#: SecureSkat.cc:928 SecureSkat.cc:1593 SecureSkat.cc:1640 SecureSkat.cc:1674
+#: SecureSkat.cc:1710 SecureSkat.cc:1757 SecureSkat.cc:1794 SecureSkat.cc:1852
+#: SecureSkat.cc:1882 SecureSkat.cc:1993 SecureSkat_game.cc:1518
 #: SecureSkat_game.cc:1593 SecureSkat_game.cc:1615 SecureSkat_game.cc:1631
 #: SecureSkat_game.cc:1676 SecureSkat_game.cc:1769 SecureSkat_game.cc:1799
 #: SecureSkat_game.cc:1820 SecureSkat_game.cc:1872 SecureSkat_game.cc:1958
@@ -97,434 +97,434 @@ msgstr "existiert bereits"
 msgid "player"
 msgstr "Skatfreund"
 
-#: SecureSkat.cc:904
+#: SecureSkat.cc:929
 msgid "is already on table"
 msgstr "ist bereits am Tisch"
 
-#: SecureSkat.cc:908
+#: SecureSkat.cc:933
 msgid "is completely occupied"
 msgstr "ist vollständig besetzt"
 
-#: SecureSkat.cc:912 SecureSkat.cc:1036
+#: SecureSkat.cc:937 SecureSkat.cc:1063
 msgid "don't exists (yet)"
 msgstr "existiert (noch) nicht"
 
-#: SecureSkat.cc:915 SecureSkat.cc:1039 SecureSkat.cc:1071 SecureSkat.cc:1139
+#: SecureSkat.cc:940 SecureSkat.cc:1066 SecureSkat.cc:1098 SecureSkat.cc:1166
 msgid "wrong number of arguments"
 msgstr "falsche Argumentanzahl"
 
-#: SecureSkat.cc:916 SecureSkat.cc:1040 SecureSkat.cc:1224
+#: SecureSkat.cc:941 SecureSkat.cc:1067 SecureSkat.cc:1251
 msgid "/help shows the list of commands"
 msgstr "/hilfe zeigt die Kommandoliste"
 
-#: SecureSkat.cc:968
+#: SecureSkat.cc:994
 msgid "wrong number of bits"
 msgstr "falsche Bitanzahl"
 
-#: SecureSkat.cc:1027
+#: SecureSkat.cc:1054
 msgid "voter"
 msgstr "Wähler"
 
-#: SecureSkat.cc:1028
+#: SecureSkat.cc:1055
 msgid "is already in room"
 msgstr "ist bereits im Raum"
 
-#: SecureSkat.cc:1032
+#: SecureSkat.cc:1059
 msgid "is closed"
 msgstr "ist geschlossen"
 
-#: SecureSkat.cc:1060 SecureSkat.cc:1122
+#: SecureSkat.cc:1087 SecureSkat.cc:1149
 msgid "opening file"
 msgstr "Öffnen der Datei"
 
-#: SecureSkat.cc:1061 SecureSkat.cc:1067 SecureSkat.cc:1123 SecureSkat.cc:1129
+#: SecureSkat.cc:1088 SecureSkat.cc:1094 SecureSkat.cc:1150 SecureSkat.cc:1156
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: SecureSkat.cc:1066
+#: SecureSkat.cc:1093
 msgid "writing file"
 msgstr "Schreiben der Datei"
 
-#: SecureSkat.cc:1072 SecureSkat.cc:1140
+#: SecureSkat.cc:1099 SecureSkat.cc:1167
 msgid "instead of"
 msgstr "anstatt von"
 
-#: SecureSkat.cc:1100
+#: SecureSkat.cc:1127
 msgid "public key already present"
 msgstr "öffentlicher Schlüssel bereits vorhanden"
 
-#: SecureSkat.cc:1104
+#: SecureSkat.cc:1131
 msgid "Checking the key"
 msgstr "Überprüfe den Schlüssel"
 
-#: SecureSkat.cc:1105 SecureSkat_pki.cc:200 SecureSkat_game.cc:1242
+#: SecureSkat.cc:1132 SecureSkat_pki.cc:200 SecureSkat_game.cc:1242
 #: SecureSkat_game.cc:1297
 msgid "Please wait"
 msgstr "Bitte warten"
 
-#: SecureSkat.cc:1109 SecureSkat.cc:2334
+#: SecureSkat.cc:1136 SecureSkat.cc:2374
 msgid "TMCG: invalid public key"
 msgstr "TMCG: öffentlicher Schlüssel ungültig"
 
-#: SecureSkat.cc:1114
+#: SecureSkat.cc:1141
 msgid "imports"
 msgstr "importiert"
 
-#: SecureSkat.cc:1128
+#: SecureSkat.cc:1155
 msgid "reading file"
 msgstr "Lesen der Datei"
 
-#: SecureSkat.cc:1135
+#: SecureSkat.cc:1162
 msgid "out of memory"
 msgstr "kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:1144
+#: SecureSkat.cc:1171
 msgid "/quit"
 msgstr "/ende"
 
-#: SecureSkat.cc:1145
+#: SecureSkat.cc:1172
 msgid "quit SecureSkat"
 msgstr "beende SecureSkat"
 
-#: SecureSkat.cc:1146
+#: SecureSkat.cc:1173
 msgid "/on"
 msgstr "/an"
 
-#: SecureSkat.cc:1147
+#: SecureSkat.cc:1174
 msgid "turn on the output of IRC channel"
 msgstr "schalte an die Ausgabe des IRC-Kanals"
 
-#: SecureSkat.cc:1149
+#: SecureSkat.cc:1176
 msgid "/off"
 msgstr "/aus"
 
-#: SecureSkat.cc:1150
+#: SecureSkat.cc:1177
 msgid "turn off the output of IRC channel"
 msgstr "schalte aus die Ausgabe des IRC-Kanals"
 
-#: SecureSkat.cc:1152
+#: SecureSkat.cc:1179
 msgid "/players"
 msgstr "/spieler"
 
-#: SecureSkat.cc:1153
+#: SecureSkat.cc:1180
 msgid "show the list of possible participants"
 msgstr "zeige Liste der möglichen Mitspieler"
 
-#: SecureSkat.cc:1154
+#: SecureSkat.cc:1181
 msgid "/tables"
 msgstr "/tische"
 
-#: SecureSkat.cc:1155
+#: SecureSkat.cc:1182
 msgid "show the list of existing game tables"
 msgstr "zeige Liste der existierenden Spieltische"
 
-#: SecureSkat.cc:1156
+#: SecureSkat.cc:1183
 msgid "/rooms"
 msgstr "/raeume"
 
-#: SecureSkat.cc:1157
+#: SecureSkat.cc:1184
 msgid "show the list of existing voting rooms"
 msgstr "zeige Liste der existierenden Wahlräume"
 
-#: SecureSkat.cc:1158
+#: SecureSkat.cc:1185
 msgid "/rank"
 msgstr "/rang"
 
-#: SecureSkat.cc:1159
+#: SecureSkat.cc:1186
 msgid "show your current rank in all score lists"
 msgstr "zeige Ihre momentane Position in den Ranglisten"
 
-#: SecureSkat.cc:1160
+#: SecureSkat.cc:1187
 msgid "/export"
 msgstr "/export"
 
-#: SecureSkat.cc:1161
+#: SecureSkat.cc:1188
 msgid "exports your public key to file <fn>"
 msgstr "exportiert Ihren öffentlichen Schlüssel in die Datei <fn>"
 
-#: SecureSkat.cc:1162
+#: SecureSkat.cc:1189
 msgid "/import"
 msgstr "/import"
 
-#: SecureSkat.cc:1163
+#: SecureSkat.cc:1190
 msgid "imports a public key from file <fn>"
 msgstr "importiert einen öffentlichen Schlüssel aus der Datei <fn>"
 
-#: SecureSkat.cc:1164 SecureSkat.cc:1166
+#: SecureSkat.cc:1191 SecureSkat.cc:1193
 msgid "/ballot"
 msgstr "/abstimmung"
 
-#: SecureSkat.cc:1165
+#: SecureSkat.cc:1192
 msgid "create the room <nr> for voting between 2^<b> values"
 msgstr "lege Raum <nr> für geheime Wahl an (2^<b> Werte)"
 
-#: SecureSkat.cc:1167
+#: SecureSkat.cc:1194
 msgid "join the voting in room <nr>"
 msgstr "nehme im Raum <nr> an der geheimen Wahl teil"
 
-#: SecureSkat.cc:1169
+#: SecureSkat.cc:1196
 msgid "open the voting process in room <nr> (only owner)"
 msgstr "eröffne die geheime Wahl im Raum <nr> (nur Eigentümer)"
 
-#: SecureSkat.cc:1171
+#: SecureSkat.cc:1198
 msgid "vote in room <nr> for value <r>"
 msgstr "stimme im Raum <nr> für den Wert <r>"
 
-#: SecureSkat.cc:1173
+#: SecureSkat.cc:1200
 msgid "create the table <nr> for playing <r> rounds"
 msgstr "lege Tisch <nr> für <r> Spielrunden an"
 
-#: SecureSkat.cc:1175
+#: SecureSkat.cc:1202
 msgid "join the game on table <nr>"
 msgstr "nehme am Spieltisch <nr> platz"
 
-#: SecureSkat.cc:1177
+#: SecureSkat.cc:1204
 msgid "execute the command <cmd> on table <nr>"
 msgstr "führe Kommando <cmd> am Tisch <nr> aus"
 
-#: SecureSkat.cc:1178
+#: SecureSkat.cc:1205
 msgid "view"
 msgstr "play"
 
-#: SecureSkat.cc:1179
+#: SecureSkat.cc:1206
 msgid "show your own cards and additional information"
 msgstr "zeige eigenes Blatt und Zusatzinformationen an"
 
-#: SecureSkat.cc:1180
+#: SecureSkat.cc:1207
 msgid "bid"
 msgstr "reize"
 
-#: SecureSkat.cc:1181
+#: SecureSkat.cc:1208
 msgid "bid or justify a bid"
 msgstr "reize oder bestätige ein Reizgebot"
 
-#: SecureSkat.cc:1182
+#: SecureSkat.cc:1209
 msgid "pass"
 msgstr "passe"
 
-#: SecureSkat.cc:1183
+#: SecureSkat.cc:1210
 msgid "pass the biding"
 msgstr "passe beim aktuellen Reizgebot"
 
-#: SecureSkat.cc:1185
+#: SecureSkat.cc:1212
 msgid "play without taking the two cards"
 msgstr "spiele aus der Hand (ohne Skataufnahme)"
 
-#: SecureSkat.cc:1187
+#: SecureSkat.cc:1214
 msgid "take the two cards and show them"
 msgstr "nehme den Skat auf und zeige Gesamtblatt an"
 
-#: SecureSkat.cc:1188
+#: SecureSkat.cc:1215
 msgid "push"
 msgstr "druecke"
 
-#: SecureSkat.cc:1189
+#: SecureSkat.cc:1216
 msgid "put away the cards <k1> and <k2>"
 msgstr "drücke <k1> und <k2> in den Skat"
 
-#: SecureSkat.cc:1190
+#: SecureSkat.cc:1217
 msgid "announce"
 msgstr "sagean"
 
-#: SecureSkat.cc:1191
+#: SecureSkat.cc:1218
 msgid "announce the game <s> ([op] is optional)"
 msgstr "sage Spiel <s> mit Zusatz [op] an"
 
-#: SecureSkat.cc:1192
+#: SecureSkat.cc:1219
 msgid "play"
 msgstr "lege"
 
-#: SecureSkat.cc:1193
+#: SecureSkat.cc:1220
 msgid "play the card <k1>"
 msgstr "spiele die Karte <k1> aus"
 
-#: SecureSkat.cc:1195
+#: SecureSkat.cc:1222
 msgid "are arbitrary strings"
 msgstr "sind beliebige Zeichenketten"
 
-#: SecureSkat.cc:1197
+#: SecureSkat.cc:1224
 msgid "are unsigned integers"
 msgstr "sind positive ganze Zahlen"
 
-#: SecureSkat.cc:1199
+#: SecureSkat.cc:1226
 msgid "followed by"
 msgstr "gefolgt von"
 
-#: SecureSkat.cc:1200 SecureSkat.cc:1202
+#: SecureSkat.cc:1227 SecureSkat.cc:1229
 msgid "is from"
 msgstr "ist aus"
 
-#: SecureSkat.cc:1223
+#: SecureSkat.cc:1250
 msgid "unknown command"
 msgstr "unbekanntes Kommando"
 
-#: SecureSkat.cc:1451 SecureSkat.cc:2370
+#: SecureSkat.cc:1481 SecureSkat.cc:2411
 msgid "IRC ERROR: connection with server collapsed"
 msgstr "IRC FEHLER: Verbindung zum Server zusammengebrochen"
 
-#: SecureSkat.cc:1505
+#: SecureSkat.cc:1540
 msgid "IRC ERROR: not registered at IRC server"
 msgstr "IRC FEHLER: Anmeldung beim IRC Server fehlgeschlagen"
 
-#: SecureSkat.cc:1518
+#: SecureSkat.cc:1554
 msgid "you join channel"
 msgstr "Sie betreten den Kanal"
 
-#: SecureSkat.cc:1528 SecureSkat.cc:1567 SecureSkat.cc:1609 SecureSkat.cc:1641
-#: SecureSkat.cc:1681 SecureSkat.cc:1726 SecureSkat.cc:1762 SecureSkat.cc:1821
+#: SecureSkat.cc:1565 SecureSkat.cc:1605 SecureSkat.cc:1647 SecureSkat.cc:1679
+#: SecureSkat.cc:1719 SecureSkat.cc:1764 SecureSkat.cc:1800 SecureSkat.cc:1859
 msgid "observer"
 msgstr "Beobachter"
 
-#: SecureSkat.cc:1529
+#: SecureSkat.cc:1567
 msgid "joins channel"
 msgstr "betritt Kanal"
 
-#: SecureSkat.cc:1542
+#: SecureSkat.cc:1580
 msgid "you join"
 msgstr "Sie betreten"
 
-#: SecureSkat.cc:1556 SecureSkat.cc:1568
+#: SecureSkat.cc:1594 SecureSkat.cc:1606
 msgid "joins"
 msgstr "betritt"
 
-#: SecureSkat.cc:1580
+#: SecureSkat.cc:1618
 msgid "IRC ERROR: join to channel failed"
 msgstr "IRC FEHLER: betreten des Kanals fehlgeschlagen"
 
-#: SecureSkat.cc:1591
+#: SecureSkat.cc:1629
 msgid "you leave channel"
 msgstr "verlasse Kanal"
 
-#: SecureSkat.cc:1603 SecureSkat.cc:1610
+#: SecureSkat.cc:1641 SecureSkat.cc:1648
 msgid "leaves channel"
 msgstr "verläßt Kanal"
 
-#: SecureSkat.cc:1623
+#: SecureSkat.cc:1661
 msgid "you leave"
 msgstr "Sie verlassen"
 
-#: SecureSkat.cc:1637 SecureSkat.cc:1642
+#: SecureSkat.cc:1675 SecureSkat.cc:1680
 msgid "leaves"
 msgstr "verläßt"
 
-#: SecureSkat.cc:1656
+#: SecureSkat.cc:1694
 msgid "you kicked from channel"
 msgstr "Sie werden verwiesen aus dem Kanal"
 
-#: SecureSkat.cc:1657 SecureSkat.cc:1674 SecureSkat.cc:1683
+#: SecureSkat.cc:1695 SecureSkat.cc:1712 SecureSkat.cc:1721
 msgid "by operator"
 msgstr "vom Operator"
 
-#: SecureSkat.cc:1660 SecureSkat.cc:1676 SecureSkat.cc:1685 SecureSkat.cc:1706
-#: SecureSkat.cc:1722 SecureSkat.cc:1729
+#: SecureSkat.cc:1698 SecureSkat.cc:1714 SecureSkat.cc:1723 SecureSkat.cc:1744
+#: SecureSkat.cc:1760 SecureSkat.cc:1767
 msgid "reason"
 msgstr "Grund"
 
-#: SecureSkat.cc:1673 SecureSkat.cc:1682
+#: SecureSkat.cc:1711 SecureSkat.cc:1720
 msgid "kicked from channel"
 msgstr "wird verwiesen aus dem Kanal"
 
-#: SecureSkat.cc:1704
+#: SecureSkat.cc:1742
 msgid "you kicked from"
 msgstr "Sie werden verwiesen aus"
 
-#: SecureSkat.cc:1720 SecureSkat.cc:1727
+#: SecureSkat.cc:1758 SecureSkat.cc:1765
 msgid "kicked from"
 msgstr "wird verwiesen aus"
 
-#: SecureSkat.cc:1738
+#: SecureSkat.cc:1776
 msgid "you quit SecureSkat"
 msgstr "Sie beenden SecureSkat"
 
-#: SecureSkat.cc:1757
+#: SecureSkat.cc:1795
 msgid "quits SecureSkat"
 msgstr "beendet SecureSkat"
 
-#: SecureSkat.cc:1763
+#: SecureSkat.cc:1801
 msgid "quits IRC client"
 msgstr "beendet IRC-Client"
 
-#: SecureSkat.cc:1777
+#: SecureSkat.cc:1815
 msgid "WARNING: host of player"
 msgstr "WARNUNG: Rechner des Spielers"
 
-#: SecureSkat.cc:1779
+#: SecureSkat.cc:1817
 msgid "has unqualified domain (no FQDN)"
 msgstr "hat keine FQDN-Adresse"
 
-#: SecureSkat.cc:1815 SecureSkat.cc:1822
+#: SecureSkat.cc:1853 SecureSkat.cc:1860
 msgid "is in channel"
 msgstr "ist im Kanal"
 
-#: SecureSkat.cc:1845
+#: SecureSkat.cc:1883
 msgid "is at"
 msgstr "ist in"
 
-#: SecureSkat.cc:1896 SecureSkat.cc:1984
+#: SecureSkat.cc:1934 SecureSkat.cc:2022
 msgid "TMCG: verify() failed"
 msgstr "TMCG: verify() [Signaturprüfung] fehlgeschlagen"
 
-#: SecureSkat.cc:1899
+#: SecureSkat.cc:1937
 msgid "TMCG: no public key available"
 msgstr "TCMG: öffentlicher Schlüssel nicht verfügbar"
 
-#: SecureSkat.cc:1957
+#: SecureSkat.cc:1995
 msgid "announces unauthorized session"
 msgstr "bewirbt unerlaubt die Sitzung"
 
-#: SecureSkat.cc:2091
+#: SecureSkat.cc:2131
 msgid "MALLOC ERROR: out of memory"
 msgstr "MALLOC FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2202
+#: SecureSkat.cc:2242
 msgid "RNK ERROR: out of memory"
 msgstr "RNK FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2304
+#: SecureSkat.cc:2344
 msgid "PKI ERROR: out of memory"
 msgstr "PKI FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2478
+#: SecureSkat.cc:2509
 msgid "Internationalization support"
 msgstr "Internationalisierungsunterstützung"
 
-#: SecureSkat.cc:2488
+#: SecureSkat.cc:2519
 msgid "PKI/RNK database directory"
 msgstr "PKI/RNK Datenbankverzeichnis"
 
-#: SecureSkat.cc:2499
+#: SecureSkat.cc:2531
 msgid "Can't create directory!"
 msgstr "Kann Verzeichnis nicht erzeugen!"
 
-#: SecureSkat.cc:2507
+#: SecureSkat.cc:2539
 msgid "Can't get the status of the directory!"
 msgstr "Status des Verzeichnisses nicht verfügbar!"
 
-#: SecureSkat.cc:2516
+#: SecureSkat.cc:2548
 msgid "Path is not a directory!"
 msgstr "Pfad ist kein Verzeichnis!"
 
-#: SecureSkat.cc:2521
+#: SecureSkat.cc:2553
 msgid "Wrong owner of the directory!"
 msgstr "Falscher Eigentümer des Verzeichnisses!"
 
-#: SecureSkat.cc:2527
+#: SecureSkat.cc:2559
 msgid "Missing permissions for directory!"
 msgstr "Fehlende Rechte am Verzeichnis!"
 
-#: SecureSkat.cc:2554
+#: SecureSkat.cc:2588
 msgid "Initialization of LibTMCG failed!"
 msgstr "Initialisierung von LibTMCG fehlgeschlagen!"
 
-#: SecureSkat.cc:2561
+#: SecureSkat.cc:2595
 msgid "Your key fingerprint"
 msgstr "Ihr Schlüsselfingerabdruck"
 
-#: SecureSkat.cc:2570 SecureSkat.cc:2591
+#: SecureSkat.cc:2620 SecureSkat.cc:2652
 msgid "Usage"
 msgstr "Benutzung"
 
-#: SecureSkat.cc:2571
+#: SecureSkat.cc:2621
 msgid "type /help for the command list or read the file README"
 msgstr "/help zeigt die Liste der Kommandos an (README lesen)"
 

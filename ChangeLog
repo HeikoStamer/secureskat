@@ -1,6 +1,7 @@
 SecureSkat 2.9:
     - massive code cleanup
-    -
+    - removed obsolete GnuTLS dependency
+    - bugfix ranking statistics (command /rank) introduced in 2.8
 SecureSkat 2.8:
     - added a message delay to avoid kick off (e.g. irc.freenode.net)
     - removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
