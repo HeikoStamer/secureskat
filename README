@@ -55,6 +55,7 @@ Requirements
   + GNU/Linux (Debian 3.1)      i686        gcc 3.3.5
   + GNU/Linux (Debian 4.0)      i686        gcc 4.1.2
   + SunOS 5.10, Solaris 10      sparc       gcc 3.4.3
+  + GNU/Linux (Gentoo Linux)    i686        gcc 4.3.3
 
 Build & Install
 ---------------
