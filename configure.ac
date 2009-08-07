@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.63 $)
+AC_REVISION($Revision: 1.64 $)
 AC_PREREQ(2.57)
 
 AC_INIT(SecureSkat, 2.9, stamer@gaos.org)
@@ -57,9 +57,9 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.1.1")
+AM_PATH_LIBTMCG("1.1.2")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.1.1 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.1.2 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
@@ -87,7 +87,7 @@ AC_CHECK_HEADERS([arpa/inet.h cassert cctype cerrno csignal cstdio cstdlib\
  cstdarg cstring ctime fcntl.h netdb.h netinet/in.h sys/socket.h sys/stat.h\
  sys/wait.h termios.h unistd.h algorithm fstream iostream list map sstream\
  string vector zlib.h gdbm.h readline/readline.h readline/history.h], ,\
- AC_MSG_ERROR([headers are missing]))
+ AC_MSG_ERROR([some C/C++ headers are missing]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -106,14 +106,15 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
- recv], , AC_MSG_ERROR([functions are missing]))
+ recv], , AC_MSG_ERROR([some C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-#CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and install SecureSkat."
+
