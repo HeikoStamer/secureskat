@@ -1,3 +1,6 @@
+SecureSkat 2.10:
+    - 
+
 SecureSkat 2.9:
     - massive code cleanup
     - removed obsolete GnuTLS dependency

@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.64 $)
+AC_REVISION($Revision: 1.65 $)
 AC_PREREQ(2.57)
 
-AC_INIT(SecureSkat, 2.9, stamer@gaos.org)
+AC_INIT(SecureSkat, 2.10, stamer@gaos.org)
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
 AC_LANG(C++)
 AC_CONFIG_SRCDIR(SecureSkat.cc)
@@ -108,10 +108,10 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
  recv], , AC_MSG_ERROR([some C functions are missing]))
 
-##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
