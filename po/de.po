@@ -1,14 +1,14 @@
 # German translations for SecureSkat package
 # German messages for SecureSkat.
-# Copyright (C) 2005, 2006 Heiko Stamer <stamer@gaos.org>
+# Copyright (C) 2005, 2006, 2009 Heiko Stamer <stamer@gaos.org>
 # This file is distributed under the same license as the SecureSkat package.
-# Heiko Stamer <stamer@gaos.org>, 2005, 2006.
+# Heiko Stamer <stamer@gaos.org>, 2005, 2006, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SecureSkat 2.9\n"
+"Project-Id-Version: SecureSkat 2.10\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2009-08-06 10:05+0200\n"
+"POT-Creation-Date: 2009-10-05 20:59+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -619,19 +619,19 @@ msgstr "bekommt das Spiel bei"
 
 #: SecureSkat_game.cc:1039 SecureSkat_game.cc:1051 SecureSkat_game.cc:1057
 #: SecureSkat_game.cc:1082 SecureSkat_game.cc:1093 SecureSkat_game.cc:1101
-#: SecureSkat_game.cc:1110 SecureSkat_game.cc:1116 SecureSkat_vote.cc:619
-#: SecureSkat_vote.cc:630 SecureSkat_vote.cc:653 SecureSkat_vote.cc:665
+#: SecureSkat_game.cc:1110 SecureSkat_game.cc:1116 SecureSkat_vote.cc:625
+#: SecureSkat_vote.cc:636 SecureSkat_vote.cc:659 SecureSkat_vote.cc:671
 msgid "VTMF ERROR"
 msgstr "VTMF FEHLER"
 
 #: SecureSkat_game.cc:1040 SecureSkat_game.cc:1083 SecureSkat_game.cc:1147
-#: SecureSkat_game.cc:1188 SecureSkat_vote.cc:620 SecureSkat_vote.cc:654
+#: SecureSkat_game.cc:1188 SecureSkat_vote.cc:626 SecureSkat_vote.cc:660
 msgid "function CheckGroup() failed"
 msgstr "Funktion CheckGroup() fehlgeschlagen"
 
 #: SecureSkat_game.cc:1052 SecureSkat_game.cc:1058 SecureSkat_game.cc:1094
 #: SecureSkat_game.cc:1102 SecureSkat_game.cc:1111 SecureSkat_game.cc:1117
-#: SecureSkat_vote.cc:631 SecureSkat_vote.cc:666
+#: SecureSkat_vote.cc:637 SecureSkat_vote.cc:672
 msgid "function KeyGenerationProtocol_UpdateKey() failed"
 msgstr "Funktion KeyGenerationProtocol_UpdateKey() fehlgeschlagen"
 
@@ -900,7 +900,7 @@ msgstr "Unterschrift von"
 msgid "is invalid"
 msgstr "ist ungültig"
 
-#: SecureSkat_vote.cc:104 SecureSkat_vote.cc:239 SecureSkat_vote.cc:476
+#: SecureSkat_vote.cc:104 SecureSkat_vote.cc:239 SecureSkat_vote.cc:482
 msgid "room completely occupied"
 msgstr "Raum ist vollständig belegt"
 
@@ -920,7 +920,7 @@ msgstr "Schlüsselaustausch mit"
 msgid "is incomplete"
 msgstr "unvollständig"
 
-#: SecureSkat_vote.cc:174 SecureSkat_vote.cc:208 SecureSkat_vote.cc:304
+#: SecureSkat_vote.cc:174 SecureSkat_vote.cc:208 SecureSkat_vote.cc:310
 msgid "Room"
 msgstr "Raum"
 
@@ -948,40 +948,48 @@ msgstr "ABSTIMMUNG"
 msgid "has voted"
 msgstr "hat gestimmt"
 
-#: SecureSkat_vote.cc:290
+#: SecureSkat_vote.cc:292
 msgid "BALLOT: you voted for value r = "
 msgstr "ABSTIMMUNG: Sie haben gestimmt für r = "
 
-#: SecureSkat_vote.cc:299
-msgid "BALLOT ERROR: already voted or bad value <r> "
-msgstr "BALLOT FEHLER: bereits gestimmt oder fehlerhafter Wert <r> "
+#: SecureSkat_vote.cc:300
+msgid "BALLOT: changed your vote to r = "
+msgstr "ABSTIMMUNG: Sie haben gestimmt für r = "
 
-#: SecureSkat_vote.cc:305 SecureSkat_skat.cc:549
+#: SecureSkat_vote.cc:305
+msgid "BALLOT ERROR: value of your vote is out of range "
+msgstr "BALLOT FEHLER: Wert liegt außerhalb des zulässigen Bereichs "
+
+#: SecureSkat_vote.cc:306
+msgid "try again"
+msgstr "Neu eingeben!"
+
+#: SecureSkat_vote.cc:311 SecureSkat_skat.cc:549
 msgid "establishing secure channels"
 msgstr "richtet sichere Kanäle ein"
 
-#: SecureSkat_vote.cc:410 SecureSkat_vote.cc:585 SecureSkat_skat.cc:103
+#: SecureSkat_vote.cc:416 SecureSkat_vote.cc:591 SecureSkat_skat.cc:103
 #: SecureSkat_skat.cc:197
 msgid "TMCG: decrypt() failed"
 msgstr "TMCG: decrypt() [Entschlüsselung] fehlgeschlagen"
 
-#: SecureSkat_vote.cc:632 SecureSkat_vote.cc:667
+#: SecureSkat_vote.cc:638 SecureSkat_vote.cc:673
 msgid "for"
 msgstr "für"
 
-#: SecureSkat_vote.cc:703
+#: SecureSkat_vote.cc:709
 msgid "BALLOT ERROR: bad card from "
 msgstr "BALLOT FEHLER: fehlerhafte Karte von "
 
-#: SecureSkat_vote.cc:743 SecureSkat_vote.cc:790
+#: SecureSkat_vote.cc:749 SecureSkat_vote.cc:796
 msgid "BALLOT ERROR: bad ZNP from "
 msgstr "BALLOT FEHLER: fehlerhafter ZN-Beweis von "
 
-#: SecureSkat_vote.cc:752
+#: SecureSkat_vote.cc:758
 msgid "BALLOT ERROR: bad stack from "
 msgstr "BALLOT FEHLER: fehlerhafter Stapel von "
 
-#: SecureSkat_vote.cc:812
+#: SecureSkat_vote.cc:818
 msgid "BALLOT RESULT:"
 msgstr "ABSTIMMUNGSERGEBNIS:"
 

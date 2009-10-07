@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007, 2009  Heiko Stamer <stamer@gaos.org>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -284,27 +284,33 @@ int ballot_child
 			
 			if ((msg.find("VOTE", 0) == 0) || (msg.find("vote", 0) == 0))
 			{
-				vote = atoi(vstr.c_str());
-				if  (!has_voted && (vote < b_pow))
-				{
-					std::cout << XX << _("BALLOT: you voted for value r = ") << 
-						vote << std::endl;
-					*out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << 
-						" :VOTE" << std::endl << std::flush;
-					gp_voters.push_back(vnicks[pkr_self]);
-					has_voted = true;
-				}
+        vote = atoi(vstr.c_str());
+        if (vote < b_pow)
+        {
+          if  (!has_voted)
+          {
+            std::cout << XX << _("BALLOT: you voted for value r = ") << 
+              vote << std::endl;
+            *out_pipe << "PRIVMSG " << MAIN_CHANNEL_UNDERSCORE << nr << 
+              " :VOTE" << std::endl << std::flush;
+            gp_voters.push_back(vnicks[pkr_self]);
+            has_voted = true;
+          }
+          else
+            std::cout << XX << _("BALLOT: changed your vote to r = ") << 
+              vote << std::endl;
+        }
 				else
 					std::cout << XX << 
-						_("BALLOT ERROR: already voted or bad value <r> ") << 
-						"(0 <= r < " << b_pow << ")" << std::endl;
+						_("BALLOT ERROR: value of your vote is out of range ") << 
+						"(0 <= r < " << b_pow << ") " << _("try again") << std::endl;
 			}
 		}
 	}
 	std::cout << X << _("Room") << " " << nr << " " <<
 		_("establishing secure channels") << " ..." << std::endl;
 	
-	// FIXME: the following part contains race conditions
+	// FIXME: the following part still contains some race conditions
 	
 	fd_set rfds;									// set of read descriptors
 	int mfds = 0;									// highest-numbered descriptor

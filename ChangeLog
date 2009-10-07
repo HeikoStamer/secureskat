@@ -1,10 +1,10 @@
 SecureSkat 2.10:
-    - 
+    - permit changing a vote by using /<room> vote <value> multiple times 
 
 SecureSkat 2.9:
     - massive code cleanup
     - removed obsolete GnuTLS dependency
-    - bugfix ranking statistics (command /rank); bug introduced in 2.8
+    - bugfix ranking statistics (command /rank); bug was introduced in 2.8
 SecureSkat 2.8:
     - added a message delay to avoid kick off (e.g. irc.freenode.net)
     - removed obsolete stuff (ABHEBEN, COMMON_DDH_GROUP, old PBKDF)
@@ -14,7 +14,7 @@ SecureSkat 2.8:
     - removed obsolete command line argument SECURITY_LEVEL (default=80)
 SecureSkat 2.7:
     - we're now using Groth's protocol for the verifiable secret shuffle
-      (improves the performance and communication complexity significantly)
+      (this improves performance and communication complexity significantly)
     - Null-games are now aborted immediately, if lost by the playing party
     - added an alternative table announcement (PRIVMSG to channel), because
       some IRC servers (e.g. freenode.net) are blocking PRIVMSG to users
