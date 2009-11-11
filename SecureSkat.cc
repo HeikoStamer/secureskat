@@ -2492,7 +2492,7 @@ int main(int argc, char* argv[], char* envp[])
     std::cout << PACKAGE_STRING <<
         ", (c) 2002--2009  Heiko Stamer <stamer@gaos.org>, License: GPLv2" << 
         std::endl <<
-        " $Id: SecureSkat.cc,v 1.59 2009/06/11 08:27:45 stamer Exp $ " << 
+        " $Id: SecureSkat.cc,v 1.60 2009/11/11 19:08:37 stamer Exp $ " << 
         std::endl;
 	
 #ifdef ENABLE_NLS
@@ -2571,7 +2571,7 @@ int main(int argc, char* argv[], char* envp[])
         // set the default values
         game_ctl = "";
         game_env = NULL;
-		
+
         // evaluate the provided command switches to override the defaults
         switch (argc)
         {
@@ -2588,6 +2588,9 @@ int main(int argc, char* argv[], char* envp[])
             std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
             return EXIT_FAILURE;
         }
+        // display version of LibTMCG
+        std::cout << "++ " << _("Initialization of LibTMCG version") << ": " << 
+          version_libTMCG() << std::endl;
 
         // key management		
         get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
