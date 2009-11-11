@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.10\n"
 "Report-Msgid-Bugs-To: stamer@gaos.org\n"
-"POT-Creation-Date: 2009-10-05 20:59+0200\n"
+"POT-Creation-Date: 2009-11-11 20:10+0100\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -516,15 +516,19 @@ msgstr "Fehlende Rechte am Verzeichnis!"
 msgid "Initialization of LibTMCG failed!"
 msgstr "Initialisierung von LibTMCG fehlgeschlagen!"
 
-#: SecureSkat.cc:2595
+#: SecureSkat.cc:2592
+msgid "Initialization of LibTMCG version"
+msgstr "Initialisierung von LibTMCG Version"
+
+#: SecureSkat.cc:2598
 msgid "Your key fingerprint"
 msgstr "Ihr Schlüsselfingerabdruck"
 
-#: SecureSkat.cc:2620 SecureSkat.cc:2652
+#: SecureSkat.cc:2623 SecureSkat.cc:2655
 msgid "Usage"
 msgstr "Benutzung"
 
-#: SecureSkat.cc:2621
+#: SecureSkat.cc:2624
 msgid "type /help for the command list or read the file README"
 msgstr "/help zeigt die Liste der Kommandos an (README lesen)"
 

@@ -2492,7 +2492,7 @@ int main(int argc, char* argv[], char* envp[])
     std::cout << PACKAGE_STRING <<
         ", (c) 2002--2009  Heiko Stamer <stamer@gaos.org>, License: GPLv2" << 
         std::endl <<
-        " $Id: SecureSkat.cc,v 1.60 2009/11/11 19:08:37 stamer Exp $ " << 
+        " $Id: SecureSkat.cc,v 1.61 2009/11/11 19:13:37 stamer Exp $ " << 
         std::endl;
 	
 #ifdef ENABLE_NLS
@@ -2589,7 +2589,7 @@ int main(int argc, char* argv[], char* envp[])
             return EXIT_FAILURE;
         }
         // display version of LibTMCG
-        std::cout << "++ " << _("Initialization of LibTMCG version") << ": " << 
+        std::cout << "++ " << _("Initialization of LibTMCG version") << " " << 
           version_libTMCG() << std::endl;
 
         // key management		
