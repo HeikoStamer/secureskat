@@ -2,10 +2,10 @@
 AC_REVISION($Revision: 1.65 $)
 AC_PREREQ(2.57)
 
-AC_INIT(SecureSkat, 2.10, stamer@gaos.org)
-AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
+AC_INIT([SecureSkat], [2.10])
 AC_LANG(C++)
-AC_CONFIG_SRCDIR(SecureSkat.cc)
+AC_CONFIG_SRCDIR([SecureSkat.cc])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE_NAME")
@@ -106,7 +106,7 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
- recv], , AC_MSG_ERROR([some C functions are missing]))
+ recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
 CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
