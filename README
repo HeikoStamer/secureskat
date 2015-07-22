@@ -1,4 +1,5 @@
-Copyright (C)  2002,2003,2004,2005,2006,2007,2009 Heiko Stamer <stamer@gaos.org>
+Copyright (C)  2002,2003,2004,2005,2006,2007,
+               2009,2015                      Heiko Stamer <HeikoStamer@gmx.net>
   Permission is granted to copy, distribute and/or modify this document
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
@@ -27,7 +28,7 @@ Requirements
 ------------
 
   You need the following libraries and appropriate header files to build
-  (GCC version >= 3.3.x is recommended) `SecureSkat' successfully:
+  (GCC version >= 4.x.y is recommended) `SecureSkat' successfully:
 
   * Toolbox for Mental Card Games (LibTMCG), version >= 1.1.1
     http://www.nongnu.org/libtmcg/
@@ -56,6 +57,7 @@ Requirements
   + GNU/Linux (Debian 4.0)      i686        gcc 4.1.2
   + SunOS 5.10, Solaris 10      sparc       gcc 3.4.3
   + GNU/Linux (Gentoo Linux)    i686        gcc 4.3.3
+  + GNU/Linux (Gentoo Linux)    x86_64      gcc 4.9.3
 
 Build & Install
 ---------------
@@ -160,19 +162,20 @@ Playing SecureSkat over an IRC network
   convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
 
-Bugs, Contribution, CVS
+Bugs, Contribution, GIT
 -----------------------
 
   If you want to contribute, please send your detailed bug reports to
   Heiko Stamer <stamer@gaos.org>.
 
-  You can get the latest sources from our CVS repository at GNU/Savannah.
+  You can get the latest sources from our GIT repository at GNU/Savannah.
 
 
 Copyright and License of this software
 --------------------------------------
 
-  (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009  Heiko Stamer <stamer@gaos.org>
+  (C) 2002, 2003, 2004, 2005, 2006, 2007, 
+      2009, 2015                          Heiko Stamer <HeikoStamer@gmx.net>
       GNU General Public License version 2
 
   Please have a look at the file 'COPYING' and http://www.fsf.org/.
@@ -182,13 +185,11 @@ References
 
 [1] Heiko Stamer. Kryptographische Skatrunde. (in German)
     Offene Systeme, Number 4, pp. 10--30, 2004, ISSN 1619-0114.
-    http://gaos.org/~stamer/OS-4-2004-openskat_rev2005.pdf
 
 [2] Heiko Stamer. Efficient Electronic Gambling: An Extended Implementation
     of the Toolbox for Mental Card Games.
     Proceedings of the Western European Workshop on Research in
     Cryptology (WEWoRC 2005), LNI P-75, pp. 1--12, 2005.
-    http://gaos.org/~stamer/WEWoRC2005_proc.pdf
 
 Appendix
 ========
