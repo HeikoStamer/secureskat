@@ -1,8 +1,8 @@
 /*******************************************************************************
    SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009
-               Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2016
+               Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -288,7 +288,7 @@ void pipe_irc(const std::string &irc_message)
                         std::endl << std::flush;
                 }
                 // Additionally, send the announcement to the main channel,
-				// because some IRC servers (e.g. freenode.net) may block
+		// because some IRC servers (e.g. freenode.net) may block
                 // private messages of unregistered users.
                 *irc << "PRIVMSG " << MAIN_CHANNEL << " :" << irc_parvec[1] << 
                     "~+~" << std::endl << std::flush;
@@ -348,124 +348,113 @@ void pipe_irc(const std::string &irc_message)
 
 void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 {
-    std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed
-    for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); 
-        pi != read_pipe.end(); pi++)
+	std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed
+	for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); pi != read_pipe.end(); pi++)
 	{
-        int fd = pi->second;    // file descriptor of the pipe
-        size_t rbs = 65536;     // size of the read buffer
-        if ((fd >= 0) && FD_ISSET(fd, &rfds))
-        {
-            if (readbuf.find(fd) == readbuf.end())
+		int fd = pi->second;    // file descriptor of the pipe
+		size_t rbs = 65536;     // size of the read buffer
+		if ((fd >= 0) && FD_ISSET(fd, &rfds))
+		{
+			if (readbuf.find(fd) == readbuf.end())
 			{
-                // allocate a new read buffer for the pipe, if not exists
-                readbuf[fd] = new char[rbs];
-                // read buffer offset
-                readed[fd] = 0;
-            }
-			ssize_t num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
-            readed[fd] += num;
-            if (num == 0)
-                del_pipe.push_back(pi->first); // close this pipe later
-            if (readed[fd] > 0)
-            {
-                std::vector<int> pos_delim; // positions of line delimiters
-                int cnt_delim = 0, cnt_pos = 0, pos = 0;
-                for (int i = 0; i < readed[fd]; i++)
-                    if (readbuf[fd][i] == '\n')
-                        cnt_delim++, pos_delim.push_back(i);
-                switch (what)
-                {
-                    case 1: // update of ranking data from RNK childs
-                        while (cnt_delim >= 2)
-                        {
-                            char *tmp = new char[rbs];
-                            std::memset(tmp, 0, rbs);
-                            std::memcpy(tmp, readbuf[fd] + cnt_pos,
-                                pos_delim[pos] - cnt_pos);
-                            --cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-                            std::string rnk1 = tmp;
+				// allocate a new read buffer for the pipe, if not exists
+				readbuf[fd] = new char[rbs];
+				// read buffer offset
+				readed[fd] = 0;
+			}
+			// read data from pipe
+			ssize_t num = 0;
+			if ((rbs - readed[fd]) > 0)
+			{
+				num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
+				readed[fd] += num;
+				if (num == 0)
+					del_pipe.push_back(pi->first); // close this pipe later
+			}
+			// process data
+			if (readed[fd] > 0)
+			{
+				std::vector<int> pos_delim; // positions of line delimiters
+				int cnt_delim = 0, cnt_pos = 0, pos = 0;
+				for (int i = 0; i < readed[fd]; i++)
+					if (readbuf[fd][i] == '\n')
+						cnt_delim++, pos_delim.push_back(i);
+				char *tmp = new char[rbs]; // allocate temporary buffer of size rbs
+				switch (what)
+				{
+					case 1: // update of ranking data from RNK childs
+						while (cnt_delim >= 2)
+						{
 							std::memset(tmp, 0, rbs);
-							std::memcpy(tmp, readbuf[fd] + cnt_pos,
-								pos_delim[pos] - cnt_pos);
-							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::memcpy(tmp, readbuf[fd] + cnt_pos, pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::string rnk1 = tmp;
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos, pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string rnk2 = tmp;
 							// do operation
 							rnk[rnk1] = rnk2;
-                            delete [] tmp;
 						}
 						break;
 					case 2: // IRC output from game childs
 						while (cnt_delim >= 1)
 						{
-							char *tmp = new char[rbs];
 							std::memset(tmp, 0, rbs);
-							std::memcpy(tmp, readbuf[fd] + cnt_pos,
-								pos_delim[pos] - cnt_pos);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos, pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string irc1 = tmp;
-
 //std::cerr << "to IRC: " << irc1 << std::endl;
-
 							pipe_irc(irc1);
-                            delete [] tmp;
 						}
 						break;
 					case 3: // import from PKI childs
 						while (cnt_delim >= 2)
 						{
-							char *tmp = new char[rbs];
 							std::memset(tmp, 0, rbs);
-							std::memcpy(tmp, readbuf[fd] + cnt_pos,
-								pos_delim[pos] - cnt_pos);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos, pos_delim[pos] - cnt_pos);
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string pki1 = tmp;
 							std::memset(tmp, 0, rbs);
-							std::memcpy(tmp, readbuf[fd] + cnt_pos,
-								pos_delim[pos] - cnt_pos);
-							cnt_delim--, cnt_pos = pos_delim[pos] + 1, pos++;
+							std::memcpy(tmp, readbuf[fd] + cnt_pos, pos_delim[pos] - cnt_pos);
+							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string pki2 = tmp;
 							// do operation
 							TMCG_PublicKey apkey;
 							if (!apkey.import(pki2))
 							{
-								std::cerr << _("TMCG: public key corrupted") <<
-                                    std::endl;
+								std::cerr << _("TMCG: public key corrupted") << std::endl;
 							}
 							else if (pki1 != apkey.keyid(5))
 							{
-								std::cerr << _("TMCG: wrong public key") <<
-                                    std::endl;
-                                std::cerr << pki1 << " vs. " << 
-                                    apkey.keyid(5) << std::endl;
+								std::cerr << _("TMCG: wrong public key") << std::endl;
+								std::cerr << pki1 << " vs. " << apkey.keyid(5) << std::endl;
 							}
 							else
 							{
 								std::cout << X << "PKI " << _("identified") <<
 									" \"" << pki1 << "\" " << "aka \"" << 
-                                    apkey.name << "\" <" << apkey.email << 
-                                    ">" << std::endl;
+									apkey.name << "\" <" << apkey.email << 
+									">" << std::endl;
 								nick_key[pki1] = apkey;
 							}
-                            delete [] tmp;
 						}
 						break;
 					default:
 						break;
 				} // end of switch
-				char *tmp = new char[rbs];
 				std::memset(tmp, 0, rbs);
 				readed[fd] -= cnt_pos;
 				std::memcpy(tmp, readbuf[fd] + cnt_pos, readed[fd]);
 				std::memcpy(readbuf[fd], tmp, readed[fd]);
-                delete [] tmp;
+				delete [] tmp;
 			}
 		}
 	}
-    // close dead pipes
+	// close dead pipes
 	for (size_t i = 0; i < del_pipe.size(); i++)
 	{
-        int fd = read_pipe[del_pipe[i]]; // file descriptor of the pipe
+		int fd = read_pipe[del_pipe[i]]; // file descriptor of the pipe
 		if (close(fd) < 0)
 			perror("read_after_select (close)");
 		delete [] readbuf[fd];
@@ -584,7 +573,7 @@ static void process_line(char *line)
             
 			// temporarily add the own public key
 			nick_key[pub.keyid(5)] = pub;
-            // parse the obtained RNK data
+			// parse the obtained RNK data
 			for (std::map<std::string, std::string>::const_iterator ri = 
 				rnk.begin(); ri != rnk.end(); ri++)
 			{
@@ -594,7 +583,7 @@ static void process_line(char *line)
 				std::string s = ri->second;
 				size_t ei;
 				
-                prt_counter++;
+				prt_counter++;
 				// header
 				if ((ei = s.find("#", 0)) != s.npos)
 				{
@@ -684,7 +673,7 @@ static void process_line(char *line)
 				else
 					continue;
 				if ((tk_header != "prt") ||
-                    // FIXME: sigid is ID8, but nick is ID5
+					// FIXME: sigid is ID8, but nick is ID5
 					//(tk_nick[0] != pub.sigid(tk_sig1)) ||
 					//(tk_nick[1] != pub.sigid(tk_sig2)) ||
 					//(tk_nick[2] != pub.sigid(tk_sig3)) ||
@@ -701,7 +690,7 @@ static void process_line(char *line)
 					continue;
 				if (!nick_key[tk_nick[2]].verify(sig_data, tk_sig3))
 					continue;
-                prt_counter_valid++;
+				prt_counter_valid++;
 				std::list<std::string> gp_l;
 				std::string gp_s = "";
 				for (size_t j = 0; j < 3; j++)
@@ -747,8 +736,8 @@ static void process_line(char *line)
 					}
 				}
 			}
-            std::cout << prt_counter_valid << " out of " << prt_counter <<
-                " game protocols are valid." << std::endl;
+			std::cout << prt_counter_valid << " out of " << prt_counter <<
+				" game protocols are valid." << std::endl;
 			// Berechnen der Leistungspunkte (Erweitertes Seeger-System)
 			for (size_t j = 0; j < 3; j++)
 			{
@@ -811,7 +800,7 @@ static void process_line(char *line)
 					std::cout << "+----+ " << std::endl;
 				}
 			}
-            // remove the temporarily added key
+			// remove the temporarily added key
 			nick_key.erase(pub.keyid(5));
 		}
 		else if (cmd_argv[0] == "skat")
@@ -967,8 +956,7 @@ static void process_line(char *line)
 								int ret = ballot_child(tnr, b, true, in_pipe[0], out_pipe[1],
 									pub.keyid(5));
 #ifndef NDEBUG
-                                std::cerr << "ballot_child() = " << ret << 
-                                    std::endl;
+std::cerr << "ballot_child() = " << ret << std::endl;
 #endif
 								sleep(1);
 								if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -1025,8 +1013,7 @@ static void process_line(char *line)
 									int ret = ballot_child(tnr, -tables_r[tnr], false,
 										in_pipe[0], out_pipe[1], tables_o[tnr]);
 #ifndef NDEBUG
-                                    std::cerr << "ballot_child() = " << ret << 
-                                        std::endl;
+std::cerr << "ballot_child() = " << ret << std::endl;
 #endif
 									sleep(1);
 									if ((close(out_pipe[1]) < 0) || (close(in_pipe[0]) < 0))
@@ -1374,8 +1361,8 @@ void run_irc()
 				}
 			}
 			
-            // PKI (export public key on port 7771)
-            // -----------------------------------------------------------------
+			// PKI (export public key on port 7771)
+			// -----------------------------------------------------------------
 			if (FD_ISSET(pki7771_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1397,8 +1384,8 @@ void run_irc()
 				}
 			}
 			
-            // RNK (get rank entry on port 7774)
-            // -----------------------------------------------------------------
+			// RNK (get rank entry on port 7774)
+			// -----------------------------------------------------------------
 			if (FD_ISSET(rnk7774_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1434,14 +1421,12 @@ void run_irc()
 							signal(SIGTERM, SIG_DFL);
 							
 							/* BEGIN child code (ranking data) */
-							iosocketstream *client_ios =
-                                new iosocketstream(client_handle);
+							iosocketstream *client_ios = new iosocketstream(client_handle);
 							char *tmp = new char[100000L];
 							client_ios->getline(tmp, 100000L);
 							
 							if (rnk.find(tmp) != rnk.end())
-								*client_ios << rnk[tmp] << std::endl << 
-                                    std::flush;
+								*client_ios << rnk[tmp] << std::endl << std::flush;
 							else
 								*client_ios << std::endl << std::flush;
 							delete client_ios, delete [] tmp;
@@ -1459,16 +1444,16 @@ void run_irc()
 			}
 			
 #ifndef NOHUP
-            // read from stdin
-            // -----------------------------------------------------------------
+			// read from stdin
+			// -----------------------------------------------------------------
 			if (FD_ISSET(fileno(stdin), &rfds))
 			{
 				rl_callback_read_char();
 			}
 #endif
 			
-            // read from IRC connection
-            // -----------------------------------------------------------------
+			// read from IRC connection
+			// -----------------------------------------------------------------
 			if (FD_ISSET(irc_handle, &rfds))
 			{
 				ssize_t num = read(irc_handle, irc_readbuf + irc_readed, 
@@ -1477,9 +1462,7 @@ void run_irc()
 				
 				if (num == 0)
 				{
-					std::cerr <<
-                        _("IRC ERROR: connection with server collapsed") <<
-                        std::endl;
+					std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
 					break;
 				}
 				
@@ -1493,22 +1476,20 @@ void run_irc()
 							cnt_delim++, pos_delim.push_back(i);
 						if (irc_readbuf[i] == '\015')
 							irc_readbuf[i] = '\n', cnt_delim++, 
-                                pos_delim.push_back(i);
+						pos_delim.push_back(i);
 					}
 					while (cnt_delim >= 1)
 					{
 						char tmp[65536];
 						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, irc_readbuf + cnt_pos, 
-                               pos_delim[pos] - cnt_pos);
+						memcpy(tmp, irc_readbuf + cnt_pos, pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string irc_reply = tmp;
 				
 				// parse NICK and HOST from IRC prefix
 				std::string pfx = irc_prefix(irc_reply);
 				std::string nick = "?", host = "?";
-				if ((pfx.find("!", 0) != pfx.npos) && 
-                    (pfx.find("@", 0) != pfx.npos))
+				if ((pfx.find("!", 0) != pfx.npos) && (pfx.find("@", 0) != pfx.npos))
 				{
 					nick = pfx.substr(0, pfx.find("!", 0));
 					host = pfx.substr(pfx.find("@", 0) + 1, 
@@ -1519,8 +1500,7 @@ void run_irc()
 				std::vector<std::string> irc_parvec;
 				if (irc_command_cmp(irc_reply, "PING"))
 				{
-					*irc << "PONG " << irc_params(irc_reply) << std::endl <<
-                        std::flush;
+					*irc << "PONG " << irc_params(irc_reply) << std::endl << std::flush;
 				} // USER success reply
 				else if (irc_command_cmp(irc_reply, "001"))
 				{
@@ -1536,9 +1516,7 @@ void run_irc()
 					irc_command_cmp(irc_reply, "466") ||
 					irc_command_cmp(irc_reply, "468"))
 				{
-					std::cerr << 
-                        _("IRC ERROR: not registered at IRC server") << 
-                        std::endl;
+					std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
 					std::cerr << irc_reply << std::endl;
 					irc_quit = 1;
 					break;
@@ -1556,8 +1534,7 @@ void run_irc()
 							}
 							else if (nick.find(public_prefix, 0) == 0)
 							{
-								*irc << "WHO " << irc_parvec[0] << std::endl << 
-                                    std::flush;
+								*irc << "WHO " << irc_parvec[0] << std::endl << std::flush;
 							}
 							else
 							{
@@ -2086,7 +2063,7 @@ void run_irc()
 				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
 					pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
 				std::string uname = pub.keyid(5);
-                // create a "unique" username based on the nickname
+				// create a "unique" username based on the nickname
 				if (uname.length() > 4)
 				{
 					std::string uname2 = "os";
@@ -2368,7 +2345,7 @@ void run_irc()
 								exit(-3);
 							}
 							
-							// check the NIZK
+							// check the self-signature and NIZK
 							if (!pkey.check())
 							{
 								std::cerr << _("TMCG: invalid public key") << std::endl;
@@ -2490,9 +2467,7 @@ int main(int argc, char* argv[], char* envp[])
     char *home = NULL;
     std::string homedir = "";
     std::cout << PACKAGE_STRING <<
-        ", (c) 2002--2009  Heiko Stamer <stamer@gaos.org>, License: GPLv2" << 
-        std::endl <<
-        " $Id: SecureSkat.cc,v 1.61 2009/11/11 19:13:37 stamer Exp $ " << 
+        ", (c) 2016  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << 
         std::endl;
 	
 #ifdef ENABLE_NLS
