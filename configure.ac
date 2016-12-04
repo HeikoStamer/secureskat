@@ -1,11 +1,30 @@
+# Copyright (C) 2016  Heiko Stamer <HeikoStamer@gmx.net>
+#
+# This file is part of SecureSkat.
+#
+# LibTMCG is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser general Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# LibTMCG is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with LibTMCG; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
 # Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision: 1.65 $)
+AC_REVISION(20161204)
 AC_PREREQ(2.57)
 
 AC_INIT([SecureSkat], [2.10])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
+AC_CONFIG_MACRO_DIRS([m4])
 AM_CONFIG_HEADER(config.h)
 
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE_NAME")
@@ -57,9 +76,9 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.1.2")
+AM_PATH_LIBTMCG("1.2.0")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.1.2 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.2.0 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
