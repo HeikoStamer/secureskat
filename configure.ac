@@ -69,9 +69,9 @@ AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
 
-AM_PATH_LIBGCRYPT("1.2.0")
+AM_PATH_LIBGCRYPT("1.6.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
-	AC_MSG_ERROR([libgcrypt >= 1.2.0 is needed])
+	AC_MSG_ERROR([libgcrypt >= 1.6.0 is needed])
 fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
