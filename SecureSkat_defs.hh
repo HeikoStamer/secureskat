@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2009  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007, 2009, 2016  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,11 +20,6 @@
 
 #ifndef INCLUDED_SecureSkat_defs_HH
     #define INCLUDED_SecureSkat_defs_HH
-
-    // autoconf header
-    #ifdef HAVE_CONFIG_H
-        #include "config.h"
-    #endif
 
     // C and C++ header
     #include <arpa/inet.h>
@@ -76,6 +71,19 @@
 
     // LibTMCG
     #include <libTMCG.hh>
+
+    // autoconf header
+    #ifdef HAVE_CONFIG_H
+	#undef PACKAGE
+	#undef PACKAGE_BUGREPORT
+	#undef PACKAGE_NAME
+	#undef PACKAGE_STRING
+	#undef PACKAGE_TARNAME
+	#undef PACKAGE_URL
+	#undef PACKAGE_VERSION
+	#undef VERSION
+        #include "config.h"
+    #endif
 
     // Internationalization
     #ifdef ENABLE_NLS
