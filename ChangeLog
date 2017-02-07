@@ -1,7 +1,7 @@
 SecureSkat 2.10:
     - permit changing a vote by using /<room> vote <value> multiple times
     - call version_LibTMCG() to display the version of LibTMCG upon startup
-    - check for LibTMCG 1.2.0: using the improved security parameters
+    - check for LibTMCG 1.3.0: using the improved security parameters
 
 SecureSkat 2.9:
     - massive code cleanup

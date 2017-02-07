@@ -1,4 +1,4 @@
-# Copyright (C) 2016  Heiko Stamer <HeikoStamer@gmx.net>
+# Copyright (C) 2016, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 #
 # This file is part of SecureSkat.
 #
@@ -17,15 +17,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION(20161204)
-AC_PREREQ(2.57)
+AC_REVISION(20170207)
+AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [2.10])
+AC_INIT([SecureSkat], [2.10], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIRS([m4])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE_NAME")
 AC_DEFINE_UNQUOTED(VERSION, "$PACKAGE_VERSION")
@@ -49,25 +49,38 @@ if test "$use_autojoin" = yes ; then
 	AC_DEFINE(AUTOJOIN, , [Define to have the AUTOJOIN behaviour])
 fi
 
+# Checks for Libtool
+LT_PREREQ([2.4.2])
+LT_INIT
+LT_LANG([C++])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 AC_PROG_LN_S
+AC_PROG_MKDIR_P
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.16.1])
 
 # Checks for libraries.
-AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
-AC_CHECK_LIB(gmp, __gmpz_import, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
-AC_CHECK_LIB(gmp, __gmpz_export, , AC_MSG_ERROR([libgmp >= 4.1 is needed]))
-AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
-AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
-AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
+AC_ARG_WITH(gmp, [AS_HELP_STRING([--with-gmp=<path>], [prefix of libgmp installation e.g. /usr/local])], [GMP_PREFIX="$with_gmp"],\
+ [AC_CHECK_LIB(gmp, __gmpz_init, [LIBS=""], AC_MSG_ERROR([libgmp is needed; maybe you want to call configure with the --with-gmp=<path> option]))])
+AC_CHECK_LIB(gmp, __gmpz_import, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
+AC_CHECK_LIB(gmp, __gmpz_export, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
+if test "x$GMP_PREFIX" != x ; then
+        LIBGMP_LIBS=" -L${GMP_PREFIX}/lib"
+        LIBGMP_CFLAGS=" -I${GMP_PREFIX}/include"
+else
+        LIBGMP_LIBS=""
+        LIBGMP_CFLAGS=""
+fi
+LIBGMP_LIBS="${GMP_LIBS} -lgmp"
+AC_SUBST(LIBGMP_LIBS)
+AC_SUBST(LIBGMP_CFLAGS)
 
 AM_PATH_LIBGCRYPT("1.6.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
@@ -76,12 +89,17 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.2.0")
+AM_PATH_LIBTMCG("1.3.0")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.2.0 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.3.0 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
+
+AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
+AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
+AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
+AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
 
 # Solaris needs -lsocket and -lnsl. Unisys system includes
 # gethostbyname in libsocket but needs libnsl for socket.
@@ -113,6 +131,7 @@ AC_C_CONST
 AC_C_INLINE
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 AC_SYS_POSIX_TERMIOS
 
 # Checks for library functions.
