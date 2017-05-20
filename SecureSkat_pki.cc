@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006, 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007
+                                       2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -126,13 +127,26 @@ void encrypt_secret_key
 void get_secret_key
 	(const std::string &filename, TMCG_SecretKey &sec, std::string &prefix)
 {
-	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
-	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) >= 
-		gcry_cipher_get_algo_keylen(GCRY_CIPHER_BLOWFISH));
-	
 	std::string key_str;
 	std::ostringstream ost;
 	datum key, data;
+
+	// check libgcrypt algorithms
+	if (!gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO))
+	{
+		std::cerr << "SecureSkat_pki::get_secret_key: gcry_md_get_algo_dlen() failed" << std::endl;
+		exit(-1);
+	}
+	if (!gcry_cipher_get_algo_keylen(GCRY_CIPHER_BLOWFISH))
+	{
+		std::cerr << "SecureSkat_pki::get_secret_key: gcry_cipher_get_algo_keylen() failed" << std::endl;
+		exit(-1);
+	}
+	if (gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO) < gcry_cipher_get_algo_keylen(GCRY_CIPHER_BLOWFISH))
+	{
+		std::cerr << "SecureSkat_pki::get_secret_key: output length of TMCG_GCRY_MD_ALGO too small" << std::endl;
+		exit(-1);	
+	}
 	
 	// open GDBM file where the secret key is stored
 	GDBM_FILE sec_db = 
