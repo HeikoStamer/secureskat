@@ -1,7 +1,7 @@
 /*******************************************************************************
    SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2016
+ Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2016, 2017
                Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@ std::map<pid_t, std::string> nick_nick;         // map: PKI PID => nick name
 std::map<std::string, int> bad_nick;            // map: nick name => PKI attemps
 std::list<pid_t> nick_pids;                     // list: PIDs of PKI requests
 
-// FIXME: put all player data into a single structure
+// TODO: put all player data into a single structure
 std::map<std::string, std::string> nick_players;
 std::map<std::string, std::string> nick_package;
 std::map<std::string, int> nick_p7771, nick_p7772, nick_p7773, nick_p7774;
@@ -673,7 +673,7 @@ static void process_line(char *line)
 				else
 					continue;
 				if ((tk_header != "prt") ||
-					// FIXME: sigid is ID8, but nick is ID5
+					// FIXME: sigid is ID8, but nick is ID5, we look only for a prefix
 					//(tk_nick[0] != pub.sigid(tk_sig1)) ||
 					//(tk_nick[1] != pub.sigid(tk_sig2)) ||
 					//(tk_nick[2] != pub.sigid(tk_sig3)) ||
@@ -2467,7 +2467,7 @@ int main(int argc, char* argv[], char* envp[])
     char *home = NULL;
     std::string homedir = "";
     std::cout << PACKAGE_STRING <<
-        ", (c) 2016  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << 
+        ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << 
         std::endl;
 	
 #ifdef ENABLE_NLS

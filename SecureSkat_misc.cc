@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006, 2007, 2009 Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007, 2009
+                                       2017 Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -134,16 +135,14 @@ int ConnectToHost
 
 char *stripwhite(char *str)
 {
-	register char *s, *t;
+	register char *s = str, *t = NULL;
 	
-	for (s = str; ((*s == ' ') || (*s == '\t')); s++)
-		;
-	
+	while ((*s == ' ') || (*s == '\t'))
+		s++;
 	if (*s == 0)
 		return s;
-	
 	t = s + strlen(s) - 1;
-	while (t > s && ((*t == ' ') || (*t == '\t')))
+	while ((t > s) && ((*t == ' ') || (*t == '\t')))
 		t--;
 	*++t = '\0';
 	
@@ -151,7 +150,7 @@ char *stripwhite(char *str)
 }
 
 clock_t start_time, stop_time;
-char time_buffer[100];
+char time_buffer[128];
 
 void start_clock
 	(void)
