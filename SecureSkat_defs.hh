@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2009, 2016  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2007, 2009, 2016, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -62,8 +62,8 @@
     // GNU crypto library
     #include <gcrypt.h> 
 
-    // GNU transport layer security
-    // #include <gnutls/gnutls.h>
+    // GNU multiple precision library
+    #include <gmp.h>
     
     // GNU readline
     #include <readline/readline.h>
