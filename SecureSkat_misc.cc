@@ -24,8 +24,9 @@
 int BindEmptyPort
 	(int start_port)
 {
+	const int max_ports = 100;
 	int current_port = start_port;
-	while (1)
+	while (current_port < (start_port + max_ports))
 	{
 		int socket_handle;
 		long socket_option = 1;
@@ -57,6 +58,8 @@ int BindEmptyPort
 			break;
 		}
 	}
+	if (current_port == (start_port + max_ports))
+		return -4;
 	return current_port;
 }
 

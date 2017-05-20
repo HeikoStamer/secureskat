@@ -149,8 +149,7 @@ void get_secret_key
 	}
 	
 	// open GDBM file where the secret key is stored
-	GDBM_FILE sec_db = 
-		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
+	GDBM_FILE sec_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
 	if (sec_db != NULL)
 	{
 		// key is stored at the first entry of the GDBM file
@@ -165,8 +164,7 @@ void get_secret_key
 			// check whether the entry is encrypted
 			std::string pass_phrase = "";
 			if (memcmp(data.dptr, "sec", 3))
-			    pass_phrase =
-				get_passphrase(_("Enter the pass phrase to unlock your key"));
+			    pass_phrase = get_passphrase(_("Enter the pass phrase to unlock your key"));
 						
 			// decrypt entry with a pass phrase supplied by the user
 			if (pass_phrase != "")
@@ -178,14 +176,12 @@ void get_secret_key
 				// compute T_1 = hash(password || salt)
 				unsigned char *T_i = new unsigned char[dlen];
 				std::string input = pass_phrase + key_str;
-				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i,
-					input.c_str(), input.length());
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, input.c_str(), input.length());
 				// use PBKDF1 with iteration count = 7000
 				// compute T_2, ..., T_7000
 				for (size_t i = 1; i < 7000; i++)
 				{
-				    gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
-					T_i, dlen);
+				    gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, T_i, dlen);
 				    memcpy(T_i, pass_digest, dlen);
 				}
 				decrypt_secret_key(data, pass_digest);
@@ -236,19 +232,15 @@ void get_secret_key
 			std::string pass_phrase, pass_retyped;
 			do
 			{
-				pass_phrase = 
-					get_passphrase(_("Enter a pass phrase to protect your secret key"));
+				pass_phrase = get_passphrase(_("Enter a pass phrase to protect your secret key"));
 				if (pass_phrase == "")
 				{
-					std::cerr << _("Empty pass phrase. Key protection disabled!") <<
-						std::endl;
+					std::cerr << _("Empty pass phrase. Key protection disabled!") << std::endl;
 					break;
 				}
-				pass_retyped =
-					get_passphrase(_("Repeat your pass phrase"));
+				pass_retyped = get_passphrase(_("Repeat your pass phrase"));
 				if (pass_phrase != pass_retyped)
-					std::cerr << _("Your pass phrases differ.") << " " <<
-						_("Please repeat carefully!") << std::endl;
+					std::cerr << _("Your pass phrases differ.") << " " << _("Please repeat carefully!") << std::endl;
 			}
 			while (pass_phrase != pass_retyped);
 			
@@ -260,14 +252,12 @@ void get_secret_key
 				// compute T_1 = hash(password || salt)
 				unsigned char *T_i = new unsigned char[dlen];
 				std::string input = pass_phrase + keyid;
-				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, 
-				    input.c_str(), input.length());
+				gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, T_i, input.c_str(), input.length());
 				// use PBKDF1 with iteration count = 7000
 				// compute T_2, ..., T_7000
 				for (size_t i = 1; i < 7000; i++)
 				{
-					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, 
-						T_i, dlen);
+					gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, pass_digest, T_i, dlen);
 					memcpy(T_i, pass_digest, dlen);
 				}
 				delete [] T_i;
@@ -277,30 +267,26 @@ void get_secret_key
 			
 			// store (encrypted) entry in GDBM file at the first position
 			gdbm_store(sec_db, key, data, GDBM_INSERT);
-			std::cout << _("PKI: cryptographic key") << " \"" << keyid <<
-				"\" " << _("created and stored") << std::endl;
+			std::cout << _("PKI: cryptographic key") << " \"" << keyid << "\" " << _("created and stored") << std::endl;
 		}
 		gdbm_close(sec_db);
 	}
 	else
 	{
-		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) <<
-			std::endl;
+		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) << std::endl;
 		perror("SecureSkat_pki::get_secret_key (gdbm_open)");
 		exit(-1);
 	}
 	
 	if (!sec.import(ost.str()))
 	{
-		std::cerr << _("PKI ERROR: secret key corrupted") << 
-			" [" << key_str << "]" << std::endl;
+		std::cerr << _("PKI ERROR: secret key corrupted") << " [" << key_str << "]" << std::endl;
 		exit(-1);
 	}
 	else
 	{
 #ifndef NDEBUG
-		std::cout << _("PKI: secret key successfully loaded") << 
-			" [" << key_str << "]" << std::endl;
+		std::cout << _("PKI: secret key successfully loaded") << " [" << key_str << "]" << std::endl;
 #endif
 	}
 	
@@ -319,8 +305,7 @@ void get_public_keys
 	(const std::string &filename, std::map<std::string, TMCG_PublicKey> &keys)
 {
 	datum key, nextkey, data;
-	GDBM_FILE pub_db = 
-		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
+	GDBM_FILE pub_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
 	if (pub_db != NULL)
 	{
 		key = gdbm_firstkey(pub_db);
@@ -331,8 +316,7 @@ void get_public_keys
 			if (pkey.import(data.dptr))
 				keys[key.dptr] = pkey;
 			else
-				std::cerr << _("PKI ERROR: public key corrupted") <<
-					" [" << key.dptr << "]" << std::endl;
+				std::cerr << _("PKI ERROR: public key corrupted") << " [" << key.dptr << "]" << std::endl;
 			nextkey = gdbm_nextkey(pub_db, key);
 			free(data.dptr);
 			free(key.dptr);
@@ -342,8 +326,7 @@ void get_public_keys
 	}
 	else
 	{
-		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) <<
-			std::endl;
+		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) << std::endl;
 		perror("SecureSkat_pki::get_public_keys (gdbm_open)");
 		exit(-1);
 	}
@@ -354,8 +337,7 @@ void set_public_keys
 	const std::map<std::string, TMCG_PublicKey> &keys)
 {
 	datum key, data;
-	GDBM_FILE pub_db = 
-		gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
+	GDBM_FILE pub_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
 	if (pub_db != NULL)
 	{
 		for (std::map<std::string, TMCG_PublicKey>::const_iterator
@@ -377,8 +359,7 @@ void set_public_keys
 	}
 	else
 	{
-		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) <<
-			std::endl;
+		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) << std::endl;
 		perror("SecureSkat_pki::set_public_keys (gdbm_open)");
 		exit(-1);
 	}
@@ -388,6 +369,11 @@ void create_pki
 	(int &pki7771_port, int &pki7771_handle)
 {
 	pki7771_port = BindEmptyPort(7771);
+	if (pki7771_port < 0)
+	{
+		std::cerr << "SecureSkat_pki::create_pki: BindEmptyPort(7771) failed" << std::endl;
+		exit(-1);
+	}
 	if ((pki7771_handle = ListenToPort(pki7771_port)) < 0)
 		exit(-1);
 }
