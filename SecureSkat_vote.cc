@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2009  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007, 2009, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -408,8 +408,9 @@ int ballot_child
 							std::endl << std::flush;
 						
 						// exchange secret keys for securesocketstreams
-						char *key1 = new char[TMCG_SAEP_S0], 
-							*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
+						unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
 						neighbor->getline(challenge_sig, sizeof(challenge_sig));
 						if (!sec.decrypt(dv, challenge_sig))
 						{
@@ -421,9 +422,7 @@ int ballot_child
 							return -74;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
-						
-						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
-							GCRY_STRONG_RANDOM);
+						gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 						*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << 
 							std::flush;
 						ios_in[vnicks[pkr_idx]] = 
@@ -579,10 +578,10 @@ int ballot_child
 						}
 						
 						// exchange secret keys for securesocketstreams
-						char *key1 = new char[TMCG_SAEP_S0],
-							*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
-						gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
-							GCRY_STRONG_RANDOM);
+						unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
+						gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 						*neighbor << pkr.keys[i].encrypt(key1) << std::endl << std::flush;
 						
 						neighbor->getline(tmp, sizeof(tmp));

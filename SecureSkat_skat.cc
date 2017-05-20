@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -92,9 +92,10 @@ int skat_connect
 	}
 	
 	// exchange secret keys for securesocketstreams
-	char *key1 = new char[TMCG_SAEP_S0], *key2 = new char[TMCG_SAEP_S0],
-		*dv = new char[TMCG_SAEP_S0];
-	gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
+	unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
+	unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
+	unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
+	gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 	*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
 	
 	std::getline(*neighbor, tmp);
@@ -189,8 +190,9 @@ int skat_accept
 							*neighbor << sec.sign(ost2.str()) << std::endl << std::flush;
 							
 							// exchange the secret keys for securesocketstream
-							char *key1 = new char[TMCG_SAEP_S0],
-								*key2 = new char[TMCG_SAEP_S0], *dv = new char[TMCG_SAEP_S0];
+							unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
+							unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
+							unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
 							std::getline(*neighbor, tmp);
 							if (!sec.decrypt(dv, tmp))
 							{
@@ -202,8 +204,7 @@ int skat_accept
 							}
 							memcpy(key2, dv, TMCG_SAEP_S0);
 							
-							gcry_randomize((unsigned char*)key1, TMCG_SAEP_S0,
-								GCRY_STRONG_RANDOM);
+							gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 							*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl <<
 								std::flush;
 							delete neighbor;

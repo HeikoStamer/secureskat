@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 1999, 2000 Kevin Birch <kbirch@pobox.com>,
-               2002, 2004 Heiko Stamer <stamer@gaos.org>
+               2002, 2004, 2017 Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ template <class traits = securesocketbuf_traits>
 		 * @param iSocket an open and connected socket
 		 */
 		basic_securesocketbuf(int iSocket, 
-			const char *key_in, size_t size_in, const char *key_out, size_t size_out
+			const unsigned char *key_in, size_t size_in, const unsigned char *key_out, size_t size_out
 		) : mSocket(iSocket) 
 		{
 			err = gcry_cipher_open(&chd_in,
@@ -406,8 +406,8 @@ class isecuresocketstream : public std::istream
 		 * @param iSocket an open and connected socket
 		 */
 		isecuresocketstream
-			(int iSocket, const char *key_in, size_t size_in,
-			const char *key_out, size_t size_out):
+			(int iSocket, const unsigned char *key_in, size_t size_in,
+			const unsigned char *key_out, size_t size_out):
 				std::istream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
@@ -428,8 +428,8 @@ class osecuresocketstream : public std::ostream
 		 * @param iSocket an open and connected socket
 		 */
 		osecuresocketstream
-			(int iSocket, const char *key_in, size_t size_in,
-			const char *key_out, size_t size_out):
+			(int iSocket, const unsigned char *key_in, size_t size_in,
+			const unsigned char *key_out, size_t size_out):
 				std::ostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
@@ -450,8 +450,8 @@ class iosecuresocketstream : public std::iostream
 		 * @param iSocket an open and connected socket
 		 */
 		iosecuresocketstream
-			(int iSocket, const char *key_in, size_t size_in,
-			const char *key_out, size_t size_out):
+			(int iSocket, const unsigned char *key_in, size_t size_in,
+			const unsigned char *key_out, size_t size_out):
 				std::iostream(&buf), buf(iSocket, key_in, size_in, key_out, size_out)
 		{
 		}
