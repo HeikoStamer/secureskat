@@ -20,7 +20,7 @@
 AC_REVISION(20170520)
 AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [3.0], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
+AC_INIT([SecureSkat], [2.10], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
