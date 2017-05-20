@@ -405,6 +405,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 							std::string irc1 = tmp;
 //std::cerr << "to IRC: " << irc1 << std::endl;
+							// do operation
 							pipe_irc(irc1);
 						}
 						break;

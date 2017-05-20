@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004, 2005, 2006, 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2004, 2005, 2006, 2007,
+                                 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1005,7 +1006,11 @@ int skat_game
 		std::string main_channel, std::string main_channel_underscore
 	)
 {
-	assert(gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO));
+	if (!gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO))
+	{
+		std::cout << ">< " << _("GAME ERROR") << ": " << _("gcry_md_get_algo_dlen() failed") << std::endl;
+		return 1;
+	}
 
 	unsigned int dlen = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
 	opipestream *out_pipe = new opipestream(opipe), *out_ctl = NULL;
@@ -1386,7 +1391,7 @@ int skat_game
 				if (FD_ISSET(ipipe, &rfds))
 				{
 					num = read(ipipe, ireadbuf + ireaded, 65536 - ireaded);
-//FIXME: Was passiert, wenn der Buffer von ipipe und ctl_i gefuellt wird?
+//FIXME: Was passiert, wenn der Buffer von ipipe und ctl_i ueberfuellt wird?
 //std::cerr << "ipipe " << num << std::endl;
 				}
 				else if (pctl && FD_ISSET(ctl_i, &rfds))

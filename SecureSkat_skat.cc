@@ -311,8 +311,8 @@ void skat_error
 		{
 			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
 				std::endl << std::flush;
-			sleep(1);		// The child has to sleep a second before quitting, because
-									// the parent must process the sended PART message first.
+			sleep(1);	// The child has to sleep a second before quitting, because
+					// the parent must process the sended PART message first.
 		}
 		exit(error);
 	}
@@ -323,7 +323,7 @@ int skat_child
 	const std::string &master)
 {
 	SchindelhauerTMCG *gp_tmcg =
-		new SchindelhauerTMCG(80, 3, 5);	// 3 players, 2^5 = 32 cards
+		new SchindelhauerTMCG(80, 3, 5);	// 3 players, 2^5 = 32 cards, security level = 80
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
@@ -472,7 +472,7 @@ int skat_child
 		else
 			pkr.keys[pkr_i++] = nick_key[*pi];
 	}
-	int gp_handle, gp_port = BindEmptyPort(7800);
+	int gp_handle, gp_port = BindEmptyPort(7800); // use free TCP ports up from 7800
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 

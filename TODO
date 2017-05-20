@@ -7,7 +7,8 @@ Copyright (c)  2002, 2004, 2005, 2017  Heiko Stamer <HeikoStamer@gmx.net>
   Free Documentation License" of the file "README".
 
 Stuff for next release:
-* use RBC for broadcast on communication channels
+* use AIO for secure communication channels between players
+* use RBC for broadcast on additional communication channels
 * use SetupGenerators() in VSSHE to protect agains malicious provers
 
 Stuff for 3.x release:
