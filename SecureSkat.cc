@@ -2035,7 +2035,7 @@ void run_irc()
 				// create a "unique" username based on the nickname
 				if (uname.length() > 4)
 				{
-					std::string uname2 = "os";
+					std::string uname2 = "os"; // prefix
 					for (size_t ic = 4; ic < uname.length(); ic++)
 					{
 						if (islower(uname[ic]))
@@ -2043,7 +2043,7 @@ void run_irc()
 						else if (isdigit(uname[ic]))
 							uname2 += ('a' + (uname[ic] - 0x30));
 						else if (isupper(uname[ic]))
-							uname2 += ('a' + (uname[ic] - 0x40));
+							uname2 += ('a' + (uname[ic] - 0x41));
 					}
 					uname = uname2;
 				}
