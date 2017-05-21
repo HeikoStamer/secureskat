@@ -38,8 +38,7 @@ int BindEmptyPort
 			perror("SecureSkat_misc::BindEmptyPort (socket)");
 			return -1;
 		}
-		if (setsockopt(socket_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option,
-			sizeof(socket_option)) < 0)
+		if (setsockopt(socket_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 		{
 			perror("SecureSkat_misc::BindEmptyPort (setsockopt)");
 			return -2;
@@ -76,8 +75,7 @@ int ListenToPort
 		perror("SecureSkat_misc::ListenToPort (socket)");
 		return -1;
 	}
-	if (setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &socket_option,
-		sizeof(socket_option)) < 0)
+	if (setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (setsockopt)");
 		return -2;
