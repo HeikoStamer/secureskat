@@ -2041,9 +2041,15 @@ void run_irc()
 						if (islower(uname[ic]))
 							uname2 += uname[ic];
 						else if (isdigit(uname[ic]))
+						{
+							uname2 += "d"; // sign for decimal digit
 							uname2 += ('a' + (uname[ic] - 0x30));
+						}
 						else if (isupper(uname[ic]))
+						{
+							uname2 += "u"; // sign for upper case letter
 							uname2 += ('a' + (uname[ic] - 0x41));
+						}
 					}
 					uname = uname2;
 				}
