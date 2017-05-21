@@ -622,13 +622,12 @@ msgid "gets the game at"
 msgstr "bekommt das Spiel bei"
 
 #: SecureSkat_game.cc:1011
-#, fuzzy
 msgid "ERROR"
-msgstr "GDBM FEHLER"
+msgstr "FEHLER"
 
 #: SecureSkat_game.cc:1011
 msgid "gcry_md_get_algo_dlen() failed"
-msgstr ""
+msgstr "gcry_md_get_algo_dlen() fehlgeschlagen"
 
 #: SecureSkat_game.cc:1044 SecureSkat_game.cc:1056 SecureSkat_game.cc:1062
 #: SecureSkat_game.cc:1087 SecureSkat_game.cc:1098 SecureSkat_game.cc:1106
