@@ -25,7 +25,7 @@ int BindEmptyPort
 	(int start_port)
 {
 	const int max_ports = 100;
-	int current_port = start_port;
+	int current_port = start_port + (mpz_wrandom_ui() % (max_ports / 2));
 	while (current_port < (start_port + max_ports))
 	{
 		int socket_handle;
