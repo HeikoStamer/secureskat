@@ -109,49 +109,37 @@ RETSIGTYPE sig_handler_usr1(int sig)
             {
                 // print success resp. error message
                 if (WEXITSTATUS(status) == 0)
-                    std::cerr << ">< " << _("Session") << " \"" << tnr << 
-                        "\" " << _("succeeded properly") << std::endl;
+                    std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("succeeded properly") << std::endl;
                 else
-                    std::cerr << ">< " << _("Session") << " \"" << tnr << 
-                        "\" " << _("failed. Error code") << ": WEXITSTATUS " << 
-                        WEXITSTATUS(status) << std::endl;
+                    std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << 
-                    _("failed. Error code") << ": WTERMSIG " <<
-                WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
             }
             // remove associated data
             games_tnr2pid.erase(tnr);
             games_pid2tnr.erase(chld_pid);
         }
-        else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) !=
-            rnkrpl_pid.end())
+        else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) != rnkrpl_pid.end())
         {
             // print success message
-            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << 
-                _("succeeded properly") << std::endl;
+            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("succeeded properly") << std::endl;
             // remove associated data
             rnkrpl_pid.remove(chld_pid);
         }
-        else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) !=
-            rnk_pids.end())
+        else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) != rnk_pids.end())
         {
             if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
             {
                 // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
-                    _("failed. Error code") << ": WEXITSTATUS " << 
-                    WEXITSTATUS(status) << std::endl;
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << 
-                    _("failed. Error code") << ": WTERMSIG " << 
-                    WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
             }
             // remove associated data
             rnk_pids.remove(chld_pid);
@@ -164,16 +152,12 @@ RETSIGTYPE sig_handler_usr1(int sig)
             if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
             {
                 // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" << 
-                    nick_nick[chld_pid] << " " << _("failed. Error code") << 
-                    ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
+                std::cerr << ">< " << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << " " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" << 
-                    nick_nick[chld_pid] << " " << _("failed. Error code") << 
-                    ": WTERMSIG " << WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << " " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
             }
             // remove a bad nick (i.e. DoS attack on PKI) from the players list
             if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
@@ -203,8 +187,7 @@ RETSIGTYPE sig_handler_usr1(int sig)
         else
         {
 #ifndef NDEBUG
-            std::cerr << "sig_handler_usr1(): unknown child with PID " << 
-                chld_pid << std::endl;
+            std::cerr << "sig_handler_usr1(): unknown child with PID " << chld_pid << std::endl;
 #endif
         }
     } // end of while body
@@ -1883,8 +1866,7 @@ void run_irc()
 					if (irc_paramvec(irc_params(irc_reply), irc_parvec) >= 2)
 					{
 						// control messages
-						if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && 
-							(irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)) && 
+						if ((irc_parvec[0].find(MAIN_CHANNEL_UNDERSCORE, 0) == 0) && (irc_parvec[0].length() > strlen(MAIN_CHANNEL_UNDERSCORE)) && 
 							(nick.find(public_prefix, 0) == 0))
 						{
 							std::string tb = 
@@ -1896,8 +1878,7 @@ void run_irc()
 								if (tei != irc_parvec[1].npos)
 								{
 									std::string realmsg = irc_parvec[1].substr(0, tei);
-									std::string sig = irc_parvec[1].substr(tei + 3, 
-										irc_parvec[1].length() - realmsg.length() - 3);
+									std::string sig = irc_parvec[1].substr(tei + 3,	irc_parvec[1].length() - realmsg.length() - 3);
 									if (nick_key.find(nick) != nick_key.end())
 									{
 										if (nick_key[nick].verify(realmsg, sig))
@@ -1917,29 +1898,21 @@ void run_irc()
 							}
 						}
 						// announce and no channel messages
-						if (((irc_parvec[1].find("~+~") != irc_parvec[1].npos) && 
-								(irc_parvec[0] == MAIN_CHANNEL))
+						if (((irc_parvec[1].find("~+~") != irc_parvec[1].npos) && (irc_parvec[0] == MAIN_CHANNEL))
 							||
-							((irc_parvec[0] != MAIN_CHANNEL) &&
-								(nick.find(public_prefix, 0) == 0) &&
-								((irc_parvec[0] == pub.keyid(5)) &&
-									(nick != pub.keyid(5)))))
+							((irc_parvec[0] != MAIN_CHANNEL) && (nick.find(public_prefix, 0) == 0) &&
+								((irc_parvec[0] == pub.keyid(5)) && (nick != pub.keyid(5)))))
 						{
 							size_t tabei1 = irc_parvec[1].find("|", 0);
 							size_t tabei2 = irc_parvec[1].find("~", 0);
 							size_t tabei3 = irc_parvec[1].find("!", 0);
-							if ((tabei1 != irc_parvec[1].npos) &&
-								(tabei2 != irc_parvec[1].npos) &&
-								(tabei3 != irc_parvec[1].npos) && 
+							if ((tabei1 != irc_parvec[1].npos) && (tabei2 != irc_parvec[1].npos) && (tabei3 != irc_parvec[1].npos) && 
 								(tabei1 < tabei2) && (tabei2 < tabei3))
 							{
 								std::string tabmsg1 = irc_parvec[1].substr(0, tabei1);
-								std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, 
-									tabei2 - tabei1 - 1);
-								std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, 
-									tabei3 - tabei2 - 1);	
-								if ((std::find(tables.begin(), tables.end(), tabmsg1) 
-									== tables.end()) && (tabmsg2 != "0"))
+								std::string tabmsg2 = irc_parvec[1].substr(tabei1 + 1, tabei2 - tabei1 - 1);
+								std::string tabmsg3 = irc_parvec[1].substr(tabei2 + 1, tabei3 - tabei2 - 1);	
+								if ((std::find(tables.begin(), tables.end(), tabmsg1) == tables.end()) && (tabmsg2 != "0"))
 								{
 									// new table
 									tables.push_back(tabmsg1);
@@ -1984,9 +1957,7 @@ void run_irc()
 						else if (irc_stat && (irc_parvec[0] == MAIN_CHANNEL))
 						{
 							size_t tei = irc_parvec[1].find("~~~");
-							if ((nick.find(public_prefix, 0) == 0) &&
-								(nick_key.find(nick) != nick_key.end()) &&
-								(tei != irc_parvec[1].npos))
+							if ((nick.find(public_prefix, 0) == 0) && (nick_key.find(nick) != nick_key.end()) && (tei != irc_parvec[1].npos))
 							{
 								std::string realmsg = irc_parvec[1].substr(0, tei);
 								std::string sig = irc_parvec[1].substr(tei + 3, 
@@ -2002,9 +1973,7 @@ void run_irc()
 							else
 								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
 						} // other messages
-						else if (irc_stat &&
-							((irc_parvec[0] == pub.keyid(5)) &&
-							(nick != pub.keyid(5))))
+						else if (irc_stat && ((irc_parvec[0] == pub.keyid(5)) && (nick != pub.keyid(5))))
 						{
 							std::cout << ">?" << nick << "?< " << irc_parvec[1] << std::endl;
 						}
@@ -2061,8 +2030,7 @@ void run_irc()
 			if (first_command)
 			{
 				char ptmp[100];
-				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", 
-					pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
+				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
 				std::string uname = pub.keyid(5);
 				// create a "unique" username based on the nickname
 				if (uname.length() > 4)
@@ -2081,8 +2049,7 @@ void run_irc()
 				}
 				else
 					uname = "unknown";
-				*irc << "USER " << uname << " 0 0 :" << PACKAGE_STRING << ptmp << 
-					std::endl << std::flush;
+				*irc << "USER " << uname << " 0 0 :" << PACKAGE_STRING << ptmp << std::endl << std::flush;
 				first_command = false;
 			}
 			else if (first_entry)
@@ -2097,8 +2064,7 @@ void run_irc()
 				// timer: autojoin to known tables each AUTOJOIN_TIMEOUT seconds
 				if (atj_counter >= AUTOJOIN_TIMEOUT)
 				{
-					for (std::list<std::string>::const_iterator ti = tables.begin(); 
-						ti != tables.end(); ti++)
+					for (std::list<std::string>::const_iterator ti = tables.begin(); ti != tables.end(); ti++)
 					{
 						// if not joined in a game, do AUTOJOIN (greedy behaviour)
 						if (games_tnr2pid.find(*ti) == games_tnr2pid.end())
@@ -2133,8 +2099,7 @@ void run_irc()
 				// timer: announce own tables every ANNOUNCE_TIMEOUT seconds
 				if (ann_counter >= ANNOUNCE_TIMEOUT)
 				{
-					for (std::map<pid_t, int>::const_iterator pi = games_ipipe.begin();
-						pi != games_ipipe.end(); ++pi)
+					for (std::map<pid_t, int>::const_iterator pi = games_ipipe.begin(); pi != games_ipipe.end(); ++pi)
 					{
 						opipestream *npipe = new opipestream(pi->second);
 						*npipe << "!ANNOUNCE" << std::endl << std::flush;
@@ -2147,8 +2112,7 @@ void run_irc()
 			}
 			
 			// send SIGQUIT to all PKI processes -- PKI TIMEMOUT exceeded
-			for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
-				pidi != nick_pids.end(); pidi++)
+			for (std::list<pid_t>::const_iterator pidi = nick_pids.begin(); pidi != nick_pids.end(); pidi++)
 			{
 				if (nick_ncnt[nick_nick[*pidi]] > PKI_TIMEOUT)
 					if (kill(*pidi, SIGQUIT) < 0)
@@ -2156,8 +2120,7 @@ void run_irc()
 			}
 			
 			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT exceeded
-			for (std::list<pid_t>::const_iterator pidi = rnk_pids.begin();
-				pidi != rnk_pids.end(); pidi++)
+			for (std::list<pid_t>::const_iterator pidi = rnk_pids.begin(); pidi != rnk_pids.end(); pidi++)
 			{
 				if (nick_rnkcnt[rnk_nick[*pidi]] > RNK_TIMEOUT)
 					if (kill(*pidi, SIGQUIT) < 0)
@@ -2165,8 +2128,7 @@ void run_irc()
 			}
 			
 			// start RNK or PKI processes
-			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin();
-					ni != nick_players.end(); ni++)
+			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin(); ni != nick_players.end(); ni++)
 			{
 				std::string nick = ni->first, host = ni->second;
 				
@@ -2235,8 +2197,7 @@ void run_irc()
 								perror("run_irc [RNK/child] (close)");
 							
 							// iterate RNK list
-							for (std::vector<std::string>::const_iterator ri = rnk_idlist.begin();
-								ri != rnk_idlist.end(); ri++)
+							for (std::vector<std::string>::const_iterator ri = rnk_idlist.begin(); ri != rnk_idlist.end(); ri++)
 							{
 								// create TCP/IP connection
 								int rhd = ConnectToHost(host.c_str(), nick_p7774[nick]);
@@ -2281,9 +2242,7 @@ void run_irc()
 				}
 				
 				// PKI (obtain and verify public keys of other players)
-				if ((nick_key.find(nick) == nick_key.end()) && 
-					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) 
-					== nick_ninf.end()))
+				if ((nick_key.find(nick) == nick_key.end()) && (std::find(nick_ninf.begin(), nick_ninf.end(), nick) == nick_ninf.end()))
 				{
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
@@ -2376,8 +2335,7 @@ void run_irc()
 						}
 					}
 				}
-				else if (std::find(nick_ninf.begin(), nick_ninf.end(), nick) 
-					!= nick_ninf.end())
+				else if (std::find(nick_ninf.begin(), nick_ninf.end(), nick) != nick_ninf.end())
 				{
 					nick_ncnt[nick] += 1;
 				}
@@ -2386,12 +2344,10 @@ void run_irc()
 	}
     // check whether the IRC connection still exists
     if (!irc->good())
-        std::cerr << _("IRC ERROR: connection with server collapsed") <<
-            std::endl;
+        std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
 
     // free the previously allocated memory (read buffers)
-    for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); 
-        rbi != readbuf.end(); rbi++)
+    for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); rbi != readbuf.end(); rbi++)
     {
         delete [] rbi->second;
     }
@@ -2400,25 +2356,22 @@ void run_irc()
 void cleanup()
 {
     // send SIGQUIT to all child processes and wait for them
-    for (std::map<pid_t, std::string>::const_iterator pidi = 
-        games_pid2tnr.begin(); pidi != games_pid2tnr.end(); pidi++)
+    for (std::map<pid_t, std::string>::const_iterator pidi = games_pid2tnr.begin(); pidi != games_pid2tnr.end(); pidi++)
     {
         if (kill(pidi->first, SIGQUIT) < 0)
             perror("cleanup (kill)");
         waitpid(pidi->first, NULL, 0);
     }
     games_pid2tnr.clear(), games_tnr2pid.clear();
-    for (std::list<pid_t>::const_iterator pidi = nick_pids.begin();
-        pidi != nick_pids.end(); pidi++)
+    for (std::list<pid_t>::const_iterator pidi = nick_pids.begin(); pidi != nick_pids.end(); pidi++)
     {
         if (kill(*pidi, SIGQUIT) < 0)
             perror("cleanup (kill)");
         waitpid(*pidi, NULL, 0);
     }
-    nick_pids.clear(), nick_nick.clear(), nick_host.clear(),
-        nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
-    for (std::list<pid_t>::const_iterator pidi = rnkrpl_pid.begin();
-        pidi != rnkrpl_pid.end(); pidi++)
+    nick_pids.clear(), nick_nick.clear(), nick_host.clear();
+    nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
+    for (std::list<pid_t>::const_iterator pidi = rnkrpl_pid.begin(); pidi != rnkrpl_pid.end(); pidi++)
     {
         if (kill(*pidi, SIGQUIT) < 0)
             perror("cleanup (kill)");
@@ -2467,9 +2420,7 @@ int main(int argc, char* argv[], char* envp[])
 {
     char *home = NULL;
     std::string homedir = "";
-    std::cout << PACKAGE_STRING <<
-        ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << 
-        std::endl;
+    std::cout << PACKAGE_STRING << ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
 	
 #ifdef ENABLE_NLS
     // set the locales
@@ -2482,8 +2433,7 @@ int main(int argc, char* argv[], char* envp[])
     // enable the native language support
     bindtextdomain(PACKAGE, LOCALEDIR);
     textdomain(PACKAGE);
-    std::cout << "++ " << _("Internationalization support") << ": " << 
-        LOCALEDIR << std::endl;
+    std::cout << "++ " << _("Internationalization support") << ": " << LOCALEDIR << std::endl;
 #endif
 	
     // evaluate the environment variable HOME
@@ -2492,8 +2442,7 @@ int main(int argc, char* argv[], char* envp[])
         homedir = home, homedir += "/.SecureSkat/";
     else
         homedir = "~/.SecureSkat/";
-    std::cout << "++ " << _("PKI/RNK database directory") << ": " << 
-        homedir << std::endl;
+    std::cout << "++ " << _("PKI/RNK database directory") << ": " << homedir << std::endl;
     
     // check existance and permissions of the home directory
     struct stat stat_buffer;
@@ -2504,16 +2453,14 @@ int main(int argc, char* argv[], char* envp[])
             // create directory, if it doesn't exist
             if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
             {
-                std::cerr << _("Can't create directory!") << " (" << 
-                    strerror(errno) << ")" << std::endl;
+                std::cerr << _("Can't create directory!") << " (" << strerror(errno) << ")" << std::endl;
                 return EXIT_FAILURE;
             }
         }
         else
         {
             // print error message
-            std::cerr << _("Can't get the status of the directory!") << 
-                " (" << strerror(errno) << ")" << std::endl;
+            std::cerr << _("Can't get the status of the directory!") << " (" << strerror(errno) << ")" << std::endl;
             return EXIT_FAILURE;
         }
     }
@@ -2529,8 +2476,7 @@ int main(int argc, char* argv[], char* envp[])
             std::cerr << _("Wrong owner of the directory!") << std::endl;
             return EXIT_FAILURE;
         }
-        if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
-            (S_IRUSR | S_IWUSR | S_IXUSR))
+        if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) != (S_IRUSR | S_IWUSR | S_IXUSR))
         {
             std::cerr << _("Missing permissions for directory!") << std::endl;
             return EXIT_FAILURE;
@@ -2538,8 +2484,7 @@ int main(int argc, char* argv[], char* envp[])
     }
 	
     // process the command line arguments
-    if (((argc == 4) && isdigit(argv[2][0])) ||
-        ((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
+    if (((argc == 4) && isdigit(argv[2][0])) || ((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
     {
         struct termios old_term;
         int irc_port = 6667;
@@ -2565,14 +2510,12 @@ int main(int argc, char* argv[], char* envp[])
             return EXIT_FAILURE;
         }
         // display version of LibTMCG
-        std::cout << "++ " << _("Initialization of LibTMCG version") << " " << 
-          version_libTMCG() << std::endl;
+        std::cout << "++ " << _("Initialization of LibTMCG version") << " " << version_libTMCG() << std::endl;
 
         // key management		
         get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
         pub = TMCG_PublicKey(sec); // extract the public part of the secret key
-        std::cout << _("Your key fingerprint") << ": " << 
-            pub.fingerprint() << std::endl;
+        std::cout << _("Your key fingerprint") << ": " << pub.fingerprint() << std::endl;
         get_public_keys(homedir + "SecureSkat.pkr", nick_key); // load pub keys
 		
         create_pki(pki7771_port, pki7771_handle);
@@ -2596,9 +2539,7 @@ int main(int argc, char* argv[], char* envp[])
         signal(SIGUSR1, sig_handler_usr1);
 
         init_irc(irc, pub.keyid(5));
-        std::cout << _("Usage") << ": " <<
-            _("type /help for the command list or read the file README") <<
-            std::endl;
+        std::cout << _("Usage") << ": " << _("type /help for the command list or read the file README") << std::endl;
 #ifndef NOHUP
         init_term(old_term);
 #endif
@@ -2628,8 +2569,6 @@ int main(int argc, char* argv[], char* envp[])
     }
 
     // print a short usage message and exit with failure
-    std::cout << _("Usage") << ": " << argv[0] <<
-        " IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" << 
-        std::endl;
+    std::cout << _("Usage") << ": " << argv[0] << " IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" << std::endl;
     return EXIT_FAILURE;
 }
