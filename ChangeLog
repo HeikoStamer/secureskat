@@ -1,15 +1,3 @@
-2017-05-21  gettextize  <bug-gnu-gettext@gnu.org>
-
-	* m4/gettext.m4: Upgrade to gettext-0.19.8.1.
-	* m4/iconv.m4: Upgrade to gettext-0.19.8.1.
-	* m4/lib-ld.m4: Upgrade to gettext-0.19.8.1.
-	* m4/lib-link.m4: Upgrade to gettext-0.19.8.1.
-	* m4/lib-prefix.m4: Upgrade to gettext-0.19.8.1.
-	* m4/nls.m4: Upgrade to gettext-0.19.8.1.
-	* m4/po.m4: Upgrade to gettext-0.19.8.1.
-	* m4/progtest.m4: Upgrade to gettext-0.19.8.1.
-	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.8.
-
 SecureSkat 2.10:
     - permit changing a vote by using /<room> vote <value> multiple times
     - call version_LibTMCG() to display the version of LibTMCG upon startup
