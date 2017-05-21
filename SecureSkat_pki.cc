@@ -206,8 +206,7 @@ void get_secret_key
 			std::getline(std::cin, name);
 			std::cout << _("Your electronic mail address") << ": ";
 			std::getline(std::cin, email);
-			std::cerr << _("Creating your key.") << " " <<
-				_("Please wait") << std::flush;
+			std::cerr << _("Creating your key.") << " " << _("Please wait") << "... " << std::endl << std::flush;
 			while (1)
 			{
 				// create a 1024-bit non-NIZK TMCG key
