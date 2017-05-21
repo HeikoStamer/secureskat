@@ -1008,7 +1008,7 @@ int skat_game
 {
 	if (!gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO))
 	{
-		std::cout << ">< " << _("GAME ERROR") << ": " << _("gcry_md_get_algo_dlen() failed") << std::endl;
+		std::cout << ">< " << _("ERROR") << ": " << _("gcry_md_get_algo_dlen() failed") << std::endl;
 		return 1;
 	}
 
@@ -1143,8 +1143,7 @@ int skat_game
 		start_clock();
 #endif
 		
-		vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, 
-			vtmf->g, vtmf->h);
+		vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, vtmf->g, vtmf->h);
 		vsshe->PublishGroup(*left), vsshe->PublishGroup(*right);
 		if (!vsshe->CheckGroup())
 		{

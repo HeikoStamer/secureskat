@@ -1,8 +1,7 @@
 # German translations for SecureSkat package
 # German messages for SecureSkat.
-# Copyright (C) 2005, 2006, 2009 Heiko Stamer <stamer@gaos.org>
+# Copyright (C) 2005, 2006, 2009, 2017 Heiko Stamer <HeikoStamer@gmx.net>
 # This file is distributed under the same license as the SecureSkat package.
-# Heiko Stamer <stamer@gaos.org>, 2005, 2006, 2009.
 #
 msgid ""
 msgstr ""
@@ -285,7 +284,7 @@ msgstr "führe Kommando <cmd> am Tisch <nr> aus"
 
 #: SecureSkat.cc:1192
 msgid "view"
-msgstr "play"
+msgstr "blatt"
 
 #: SecureSkat.cc:1193
 msgid "show your own cards and additional information"
