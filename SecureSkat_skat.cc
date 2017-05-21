@@ -66,7 +66,7 @@ int skat_connect
 	if (neighbor->good())
 	{
 		std::ostringstream ost, ost2;
-		ost << nonce_A << "<>" << vnicks[pkr_idx];
+		ost << nonce_A << "<req>" << vnicks[pkr_idx];
 		// send the signature
 		*neighbor << sec.sign(ost.str()) << std::endl << std::flush;
 		// create a fresh nonce
@@ -76,7 +76,7 @@ int skat_connect
 		// receive the signature
 		std::getline(*neighbor, tmp);
 		// verify the signature
-		ost2 << nonce_B << "<>" << vnicks[pkr_self];
+		ost2 << nonce_A << "<rpl>" << vnicks[pkr_idx] << "<|>" << nonce_B << "<rpl>" << vnicks[pkr_self];
 		if (!pkr.keys[pkr_idx].verify(ost2.str(), tmp) || !neighbor->good())
 		{
 			delete neighbor;
@@ -171,7 +171,7 @@ int skat_accept
 					// receive the signature
 					std::getline(*neighbor, tmp);
 					// verify the signature
-					ost << nonce_A << "<>" << vnicks[pkr_self];
+					ost << nonce_A << "<req>" << vnicks[pkr_self];
 					if (!pkr.keys[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
 					{
 						delete neighbor;
@@ -180,12 +180,12 @@ int skat_accept
 					}
 					else
 					{
-						// receive the nonce
+						// receive the nonce and reply
 						*neighbor >> nonce_B;
 						neighbor->ignore(1, '\n');
 						if (neighbor->good())
 						{
-							ost2 << nonce_B << "<>" << vnicks[pkr_idx];
+							ost2 << nonce_A << "<rpl>" << vnicks[pkr_self] << "<|>" << nonce_B << "<rpl>" << vnicks[pkr_idx];
 							*neighbor << sec.sign(ost2.str()) << std::endl << std::flush;
 							
 							// exchange the secret keys for securesocketstream
@@ -202,7 +202,6 @@ int skat_accept
 								return -6;
 							}
 							memcpy(key2, dv, TMCG_SAEP_S0);
-							
 							gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 							*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
 							delete neighbor;
@@ -254,21 +253,18 @@ int skat_accept
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 					{
-						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" 
-							<< nr << "|3~" << r << "!" << std::endl << std::flush;
+						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|3~" << r << "!" << std::endl << std::flush;
 					}
 					if (neu && (cmd.find("KIEBITZ ", 0) == 0))
 					{
 						std::string nick = cmd.substr(8, cmd.length() - 8);
-						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
-							nick << " :" << _("observers currently not permitted") << 
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " <<	nick << " :" << _("observers currently not permitted") << 
 							std::endl << std::flush;
 					}
 					if (neu && (cmd.find("JOIN ", 0) == 0))
 					{
 						std::string nick = cmd.substr(5, cmd.length() - 5);
-						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
-							nick << " :" << _("table completely occupied") << 
+						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " <<	nick << " :" << _("table completely occupied") << 
 							std::endl << std::flush;
 					}
 					if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0))
@@ -306,8 +302,7 @@ void skat_error
 	{
 		if (error < -1)
 		{
-			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << 
-				std::endl << std::flush;
+			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 			sleep(1);	// The child has to sleep a second before quitting, because
 					// the parent must process the sended PART message first.
 		}
@@ -319,8 +314,7 @@ int skat_child
 	(const std::string &nr, int r, bool neu, int ipipe, int opipe, int hpipe,
 	const std::string &master)
 {
-	SchindelhauerTMCG *gp_tmcg =
-		new SchindelhauerTMCG(80, 3, 5);	// 3 players, 2^5 = 32 cards, security level = 80
+	SchindelhauerTMCG *gp_tmcg = new SchindelhauerTMCG(80, 3, 5); // 3 players, 2^5 = 32 cards, security level = 80
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
