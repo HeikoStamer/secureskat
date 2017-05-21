@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION(20170520)
+AC_REVISION(20170521)
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.10], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -64,7 +64,7 @@ AC_PROG_MKDIR_P
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.16.1])
+AM_GNU_GETTEXT_VERSION([0.19.8])
 
 # Checks for libraries.
 AC_ARG_WITH(gmp, [AS_HELP_STRING([--with-gmp=<path>], [prefix of libgmp installation e.g. /usr/local])], [GMP_PREFIX="$with_gmp"],\
