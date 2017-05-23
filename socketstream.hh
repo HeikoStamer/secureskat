@@ -75,9 +75,9 @@ public:
          * The destructor
          */
     ~basic_socketbuf() {
+        sync();
         delete [] mRBuffer;
         delete [] mWBuffer;
-        sync();
     }
     
 protected:

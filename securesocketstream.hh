@@ -193,10 +193,10 @@ template <class traits = securesocketbuf_traits>
 		 */
 		~basic_securesocketbuf() 
 		{
-		  deflateEnd(&zs_out), inflateEnd(&zs_in);
+			sync();
+			deflateEnd(&zs_out), inflateEnd(&zs_in);
 			gcry_cipher_close(chd_in), gcry_cipher_close(chd_out);
 			delete [] mRBuffer, delete [] mWBuffer;
-			sync();
 		}
 	
 	protected:
