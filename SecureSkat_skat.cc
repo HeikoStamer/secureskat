@@ -25,16 +25,16 @@ int ctl_pid = 0; // PID of the running control program
 RETSIGTYPE sig_handler_skat_quit(int sig)
 {
 #ifndef NDEBUG
-    std::cerr << "sig_handler_skat_quit: got signal " << sig << std::endl;
+	std::cerr << "sig_handler_skat_quit: got signal " << sig << std::endl;
 #endif
-    if (ctl_pid > 0)
-    {
-	// send SIGQUIT to running control program
-	if (kill(ctl_pid, SIGQUIT) < 0)
-	    perror("sig_handler_skat_quit (kill)");
-	waitpid(ctl_pid, NULL, 0);
-    }
-    exit(-100);
+	if (ctl_pid > 0)
+	{
+		// send SIGQUIT to running control program
+		if (kill(ctl_pid, SIGQUIT) < 0)
+			perror("sig_handler_skat_quit (kill)");
+		waitpid(ctl_pid, NULL, 0);
+	}
+	exit(-100);
 }
 
 extern TMCG_SecretKey sec;
@@ -47,9 +47,9 @@ extern char **game_env;
 
 
 int skat_connect
-    (size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
-    std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
-    const TMCG_PublicKeyRing &pkr)
+	(size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
+	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
+	const TMCG_PublicKeyRing &pkr)
 {
 	// create TCP/IP connection
 	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(),
@@ -80,14 +80,14 @@ int skat_connect
 		if (!pkr.keys[pkr_idx].verify(ost2.str(), tmp) || !neighbor->good())
 		{
 			delete neighbor;
-			close(handle);
+			CloseHandle(handle);
 			return -6;
 		}
 	}
 	else
 	{
 		delete neighbor;
-		close(handle);
+		CloseHandle(handle);
 		return -6;
 	}
 	
@@ -345,8 +345,9 @@ int skat_child
 	// wait for players
 	while (1)
 	{
-		char tmp[10000];
-		in_pipe->getline(tmp, sizeof(tmp));
+		char tmp[10001];
+		memset(tmp, 0, sizeof(tmp));
+		in_pipe->getline(tmp, (sizeof(tmp) - 1));
 		std::string cmd = tmp;
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
@@ -483,8 +484,9 @@ int skat_child
 	std::map<std::string, int> gp_ports;
 	while (gp_rdport.size() < 2)
 	{
-		char tmp[10000];
-		in_pipe->getline(tmp, sizeof(tmp));
+		char tmp[10001];
+		memset(tmp, 0, sizeof(tmp));
+		in_pipe->getline(tmp, (sizeof(tmp) - 1));
 		std::string cmd = tmp;
 		
 		if (cmd.find("!KICK", 0) == 0)

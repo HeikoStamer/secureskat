@@ -23,9 +23,9 @@
 RETSIGTYPE sig_handler_ballot_quit(int sig)
 {
 #ifndef NDEBUG
-    std::cerr << "signal_handler_ballot_quit: got signal " << sig << std::endl;
+	std::cerr << "signal_handler_ballot_quit: got signal " << sig << std::endl;
 #endif
-    exit(-100);
+	exit(-100);
 }
 
 extern TMCG_SecretKey sec;
@@ -72,8 +72,9 @@ int ballot_child
 	// wait for voters
 	while (1)
 	{
-		char tmp[10000];
-		in_pipe->getline(tmp, sizeof(tmp));
+		char tmp[10001];
+		memset(tmp, 0, sizeof(tmp));
+		in_pipe->getline(tmp, (sizeof(tmp) - 1));
 		std::string cmd = tmp;
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0) || (b <= 0))
