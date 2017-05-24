@@ -1022,8 +1022,7 @@ int skat_game
 	for (size_t i = 0; pctl && (i < 3); i++)
 	{
 		std::ostringstream ost;
-		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " << 
-			pkr.keys[i].name << std::endl;
+		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " << pkr.keys[i].name << std::endl;
 		*out_ctl << ost.str() << std::flush;
 	}
 	
@@ -1037,12 +1036,16 @@ int skat_game
 #endif
 		
 		vtmf = new BarnettSmartVTMF_dlog();
-		vtmf->PublishGroup(*left), vtmf->PublishGroup(*right);
+		vtmf->PublishGroup(*left);
+		vtmf->PublishGroup(*right);
 		
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " <<
-				_("function CheckGroup() failed") << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		
@@ -1053,14 +1056,20 @@ int skat_game
 		
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " <<
-				_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " <<
-				_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		
@@ -1084,8 +1093,11 @@ int skat_game
 		
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " <<
-				_("function CheckGroup() failed") << std::endl;
+			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		
@@ -1095,16 +1107,22 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " <<
-					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
 			vtmf->KeyGenerationProtocol_PublishKey(*right);
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " <<
-					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 2;
 			}
 		}
@@ -1112,14 +1130,20 @@ int skat_game
 		{
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
 			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " <<
-					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 2;
 			}
 			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
 			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " <<
-					_("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 2;
 			}
 			vtmf->KeyGenerationProtocol_PublishKey(*left);
@@ -1144,30 +1168,46 @@ int skat_game
 #endif
 		
 		vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, vtmf->g, vtmf->h);
-		vsshe->PublishGroup(*left), vsshe->PublishGroup(*right);
+		vsshe->PublishGroup(*left);
+		vsshe->PublishGroup(*right);
 		if (!vsshe->CheckGroup())
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("function CheckGroup() failed") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->h, vsshe->com->h))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("common public key does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("common public key does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->q, vsshe->com->q))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("subgroup order does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("subgroup order does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
-		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || 
-			mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
+		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) ||	mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("encryption scheme does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("encryption scheme does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		
@@ -1188,27 +1228,42 @@ int skat_game
 			vsshe = new GrothVSSHE(32, *left);
 		if (!vsshe->CheckGroup())
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("function CheckGroup() failed") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->h, vsshe->com->h))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("common public key does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("common public key does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		if (mpz_cmp(vtmf->q, vsshe->com->q))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("subgroup order does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("subgroup order does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
-		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || 
-			mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
+		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
 		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " <<
-				_("encryption scheme does not match") << std::endl;
+			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("encryption scheme does not match") << std::endl;
+			delete vsshe;
+			delete vtmf;
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2;
 		}
 		
@@ -1242,8 +1297,7 @@ int skat_game
 			TMCG_StackSecret<VTMF_CardSecret> ss, ab;
 			d2.push(d);
 			tmcg->TMCG_CreateStackSecret(ss, false, d2.size(), vtmf);
-			std::cout << "><>< " << _("Shuffle the cards.") << " " <<
-				_("Please wait") << "." << std::flush;
+			std::cout << "><>< " << _("Shuffle the cards.") << " " << _("Please wait") << "." << std::flush;
 			if (pctl)
 			{
 				std::ostringstream ost;
@@ -1256,8 +1310,12 @@ int skat_game
 			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
-				std::cout << ">< " << _("shuffling error") << ": " <<
-					_("bad stack format") << std::endl;
+				std::cout << ">< " << _("shuffling error") << ": " << _("bad stack format") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 1;
 			}
 #ifndef NDEBUG
@@ -1271,8 +1329,12 @@ int skat_game
 			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss,
 				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
-				std::cout << ">< " << _("shuffling error") << ": " <<
-					_("wrong ZK proof") << std::endl;
+				std::cout << ">< " << _("shuffling error") << ": " << _("wrong ZK proof") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 2;
 			}
 #ifndef NDEBUG
@@ -1289,16 +1351,13 @@ int skat_game
 			std::string osttmp = game_stream.str();
 
 			char *game_digest = new char[dlen];
-			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, game_digest,
-				osttmp.c_str(), osttmp.length());
+			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, game_digest, osttmp.c_str(), osttmp.length());
 			char *hex_game_digest =	new char[2 * dlen + 1];
 			for (size_t i = 0; i < dlen; i++)
-				snprintf(hex_game_digest + (2 * i), 3, "%02x",
-					(unsigned char)game_digest[i]);
+				snprintf(hex_game_digest + (2 * i), 3, "%02x", (unsigned char)game_digest[i]);
 			
 			// dealing the cards
-			std::cout << "><>< " << _("Dealing the cards.") << " " <<
-				_("Please wait") << "." << std::flush;
+			std::cout << "><>< " << _("Dealing the cards.") << " " << _("Please wait") << "." << std::flush;
 			if (pctl)
 			{
 				std::ostringstream ost;
@@ -1311,17 +1370,28 @@ int skat_game
 			TMCG_Stack<VTMF_Card> s[3], sk;
 			if (!skat_geben(tmcg, d_end, s[0], s[1], s[2], sk))
 			{
-				std::cout << ">< " << _("dealing error") << ": " <<
-					_("not enough cards") << std::endl;
+				std::cout << ">< " << _("dealing error") << ": " << _("not enough cards") << std::endl;
+				delete [] hex_game_digest;
+				delete [] game_digest;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 3;
 			}
 			std::cout << "." << std::flush;
 			TMCG_OpenStack<VTMF_Card> os, os_ov, os_sp, os_st, os_pkt[3], os_rc[3];
-			if (!skat_sehen(pkr_self, tmcg, vtmf, os,
-				s[0], s[1], s[2], right, left))
+			if (!skat_sehen(pkr_self, tmcg, vtmf, os, s[0], s[1], s[2], right, left))
 			{
-				std::cout << ">< " << _("dealing error") << ": " <<
-					_("wrong ZK proof") << std::endl;
+				std::cout << ">< " << _("dealing error") << ": " << _("wrong ZK proof") << std::endl;
+				delete [] hex_game_digest;
+				delete [] game_digest;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 4;
 			}
 #ifndef NDEBUG
@@ -1358,14 +1428,19 @@ int skat_game
 			{
 				if (!left->good() || !right->good())
 				{
-					std::cout << ">< " <<
-						_("connection with participating player(s) collapsed") << std::endl;
+					std::cout << ">< " << _("connection with participating player(s) collapsed") << std::endl;
+					delete [] hex_game_digest;
+					delete [] game_digest;
+					delete vsshe;
+					delete vtmf;
+					if (pctl)
+						delete out_ctl;
+					delete out_pipe;
 					return 5;
 				}
 				
-				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh,
-					reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
-						break;
+				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh, reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
+					break;
 				
 				// select(2) -- initialize file descriptors
 				FD_ZERO(&rfds);
@@ -1420,43 +1495,61 @@ int skat_game
 				
 				if (!left->good() || !right->good())
 				{
-					std::cout << ">< " <<
-					_("connection with participating player(s) collapsed") << std::endl;
+					std::cout << ">< " << _("connection with participating player(s) collapsed") << std::endl;
+					delete [] hex_game_digest;
+					delete [] game_digest;
+					delete vsshe;
+					delete vtmf;
+					if (pctl)
+						delete out_ctl;
+					delete out_pipe;
 					return 5;
 				}
 				
-				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh,
-					reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
+				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh, reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
 				{
 					got_break = true;
 					break;
 				}
 				
 				if ((cmd.find("!KICK", 0) == 0) || (cmd.find("!QUIT", 0) == 0))
+				{
+					delete [] hex_game_digest;
+					delete [] game_digest;
+					delete vsshe;
+					delete vtmf;
+					if (pctl)
+						delete out_ctl;
+					delete out_pipe;
 					return 6;
-				if ((cmd.find("PART ", 0) == 0) 
-					|| (cmd.find("QUIT ", 0) == 0)
-					|| (cmd.find("KICK ", 0) == 0))
+				}
+				if ((cmd.find("PART ", 0) == 0) || (cmd.find("QUIT ", 0) == 0) || (cmd.find("KICK ", 0) == 0))
 				{
 					std::string nick = cmd.substr(5, cmd.length() - 5);
 					if (std::find(nicks.begin(), nicks.end(), nick) != nicks.end())
+					{
+						delete [] hex_game_digest;
+						delete [] game_digest;
+						delete vsshe;
+						delete vtmf;
+						if (pctl)
+							delete out_ctl;
+						delete out_pipe;
 						return 7;
+					}
 				}
 				if (master && started && (cmd.find("!ANNOUNCE", 0) == 0))
 				{
-					*out_pipe << "PRIVMSG " << main_channel << " :" << nr << "|3~" <<
-						(rounds - r) << "!" << std::endl << std::flush;
+					*out_pipe << "PRIVMSG " << main_channel << " :" << nr << "|3~" << (rounds - r) << "!" << std::endl << std::flush;
 				}	
 				if (cmd.find("IRC ", 0) == 0)
 				{
-					*out_pipe << "PRIVMSG " << main_channel << " :" << 
-						cmd.substr(4, cmd.length() - 4) << std::endl << std::flush;
+					*out_pipe << "PRIVMSG " << main_channel << " :" << cmd.substr(4, cmd.length() - 4) << std::endl << std::flush;
 				}
 				if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
 				{
 					std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
-					std::string msg = cmd.substr(cmd.find(" ", 4) + 1, 
-						cmd.length() - cmd.find(" ", 4) - 1);
+					std::string msg = cmd.substr(cmd.find(" ", 4) + 1, cmd.length() - cmd.find(" ", 4) - 1);
 					
 					size_t who_biding = 100;
 					switch (reiz_status)
@@ -1519,16 +1612,13 @@ int skat_game
 									reiz_status = 11;
 									break;
 							}
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[who_biding].name << "\" " << _("passes at") << " " << 
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[who_biding].name << "\" " << _("passes at") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							if (pctl)
-								*out_ctl << nicks[who_biding] << " PASSE" << std::endl << 
-									std::flush;
+								*out_ctl << nicks[who_biding] << " PASSE" << std::endl << std::flush;
 						}
 						else
-							std::cout << ">< " << _("biding error") << ": " <<
-								_("pass action incorrect") << std::endl;
+							std::cout << ">< " << _("biding error") << ": " << _("pass action incorrect") << std::endl;
 					}
 					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0) ||
 						(msg.find("BID", 0) == 0) || (msg.find("bid", 0) == 0))
@@ -1543,71 +1633,166 @@ int skat_game
 							{
 								case 0: // MH reizt (zu Beginn)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 1;
 									break;
 								case 1: // VH sagt ja (nach Reizen MH)
 									if (irw != reiz_wert[reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 2;
 									break;
 								case 2: // MH reizt (weiter)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 1;
 									break;
 								case 3: // HH reizt (nach sofort Passen MH, oder Reizen VH)
 								case 5: // HH reizt (nach sofort Passen MH, oder Reizen VH)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 4;
 									break;
 								case 4: // VH sagt ja (nach Passen MH, Reizen HH)
 									if (irw != reiz_wert[reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 5;
 									break;
 								case 6: // HH reizt (nach Passen MH)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 7;
 									break;
 								case 7: // VH sagt ja (nach Passen MH, Reizen HH)
 									if (irw != reiz_wert[reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 6;
 									break;
 								case 8: // HH reizt (nach Passen VH)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 9;
 									break;
 								case 9: // MH sagt ja (nach Passen VH)
 									if (irw != reiz_wert[reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 8;
 									break;
 								case 10: // VH reizt (nach sofort Passen MH, sofort Passen HH)
 									if (irw != reiz_wert[++reiz_counter])
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 22;
+									}
 									reiz_status = 12;
 									break;
-								
+								default: // should never happen
+									delete [] hex_game_digest;
+									delete [] game_digest;
+									delete vsshe;
+									delete vtmf;
+									if (pctl)
+										delete out_ctl;
+									delete out_pipe;
+									return 23;
 							}
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[who_biding].name << "\" " << _("bids") << " " << 
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[who_biding].name << "\" " << _("bids") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							if (pctl)
 							{
 								std::ostringstream ost;
-								ost << nicks[who_biding] << " REIZE " << 
-									reiz_wert[reiz_counter] << std::endl;
+								ost << nicks[who_biding] << " REIZE " << reiz_wert[reiz_counter] << std::endl;
 								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else
-							std::cout << ">< " << _("biding error") << ": " <<
-								_("bid action incorrect") << std::endl;
+							std::cout << ">< " << _("biding error") << ": " << _("bid action incorrect") << std::endl;
 					}
 					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
 					{
@@ -1616,12 +1801,10 @@ int skat_game
 							if ((nick == nicks[spiel_allein]) && (pkr_self != spiel_allein))
 							{
 								hand_spiel = true, reiz_status += 100;
-								std::cout << "><><>< " << _("player") << " \"" <<
-									pkr.keys[spiel_allein].name << 
+								std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_allein].name << 
 									"\" " << _("doesn't take the Skat") << std::endl;
 								if (pctl)
-									*out_ctl << nicks[spiel_allein] << " HAND" << std::endl << 
-										std::flush;
+									*out_ctl << nicks[spiel_allein] << " HAND" << std::endl << std::flush;
 							}
 						}
 					}
@@ -1632,8 +1815,7 @@ int skat_game
 							if ((nick == nicks[spiel_allein]) && (pkr_self != spiel_allein))
 							{
 								hand_spiel = false, reiz_status += 100;
-								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.keys[spiel_allein].name << 
+								std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_allein].name << 
 									"\" " << _("takes the Skat") << std::endl;
 								assert(sk.size() == 2);
 								s[spiel_allein].push(sk);
@@ -1659,37 +1841,41 @@ int skat_game
 										skat_szeigen(tmcg, vtmf, sk, right);
 								}
 								if (pctl)
-									*out_ctl << nicks[spiel_allein] << " SKAT" << std::endl << 
-										std::flush;
+									*out_ctl << nicks[spiel_allein] << " SKAT" << std::endl << std::flush;
 							}
 						}
 					}
-					else if ((msg.find("DRUECKE", 0) == 0) || 
-						(msg.find("druecke", 0) == 0) || (msg.find("PUSH", 0) == 0) || 
-						(msg.find("push", 0) == 0))
+					else if ((msg.find("DRUECKE", 0) == 0) || (msg.find("druecke", 0) == 0) ||
+						(msg.find("PUSH", 0) == 0) || (msg.find("push", 0) == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
 							if (!hand_spiel)
 							{
-								if ((nick == nicks[spiel_allein]) && 
-									(pkr_self != spiel_allein))
+								if ((nick == nicks[spiel_allein]) && (pkr_self != spiel_allein))
 								{
 									VTMF_Card c1, c2;
 									reiz_status += 100;
-									std::cout << "><><>< " << _("player") << " \"" << 
-										pkr.keys[spiel_allein].name << 
+									std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_allein].name << 
 										"\" " << _("pushes the Skat") << std::endl;
 									if (pctl)
-										*out_ctl << nicks[spiel_allein] << " DRUECKE" << 
-											std::endl << std::flush;
+										*out_ctl << nicks[spiel_allein] << " DRUECKE" << std::endl << std::flush;
 									if (((pkr_self == 0) && (spiel_allein == 1)) || 
 										((pkr_self == 1) && (spiel_allein == 2)) || 
 										((pkr_self == 2) && (spiel_allein == 0)))
 									{
 										*left >> c1 >> c2;
 										if (!left->good())
+										{
+											delete [] hex_game_digest;
+											delete [] game_digest;
+											delete vsshe;
+											delete vtmf;
+											if (pctl)
+												delete out_ctl;
+											delete out_pipe;
 											return 9;
+										}
 									}
 									else if (((pkr_self == 0) && (spiel_allein == 2)) || 
 										((pkr_self == 1) && (spiel_allein == 0)) || 
@@ -1697,15 +1883,41 @@ int skat_game
 									{
 										*right >> c1 >> c2;
 										if (!right->good())
+										{
+											delete [] hex_game_digest;
+											delete [] game_digest;
+											delete vsshe;
+											delete vtmf;
+											if (pctl)
+												delete out_ctl;
+											delete out_pipe;
 											return 9;
+										}
 									}
 									else
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
 										return 9;
+									}
 									
 									// check and store pushed cards
-									if ((!s[spiel_allein].find(c1)) || 
-										(!s[spiel_allein].find(c2)))
-											return 10;
+									if ((!s[spiel_allein].find(c1)) || (!s[spiel_allein].find(c2)))
+									{
+										delete [] hex_game_digest;
+										delete [] game_digest;
+										delete vsshe;
+										delete vtmf;
+										if (pctl)
+											delete out_ctl;
+										delete out_pipe;
+										return 10;
+									}
 									sk.clear();
 									s[spiel_allein].remove(c1);
 									sk.push(c1);
@@ -1715,9 +1927,8 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("SAGEAN", 0) == 0) || 
-						(msg.find("sagean", 0) == 0) || (msg.find("ANNOUNCE", 0) == 0) || 
-						(msg.find("announce", 0) == 0))
+					else if ((msg.find("SAGEAN", 0) == 0) || (msg.find("sagean", 0) == 0) ||
+						(msg.find("ANNOUNCE", 0) == 0) || (msg.find("announce", 0) == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -1757,14 +1968,20 @@ int skat_game
 										{
 											std::cout << ">< " << _("card decryption error") << 
 												": " << _("wrong ZK proof") << std::endl;
+											delete [] hex_game_digest;
+											delete [] game_digest;
+											delete vsshe;
+											delete vtmf;
+											if (pctl)
+												delete out_ctl;
+											delete out_pipe;
 											return 11;
 										}
 										os_ov.push(type, VTMF_Card());
 										if (pctl)
 										{
 											std::ostringstream ost;
-											ost << nicks[spiel_allein] << " OUVERT " << type << 
-												std::endl;
+											ost << nicks[spiel_allein] << " OUVERT " << type << std::endl;
 											*out_ctl << ost.str() << std::flush;
 										}
 									}
@@ -1798,17 +2015,21 @@ int skat_game
 							{
 								std::cout << ">< " << _("card decryption error") << 
 									": " << _("wrong ZK proof") << std::endl;
+								delete [] hex_game_digest;
+								delete [] game_digest;
+								delete vsshe;
+								delete vtmf;
+								if (pctl)
+									delete out_ctl;
+								delete out_pipe;
 								return 12;
 							}
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[spiel_who[spiel_dran]].name << "\" " << 
-								_("plays the card") << ": " <<
-								skat_type2string(type) << std::endl;
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_who[spiel_dran]].name << "\" " << 
+								_("plays the card") << ": " << skat_type2string(type) << std::endl;
 							if (pctl)
 							{
 								std::ostringstream ost;
-								ost << nicks[spiel_who[spiel_dran]] << " LEGE " << type << 
-									std::endl;
+								ost << nicks[spiel_who[spiel_dran]] << " LEGE " << type << std::endl;
 								*out_ctl << ost.str() << std::flush;
 							}	
 							VTMF_Card c;
@@ -1821,8 +2042,7 @@ int skat_game
 							{
 								int bk = skat_bstich(os_sp, spiel_status);
 								assert (bk != -1);
-								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.keys[spiel_who[bk]].name << "\" " << 
+								std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_who[bk]].name << "\" " << 
 									_("gets the trick") << ": ";
 								for (size_t i = 0; i < os_sp.size(); i++)
 									std::cout << skat_type2string(os_sp[i].first);
@@ -1830,8 +2050,7 @@ int skat_game
 								if (os.size() > 0)
 									skat_blatt((pkr_self + p) % 3, os);
 								if (pctl)
-									*out_ctl << nicks[spiel_who[bk]] << " BSTICH" << 
-										std::endl << std::flush;
+									*out_ctl << nicks[spiel_who[bk]] << " BSTICH" << std::endl << std::flush;
 								// Stichstapel erste Karte (Regelkontrolle)
 								os_st.push(os_sp[0].first, os_sp[0].second);
 								// Stichstapel jedes Spielers
@@ -1873,16 +2092,14 @@ int skat_game
 							skat_blatt(10, os_ov);
 						if (spiel_status > 0)
 						{
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[spiel_allein].name << "\" (";
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_allein].name << "\" (";
 							if ((reiz_status - 412) == 0)
 								std::cout << "VH";
 							if ((reiz_status - 412) == 1)
 								std::cout << "MH";
 							if ((reiz_status - 412) == 2)
 								std::cout << "HH";
-							std::cout << ") " << _("announced") << " \"" << 
-								skat_spiel2string(spiel_status) << "\"" << std::endl;
+							std::cout << ") " << _("announced") << " \"" << skat_spiel2string(spiel_status) << "\"" << std::endl;
 							std::cout << "><><>< " << _("played cards") << ": ";
 							for (size_t i = 0; i < os_sp.size(); i++)
 							{
@@ -1893,14 +2110,12 @@ int skat_game
 							}
 							if (os_sp.size() < 3)
 							{
-								std::cout << " [" << pkr.keys[spiel_who[spiel_dran]].name << 
-									" " << _("has to play") << "]" << std::endl;
+								std::cout << " [" << pkr.keys[spiel_who[spiel_dran]].name << " " << _("has to play") << "]" << std::endl;
 							}
 						}
 					}
-					else if ((msg.find("PASSE", 0) == 0) ||
-						(msg.find("passe", 0) == 0) || (msg.find("PASS", 0) == 0) || 
-						(msg.find("pass", 0) == 0))
+					else if ((msg.find("PASSE", 0) == 0) ||	(msg.find("passe", 0) == 0) ||
+						(msg.find("PASS", 0) == 0) || (msg.find("pass", 0) == 0))
 					{
 						bool pass_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -1959,8 +2174,7 @@ int skat_game
 						
 						if (pass_ok)
 						{
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[pkr_self].name << "\" " << _("passes at") << " " << 
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[pkr_self].name << "\" " << _("passes at") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
 							*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
 								" :PASSE " << hex_game_digest << std::endl << std::flush;
@@ -1969,12 +2183,10 @@ int skat_game
 									std::flush;
 						}
 						else
-							std::cout << ">< " << _("biding error") << ": " << 
-								_("passing is currently not allowed") << std::endl;
+							std::cout << ">< " << _("biding error") << ": " << _("passing is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("REIZE", 0) == 0) || 
-						(msg.find("reize", 0) == 0) || (msg.find("BID", 0) == 0) || 
-						(msg.find("bid", 0) == 0))
+					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0) ||
+						(msg.find("BID", 0) == 0) || (msg.find("bid", 0) == 0))
 					{
 					bool bid_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -2038,23 +2250,19 @@ int skat_game
 						
 						if (bid_ok)
 						{
-							std::cout << "><><>< " << _("player") << " \"" << 
-								pkr.keys[pkr_self].name << "\" " << _("bids") << " " << 
+							std::cout << "><><>< " << _("player") << " \"" << pkr.keys[pkr_self].name << "\" " << _("bids") << " " << 
 								reiz_wert[reiz_counter] << std::endl;
-							*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
-								" :REIZE " << reiz_wert[reiz_counter] << " " << 
+							*out_pipe << "PRIVMSG " << main_channel_underscore << nr << " :REIZE " << reiz_wert[reiz_counter] << " " << 
 								hex_game_digest << std::endl << std::flush;
 							if (pctl)
 							{
 								std::ostringstream ost;
-								ost << nicks[pkr_self] << " REIZE " << 
-									reiz_wert[reiz_counter] << std::endl;
+								ost << nicks[pkr_self] << " REIZE " << reiz_wert[reiz_counter] << std::endl;
 								*out_ctl << ost.str() << std::flush;
 							}
 						}
 						else
-							std::cout << ">< " << _("biding error") << ": " << 
-								_("biding is currently not allowed") << std::endl;
+							std::cout << ">< " << _("biding error") << ": " << _("biding is currently not allowed") << std::endl;
 					}
 					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
 					{
@@ -2062,22 +2270,19 @@ int skat_game
 						{
 							if ((reiz_status - 112) == ((pkr_self + p) % 3))
 							{
-								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.keys[pkr_self].name << "\" " <<
+								std::cout << "><><>< " << _("player") << " \"" << pkr.keys[pkr_self].name << "\" " <<
 									_("doesn't take the Skat") << std::endl;
 								*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
 									" :HAND " << hex_game_digest << std::endl << std::flush;
 								hand_spiel = true, reiz_status += 100;
 								if (pctl)
-									*out_ctl << nicks[pkr_self] << " HAND" << std::endl << 
-										std::flush;
+									*out_ctl << nicks[pkr_self] << " HAND" << std::endl << std::flush;
 							}
 							else
 								std::cout << ">< " << _("It's not your game.") << std::endl;
 						}
 						else
-							std::cout << ">< " <<
-								_("taking the Skat is currently not allowed") << std::endl;
+							std::cout << ">< " << _("taking the Skat is currently not allowed") << std::endl;
 					}
 					else if ((msg.find("SKAT", 0) == 0) || (msg.find("skat", 0) == 0))
 					{
@@ -2085,41 +2290,42 @@ int skat_game
 						{
 							if (pkr_self == spiel_allein)
 							{
-								std::cout << "><><>< " << _("player") << " \"" << 
-									pkr.keys[pkr_self].name << "\" " << 
+								std::cout << "><><>< " << _("player") << " \"" << pkr.keys[pkr_self].name << "\" " << 
 									_("takes the Skat") << std::endl;
 								*out_pipe << "PRIVMSG " << main_channel_underscore << nr << 
 									" :SKAT " << hex_game_digest << std::endl << std::flush;
 								hand_spiel = false, reiz_status += 100;
-								if (!skat_ssehen(pkr_self, tmcg, vtmf, os, sk,
-									right, left))
+								if (!skat_ssehen(pkr_self, tmcg, vtmf, os, sk, right, left))
 								{
 									std::cout << ">< " << _("card decryption error") << 
 										": " << _("wrong ZK proof") << std::endl;
+									delete [] hex_game_digest;
+									delete [] game_digest;
+									delete vsshe;
+									delete vtmf;
+									if (pctl)
+										delete out_ctl;
+									delete out_pipe;
 									return 8;
 								}
 								for (size_t i = 10; (pctl && (i < os.size())); i++)
 								{
 									std::ostringstream ost;
-									ost << nicks[pkr_self] << " KARTE " << os[i].first << 
-										std::endl;
+									ost << nicks[pkr_self] << " KARTE " << os[i].first << std::endl;
 									*out_ctl << ost.str() << std::flush;
 								}
 								if (pctl)
-									*out_ctl << nicks[pkr_self] << " SKAT" << std::endl << 
-										std::flush;
+									*out_ctl << nicks[pkr_self] << " SKAT" << std::endl << std::flush;
 								skat_blatt((pkr_self + p) % 3, os);
 							}
 							else
 								std::cout << ">< " << _("It's not your game.") << std::endl;
 						}
 						else
-							std::cout << ">< " << 
-								_("taking the Skat is currently not allowed") << std::endl;
+							std::cout << ">< " << _("taking the Skat is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("DRUECKE", 0) == 0) || 
-						(msg.find("druecke", 0) == 0) || (msg.find("PUSH", 0) == 0) || 
-						(msg.find("push", 0) == 0))
+					else if ((msg.find("DRUECKE", 0) == 0) || (msg.find("druecke", 0) == 0) ||
+						(msg.find("PUSH", 0) == 0) || (msg.find("push", 0) == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
@@ -2138,8 +2344,7 @@ int skat_game
 									if ((ei != par.npos) && (par.length() > ei))
 									{
 										std::string cc1 = par.substr(0, ei);
-										std::string cc2 = par.substr(ei + 1,
-											par.length() - (ei + 1));
+										std::string cc2 = par.substr(ei + 1, par.length() - (ei + 1));
 										
 										int tt1 = skat_wort2type(cc1), tt2 = skat_wort2type(cc2);
 										if ((tt1 != -1) && (tt2 != -1))
@@ -2151,8 +2356,7 @@ int skat_game
 												assert(sk.size() == 2);
 												s[pkr_self].clear();
 												s[pkr_self].push(os);
-												std::cout << "><><>< " << _("player") << " \"" << 
-													pkr.keys[pkr_self].name << 
+												std::cout << "><><>< " << _("player") << " \"" << pkr.keys[pkr_self].name << 
 													"\" " << _("pushes") << ": " << 
 													skat_type2string(tt1) << skat_type2string(tt2) << 
 													std::endl;
@@ -2165,8 +2369,7 @@ int skat_game
 												*left << sk[0] << std::endl << std::flush;
 												*left << sk[1] << std::endl << std::flush;
 												if (pctl)
-													*out_ctl << nicks[pkr_self] << " DRUECKE" << 
-														std::endl << std::flush;
+													*out_ctl << nicks[pkr_self] << " DRUECKE" << std::endl << std::flush;
 												skat_blatt((pkr_self + p) % 3, os);
 											}
 											else
@@ -2181,23 +2384,19 @@ int skat_game
 												std::endl;
 									}
 									else
-										std::cout << ">< " << _("not enough parameter") << 
-											std::endl;
+										std::cout << ">< " << _("not enough parameter") << std::endl;
 								}
 								else
-									std::cout << ">< " << _("You must play without the Skat.") << 
-										std::endl;
+									std::cout << ">< " << _("You must play without the Skat.") << std::endl;
 							}
 							else
 								std::cout << ">< " << _("It's not your game.") << std::endl;
 						}
 						else
-							std::cout << ">< " << 
-								_("pushing the Skat is currently not allowed") << std::endl;
+							std::cout << ">< " << _("pushing the Skat is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("SAGEAN", 0) == 0) || 
-						(msg.find("sagean", 0) == 0) || (msg.find("ANNOUNCE", 0) == 0) || 
-						(msg.find("announce", 0) == 0))
+					else if ((msg.find("SAGEAN", 0) == 0) || (msg.find("sagean", 0) == 0) ||
+						(msg.find("ANNOUNCE", 0) == 0) || (msg.find("announce", 0) == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -2228,8 +2427,7 @@ int skat_game
 									int sz = s1 + s2 + (hand_spiel ? 1000 : 0);
 									if ((s1 != -1) && (s2 != -1) && (s1 > 0) && (sz > 0))
 									{
-										if (((sz < 100) || (sz > 1000) || (sz == 323)) &&
-											(sz != 1123) && (sz != 1223))
+										if (((sz < 100) || (sz > 1000) || (sz == 323)) && (sz != 1123) && (sz != 1223))
 										{
 											reiz_status += (hand_spiel ? 200 : 100);
 											spiel_status = sz;
@@ -2250,7 +2448,7 @@ int skat_game
 														skat_type2string(os[i].first) << " " << 
 														hex_game_digest << std::endl << std::flush;
 													skat_okarte(tmcg, vtmf, os[i].second, right, left);
-													// sleep to prevent "Excess Flood" error
+													// sleep few seconds to prevent "Excess Flood" error
 													sleep(3);
 												}
 											}
@@ -2335,8 +2533,7 @@ int skat_game
 										{
 											int bk = skat_bstich(os_sp, spiel_status);
 											assert(bk != -1);
-											std::cout << "><><>< " << _("player") << " \"" << 
-												pkr.keys[spiel_who[bk]].name << 
+											std::cout << "><><>< " << _("player") << " \"" << pkr.keys[spiel_who[bk]].name << 
 												"\" " << _("gets the trick") << ": ";
 											for (size_t i = 0; i < os_sp.size(); i++)
 												std::cout << skat_type2string(os_sp[i].first);
@@ -2344,24 +2541,21 @@ int skat_game
 											if (os.size() > 0)
 												skat_blatt((pkr_self + p) % 3, os);
 											if (pctl)
-												*out_ctl << nicks[spiel_who[bk]] << " BSTICH" <<
-													std::endl << std::flush;
+												*out_ctl << nicks[spiel_who[bk]] << " BSTICH" << std::endl << std::flush;
 											// Stichstapel erste Karte (Regelkontrolle)
 											os_st.push(os_sp[0].first, os_sp[0].second);
 											// Stichstapel jedes Spielers
 											os_pkt[spiel_who[bk]].push(os_sp);
 											// Kartenstapel jedes Spielers (Regelkontrolle)
 											for (size_t i = 0; i < os_sp.size(); i++)
-												os_rc[spiel_who[i]].push(os_sp[i].first,
-													os_sp[i].second);
+												os_rc[spiel_who[i]].push(os_sp[i].first, os_sp[i].second);
 											os_sp.clear();
 											spiel_who[0] = spiel_who[bk];
 											spiel_who[1] = (spiel_who[0] + 1) % 3;
 											spiel_who[2] = (spiel_who[0] + 2) % 3;
 											spiel_dran = 0;
 											// Null-Spiele ggf. sofort abbrechen
-											if ((skat_spiel2gwert(spiel_status) == 23)
-												&& (os_pkt[spiel_allein].size() != 0))
+											if ((skat_spiel2gwert(spiel_status) == 23) && (os_pkt[spiel_allein].size() != 0))
 											{
 												s[0].clear(), s[1].clear(), s[2].clear();
 											}
@@ -2374,20 +2568,17 @@ int skat_game
 											_("is not in your hands") << std::endl;
 								}
 								else
-									std::cout << ">< " << _("wrong card name") << ": \"" <<
-										par << "\"" << std::endl;
+									std::cout << ">< " << _("wrong card name") << ": \"" <<	par << "\"" << std::endl;
 							}
 							else
 								std::cout << ">< " << _("not enough parameter") << std::endl;
 						}
 						else
-							std::cout << ">< " << 
-								_("playing of cards is currently not allowed") << std::endl;
+							std::cout << ">< " << _("playing of cards is currently not allowed") << std::endl;
 					}
 					else
 					{
-						std::cout << ">< " << _("unknown table command") << " \"/" << nr << 
-							" " << msg << "\"" << std::endl;
+						std::cout << ">< " << _("unknown table command") << " \"/" << nr << " " << msg << "\"" << std::endl;
 					}
 				}
 							// ----------------------------------------------------------------
@@ -2400,10 +2591,16 @@ int skat_game
 					if (got_break)
 						break;
 				}
-				if (num == 0)
+				if (num <= 0)
 				{
-					std::cout << "><>< " << 
-						_("connection to program modules collapsed") << std::endl;
+					std::cout << "><>< " << _("connection to program modules collapsed") << std::endl;
+					delete [] hex_game_digest;
+					delete [] game_digest;
+					delete vsshe;
+					delete vtmf;
+					if (pctl)
+					delete out_ctl;
+					delete out_pipe;
 					return 5;
 				}
 			}
@@ -2564,11 +2761,17 @@ int skat_game
 					{
 						std::cout << "><>< " << _("player") << " \"" << pkr.keys[i].name << 
 							"\" " << _("has violated the rules.") << std::endl;
+						delete [] hex_game_digest;
+						delete [] game_digest;
+						delete vsshe;
+						delete vtmf;
+						if (pctl)
+							delete out_ctl;
+						delete out_pipe;
 						return 20;
 					}
 				}
-				std::cout << "><><>< " << _("game points") << ": " << spiel_wert << 
-					", " << _("biding value") << ": " <<
+				std::cout << "><><>< " << _("game points") << ": " << spiel_wert << ", " << _("biding value") << ": " <<
 					reiz_wert[reiz_counter] << ", " << _("game outcome") << ": " <<
 					(spiel_gewonnen ? _("win") : _("loose")) << std::endl;
 				if (pctl)
@@ -2597,7 +2800,8 @@ int skat_game
 				spiel_protokoll << "NONE~0~0~0~0~" << hex_game_digest << "~#";
 			}
 			
-			delete [] game_digest, delete [] hex_game_digest;
+			delete [] game_digest;
+			delete [] hex_game_digest;
 			os.clear();
 			os_ov.clear();
 			os_sp.clear();
@@ -2637,6 +2841,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[1].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2645,6 +2854,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[2].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2656,6 +2870,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[0].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2668,6 +2887,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[2].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2679,6 +2903,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[0].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2687,6 +2916,11 @@ int skat_game
 			{
 				std::cout << "><>< " << _("Signature of") << " " << _("player") <<
 					" \"" << pkr.keys[1].name << "\" " << _("is invalid") << std::endl;
+				delete vsshe;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
 				return 30;
 			}
 			sig_protokoll << stmp << "#";
@@ -2700,12 +2934,10 @@ int skat_game
 		// compute rnk_id aka hex_rnk_digest
 		std::string osttmp = spiel_protokoll.str();
 		char *rnk_digest = new char[dlen];
-		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest,
-			osttmp.c_str(), osttmp.length());
+		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest, osttmp.c_str(), osttmp.length());
 		char *hex_rnk_digest = new char[2 * dlen + 1];
 		for (size_t i = 0; i < dlen; i++)
-			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", 
-				(unsigned char)rnk_digest[i]);
+			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", (unsigned char)rnk_digest[i]);
 		opipestream *npipe = new opipestream(hpipe);
 		*npipe << hex_rnk_digest << std::endl << std::flush;
 		*npipe << spiel_protokoll.str() << std::endl << std::flush;
@@ -2713,11 +2945,12 @@ int skat_game
 		delete [] hex_rnk_digest;
 		delete npipe;
 	}
-	delete vsshe,	delete vtmf;
+	delete vsshe;
+	delete vtmf;
 	if (pctl)
 		*out_ctl << nicks[pkr_self] << " DONE" << std::endl << std::flush;
-	delete out_pipe;
 	if (pctl)
 		delete out_ctl;
+	delete out_pipe;
 	return 0;
 }

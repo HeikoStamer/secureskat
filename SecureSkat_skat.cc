@@ -52,8 +52,7 @@ int skat_connect
 	const TMCG_PublicKeyRing &pkr)
 {
 	// create TCP/IP connection
-	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(),
-		gp_ports[vnicks[pkr_idx]]);
+	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(), gp_ports[vnicks[pkr_idx]]);
 	if (handle < 0)
 		return -4;
 	iosocketstream *neighbor = new iosocketstream(handle);
@@ -109,6 +108,8 @@ int skat_connect
 	}
 	memcpy(key2, dv, TMCG_SAEP_S0);
 	delete neighbor;
+
+	// create encrypted stream and release keys
 	secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
 	delete [] key1, delete [] key2, delete [] dv;
 	return 0;
@@ -207,6 +208,8 @@ int skat_accept
 							gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 							*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
 							delete neighbor;
+
+							// create encrypted stream and release keys
 							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
 							delete [] key1, delete [] key2, delete [] dv;
 							break;
@@ -284,7 +287,7 @@ int skat_accept
 				memcpy(tmp, ireadbuf + cnt_pos, ireaded);
 				memcpy(ireadbuf, tmp, ireaded);
 			}
-			if (num == 0)
+			if (num <= 0)
 				return -50;
 		}
 	}
