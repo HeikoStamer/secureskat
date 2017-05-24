@@ -104,7 +104,7 @@ int skat_connect
 		std::cerr << _("TMCG: decrypt() failed") << std::endl;
 		delete neighbor;
 		delete [] key1, delete [] key2, delete [] dv;
-		close(handle);
+		CloseHandle(handle);
 		return -6;
 	}
 	memcpy(key2, dv, TMCG_SAEP_S0);
