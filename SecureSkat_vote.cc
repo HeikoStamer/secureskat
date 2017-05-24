@@ -78,6 +78,7 @@ int ballot_child
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0) || (b <= 0))
 		{
+			delete in_pipe, delete out_pipe;
 			return -1;
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -126,6 +127,7 @@ int ballot_child
 			{
 				std::cout << X << _("key exchange with") << " " << nick << " " << _("is incomplete") << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete in_pipe, delete out_pipe;
 				return -1;
 			}
 		}
@@ -165,11 +167,13 @@ int ballot_child
 	if (gp_nick.size() > TMCG_MAX_PLAYERS)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete in_pipe, delete out_pipe;
 		return -33;
 	}
 	if (b > TMCG_MAX_TYPEBITS)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete in_pipe, delete out_pipe;
 		return -33;
 	}
 	SchindelhauerTMCG *ballot_tmcg = new SchindelhauerTMCG(80, gp_nick.size(), b); // n players, 2^b cards, security level = 80
@@ -192,6 +196,8 @@ int ballot_child
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete in_pipe, delete out_pipe;
+		delete ballot_tmcg;
 		return -4;
 	}
 	std::ostringstream ost;
@@ -209,12 +215,16 @@ int ballot_child
 	bool has_voted = false;
 	while ((gp_rdport.size() < (gp_nick.size() - 1)) || (gp_voters.size() < gp_nick.size()))
 	{
-		char tmp[10000];
-		in_pipe->getline(tmp, sizeof(tmp));
+		char tmp[10001];
+		memset(tmp, 0, sizeof(tmp));
+		in_pipe->getline(tmp, (sizeof(tmp) - 1));
 		std::string cmd = tmp;
 		
 		if (cmd.find("!KICK", 0) == 0)
 		{
+			delete in_pipe, delete out_pipe;
+			delete ballot_tmcg;
+			CloseHandle(gp_handle);
 			return -1;
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -232,6 +242,9 @@ int ballot_child
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete in_pipe, delete out_pipe;
+				delete ballot_tmcg;
+				CloseHandle(gp_handle);
 				return -5;
 			}
 		}
@@ -293,7 +306,7 @@ int ballot_child
 	fd_set rfds;				// set of read descriptors
 	int mfds = 0;				// highest-numbered descriptor
 	struct timeval tv;			// timeout structure
-	char *ireadbuf = (char*)malloc(65536);
+	char *ireadbuf = new char[65536];
 	int ireaded = 0;
 	size_t pkr_idx = 0;
 	std::map<std::string, iosecuresocketstream*> ios_in, ios_out;
@@ -340,16 +353,25 @@ int ballot_child
 				{
 					perror("ballot_child (gethostbyname)");
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
+					delete ireadbuf;
+					CloseHandle(handle);
 					return -70;
 				}
 				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr)
 				{
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
+					delete ireadbuf;
+					CloseHandle(handle);
 					return -71;
 				}
 				// establish and authenticate the connection
 				iosocketstream *neighbor = new iosocketstream(handle);
-				
 				TMCG_CardSecret cs(gp_nick.size(), b);
 				ballot_tmcg->TMCG_CreateCardSecret(cs, pkr, pkr_self);
 				*neighbor << cs << std::endl << std::flush;
@@ -359,14 +381,24 @@ int ballot_child
 				challenge << cs << vnicks[pkr_self];
 				if (!neighbor->good())
 				{
-					delete neighbor, close(handle);
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
+					delete ireadbuf;
+					CloseHandle(handle);
+					delete neighbor;
 					return -72;
 				}
 				else if (!pkr.keys[pkr_idx].verify(challenge.str(), challenge_sig))
 				{
-					delete neighbor, close(handle);
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
+					delete ireadbuf;
+					CloseHandle(handle);
+					delete neighbor;
 					return -73;
 				}
 				else
@@ -386,9 +418,14 @@ int ballot_child
 						if (!sec.decrypt(dv, challenge_sig))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
-							close(handle);
+							delete [] key1, delete [] key2, delete [] dv;
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+							delete in_pipe, delete out_pipe;
+							delete ballot_tmcg;
+							CloseHandle(gp_handle);
+							delete ireadbuf;
+							CloseHandle(handle);
+							delete neighbor;
 							return -74;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
@@ -403,13 +440,18 @@ int ballot_child
 					}
 					else
 					{
-						delete neighbor;
-						close(handle);
 						*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+						delete in_pipe, delete out_pipe;
+						delete ballot_tmcg;
+						CloseHandle(gp_handle);
+						delete ireadbuf;
+						CloseHandle(handle);
+						delete neighbor;
 						return -76;
 					}
 				}
 			}
+			CloseHandle(handle);
 		}
 		else if ((ret > 0) && FD_ISSET(ipipe, &rfds))
 		{
@@ -433,6 +475,10 @@ int ballot_child
 					// do operation
 					if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 					{
+						delete in_pipe, delete out_pipe;
+						delete ballot_tmcg;
+						CloseHandle(gp_handle);
+						delete ireadbuf;
 						return -1;
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -451,6 +497,10 @@ int ballot_child
 						if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 						{
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+							delete in_pipe, delete out_pipe;
+							delete ballot_tmcg;
+							CloseHandle(gp_handle);
+							delete ireadbuf;
 							return -77;
 						}
 					}
@@ -469,6 +519,10 @@ int ballot_child
 			if (num == 0)
 			{
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete in_pipe, delete out_pipe;
+				delete ballot_tmcg;
+				CloseHandle(gp_handle);
+				delete ireadbuf;
 				return -78;
 			}
 		}
@@ -488,6 +542,10 @@ int ballot_child
 						if (handle < 0)
 						{
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+							delete in_pipe, delete out_pipe;
+							delete ballot_tmcg;
+							CloseHandle(gp_handle);
+							delete ireadbuf;
 							return -79;
 						}
 						iosocketstream *neighbor = new iosocketstream(handle);
@@ -513,21 +571,36 @@ int ballot_child
 							response << cs << vnicks[pkr_self];
 							if (!neighbor->good())
 							{
-								delete neighbor, close(handle);
 								*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+								delete in_pipe, delete out_pipe;
+								delete ballot_tmcg;
+								CloseHandle(gp_handle);
+								delete ireadbuf;
+								CloseHandle(handle);
+								delete neighbor;
 								return -80;
 							}
 							else if (!pkr.keys[i].verify(response.str(), tmp))
 							{
-								delete neighbor, close(handle);
 								*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+								delete in_pipe, delete out_pipe;
+								delete ballot_tmcg;
+								CloseHandle(gp_handle);
+								delete ireadbuf;
+								CloseHandle(handle);
+								delete neighbor;
 								return -81;
 							}
 						}
 						else
 						{
-							delete neighbor, close(handle);
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+							delete in_pipe, delete out_pipe;
+							delete ballot_tmcg;
+							CloseHandle(gp_handle);
+							delete ireadbuf;
+							CloseHandle(handle);
+							delete neighbor;
 							return -82;
 						}
 						
@@ -542,9 +615,14 @@ int ballot_child
 						if (!sec.decrypt(dv, tmp))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete neighbor, delete [] key1, delete [] key2, delete [] dv;
-							close(handle);
+							delete [] key1, delete [] key2, delete [] dv;
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+							delete in_pipe, delete out_pipe;
+							delete ballot_tmcg;
+							CloseHandle(gp_handle);
+							delete ireadbuf;
+							CloseHandle(handle);
+							delete neighbor;
 							return -84;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
@@ -554,12 +632,14 @@ int ballot_child
 						std::cerr << "ios_out[" << vnicks[i] << "]" << std::endl;
 #endif
 						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
+						CloseHandle(handle);
 					}
 				}
 				pkr_idx++;
 			}
 		}
 	} // while
+	delete ireadbuf;
 	
 	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
@@ -574,6 +654,13 @@ int ballot_child
 		if (!vtmf->CheckGroup())
 		{
 			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+			delete vtmf;
+			for (size_t ii = 0; ii < vnicks.size(); ii++)
+				delete ios_out[vnicks[ii]];
+			delete in_pipe, delete out_pipe;
+			delete ballot_tmcg;
+			CloseHandle(gp_handle);
 			return -90;
 		}
 		vtmf->KeyGenerationProtocol_GenerateKey();
@@ -585,6 +672,13 @@ int ballot_child
 				{
 					std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
 						" " << _("for") << " " << vnicks[i]<< std::endl;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete vtmf;
+					for (size_t ii = 0; ii < vnicks.size(); ii++)
+						delete ios_out[vnicks[ii]];
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
 					return -90;
 				}
 			}
@@ -606,6 +700,13 @@ int ballot_child
 		if (!vtmf->CheckGroup())
 		{
 			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+			delete vtmf;
+			for (size_t ii = 0; ii < vnicks.size(); ii++)
+				delete ios_out[vnicks[ii]];
+			delete in_pipe, delete out_pipe;
+			delete ballot_tmcg;
+			CloseHandle(gp_handle);
 			return -90;
 		}
 		
@@ -618,6 +719,13 @@ int ballot_child
 				{
 					std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
 						" " << _("for") << " " << vnicks[i]<< std::endl;
+					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete vtmf;
+					for (size_t ii = 0; ii < vnicks.size(); ii++)
+						delete ios_out[vnicks[ii]];
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
 					return -90;
 				}
 			}
@@ -655,6 +763,12 @@ int ballot_child
 			{
 				std::cerr << XX << _("BALLOT ERROR: bad card from ") << vnicks[i] << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete vtmf;
+				for (size_t ii = 0; ii < vnicks.size(); ii++)
+					delete ios_out[vnicks[ii]];
+				delete in_pipe, delete out_pipe;
+				delete ballot_tmcg;
+				CloseHandle(gp_handle);
 				return -85;
 			}
 		}
@@ -692,6 +806,12 @@ int ballot_child
 				{
 					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete vtmf;
+					for (size_t ii = 0; ii < vnicks.size(); ii++)
+						delete ios_out[vnicks[ii]];
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
 					return -85;
 				}
 			}
@@ -699,6 +819,12 @@ int ballot_child
 			{
 				std::cerr << XX << _("BALLOT ERROR: bad stack from ") << vnicks[i] << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete vtmf;
+				for (size_t ii = 0; ii < vnicks.size(); ii++)
+					delete ios_out[vnicks[ii]];
+				delete in_pipe, delete out_pipe;
+				delete ballot_tmcg;
+				CloseHandle(gp_handle);
 				return -85;
 			}
 		}
@@ -733,6 +859,12 @@ int ballot_child
 				{
 					std::cerr << XX << _("BALLOT ERROR: bad ZNP from ") << vnicks[i] << std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+					delete vtmf;
+					for (size_t ii = 0; ii < vnicks.size(); ii++)
+						delete ios_out[vnicks[ii]];
+					delete in_pipe, delete out_pipe;
+					delete ballot_tmcg;
+					CloseHandle(gp_handle);
 					return -85;
 				}
 			}
@@ -765,6 +897,9 @@ int ballot_child
 		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|0~" << -b << "!" << std::endl << std::flush;
 	
 	// exit from room
+	for (size_t ii = 0; ii < vnicks.size(); ii++)
+		delete ios_out[vnicks[ii]];
+	CloseHandle(gp_handle);
 	delete vtmf;
 	delete ballot_tmcg;
 	*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;

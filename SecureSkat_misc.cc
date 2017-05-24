@@ -28,33 +28,39 @@ int BindEmptyPort
 	int current_port = start_port + (mpz_wrandom_ui() % (max_ports / 2));
 	while (current_port < (start_port + max_ports))
 	{
-		int socket_handle;
+		int sockfd;
 		long socket_option = 1;
-		struct sockaddr_in sin;
-		sin.sin_port = htons(current_port), sin.sin_family = AF_INET;
+		struct sockaddr_in sin = { 0 };
+		sin.sin_port = htons(current_port);
+		sin.sin_family = AF_INET;
 		sin.sin_addr.s_addr = htonl(INADDR_ANY);
-		if ((socket_handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+		if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
 			perror("SecureSkat_misc::BindEmptyPort (socket)");
 			return -1;
 		}
-		if (setsockopt(socket_handle, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 		{
 			perror("SecureSkat_misc::BindEmptyPort (setsockopt)");
 			return -2;
 		}
-		if (bind(socket_handle, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+		if (bind(sockfd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
 		{
 			current_port++;
 		}
 		else
 		{
-			if (close(socket_handle) < 0)
+			if (close(sockfd) < 0)
 			{
 				perror("SecureSkat_misc::BindEmptyPort (close)");
 				return -3;
 			}
 			break;
+		}
+		if (close(sockfd) < 0)
+		{
+			perror("SecureSkat_misc::BindEmptyPort (close)");
+			return -3;
 		}
 	}
 	if (current_port == (start_port + max_ports))
@@ -65,39 +71,40 @@ int BindEmptyPort
 int ListenToPort
 	(int port)
 {
-	int handle;
+	int sockfd;
 	long socket_option = 1;
-	struct sockaddr_in sin;
-	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+	struct sockaddr_in sin = { 0 };
+	sin.sin_port = htons(port);
 	sin.sin_family = AF_INET;
-	if ((handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (socket)");
 		return -1;
 	}
-	if (setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (setsockopt)");
 		return -2;
 	}
-	sin.sin_port = htons(port);
-	if (bind(handle, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+	if (bind(sockfd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (bind)");
 		return -3;
 	}
-	if (listen(handle, SOMAXCONN) < 0)
+	if (listen(sockfd, SOMAXCONN) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (listen)");
+		close(sockfd);
 		return -4;
 	}
-	return handle;
+	return sockfd;
 }
 
 int CloseHandle
-	(int handle)
+	(int sockfd)
 {
-	if (close(handle) < 0)
+	if (close(sockfd) < 0)
 	{
 		perror("SecureSkat_misc::CloseHandle (close)");
 		return -1;
@@ -108,10 +115,11 @@ int CloseHandle
 int ConnectToHost
 	(const char *host, int port)
 {
-	int handle;
+	int sockfd;
 	struct hostent *hostinf;
-	struct sockaddr_in sin;
-	sin.sin_port = htons(port), sin.sin_family = AF_INET;
+	struct sockaddr_in sin = { 0 };
+	sin.sin_port = htons(port);
+	sin.sin_family = AF_INET;
 	if ((hostinf = gethostbyname(host)) != NULL)
 	{
 		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
@@ -121,17 +129,18 @@ int ConnectToHost
 		perror("SecureSkat_misc::ConnectToHost (gethostbyname)");
 		return -1;
 	}
-	if ((handle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		perror("SecureSkat_misc::ConnectToHost (socket)");
 		return -2;
 	}
-	if ((connect(handle, (struct sockaddr*)&sin, sizeof(sin))) < 0)
+	if ((connect(sockfd, (struct sockaddr*)&sin, sizeof(sin))) < 0)
 	{
 		perror("SecureSkat_misc::ConnectToHost (connect)");
+		close(sockfd);
 		return -3;
 	}
-	return handle;
+	return sockfd;
 }
 
 char *stripwhite(char *str)

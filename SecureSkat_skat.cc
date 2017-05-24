@@ -351,6 +351,9 @@ int skat_child
 		
 		if ((cmd == "") || (cmd.find("!KICK", 0) == 0))
 		{
+			delete gp_tmcg;
+			delete [] ipipe_readbuf;
+			delete in_pipe, delete out_pipe;
 			return -1;
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -396,6 +399,9 @@ int skat_child
 			{
 				std::cerr << X << _("key exchange with") << " " << nick << " " << _("is incomplete") << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete gp_tmcg;
+				delete [] ipipe_readbuf;
+				delete in_pipe, delete out_pipe;
 				return -1;
 			}
 		}
@@ -428,6 +434,9 @@ int skat_child
 	{
 		std::cerr << X << _("wrong number of players") << ": " << gp_nick.size() << std::endl;
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete gp_tmcg;
+		delete [] ipipe_readbuf;
+		delete in_pipe, delete out_pipe;
 		return -2;
 	}
 	TMCG_PublicKeyRing pkr(gp_nick.size());
@@ -449,11 +458,17 @@ int skat_child
 	if (gp_port < 0)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete gp_tmcg;
+		delete [] ipipe_readbuf;
+		delete in_pipe, delete out_pipe;
 		return -4;
 	}
 	if ((gp_handle = ListenToPort(gp_port)) < 0)
 	{
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete gp_tmcg;
+		delete [] ipipe_readbuf;
+		delete in_pipe, delete out_pipe;
 		return -4;
 	}
 	
@@ -474,6 +489,9 @@ int skat_child
 		
 		if (cmd.find("!KICK", 0) == 0)
 		{
+			delete gp_tmcg;
+			delete [] ipipe_readbuf;
+			delete in_pipe, delete out_pipe;
 			return -1;
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -496,6 +514,9 @@ int skat_child
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete gp_tmcg;
+				delete [] ipipe_readbuf;
+				delete in_pipe, delete out_pipe;
 				return -5;
 			}
 		}
@@ -578,9 +599,9 @@ int skat_child
 					perror("skat_child (close)");
 				ctl_i = pipe1fd[0], ctl_o = pipe2fd[1];
 				std::cout << X << _("Execute control process") << " (" << ctl_pid << "): " << std::flush;
-				char buffer[1024];
+				char buffer[1025];
 				memset(buffer, 0, sizeof(buffer));
-				ssize_t num = read(ctl_i, buffer, sizeof(buffer));
+				ssize_t num = read(ctl_i, buffer, (sizeof(buffer) - 1));
 				if (num > 0)
 					std::cout << buffer << std::flush;
 				else
@@ -611,12 +632,15 @@ int skat_child
 		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|0~" << r << "!" << std::endl << std::flush;
 	
 	// release the game
-	delete gp_tmcg, delete left_neighbor, delete right_neighbor;
-	close(connect_handle), close(accept_handle);
+	delete left_neighbor, delete right_neighbor;
+	CloseHandle(connect_handle);
+	CloseHandle(accept_handle);
 	if (exit_code != 6)
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+	CloseHandle(gp_handle);
 	delete in_pipe, delete out_pipe;
 	delete [] ipipe_readbuf;
+	delete gp_tmcg;
 	return exit_code;
 }
 
