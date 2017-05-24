@@ -175,7 +175,8 @@ int skat_accept
 					if (!pkr.keys[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
 					{
 						delete neighbor;
-						close(handle);
+						if (close(handle) < 0)
+							perror("skat_accept (close)");
 						return -6;
 					}
 					else
@@ -198,7 +199,8 @@ int skat_accept
 								std::cerr << _("TMCG: decrypt() failed") << std::endl;
 								delete neighbor;
 								delete [] key1, delete [] key2, delete [] dv;
-								close(handle);
+								if (close(handle) < 0)
+									perror("skat_accept (close)");
 								return -6;
 							}
 							memcpy(key2, dv, TMCG_SAEP_S0);
@@ -212,7 +214,8 @@ int skat_accept
 						else
 						{
 							delete neighbor;
-							close(handle);
+							if (close(handle) < 0)
+								perror("skat_accept (close)");
 							return -6;
 						}
 					}
@@ -220,7 +223,8 @@ int skat_accept
 				else
 				{
 					std::cerr << _("Unexpected connection from") << ": " << inet_ntoa(client_in.sin_addr) << std::endl;
-					close(handle);
+					if (close(handle) < 0)
+						perror("skat_accept (close)");
 					return -6;
 				}
 			}

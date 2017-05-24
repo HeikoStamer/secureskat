@@ -42,6 +42,8 @@ int BindEmptyPort
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 		{
 			perror("SecureSkat_misc::BindEmptyPort (setsockopt)");
+			if (close(sockfd) < 0)
+				perror("SecureSkat_misc::BindEmptyPort (close)");
 			return -2;
 		}
 		if (bind(sockfd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
@@ -85,17 +87,22 @@ int ListenToPort
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (setsockopt)");
+		if (close(sockfd) < 0)
+			perror("SecureSkat_misc::ListenToPort (close)");
 		return -2;
 	}
 	if (bind(sockfd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (bind)");
+		if (close(sockfd) < 0)
+			perror("SecureSkat_misc::ListenToPort (close)");
 		return -3;
 	}
 	if (listen(sockfd, SOMAXCONN) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (listen)");
-		close(sockfd);
+		if (close(sockfd) < 0)
+			perror("SecureSkat_misc::ListenToPort (close)");
 		return -4;
 	}
 	return sockfd;
@@ -137,7 +144,8 @@ int ConnectToHost
 	if ((connect(sockfd, (struct sockaddr*)&sin, sizeof(sin))) < 0)
 	{
 		perror("SecureSkat_misc::ConnectToHost (connect)");
-		close(sockfd);
+		if (close(sockfd) < 0)
+			perror("SecureSkat_misc::ConnectToHost (close)");
 		return -3;
 	}
 	return sockfd;
