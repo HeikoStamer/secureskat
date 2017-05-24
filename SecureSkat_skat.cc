@@ -609,7 +609,10 @@ int skat_child
 				memset(buffer, 0, sizeof(buffer));
 				ssize_t num = read(ctl_i, buffer, (sizeof(buffer) - 1));
 				if (num > 0)
+				{
+					buffer[num] = 0; // null-terminate string
 					std::cout << buffer << std::flush;
+				}
 				else
 					std::cout << "... " << _("failed!") << std::endl;
 			}
