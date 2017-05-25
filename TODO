@@ -7,32 +7,29 @@ Copyright (c)  2002, 2004, 2005, 2017  Heiko Stamer <HeikoStamer@gmx.net>
   Free Documentation License" of the file "README".
 
 Stuff for next release:
-* use AIO for secure communication channels between players
-* use RBC for broadcast on additional communication channels
 * use SetupGenerators() in VSSHE to protect agains malicious provers
-
-Stuff for 3.x release:
-+ add GNUnet integration as configure feature
-
-Stuff that should be done (until the first production release):
-
 * obtain full conformance with RFC2812 [MAX_NICKLEN=9, MAX_CHANNELLEN=50/30]
   max. 15 irc parameters, irc msg. length. max 512 byte,
   msg. seperator CR+LF, nickname starts with letter or special char.
   channelname only letters and digits, numeric replies
-+ use Boost library (asio and other stuff)
-+ use GNU TLS for privacy and integrity protection
-+ replace (former) xskat GUI by native IRC server implementation (or GnomeSkat)
-+ tunnel TCP connections via IRC (if requested, e.g. paranoid firewall)
+
+Stuff for 3.x release:
++ use AIO for secure communication channels between players (replaces
+  securesocketstream.hh)
++ use RBC for broadcast on additional communication channels
++ add GNUnet integration as configure feature
+
+Minor stuff that should be done eventually:
++ documentation: manpage and/or texinfo manual (doc subdir)
++ replace the former xskat GUI by a native implementation (GnomeSkat)
++ tunnel peer2peer TCP connections via IRC, if requested (paranoid firewall)
 - for gcc: perror output with __FILE__::__FUNCTION__
 - fix race conditions in parts of the voting system (or remove it completely)
 - fix race conditions in automatic player/table handshake
 - provide nice libpopt/getopt commandline interface
 - use GcrySexp for ADTs/ store secrets via subkey in OpenPGP-impl.
-+ documentation: doc subdir, manpage, texinfo, paper
 
-Further open tasks:
-
+Further open tasks to do:
 - [fair ranking system (command /rank)]
 - [artificial intelligence (SecureSkat_ai)]
 

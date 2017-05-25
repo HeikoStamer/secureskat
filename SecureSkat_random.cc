@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2005, 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2002, 2003, 2004, 2005, 2007,
+                                       2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,33 +24,34 @@
 
 void random_announce(const std::vector<size_t> &cards)
 {
-    switch (random() % 6)
-    {
-	case 0:
-	    std::cout << "CMD sagean Ei" << std::endl;
-	    break;
-	case 1:
-	    std::cout << "CMD sagean Gr" << std::endl;
-	    break;
-	case 2:
-	    std::cout << "CMD sagean Ro" << std::endl;
-	    break;
-	case 3:
-	    std::cout << "CMD sagean Sc" << std::endl;
-	    break;
-	case 4:
-	    std::cout << "CMD sagean Gd" << std::endl;
-	    break;
-	case 5:
-	    std::cout << "CMD sagean Nu" << std::endl;
-	    break;
-    }
+	switch (random() % 6)
+	{
+		case 0:
+			std::cout << "CMD sagean Ei" << std::endl;
+			break;
+		case 1:
+			std::cout << "CMD sagean Gr" << std::endl;
+			break;
+		case 2:
+			std::cout << "CMD sagean Ro" << std::endl;
+			break;
+		case 3:
+			std::cout << "CMD sagean Sc" << std::endl;
+			break;
+		case 4:
+			std::cout << "CMD sagean Gd" << std::endl;
+			break;
+		case 5:
+			std::cout << "CMD sagean Nu" << std::endl;
+			break;
+	}
 }
 
 int main (int argc, char **argv)
 {
-    std::cout << argv[0] << " (c) 2007 <stamer@gaos.org> " << std::endl;
-	
+    std::cout << argv[0] << " (c) 2017 <HeikoStamer@gmx.net> " << std::endl;
+
+    int fd = fileno(stdin); // file descriptor of STDIN
     fd_set rfds; // set of read descriptors
     int mfds = 0; // highest-numbered descriptor
     struct timeval tv; // timeout structure for select(2)
@@ -65,7 +67,7 @@ int main (int argc, char **argv)
     {
 	// select(2) -- initialize file descriptors
 	FD_ZERO(&rfds);
-	MFD_SET(fileno(stdin), &rfds);
+	MFD_SET(fd, &rfds);
 
 	// select(2) -- initialize timeout
 	tv.tv_sec = 1L; // seconds
@@ -78,10 +80,9 @@ int main (int argc, char **argv)
 	if ((ret < 0) && (errno != EINTR))
 	    perror("SecureSkat_*::main (select)");
 		
-	if ((ret > 0) && FD_ISSET(fileno(stdin), &rfds))
+	if ((ret > 0) && FD_ISSET(fd, &rfds))
 	{
-	    ssize_t num = read(fileno(stdin), buffer + readed,
-		sizeof(buffer) - readed);
+	    ssize_t num = read(fd, buffer + readed, sizeof(buffer) - readed);
 	    readed += num;
 				
 	    if (readed > 0)
@@ -126,7 +127,7 @@ int main (int argc, char **argv)
 			    {
 				name += par[3 + j];
 				if (j < (par.size() - 4))
-				name += " ";
+				    name += " ";
 			    }
 			    names.push_back(name);
 			}
@@ -291,7 +292,7 @@ int main (int argc, char **argv)
 			{
 			}
 		    }
-		}
+		} // end 2nd while
 		char ytmp[65536];
 		memset(ytmp, 0, sizeof(ytmp));
 		readed -= cnt_pos;
@@ -305,44 +306,44 @@ int main (int argc, char **argv)
 		while (1)
 		    sleep(100);
 	    }
-    }
-		
-    if (ret == 0)
-    {
-	if (reize_dran)
-	{
-	    if (random() & 1L)
-		std::cout << "CMD passe" << std::endl << std::flush;
-	    else
-		std::cout << "CMD reize" << std::endl << std::flush;
 	}
-	else if (lege_dran)
+		
+	if (ret == 0)
 	{
-	    if ((stich.size() == 0) && (cards.size() > 0))
+	    if (reize_dran)
 	    {
-		std::string card = skat_type2string(cards[0]);
-		std::cout << "CMD lege " << 
-		    card.substr(0, card.length() - 1) << std::endl << 
-		    std::flush;
+		if (random() & 1L)
+		    std::cout << "CMD passe" << std::endl << std::flush;
+		else
+		    std::cout << "CMD reize" << std::endl << std::flush;
 	    }
-	    else
+	    else if (lege_dran)
 	    {
-		for (std::vector<size_t>::iterator ci = cards.begin();
-		    ci != cards.end(); ci++)
+		if ((stich.size() == 0) && (cards.size() > 0))
 		{
-		    if (skat_rulectl(stich[0], *ci, spiel_status, cards))
+		    std::string card = skat_type2string(cards[0]);
+		    std::cout << "CMD lege " << 
+		    card.substr(0, card.length() - 1) << std::endl << 
+			std::flush;
+		}
+		else
+		{
+		    for (std::vector<size_t>::iterator ci = cards.begin();
+			ci != cards.end(); ci++)
 		    {
-			std::string card = skat_type2string(*ci);
-			std::cout << "CMD lege " << 
-			    card.substr(0, card.length() - 1) << std::endl << 
-			    std::flush;
-			break;
+			if (skat_rulectl(stich[0], *ci, spiel_status, cards))
+			{
+			    std::string card = skat_type2string(*ci);
+			    std::cout << "CMD lege " << 
+				card.substr(0, card.length() - 1) << 
+				std::endl << std::flush;
+			    break;
+			}
 		    }
 		}
+		lege_dran = false;
 	    }
-	    lege_dran = false;
 	}
-	}
-    }
+    } // end 1st while
     return 0;
 }

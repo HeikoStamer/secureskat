@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2007, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 *******************************************************************************/
 
 #ifndef INCLUDED_SecureSkat_skat_HH
-    #define INCLUDED_SecureSkat_skat_HH
+	#define INCLUDED_SecureSkat_skat_HH
 	
-    #include "SecureSkat_defs.hh"
-    #include "SecureSkat_misc.hh"
-    #include "SecureSkat_game.hh"
+	#include "SecureSkat_defs.hh"
+	#include "SecureSkat_misc.hh"
+	#include "SecureSkat_game.hh"
 
-    int skat_child
-	(const std::string &nr, int r, bool neu, int ipipe, int opipe, 
-	int hpipe, const std::string &master);
+	int skat_child
+		(const std::string &nr, int r, bool neu, int ipipe, int opipe, 
+		int hpipe, const std::string &master);
 	
 #endif

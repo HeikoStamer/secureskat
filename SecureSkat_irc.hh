@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2009  Heiko Stamer <stamer@gaos.org>
+ Copyright (C) 2009, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,22 +24,22 @@
 	#include "SecureSkat_defs.hh"
 	#include "SecureSkat_misc.hh"
 
-    int create_irc
-        (const std::string &server, short int port, iosocketstream **irc);
-    void init_irc
-        (iosocketstream *irc, const std::string &nickname);
+	int create_irc
+		(const std::string &server, short int port, iosocketstream **irc);
+	void init_irc
+		(iosocketstream *irc, const std::string &nickname);
 	std::string irc_prefix
-        (const std::string &input);
+		(const std::string &input);
 	std::string irc_command
-        (const std::string &input);
+		(const std::string &input);
 	std::string irc_params
-        (const std::string &input);
+		(const std::string &input);
 	size_t irc_paramvec
-        (std::string input, std::vector<std::string> &v);
+		(std::string input, std::vector<std::string> &v);
 	bool irc_command_cmp
-        (const std::string &input, const std::string &cmd);
-    void done_irc
-        (iosocketstream *irc);
-    void release_irc
-        (int irc_handle, iosocketstream *irc);
+		(const std::string &input, const std::string &cmd);
+	void done_irc
+		(iosocketstream *irc);
+	void release_irc
+		(int irc_handle, iosocketstream *irc);
 #endif
