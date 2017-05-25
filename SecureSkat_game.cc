@@ -1213,7 +1213,7 @@ int skat_game
 		
 #ifndef NDEBUG
 		stop_clock();
-		std::cerr << "KeyGenerationProtocol2: " << elapsed_time() << std::endl;
+		std::cerr << "KeyGenerationProtocol2a: " << elapsed_time() << std::endl;
 #endif
 	}
 	else
@@ -1269,9 +1269,17 @@ int skat_game
 		
 #ifndef NDEBUG
 		stop_clock();
-		std::cerr << "KeyGenerationProtocol2: " << elapsed_time() << std::endl;
+		std::cerr << "KeyGenerationProtocol2a: " << elapsed_time() << std::endl;
 #endif
 	}
+#ifndef NDEBUG
+	start_clock();
+#endif	
+	vsshe->SetupGenerators_publiccoin(vtmf->h);
+#ifndef NDEBUG
+	stop_clock();
+	std::cerr << "KeyGenerationProtocol2b: " << elapsed_time() << std::endl;
+#endif
 	
 	// loop the given number of rounds
 	for (size_t r = 0; r < rounds; r++)

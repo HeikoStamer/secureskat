@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION(20170521)
+AC_REVISION(20170525)
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.10], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -89,9 +89,9 @@ fi
 AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
 AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
 
-AM_PATH_LIBTMCG("1.3.0")
+AM_PATH_LIBTMCG("1.3.1")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.3.0 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.3.1 is needed])
 fi
 AC_SUBST(LIBTMCG_CONFIG_LIBS)
 AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
