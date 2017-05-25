@@ -8,12 +8,12 @@ Copyright (c)  2002, 2004, 2005, 2017  Heiko Stamer <HeikoStamer@gmx.net>
 
 Stuff for next release:
 * use SetupGenerators() in VSSHE to protect agains malicious provers
+
+Stuff for 3.x release:
 * obtain full conformance with RFC2812 [MAX_NICKLEN=9, MAX_CHANNELLEN=50/30]
   max. 15 irc parameters, irc msg. length. max 512 byte,
   msg. seperator CR+LF, nickname starts with letter or special char.
   channelname only letters and digits, numeric replies
-
-Stuff for 3.x release:
 + use AIO for secure communication channels between players (replaces
   securesocketstream.hh)
 + use RBC for broadcast on additional communication channels
