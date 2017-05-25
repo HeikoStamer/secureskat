@@ -54,12 +54,9 @@ Requirements
 
   SecureSkat was tested (+ successful, - with errors) on following platforms:
 
-  + GNU/Linux (Debian 3.1)      i686        gcc 3.3.5
-  + GNU/Linux (Debian 4.0)      i686        gcc 4.1.2
-  + SunOS 5.10, Solaris 10      sparc       gcc 3.4.3
-  + GNU/Linux (Gentoo Linux)    i686        gcc 4.3.3
-  + GNU/Linux (Gentoo Linux)    x86_64      gcc 4.9.3
   + GNU/Linux (Gentoo Linux)    x86_64      gcc 5.4.0
+  + GNU/Linux (Debian 8)        x86_64      gcc 4.9.2
+  + GNU/Linux (Ubuntu 16.04.2)	x86_64      gcc 5.4.0
 
 Build & Install
 ---------------
@@ -75,7 +72,7 @@ Playing SecureSkat over an IRC network
 
   Please run 'SecureSkat <IRC_SERVER> [<IRC_PORT> [<CTRL_PROGRAM>]]',
   where
-    <IRC_SERVER> is the hostname of an RFC1459 conform IRC server,
+    <IRC_SERVER> is the hostname of a RFC1459 conform IRC server,
     <IRC_PORT> is the TCP port number of this server, e.g. 6667, and
     <CTRL_PROGRAM> is an interface control program, e.g. SecureSkat_random.
     (Note: Please give always the full path to the binary file here!)
@@ -105,7 +102,7 @@ Playing SecureSkat over an IRC network
   like `ID5^z34g0' (based on the key id from your public key). For large
   groups of participants collisions become probable --- in such a rare case,
   please generate a fresh key by deleting the database 'SecureSkat.skr'
-  and start up again.
+  and restart again.
   
   Now you will be joined to channel #openSkat (The old program name was
   kept to provide backward compatibility with older versions.) and you can
