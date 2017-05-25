@@ -517,7 +517,7 @@ int ballot_child
 				memcpy(tmp, ireadbuf + cnt_pos, ireaded);
 				memcpy(ireadbuf, tmp, ireaded);
 			}
-			if (num <= 0)
+			if (num == 0)
 			{
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 				delete in_pipe, delete out_pipe;
@@ -526,6 +526,8 @@ int ballot_child
 				delete ireadbuf;
 				return -78;
 			}
+			else if (num < 0)
+				perror("SecureSkat_vote::ballot_child (read)");
 		}
 		
 		if (ret == 0)

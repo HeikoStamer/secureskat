@@ -287,8 +287,10 @@ int skat_accept
 				memcpy(tmp, ireadbuf + cnt_pos, ireaded);
 				memcpy(ireadbuf, tmp, ireaded);
 			}
-			if (num <= 0)
+			if (num == 0)
 				return -50;
+			else if (num < 0)
+				perror("SecureSkat_skat::skat_accept (read)");
 		}
 	}
 	return 0;

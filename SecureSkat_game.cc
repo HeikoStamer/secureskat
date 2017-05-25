@@ -1315,8 +1315,7 @@ int skat_game
 #ifndef NDEBUG
 			start_clock();
 #endif
-			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss,
-				d_mix[0], d_mix[1], d_mix[2], right, left))
+			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss, d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
 				std::cout << ">< " << _("shuffling error") << ": " << _("bad stack format") << std::endl;
 				delete vsshe;
@@ -1334,8 +1333,7 @@ int skat_game
 #ifndef NDEBUG
 			start_clock();
 #endif
-			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss,
-				d_mix[0], d_mix[1], d_mix[2], right, left))
+			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss, d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
 				std::cout << ">< " << _("shuffling error") << ": " << _("wrong ZK proof") << std::endl;
 				delete vsshe;
@@ -1430,8 +1428,8 @@ int skat_game
 			if (p == 2)
 				vh = 1, mh = 2, hh = 0;
 			skat_blatt((pkr_self + p) % 3, os);
-			fd_set rfds;		// set of read descriptors
-			int mfds = 0;		// highest-numbered descriptor
+			fd_set rfds; // set of read descriptors
+			int mfds = 0; // highest-numbered descriptor
 			while ((s[0].size() > 0) || (s[1].size() > 0) || (s[2].size() > 0))
 			{
 				if (!left->good() || !right->good())
@@ -2599,7 +2597,7 @@ int skat_game
 					if (got_break)
 						break;
 				}
-				if (num <= 0)
+				if (num == 0)
 				{
 					std::cout << "><>< " << _("connection to program modules collapsed") << std::endl;
 					delete [] hex_game_digest;
@@ -2610,6 +2608,10 @@ int skat_game
 					delete out_ctl;
 					delete out_pipe;
 					return 5;
+				}
+				else if (num < 0)
+				{
+					perror("SecureSkat_game::skat_game (read)");	
 				}
 			}
 			
