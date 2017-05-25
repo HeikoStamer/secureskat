@@ -86,15 +86,15 @@ AM_PATH_LIBGCRYPT("1.6.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
 	AC_MSG_ERROR([libgcrypt >= 1.6.0 is needed])
 fi
-AC_SUBST(LIBGCRYPT_CONFIG_LIBS)
-AC_SUBST(LIBGCRYPT_CONFIG_CFLAGS)
+AC_SUBST(LIBGCRYPT_LIBS)
+AC_SUBST(LIBGCRYPT_CFLAGS)
 
 AM_PATH_LIBTMCG("1.3.1")
 if test "x$LIBTMCG_LIBS" = "x"; then
 	AC_MSG_ERROR([libTMCG >= 1.3.1 is needed])
 fi
-AC_SUBST(LIBTMCG_CONFIG_LIBS)
-AC_SUBST(LIBTMCG_CONFIG_CFLAGS)
+AC_SUBST(LIBTMCG_LIBS)
+AC_SUBST(LIBTMCG_CFLAGS)
 
 AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
 AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
@@ -146,10 +146,10 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
  recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT

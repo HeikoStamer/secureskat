@@ -2605,7 +2605,7 @@ int skat_game
 					delete vsshe;
 					delete vtmf;
 					if (pctl)
-					delete out_ctl;
+						delete out_ctl;
 					delete out_pipe;
 					return 5;
 				}
