@@ -146,10 +146,10 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
  getuid getenv strerror snprintf pipe perror waitpid close read write send\
  recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
