@@ -1,3 +1,5 @@
+SecureSkat 3.0:
+    - TODO
 SecureSkat 2.10:
     - permit changing a vote by using /<room> vote <value> multiple times
     - call version_LibTMCG() to display the version of LibTMCG upon startup
