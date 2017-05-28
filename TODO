@@ -28,6 +28,8 @@ Minor stuff that should be done eventually:
 
 Further open tasks to do:
 - [fair ranking system (command /rank)]
-- [artificial intelligence (SecureSkat_ai)]
+- [artificial intelligence (SecureSkat_ai) cf. Michael Buro, Jeffrey R. Long,
+   Timothy Furtak, Nathan Sturtevant: Improving State Evaluation, Inference,
+   and Search in Trick-Based Card Games. IJCAI 2009, pp. 1407--1413]
 
 Any volunteers?
