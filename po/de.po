@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SecureSkat 2.10\n"
+"Project-Id-Version: SecureSkat 3.0\n"
 "Report-Msgid-Bugs-To: HeikoStamer@gmx.net\n"
-"POT-Creation-Date: 2017-05-25 11:35+0200\n"
+"POT-Creation-Date: 2017-05-28 09:17+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -70,6 +70,14 @@ msgstr "Raum"
 #: SecureSkat.cc:547
 msgid "voters"
 msgstr "Wähler"
+
+#: SecureSkat.cc:723
+msgid "out of"
+msgstr "von"
+
+#: SecureSkat.cc:724
+msgid "game protocols are valid"
+msgstr "Spielprotokolle sind gültig"
 
 #: SecureSkat.cc:779 SecureSkat.cc:781 SecureSkat.cc:783
 msgid "score points"

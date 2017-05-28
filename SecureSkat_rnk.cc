@@ -105,3 +105,4 @@ void release_rnk
 	CloseHandle(rnk7773_handle);
 	CloseHandle(rnk7774_handle);
 }
+

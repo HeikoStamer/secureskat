@@ -720,8 +720,8 @@ static void process_line(char *line)
 					}
 				}
 			}
-			std::cout << prt_counter_valid << " out of " << prt_counter <<
-				" game protocols are valid." << std::endl;
+			std::cout << prt_counter_valid << " " << _("out of") << " " << prt_counter <<
+				" " << _("game protocols are valid") << "." << std::endl;
 			// Berechnen der Leistungspunkte (Erweitertes Seeger-System)
 			for (size_t j = 0; j < 3; j++)
 			{
