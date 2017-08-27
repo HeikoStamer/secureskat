@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION(20170527)
+AC_REVISION(20170827)
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [3.0], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -67,10 +67,14 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19.8])
 
 # Checks for libraries.
-AC_ARG_WITH(gmp, [AS_HELP_STRING([--with-gmp=<path>], [prefix of libgmp installation e.g. /usr/local])], [GMP_PREFIX="$with_gmp"],\
+backup_LDFLAGS="$LDFLAGS"       
+backup_CPPLAGS="$CPPFLAGS"
+AC_ARG_WITH(gmp, [AS_HELP_STRING([--with-gmp=<path>], [prefix of libgmp installation e.g. /usr/local])],\
+ [GMP_PREFIX="$with_gmp" LDFLAGS="-L${with_gmp}/lib $backup_LDFLAGS" CPPFLAGS="-I${with_gmp}/include $backup_CPPFLAGS"],\
  [AC_CHECK_LIB(gmp, __gmpz_init, [LIBS=""], AC_MSG_ERROR([libgmp is needed; maybe you want to call configure with the --with-gmp=<path> option]))])
 AC_CHECK_LIB(gmp, __gmpz_import, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
 AC_CHECK_LIB(gmp, __gmpz_export, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
+AC_CHECK_HEADERS([gmp.h], , AC_MSG_ERROR([libgmp headers are missing]))
 if test "x$GMP_PREFIX" != x ; then
         LIBGMP_LIBS=" -L${GMP_PREFIX}/lib"
         LIBGMP_CFLAGS=" -I${GMP_PREFIX}/include"
@@ -81,11 +85,17 @@ fi
 LIBGMP_LIBS="${GMP_LIBS} -lgmp"
 AC_SUBST(LIBGMP_LIBS)
 AC_SUBST(LIBGMP_CFLAGS)
+LDFLAGS="$backup_LDFLAGS"
+CPPFLAGS="$backup_CPPFLAGS"
 
 AM_PATH_LIBGCRYPT("1.6.0")
 if test "x$LIBGCRYPT_LIBS" = "x"; then
 	AC_MSG_ERROR([libgcrypt >= 1.6.0 is needed])
 fi
+backup_CPPLAGS="$CPPFLAGS"
+CPPFLAGS="$LIBGCRYPT_CFLAGS $backup_CPPFLAGS"
+AC_CHECK_HEADERS([gcrypt.h], , AC_MSG_ERROR([libgcrypt headers are missing]))
+CPPFLAGS="$backup_CPPFLAGS"
 AC_SUBST(LIBGCRYPT_LIBS)
 AC_SUBST(LIBGCRYPT_CFLAGS)
 
@@ -141,10 +151,10 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp select socket\
- strchr strncasecmp strrchr strstr strtol strtoul uname clock stat mkdir\
- getuid getenv strerror snprintf pipe perror waitpid close read write send\
- recv], , AC_MSG_ERROR([some essential C functions are missing]))
+AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp memmove select\
+ socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat\
+ mkdir getuid getenv strerror snprintf pipe perror waitpid close read write\
+ send recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
 CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"

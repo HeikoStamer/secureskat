@@ -178,7 +178,7 @@ used
             numPutBack = traits_type::putback_sz();
         }
         
-        std::memcpy(mRBuffer+(traits_type::putback_sz()-numPutBack),
+        std::memmove(mRBuffer+(traits_type::putback_sz()-numPutBack),
 gptr()-numPutBack, 
                     numPutBack);
         

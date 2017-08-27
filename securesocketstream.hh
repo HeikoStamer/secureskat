@@ -329,7 +329,7 @@ template <class traits = securesocketbuf_traits>
 			size_t numPutBack = gptr() - eback();
 			if (numPutBack > traits_type::putback_sz())
 				numPutBack = traits_type::putback_sz();
-			std::memcpy(mRBuffer + (traits_type::putback_sz() - numPutBack),
+			std::memmove(mRBuffer + (traits_type::putback_sz() - numPutBack),
 				gptr() - numPutBack, numPutBack);
 			
 			int count = 0;
