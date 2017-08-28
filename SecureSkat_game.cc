@@ -999,7 +999,7 @@ int skat_game
 	(
 		std::string nr, size_t rounds, size_t pkr_self, bool master, int opipe,
 		int ipipe, int ctl_o, int ctl_i, SchindelhauerTMCG *tmcg,
-		const TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
+		TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
 		iosecuresocketstream *right, iosecuresocketstream *left,
 		const std::vector<std::string> &nicks, int hpipe, bool pctl,
 		char *ireadbuf, int &ireaded,

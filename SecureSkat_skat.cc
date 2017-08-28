@@ -49,7 +49,7 @@ extern char **game_env;
 int skat_connect
 	(size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
-	const TMCG_PublicKeyRing &pkr)
+	TMCG_PublicKeyRing &pkr)
 {
 	// create TCP/IP connection
 	handle = ConnectToHost(nick_players[vnicks[pkr_idx]].c_str(), gp_ports[vnicks[pkr_idx]]);
@@ -118,7 +118,7 @@ int skat_connect
 int skat_accept
 	(opipestream *out_pipe, int ipipe, const std::string &nr, int r,
 	int pkr_self, int pkr_idx, iosecuresocketstream *&secure, int &handle,
-	const std::vector<std::string> &vnicks, const TMCG_PublicKeyRing &pkr,
+	const std::vector<std::string> &vnicks, TMCG_PublicKeyRing &pkr,
 	int gp_handle, bool neu, char *ireadbuf, int &ireaded)
 {
 	struct hostent *hostinf;
