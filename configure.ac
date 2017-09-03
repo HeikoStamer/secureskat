@@ -17,10 +17,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION(20170830)
+AC_REVISION(20170903)
 AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [2.11], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
+AC_INIT([SecureSkat], [3.0], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
@@ -156,10 +156,10 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp memmove select\
  mkdir getuid getenv strerror snprintf pipe perror waitpid close read write\
  send recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
-##CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+#CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
