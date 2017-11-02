@@ -357,7 +357,7 @@ int ballot_child
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
-					delete ireadbuf;
+					delete [] ireadbuf;
 					CloseHandle(handle);
 					return -70;
 				}
@@ -367,7 +367,7 @@ int ballot_child
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
-					delete ireadbuf;
+					delete [] ireadbuf;
 					CloseHandle(handle);
 					return -71;
 				}
@@ -386,7 +386,7 @@ int ballot_child
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
-					delete ireadbuf;
+					delete [] ireadbuf;
 					CloseHandle(handle);
 					delete neighbor;
 					return -72;
@@ -397,7 +397,7 @@ int ballot_child
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
-					delete ireadbuf;
+					delete [] ireadbuf;
 					CloseHandle(handle);
 					delete neighbor;
 					return -73;
@@ -424,7 +424,7 @@ int ballot_child
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
 							CloseHandle(gp_handle);
-							delete ireadbuf;
+							delete [] ireadbuf;
 							CloseHandle(handle);
 							delete neighbor;
 							return -74;
@@ -445,7 +445,7 @@ int ballot_child
 						delete in_pipe, delete out_pipe;
 						delete ballot_tmcg;
 						CloseHandle(gp_handle);
-						delete ireadbuf;
+						delete [] ireadbuf;
 						CloseHandle(handle);
 						delete neighbor;
 						return -76;
@@ -479,7 +479,7 @@ int ballot_child
 						delete in_pipe, delete out_pipe;
 						delete ballot_tmcg;
 						CloseHandle(gp_handle);
-						delete ireadbuf;
+						delete [] ireadbuf;
 						return -1;
 					}
 					if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
@@ -501,7 +501,7 @@ int ballot_child
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
 							CloseHandle(gp_handle);
-							delete ireadbuf;
+							delete [] ireadbuf;
 							return -77;
 						}
 					}
@@ -523,7 +523,7 @@ int ballot_child
 				delete in_pipe, delete out_pipe;
 				delete ballot_tmcg;
 				CloseHandle(gp_handle);
-				delete ireadbuf;
+				delete [] ireadbuf;
 				return -78;
 			}
 			else if (num < 0)
@@ -548,7 +548,7 @@ int ballot_child
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
 							CloseHandle(gp_handle);
-							delete ireadbuf;
+							delete [] ireadbuf;
 							return -79;
 						}
 						iosocketstream *neighbor = new iosocketstream(handle);
@@ -578,7 +578,7 @@ int ballot_child
 								delete in_pipe, delete out_pipe;
 								delete ballot_tmcg;
 								CloseHandle(gp_handle);
-								delete ireadbuf;
+								delete [] ireadbuf;
 								CloseHandle(handle);
 								delete neighbor;
 								return -80;
@@ -589,7 +589,7 @@ int ballot_child
 								delete in_pipe, delete out_pipe;
 								delete ballot_tmcg;
 								CloseHandle(gp_handle);
-								delete ireadbuf;
+								delete [] ireadbuf;
 								CloseHandle(handle);
 								delete neighbor;
 								return -81;
@@ -601,7 +601,7 @@ int ballot_child
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
 							CloseHandle(gp_handle);
-							delete ireadbuf;
+							delete [] ireadbuf;
 							CloseHandle(handle);
 							delete neighbor;
 							return -82;
@@ -623,7 +623,7 @@ int ballot_child
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
 							CloseHandle(gp_handle);
-							delete ireadbuf;
+							delete [] ireadbuf;
 							CloseHandle(handle);
 							delete neighbor;
 							return -84;
@@ -642,7 +642,7 @@ int ballot_child
 			}
 		}
 	} // while
-	delete ireadbuf;
+	delete [] ireadbuf;
 	
 	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
