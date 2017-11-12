@@ -419,7 +419,9 @@ int ballot_child
 						if (!sec.decrypt(dv, challenge_sig))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete [] key1, delete [] key2, delete [] dv;
+							delete [] key1;
+							delete [] key2;
+							delete [] dv;
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
@@ -436,7 +438,10 @@ int ballot_child
 #ifndef NDEBUG
 						std::cerr << "ios_in[" << vnicks[pkr_idx] << "]" << std::endl;
 #endif
-						delete neighbor, delete [] key1, delete [] key2, delete [] dv;						
+						delete neighbor;
+						delete [] key1;
+						delete [] key2;
+						delete [] dv;						
 						pkr_idx++;
 					}
 					else

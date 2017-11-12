@@ -199,7 +199,9 @@ int skat_accept
 							{
 								std::cerr << _("TMCG: decrypt() failed") << std::endl;
 								delete neighbor;
-								delete [] key1, delete [] key2, delete [] dv;
+								delete [] key1;
+								delete [] key2;
+								delete [] dv;
 								if (close(handle) < 0)
 									perror("skat_accept (close)");
 								return -6;
@@ -211,8 +213,10 @@ int skat_accept
 
 							// create encrypted stream and release keys
 							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
-							delete [] key1, delete [] key2, delete [] dv;
-							break;
+							delete [] key1;
+							delete [] key2;
+							delete [] dv;
+							break; // exit while-loop
 						}
 						else
 						{
