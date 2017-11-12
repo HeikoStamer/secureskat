@@ -108,7 +108,7 @@ AC_SUBST(LIBTMCG_CFLAGS)
 
 AC_ARG_WITH(gdbm, [AS_HELP_STRING([--with-gdbm=<path>], [prefix of libgdbm installation e.g. /usr/local])],\
  [GDBM_PREFIX="$with_gdbm" LDFLAGS="-L${with_gdbm}/lib $LDFLAGS" CPPFLAGS="-I${with_gdbm}/include $CPPFLAGS"],\
- [AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed; maybe you want to call configure with the --with-gdbm=<path> option]))])
+ [AC_CHECK_LIB(gdbm, gdbm_open, [LIBS="-lgdbm"], AC_MSG_ERROR([libgdbm is needed; maybe you want to call configure with the --with-gdbm=<path> option]))])
 AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
@@ -158,7 +158,7 @@ AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp memmove select\
  mkdir getuid getenv strerror snprintf pipe perror waitpid close read write\
  send recv], , AC_MSG_ERROR([some essential C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -g3 -pedantic $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
 #CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
