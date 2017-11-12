@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20171031])
+AC_REVISION([20171112])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [3.0], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -106,7 +106,9 @@ fi
 AC_SUBST(LIBTMCG_LIBS)
 AC_SUBST(LIBTMCG_CFLAGS)
 
-AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed]))
+AC_ARG_WITH(gdbm, [AS_HELP_STRING([--with-gdbm=<path>], [prefix of libgdbm installation e.g. /usr/local])],\
+ [GDBM_PREFIX="$with_gdbm" LDFLAGS="-L${with_gdbm}/lib $LDFLAGS" CPPFLAGS="-I${with_gdbm}/include $CPPFLAGS"],\
+ [AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed; maybe you want to call configure with the --with-gdbm=<path> option]))])
 AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
