@@ -1,7 +1,8 @@
 SecureSkat 3.0:
     - TODO
+    - added configure switch --with-gdbm=<path> for non-standard search path
 SecureSkat 2.11:
-    - minor bugfixes and check for new LibTMCG 1.3.2 have been added
+    - minor bugfixes and a check for new LibTMCG 1.3.2 have been added
 SecureSkat 2.10:
     - permit changing a vote by using /<room> vote <value> multiple times
     - call version_LibTMCG() to display the version of LibTMCG upon startup
