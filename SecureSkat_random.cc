@@ -24,7 +24,7 @@
 
 void random_announce(const std::vector<size_t> &cards)
 {
-	switch (random() % 6)
+	switch (mpz_wrandom_ui() % 6)
 	{
 		case 0:
 			std::cout << "CMD sagean Ei" << std::endl;
@@ -62,7 +62,6 @@ int main (int argc, char **argv)
     std::vector<std::string> nicks, names;
     std::vector<size_t> cards, ocards, stich;
 
-    srandom(time(NULL) + getpid() + getppid());
     while (1)
     {
 	// select(2) -- initialize file descriptors
@@ -169,7 +168,7 @@ int main (int argc, char **argv)
 				pkr_spielt = 2;
 			    if (pkr_spielt == pkr_self)
 			    {
-				if (random() & 1L)
+				if (mpz_wrandom_ui() & 1L)
 				    std::cout << "CMD skat" << std::endl << 
 					std::flush;
 				else
@@ -312,7 +311,7 @@ int main (int argc, char **argv)
 	{
 	    if (reize_dran)
 	    {
-		if (random() & 1L)
+		if (mpz_wrandom_ui() & 1L)
 		    std::cout << "CMD passe" << std::endl << std::flush;
 		else
 		    std::cout << "CMD reize" << std::endl << std::flush;
@@ -321,25 +320,29 @@ int main (int argc, char **argv)
 	    {
 		if ((stich.size() == 0) && (cards.size() > 0))
 		{
-		    std::string card = skat_type2string(cards[0]);
+		    size_t idx = mpz_wrandom_ui() % cards.size();
+		    std::string card = skat_type2string(cards[idx]);
 		    std::cout << "CMD lege " << 
 		    card.substr(0, card.length() - 1) << std::endl << 
 			std::flush;
 		}
 		else
 		{
+		    std::vector<size_t> allowed_cards;
 		    for (std::vector<size_t>::iterator ci = cards.begin();
 			ci != cards.end(); ci++)
 		    {
 			if (skat_rulectl(stich[0], *ci, spiel_status, cards))
 			{
-			    std::string card = skat_type2string(*ci);
-			    std::cout << "CMD lege " << 
-				card.substr(0, card.length() - 1) << 
-				std::endl << std::flush;
-			    break;
+			    allowed_cards.push_back(*ci);
 			}
 		    }
+		    assert((allowed_cards.size() > 0));
+		    size_t idx = mpz_wrandom_ui() % allowed_cards.size();
+		    std::string card = skat_type2string(allowed_cards[idx]);
+		    std::cout << "CMD lege " << 
+		    card.substr(0, card.length() - 1) << std::endl << 
+			std::flush;
 		}
 		lege_dran = false;
 	    }

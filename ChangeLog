@@ -1,5 +1,7 @@
 SecureSkat 3.0:
     - TODO
+    - SecureSkat_random: randomize playing of allowed cards during game
+    - replaced random() by LibTMCG's function mpz_wrandom_ui()
     - added configure switch --with-gdbm=<path> for non-standard search path
 SecureSkat 2.11:
     - minor bugfixes and a check for new LibTMCG 1.3.2 have been added
