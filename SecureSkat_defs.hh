@@ -56,17 +56,8 @@
     // zlib
     #include <zlib.h>
 
-#if defined (__cplusplus)
-	extern "C"
-	{
-#endif
-
     // GNU database manager
     #include <gdbm.h>
-
-#if defined(__cplusplus)
-	}
-#endif
 
     // GNU crypto library
     #include <gcrypt.h> 
