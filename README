@@ -57,6 +57,7 @@ Requirements
   + GNU/Linux (Gentoo Linux)    x86_64      gcc 6.4.0
   + GNU/Linux (Debian 8)        x86_64      gcc 4.9.2
   + GNU/Linux (Ubuntu 16.04.2)	x86_64      gcc 5.4.0
+  + OpenBSD 6.1                 amd64       gcc 4.2.1
 
 Build & Install
 ---------------
