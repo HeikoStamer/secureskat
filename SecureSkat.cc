@@ -1782,6 +1782,7 @@ void run_irc()
 									size_t ai = tmp.find("|", 0), bi = tmp.find("~", 0);
 									size_t ci = tmp.find("!", 0), di = tmp.find("#", 0);
 									size_t ei = tmp.find("?", 0), fi = tmp.find("/", 0);
+std::cerr << "INFO: 352 => " << tmp << std::endl;
 									if ((a0 != tmp.npos) && (ai != tmp.npos) && 
 										(bi != tmp.npos) && (ci != tmp.npos) && 
 										(di != tmp.npos) && (ei != tmp.npos) && 
