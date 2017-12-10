@@ -31,7 +31,7 @@ Requirements
   You need the following libraries and appropriate header files to build
   (GCC version >= 4.x.y is recommended) `SecureSkat' successfully:
 
-  * Toolbox for Mental Card Games (LibTMCG), version >= 1.3.2
+  * Toolbox for Mental Card Games (LibTMCG), version >= 1.3.8
     http://www.nongnu.org/libtmcg/
 
   * GNU Multiple Precision Arithmetic Library (libgmp), version >= 4.2
