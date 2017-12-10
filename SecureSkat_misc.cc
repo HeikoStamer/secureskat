@@ -120,35 +120,44 @@ int CloseHandle
 }
 
 int ConnectToHost
-	(const char *host, int port)
+	(const char *host, uint16_t port)
 {
-	int sockfd;
-	struct hostent *hostinf;
-	struct sockaddr_in sin = { 0 };
-	sin.sin_port = htons(port);
-	sin.sin_family = AF_INET;
-	if ((hostinf = gethostbyname(host)) != NULL)
+	struct addrinfo hints = { 0 }, *res, *rp;
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_NUMERICSERV | AI_ADDRCONFIG;
+	std::stringstream ports;
+	int ret;
+	ports << port;
+	if ((ret = getaddrinfo(host, (ports.str()).c_str(), &hints, &res)) != 0)
 	{
-		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
-	}
-	else
-	{
-		perror("SecureSkat_misc::ConnectToHost (gethostbyname)");
+		if (ret == EAI_SYSTEM)
+			perror("SecureSkat_misc::ConnectToHost (getaddrinfo)");
+		else
+			std::cerr << gai_strerror(ret) << std::endl;
 		return -1;
 	}
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	for (rp = res; rp != NULL; rp = rp->ai_next)
 	{
-		perror("SecureSkat_misc::ConnectToHost (socket)");
-		return -2;
+		int sockfd;
+		if ((sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
+		{
+			perror("SecureSkat_misc::ConnectToHost (socket)");
+			continue; // try next address
+		}
+		if (connect(sockfd, rp->ai_addr, rp->ai_addrlen) < 0)
+		{
+			if (errno != ECONNREFUSED)
+				perror("SecureSkat_misc::ConnectToHost (connect)");					
+			if (close(sockfd) < 0)
+				perror("SecureSkat_misc::ConnectToHost (close)");
+			continue; // try next address
+		}
+		else
+			return sockfd;
+		freeaddrinfo(res);
 	}
-	if ((connect(sockfd, (struct sockaddr*)&sin, sizeof(sin))) < 0)
-	{
-		perror("SecureSkat_misc::ConnectToHost (connect)");
-		if (close(sockfd) < 0)
-			perror("SecureSkat_misc::ConnectToHost (close)");
-		return -3;
-	}
-	return sockfd;
+	return -3;
 }
 
 char *stripwhite(char *str)

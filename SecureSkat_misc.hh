@@ -31,7 +31,7 @@
 	int CloseHandle
 		(int handle);
 	int ConnectToHost
-		(const char *host, int port);
+		(const char *host, uint16_t port);
 
 	char *stripwhite
 		(char *str);
