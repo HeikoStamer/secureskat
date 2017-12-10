@@ -1235,7 +1235,7 @@ std::cerr << "ballot_child() = " << ret << std::endl;
 	free(line);
 }
 
-void run_irc()
+void run_irc(const std::string &hostname)
 {
     bool first_command = true, first_entry = false, entry_ok = false;
     fd_set rfds;                    // set of read descriptors
@@ -1778,11 +1778,12 @@ void run_irc()
 											_("has unqualified domain (no FQDN)") << std::endl;
 									std::string tmp = irc_parvec[7], package = "unknown";
 									int p7771 = 0, p7772 = 0, p7773 = 0, p7774 = 0, sl = 0;
+									std::string ahostname = "undefined";
 									size_t a0 = tmp.find(" ", 0);
 									size_t ai = tmp.find("|", 0), bi = tmp.find("~", 0);
 									size_t ci = tmp.find("!", 0), di = tmp.find("#", 0);
 									size_t ei = tmp.find("?", 0), fi = tmp.find("/", 0);
-std::cerr << "INFO: 352 => " << tmp << std::endl;
+									size_t gi = tmp.find("*", 0);
 									if ((a0 != tmp.npos) && (ai != tmp.npos) && 
 										(bi != tmp.npos) && (ci != tmp.npos) && 
 										(di != tmp.npos) && (ei != tmp.npos) && 
@@ -1800,6 +1801,9 @@ std::cerr << "INFO: 352 => " << tmp << std::endl;
 										p7773 = atoi(ptmp7773.c_str());
 										p7774 = atoi(ptmp7774.c_str());
 										sl = atoi(sltmp.c_str());
+										// exctract the alternative hostname (e.g. onion address)
+										if ((gi != tmp.npos) && (fi < gi))
+											ahostname = tmp.substr(fi + 1, gi - fi - 1);
 									}
 									nick_package[irc_parvec[5]] = package;
 									nick_p7771[irc_parvec[5]] = p7771;
@@ -1807,7 +1811,10 @@ std::cerr << "INFO: 352 => " << tmp << std::endl;
 									nick_p7773[irc_parvec[5]] = p7773;
 									nick_p7774[irc_parvec[5]] = p7774;
 									nick_sl[irc_parvec[5]] = sl;
-									nick_players[irc_parvec[5]] = irc_parvec[3];
+									if (ahostname == "undefined")
+										nick_players[irc_parvec[5]] = irc_parvec[3];
+									else
+										nick_players[irc_parvec[5]] = ahostname;
 									if (nick_key.find(irc_parvec[5]) != nick_key.end())
 										irc_parvec[5] = nick_key[irc_parvec[5]].name;
 									if (irc_stat)
@@ -2030,8 +2037,8 @@ std::cerr << "INFO: 352 => " << tmp << std::endl;
 			// do other delayed stuff, i.e., register at IRC server and join
 			if (first_command)
 			{
-				char ptmp[100];
-				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
+				char ptmp[1024];
+				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/%s*", pki7771_port, 0, rnk7773_port, rnk7774_port, 80, hostname.c_str());
 				std::string uname = pub.keyid(5);
 				// create a "unique" username based on the nickname
 				if (uname.length() > 4)
@@ -2425,8 +2432,8 @@ void done_term(struct termios &old_term)
 
 int main(int argc, char* argv[], char* envp[])
 {
-    char *home = NULL;
-    std::string homedir = "";
+    char *home = NULL, *althost = NULL;
+    std::string homedir = "", hostname = "";
     std::cout << PACKAGE_STRING << ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
 	
 #ifdef ENABLE_NLS
@@ -2450,6 +2457,14 @@ int main(int argc, char* argv[], char* envp[])
     else
         homedir = "~/.SecureSkat/";
     std::cout << "++ " << _("PKI/RNK database directory") << ": " << homedir << std::endl;
+
+    // evaluate the environment variable ALTHOST
+    althost = getenv("ALTHOST");
+    if (althost != NULL)
+    {
+        hostname = althost;
+        std::cout << "++ " << _("Alternative hostname") << ": " << hostname << std::endl;
+    }
     
     // check existance and permissions of the home directory
     struct stat stat_buffer;
@@ -2494,9 +2509,10 @@ int main(int argc, char* argv[], char* envp[])
     if (((argc == 4) && isdigit(argv[2][0])) || ((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
     {
         struct termios old_term;
-        int irc_port = 6667;
+        int irc_port = 0;
 
         // set the default values
+	irc_port = 6667;
         game_ctl = "";
         game_env = NULL;
 
@@ -2506,8 +2522,11 @@ int main(int argc, char* argv[], char* envp[])
             case 4:
                 game_ctl = argv[3];
                 game_env = envp;
+		irc_port = atoi(argv[2]);
+		break;
             case 3:
                 irc_port = atoi(argv[2]);
+		break;
         }
 
         // initialize LibTMCG
@@ -2550,7 +2569,7 @@ int main(int argc, char* argv[], char* envp[])
 #ifndef NOHUP
         init_term(old_term);
 #endif
-        run_irc(); // main loop
+        run_irc(hostname); // main loop
 #ifndef NOHUP
         done_term(old_term);
 #endif

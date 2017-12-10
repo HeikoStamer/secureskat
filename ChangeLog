@@ -1,5 +1,5 @@
 SecureSkat 2.12:
-    - TODO
+    - introducing environment variable ALTHOST to a set alternative hostname
     - increased bit length for generated TMCG/Rabin keys to 2408 bit
     - SecureSkat_random: randomize playing of allowed cards during game
     - replaced random() by LibTMCG's function mpz_wrandom_ui()
