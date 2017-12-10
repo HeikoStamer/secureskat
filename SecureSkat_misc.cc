@@ -134,7 +134,7 @@ int ConnectToHost
 		if (ret == EAI_SYSTEM)
 			perror("SecureSkat_misc::ConnectToHost (getaddrinfo)");
 		else
-			std::cerr << gai_strerror(ret) << std::endl;
+			std::cerr << "ERROR: " << gai_strerror(ret) << std::endl;
 		return -1;
 	}
 	for (rp = res; rp != NULL; rp = rp->ai_next)
@@ -154,9 +154,12 @@ int ConnectToHost
 			continue; // try next address
 		}
 		else
+		{
+			freeaddrinfo(res);
 			return sockfd;
-		freeaddrinfo(res);
+		}
 	}
+	freeaddrinfo(res);
 	return -3;
 }
 

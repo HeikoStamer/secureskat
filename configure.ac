@@ -153,7 +153,7 @@ AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([fork dup2 gethostbyname memset memcpy memcmp memmove select\
+AC_CHECK_FUNCS([fork dup2 getaddrinfo memset memcpy memcmp memmove select\
  socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat\
  mkdir getuid getenv strerror snprintf pipe perror waitpid close read write\
  send recv fileno tcgetattr tcsetattr], , AC_MSG_ERROR([some essential C functions are missing]))
