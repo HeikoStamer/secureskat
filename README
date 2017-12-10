@@ -165,6 +165,8 @@ Playing SecureSkat over an IRC network
   workstation should be not behind a (paranoid) firewall. Perhaps you can
   convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
+  In order to set an alternative hostname the environment variable ALTHOST
+  can be used, e.g., for an onion address with local port forwarding rules.
 
 Bugs, Contribution, GIT
 -----------------------
