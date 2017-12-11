@@ -123,7 +123,7 @@ int skat_accept
 {
 	struct hostent *hostinf;
 	struct sockaddr_in sin;
-	if ((hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str())) != NULL)
+	if ((hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str())) != NULL) // FIXME: replace this function
 	{
 		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
 	}
@@ -160,7 +160,7 @@ int skat_accept
 			}
 			else
 			{
-				if (client_in.sin_addr.s_addr == sin.sin_addr.s_addr)
+				if (client_in.sin_addr.s_addr == sin.sin_addr.s_addr) // FIXME: does not work over TOR
 				{
 					iosocketstream *neighbor = new iosocketstream(handle);
 					

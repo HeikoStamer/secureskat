@@ -345,7 +345,7 @@ int ballot_child
 			{
 				// check host address
 				struct sockaddr_in sin;
-				struct hostent *hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str());
+				struct hostent *hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str()); // FIXME: replace this function
 				if (hostinf != NULL)
 				{
 					memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
@@ -361,7 +361,7 @@ int ballot_child
 					CloseHandle(handle);
 					return -70;
 				}
-				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr)
+				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr) // FIXME: does not work over TOR
 				{
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 					delete in_pipe, delete out_pipe;
@@ -661,7 +661,7 @@ int ballot_child
 		}
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
 			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 			delete vtmf;
 			for (size_t ii = 0; ii < vnicks.size(); ii++)
@@ -678,7 +678,7 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
+					std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
 						" " << _("for") << " " << vnicks[i]<< std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 					delete vtmf;
@@ -707,7 +707,7 @@ int ballot_child
 		
 		if (!vtmf->CheckGroup())
 		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+			std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
 			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 			delete vtmf;
 			for (size_t ii = 0; ii < vnicks.size(); ii++)
@@ -725,7 +725,7 @@ int ballot_child
 			{
 				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
 				{
-					std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
+					std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
 						" " << _("for") << " " << vnicks[i]<< std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 					delete vtmf;

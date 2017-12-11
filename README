@@ -165,8 +165,93 @@ Playing SecureSkat over an IRC network
   workstation should be not behind a (paranoid) firewall. Perhaps you can
   convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
-  In order to set an alternative hostname the environment variable ALTHOST
-  can be used, e.g., for an onion address with local port forwarding rules.
+  However, there is another way to get things work: use TOR! In order to set
+  an alternative hostname the environment variable ALTHOST can be used, i.e.,
+  onion address of a local hidden service with local port forwarding rules.
+  Therefore you have to put the following lines in your torrc file:
+
+    HiddenServiceDir /var/lib/tor/secureskat/
+    HiddenServicePort 7771 127.0.0.1:7771
+    HiddenServicePort 7772 127.0.0.1:7772
+    HiddenServicePort 7773 127.0.0.1:7773
+    HiddenServicePort 7774 127.0.0.1:7774
+    HiddenServicePort 7775 127.0.0.1:7775
+    HiddenServicePort 7776 127.0.0.1:7776
+    HiddenServicePort 7777 127.0.0.1:7777
+    HiddenServicePort 7778 127.0.0.1:7778
+    HiddenServicePort 7779 127.0.0.1:7779
+    HiddenServicePort 7780 127.0.0.1:7780
+    HiddenServicePort 7781 127.0.0.1:7781
+    HiddenServicePort 7782 127.0.0.1:7782
+    HiddenServicePort 7783 127.0.0.1:7783
+    HiddenServicePort 7784 127.0.0.1:7784
+    HiddenServicePort 7785 127.0.0.1:7785
+    HiddenServicePort 7786 127.0.0.1:7786
+    HiddenServicePort 7787 127.0.0.1:7787
+    HiddenServicePort 7788 127.0.0.1:7788
+    HiddenServicePort 7789 127.0.0.1:7789
+    HiddenServicePort 7790 127.0.0.1:7790
+    HiddenServicePort 7791 127.0.0.1:7791
+    HiddenServicePort 7792 127.0.0.1:7792
+    HiddenServicePort 7793 127.0.0.1:7793
+    HiddenServicePort 7794 127.0.0.1:7794
+    HiddenServicePort 7795 127.0.0.1:7795
+    HiddenServicePort 7796 127.0.0.1:7796
+    HiddenServicePort 7797 127.0.0.1:7797
+    HiddenServicePort 7798 127.0.0.1:7798
+    HiddenServicePort 7799 127.0.0.1:7799
+    HiddenServicePort 7800 127.0.0.1:7800
+    HiddenServicePort 7801 127.0.0.1:7801
+    HiddenServicePort 7802 127.0.0.1:7802
+    HiddenServicePort 7803 127.0.0.1:7803
+    HiddenServicePort 7804 127.0.0.1:7804
+    HiddenServicePort 7805 127.0.0.1:7805
+    HiddenServicePort 7806 127.0.0.1:7806
+    HiddenServicePort 7807 127.0.0.1:7807
+    HiddenServicePort 7808 127.0.0.1:7808
+    HiddenServicePort 7809 127.0.0.1:7809
+    HiddenServicePort 7810 127.0.0.1:7810
+    HiddenServicePort 7811 127.0.0.1:7811
+    HiddenServicePort 7812 127.0.0.1:7812
+    HiddenServicePort 7813 127.0.0.1:7813
+    HiddenServicePort 7814 127.0.0.1:7814
+    HiddenServicePort 7815 127.0.0.1:7815
+    HiddenServicePort 7816 127.0.0.1:7816
+    HiddenServicePort 7817 127.0.0.1:7817
+    HiddenServicePort 7818 127.0.0.1:7818
+    HiddenServicePort 7819 127.0.0.1:7819
+    HiddenServicePort 7820 127.0.0.1:7820
+    HiddenServicePort 7821 127.0.0.1:7821
+    HiddenServicePort 7822 127.0.0.1:7822
+    HiddenServicePort 7823 127.0.0.1:7823
+    HiddenServicePort 7824 127.0.0.1:7824
+    HiddenServicePort 7825 127.0.0.1:7825
+    HiddenServicePort 7826 127.0.0.1:7826
+    HiddenServicePort 7827 127.0.0.1:7827
+    HiddenServicePort 7828 127.0.0.1:7828
+    HiddenServicePort 7829 127.0.0.1:7829
+    HiddenServicePort 7830 127.0.0.1:7830
+    HiddenServicePort 7831 127.0.0.1:7831
+    HiddenServicePort 7832 127.0.0.1:7832
+    HiddenServicePort 7833 127.0.0.1:7833
+    HiddenServicePort 7834 127.0.0.1:7834
+    HiddenServicePort 7835 127.0.0.1:7835
+    HiddenServicePort 7836 127.0.0.1:7836
+    HiddenServicePort 7837 127.0.0.1:7837
+    HiddenServicePort 7838 127.0.0.1:7838
+    HiddenServicePort 7839 127.0.0.1:7839
+    HiddenServicePort 7840 127.0.0.1:7840
+    HiddenServicePort 7841 127.0.0.1:7841
+    HiddenServicePort 7842 127.0.0.1:7842
+    HiddenServicePort 7843 127.0.0.1:7843
+    HiddenServicePort 7844 127.0.0.1:7844
+    HiddenServicePort 7845 127.0.0.1:7845
+    HiddenServicePort 7846 127.0.0.1:7846
+    HiddenServicePort 7847 127.0.0.1:7847
+    HiddenServicePort 7848 127.0.0.1:7848
+    HiddenServicePort 7849 127.0.0.1:7849
+    [...]
+
 
 Bugs, Contribution, GIT
 -----------------------
