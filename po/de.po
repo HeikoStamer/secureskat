@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SecureSkat 3.0\n"
+"Project-Id-Version: SecureSkat 2.12\n"
 "Report-Msgid-Bugs-To: HeikoStamer@gmx.net\n"
-"POT-Creation-Date: 2017-12-10 17:30+0100\n"
+"POT-Creation-Date: 2017-12-11 18:48+0100\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -30,11 +30,11 @@ msgstr "ordnungsgemäß beendet."
 msgid "failed. Error code"
 msgstr "fehlgeschlagen. Fehlerstatus"
 
-#: SecureSkat.cc:410 SecureSkat.cc:1093 SecureSkat.cc:2311
+#: SecureSkat.cc:410 SecureSkat.cc:1093 SecureSkat.cc:2314
 msgid "TMCG: public key corrupted"
 msgstr "TMCG: öffentlicher Schlüssel beschädigt"
 
-#: SecureSkat.cc:414 SecureSkat.cc:2318
+#: SecureSkat.cc:414 SecureSkat.cc:2321
 msgid "TMCG: wrong public key"
 msgstr "TMCG: öffentlicher Schlüssel unpassend"
 
@@ -170,7 +170,7 @@ msgstr "Überprüfe den Schlüssel"
 msgid "Please wait"
 msgstr "Bitte warten"
 
-#: SecureSkat.cc:1107 SecureSkat.cc:2325
+#: SecureSkat.cc:1107 SecureSkat.cc:2328
 msgid "TMCG: invalid public key"
 msgstr "TMCG: öffentlicher Schlüssel ungültig"
 
@@ -366,7 +366,7 @@ msgstr "ist aus"
 msgid "unknown command"
 msgstr "unbekanntes Kommando"
 
-#: SecureSkat.cc:1449 SecureSkat.cc:2361
+#: SecureSkat.cc:1449 SecureSkat.cc:2364
 msgid "IRC ERROR: connection with server collapsed"
 msgstr "IRC FEHLER: Verbindung zum Server zusammengebrochen"
 
@@ -480,67 +480,67 @@ msgstr "TCMG: öffentlicher Schlüssel nicht verfügbar"
 msgid "announces unauthorized session"
 msgstr "bewirbt unerlaubt die Sitzung"
 
-#: SecureSkat.cc:2089
+#: SecureSkat.cc:2092
 msgid "MALLOC ERROR: out of memory"
 msgstr "MALLOC FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2196
+#: SecureSkat.cc:2199
 msgid "RNK ERROR: out of memory"
 msgstr "RNK FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2295
+#: SecureSkat.cc:2298
 msgid "PKI ERROR: out of memory"
 msgstr "PKI FEHLER: kein freier Speicherplatz vorhanden"
 
-#: SecureSkat.cc:2450
+#: SecureSkat.cc:2453
 msgid "Internationalization support"
 msgstr "Internationalisierungsunterstützung"
 
-#: SecureSkat.cc:2459
+#: SecureSkat.cc:2462
 msgid "PKI/RNK database directory"
 msgstr "PKI/RNK Datenbankverzeichnis"
 
-#: SecureSkat.cc:2466
+#: SecureSkat.cc:2469
 msgid "Alternative hostname"
-msgstr ""
+msgstr "Alternativer Hostname"
 
-#: SecureSkat.cc:2478
+#: SecureSkat.cc:2481
 msgid "Can't create directory!"
 msgstr "Kann Verzeichnis nicht erzeugen!"
 
-#: SecureSkat.cc:2485
+#: SecureSkat.cc:2488
 msgid "Can't get the status of the directory!"
 msgstr "Status des Verzeichnisses nicht verfügbar!"
 
-#: SecureSkat.cc:2493
+#: SecureSkat.cc:2496
 msgid "Path is not a directory!"
 msgstr "Pfad ist kein Verzeichnis!"
 
-#: SecureSkat.cc:2498
+#: SecureSkat.cc:2501
 msgid "Wrong owner of the directory!"
 msgstr "Falscher Eigentümer des Verzeichnisses!"
 
-#: SecureSkat.cc:2503
+#: SecureSkat.cc:2506
 msgid "Missing permissions for directory!"
 msgstr "Fehlende Rechte am Verzeichnis!"
 
-#: SecureSkat.cc:2535
+#: SecureSkat.cc:2538
 msgid "Initialization of LibTMCG failed!"
 msgstr "Initialisierung von LibTMCG fehlgeschlagen!"
 
-#: SecureSkat.cc:2539
+#: SecureSkat.cc:2542
 msgid "Initialization of LibTMCG version"
 msgstr "Initialisierung von LibTMCG Version"
 
-#: SecureSkat.cc:2544
+#: SecureSkat.cc:2547
 msgid "Your key fingerprint"
 msgstr "Ihr Schlüsselfingerabdruck"
 
-#: SecureSkat.cc:2568 SecureSkat.cc:2598
+#: SecureSkat.cc:2571 SecureSkat.cc:2601
 msgid "Usage"
 msgstr "Benutzung"
 
-#: SecureSkat.cc:2568
+#: SecureSkat.cc:2571
 msgid "type /help for the command list or read the file README"
 msgstr "/help zeigt die Liste der Kommandos an (README lesen)"
 

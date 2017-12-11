@@ -2038,7 +2038,10 @@ void run_irc(const std::string &hostname)
 			if (first_command)
 			{
 				char ptmp[1024];
-				snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/%s*", pki7771_port, 0, rnk7773_port, rnk7774_port, 80, hostname.c_str());
+				if (hostname == "undefined")
+					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
+				else
+					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/%s*", pki7771_port, 0, rnk7773_port, rnk7774_port, 80, hostname.c_str());
 				std::string uname = pub.keyid(5);
 				// create a "unique" username based on the nickname
 				if (uname.length() > 4)
@@ -2433,7 +2436,7 @@ void done_term(struct termios &old_term)
 int main(int argc, char* argv[], char* envp[])
 {
     char *home = NULL, *althost = NULL;
-    std::string homedir = "", hostname = "";
+    std::string homedir = "", hostname = "undefined";
     std::cout << PACKAGE_STRING << ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
 	
 #ifdef ENABLE_NLS
