@@ -45,7 +45,6 @@ extern std::string X;
 extern std::string game_ctl;
 extern char **game_env;
 
-
 int skat_connect
 	(size_t pkr_self, size_t pkr_idx, iosecuresocketstream *&secure, int &handle,
 	std::map<std::string, int> gp_ports, const std::vector<std::string> &vnicks,
@@ -102,7 +101,9 @@ int skat_connect
 	{
 		std::cerr << _("TMCG: decrypt() failed") << std::endl;
 		delete neighbor;
-		delete [] key1, delete [] key2, delete [] dv;
+		delete [] key1;
+		delete [] key2;
+		delete [] dv;
 		CloseHandle(handle);
 		return -6;
 	}
@@ -111,7 +112,9 @@ int skat_connect
 
 	// create encrypted stream and release keys
 	secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
-	delete [] key1, delete [] key2, delete [] dv;
+	delete [] key1;
+	delete [] key2;
+	delete [] dv;
 	return 0;
 }
 
@@ -121,17 +124,6 @@ int skat_accept
 	const std::vector<std::string> &vnicks, TMCG_PublicKeyRing &pkr,
 	int gp_handle, bool neu, char *ireadbuf, int &ireaded)
 {
-	struct hostent *hostinf;
-	struct sockaddr_in sin;
-	if ((hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str())) != NULL) // FIXME: replace this function
-	{
-		memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
-	}
-	else
-	{
-		perror("skat_accept (gethostbyname)");
-		return -4;
-	}
 	fd_set rfds;	// set of read descriptors
 	int mfds = 0;	// highest-numbered descriptor
 	while (1)
@@ -160,79 +152,66 @@ int skat_accept
 			}
 			else
 			{
-				if (client_in.sin_addr.s_addr == sin.sin_addr.s_addr) // FIXME: does not work over TOR
+				iosocketstream *neighbor = new iosocketstream(handle);
+				// create a fresh nonce
+				unsigned long int nonce_A = mpz_srandom_ui(), nonce_B = 0;
+				std::ostringstream ost, ost2;
+				std::string tmp;
+				*neighbor << nonce_A << std::endl << std::flush;
+				// receive the signature
+				std::getline(*neighbor, tmp);
+				// verify the signature
+				ost << nonce_A << "<req>" << vnicks[pkr_self];
+				if (!pkr.keys[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
 				{
-					iosocketstream *neighbor = new iosocketstream(handle);
-					
-					// create a fresh nonce
-					unsigned long int nonce_A = mpz_srandom_ui(), nonce_B = 0;
-					std::ostringstream ost, ost2;
-					std::string tmp;
-					*neighbor << nonce_A << std::endl << std::flush;
-					// receive the signature
-					std::getline(*neighbor, tmp);
-					// verify the signature
-					ost << nonce_A << "<req>" << vnicks[pkr_self];
-					if (!pkr.keys[pkr_idx].verify(ost.str(), tmp) || !neighbor->good())
+					delete neighbor;
+					if (close(handle) < 0)
+						perror("skat_accept (close)");
+					return -6;
+				}
+				else
+				{
+					// receive the nonce and reply
+					*neighbor >> nonce_B;
+					neighbor->ignore(1, '\n');
+					if (neighbor->good())
+					{
+						ost2 << nonce_A << "<rpl>" << vnicks[pkr_self] << "<|>" << nonce_B << "<rpl>" << vnicks[pkr_idx];
+						*neighbor << sec.sign(ost2.str()) << std::endl << std::flush;
+						// exchange the secret keys for securesocketstream
+						unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
+						unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
+						std::getline(*neighbor, tmp);
+						if (!sec.decrypt(dv, tmp))
+						{
+							std::cerr << _("TMCG: decrypt() failed") << std::endl;
+							delete neighbor;
+							delete [] key1;
+							delete [] key2;
+							delete [] dv;
+							if (close(handle) < 0)
+								perror("skat_accept (close)");
+							return -6;
+						}
+						memcpy(key2, dv, TMCG_SAEP_S0);
+						gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
+						*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
+						delete neighbor;
+						// create encrypted stream and release keys
+						secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
+						delete [] key1;
+						delete [] key2;
+						delete [] dv;
+						break; // exit while-loop
+					}
+					else
 					{
 						delete neighbor;
 						if (close(handle) < 0)
 							perror("skat_accept (close)");
 						return -6;
 					}
-					else
-					{
-						// receive the nonce and reply
-						*neighbor >> nonce_B;
-						neighbor->ignore(1, '\n');
-						if (neighbor->good())
-						{
-							ost2 << nonce_A << "<rpl>" << vnicks[pkr_self] << "<|>" << nonce_B << "<rpl>" << vnicks[pkr_idx];
-							*neighbor << sec.sign(ost2.str()) << std::endl << std::flush;
-							
-							// exchange the secret keys for securesocketstream
-							unsigned char *key1 = new unsigned char[TMCG_SAEP_S0];
-							unsigned char *key2 = new unsigned char[TMCG_SAEP_S0];
-							unsigned char *dv = new unsigned char[TMCG_SAEP_S0];
-							std::getline(*neighbor, tmp);
-							if (!sec.decrypt(dv, tmp))
-							{
-								std::cerr << _("TMCG: decrypt() failed") << std::endl;
-								delete neighbor;
-								delete [] key1;
-								delete [] key2;
-								delete [] dv;
-								if (close(handle) < 0)
-									perror("skat_accept (close)");
-								return -6;
-							}
-							memcpy(key2, dv, TMCG_SAEP_S0);
-							gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
-							*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
-							delete neighbor;
-
-							// create encrypted stream and release keys
-							secure = new iosecuresocketstream(handle, key1, 16, key2, 16);
-							delete [] key1;
-							delete [] key2;
-							delete [] dv;
-							break; // exit while-loop
-						}
-						else
-						{
-							delete neighbor;
-							if (close(handle) < 0)
-								perror("skat_accept (close)");
-							return -6;
-						}
-					}
-				}
-				else
-				{
-					std::cerr << _("Unexpected connection from") << ": " << inet_ntoa(client_in.sin_addr) << std::endl;
-					if (close(handle) < 0)
-						perror("skat_accept (close)");
-					return -6;
 				}
 			}
 		}

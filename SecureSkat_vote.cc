@@ -343,34 +343,6 @@ int ballot_child
 			}
 			else
 			{
-				// check host address
-				struct sockaddr_in sin;
-				struct hostent *hostinf = gethostbyname(nick_players[vnicks[pkr_idx]].c_str()); // FIXME: replace this function
-				if (hostinf != NULL)
-				{
-					memcpy((char*)&sin.sin_addr, hostinf->h_addr, hostinf->h_length);
-				}
-				else
-				{
-					perror("ballot_child (gethostbyname)");
-					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-					delete in_pipe, delete out_pipe;
-					delete ballot_tmcg;
-					CloseHandle(gp_handle);
-					delete [] ireadbuf;
-					CloseHandle(handle);
-					return -70;
-				}
-				if (client_in.sin_addr.s_addr != sin.sin_addr.s_addr) // FIXME: does not work over TOR
-				{
-					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-					delete in_pipe, delete out_pipe;
-					delete ballot_tmcg;
-					CloseHandle(gp_handle);
-					delete [] ireadbuf;
-					CloseHandle(handle);
-					return -71;
-				}
 				// establish and authenticate the connection
 				iosocketstream *neighbor = new iosocketstream(handle);
 				TMCG_CardSecret cs(gp_nick.size(), b);
