@@ -630,7 +630,13 @@ int ballot_child
 			vtmf->PublishGroup(*ios_out[vnicks[i]]);
 	}
 	else
+	{
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
+		if (!ios_in[vnicks[0]]->good())
+		{
+std::cerr << "BAD!" << std::endl;
+		}
+	}
 	if (!vtmf->CheckGroup())
 	{
 		std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;

@@ -99,12 +99,12 @@ template <class traits = securesocketbuf_traits>
 		int mSocket;				/*! @member mSocket the socket to operate on */
 		char *mRBuffer;				/*! @member mRBuffer the read buffer */
 		char *mWBuffer;				/*! @member mWBuffer the write buffer */
-		gcry_cipher_hd_t chd_in;	/*! @member chd_in cipher handle for reading */
-		gcry_cipher_hd_t chd_out;	/*! @member chd_out cipher handle for writing */
+		gcry_cipher_hd_t chd_in;		/*! @member chd_in cipher handle for reading */
+		gcry_cipher_hd_t chd_out;		/*! @member chd_out cipher handle for writing */
 		gcry_error_t err;			/*! @member err the gcry error return code */
 		z_stream zs_out;			/*! @member zs_out zlib compression stream */
 		z_stream zs_in;				/*! @member zs_in zlib uncompression stream */
-		int zerr;					/*! @member zerr the zlib error return code */
+		int zerr;				/*! @member zerr the zlib error return code */
 
 	public:
 		typedef traits traits_type;	/*! @typedef traits_type for clients */
@@ -117,8 +117,7 @@ template <class traits = securesocketbuf_traits>
 			const unsigned char *key_in, size_t size_in, const unsigned char *key_out, size_t size_out
 		) : mSocket(iSocket) 
 		{
-			err = gcry_cipher_open(&chd_in,
-				GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
+			err = gcry_cipher_open(&chd_in,	GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
 			if (err)
 			{
 				std::cerr << "libgcrypt: gcry_cipher_open() failed" << std::endl;
@@ -134,8 +133,7 @@ template <class traits = securesocketbuf_traits>
 				exit(-1);
 			}
 			
-			err = gcry_cipher_open(&chd_out,
-				GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
+			err = gcry_cipher_open(&chd_out, GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, 0);
 			if (err)
 			{
 				std::cerr << "libgcrypt: gcry_cipher_open() failed" << std::endl;
@@ -167,16 +165,14 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflateInit(&zs_out, Z_DEFAULT_COMPRESSION);
 			if (zerr)
 			{
-				std::cerr << "zlib: deflateInit() failed with error " << zerr
-					<< std::endl;
+				std::cerr << "zlib: deflateInit() failed with error " << zerr << std::endl;
 				exit(-1);
 			}
 			
 			zerr = inflateInit(&zs_in);
 			if (zerr)
 			{
-				std::cerr << "zlib: inflateInit() failed with error " << zerr
-					<< std::endl;
+				std::cerr << "zlib: inflateInit() failed with error " << zerr << std::endl;
 				exit(-1);
 			}
 			
@@ -194,8 +190,10 @@ template <class traits = securesocketbuf_traits>
 		~basic_securesocketbuf() 
 		{
 			sync();
-			deflateEnd(&zs_out), inflateEnd(&zs_in);
-			gcry_cipher_close(chd_in), gcry_cipher_close(chd_out);
+			deflateEnd(&zs_out);
+			inflateEnd(&zs_in);
+			gcry_cipher_close(chd_in);
+			gcry_cipher_close(chd_out);
 			delete [] mRBuffer, delete [] mWBuffer;
 		}
 	
@@ -221,8 +219,7 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflate(&zs_out, Z_SYNC_FLUSH);
 			if (zerr || (zs_out.avail_in != 0) || (zs_out.avail_out == 0))
 			{
-				std::cerr << "zlib: deflate() failed with error " << zerr
-					<< std::endl;
+				std::cerr << "zlib: deflate() failed with error " << zerr << std::endl;
 				exit(-1);
 			}
 			clen = zs_out.total_out - clen;
@@ -296,8 +293,7 @@ template <class traits = securesocketbuf_traits>
 			zerr = deflate(&zs_out, Z_SYNC_FLUSH);
 			if (zerr || (zs_out.avail_in != 0) || (zs_out.avail_out == 0))
 			{
-				std::cerr << "zlib: deflate() failed with error " << zerr
-					<< std::endl;
+				std::cerr << "zlib: deflate() failed with error " << zerr << std::endl;
 				exit(-1);
 			}
 			clen = zs_out.total_out - clen;
@@ -366,8 +362,7 @@ template <class traits = securesocketbuf_traits>
 					zerr = inflate(&zs_in, Z_SYNC_FLUSH);
 					if (zerr)
 					{
-						std::cerr << "zlib: inflate() failed with error " << zerr
-							<< std::endl;
+						std::cerr << "zlib: inflate() failed with error " << zerr << std::endl;
 						exit(-1);
 					}
 					count = zs_in.total_out - clen;
