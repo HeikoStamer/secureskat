@@ -631,95 +631,50 @@ int ballot_child
 			if (i != pkr_self)
 				vtmf->PublishGroup(*ios_out[vnicks[i]]);
 		}
-		if (!vtmf->CheckGroup())
-		{
-			std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-			delete vtmf;
-			for (size_t ii = 0; ii < vnicks.size(); ii++)
-				delete ios_out[vnicks[ii]];
-			delete in_pipe, delete out_pipe;
-			delete ballot_tmcg;
-			CloseHandle(gp_handle);
-			return -90;
-		}
-		vtmf->KeyGenerationProtocol_GenerateKey();
-		for (size_t i = 0; i < vnicks.size(); i++)
-		{
-			if (i != pkr_self)
-			{
-				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
-				{
-					std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
-						" " << _("for") << " " << vnicks[i]<< std::endl;
-					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-					delete vtmf;
-					for (size_t ii = 0; ii < vnicks.size(); ii++)
-						delete ios_out[vnicks[ii]];
-					delete in_pipe, delete out_pipe;
-					delete ballot_tmcg;
-					CloseHandle(gp_handle);
-					return -90;
-				}
-			}
-			else
-			{
-				for (size_t j = 0; j < vnicks.size(); j++)
-				{
-					if (j != pkr_self)
-						vtmf->KeyGenerationProtocol_PublishKey(*ios_out[vnicks[j]]);
-				}
-			}
-		}
-		vtmf->KeyGenerationProtocol_Finalize();
 	}
 	else
-	{
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
-		
-		if (!vtmf->CheckGroup())
-		{
-			std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-			delete vtmf;
-			for (size_t ii = 0; ii < vnicks.size(); ii++)
-				delete ios_out[vnicks[ii]];
-			delete in_pipe, delete out_pipe;
-			delete ballot_tmcg;
-			CloseHandle(gp_handle);
-			return -90;
-		}
-		
-		vtmf->KeyGenerationProtocol_GenerateKey();
-		for (size_t i = 0; i < vnicks.size(); i++)
-		{
-			if (i != pkr_self)
-			{
-				if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
-				{
-					std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
-						" " << _("for") << " " << vnicks[i]<< std::endl;
-					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
-					delete vtmf;
-					for (size_t ii = 0; ii < vnicks.size(); ii++)
-						delete ios_out[vnicks[ii]];
-					delete in_pipe, delete out_pipe;
-					delete ballot_tmcg;
-					CloseHandle(gp_handle);
-					return -90;
-				}
-			}
-			else
-			{
-				for (size_t j = 0; j < vnicks.size(); j++)
-				{
-					if (j != pkr_self)
-						vtmf->KeyGenerationProtocol_PublishKey(*ios_out[vnicks[j]]);
-				}
-			}
-		}
-		vtmf->KeyGenerationProtocol_Finalize();
+	if (!vtmf->CheckGroup())
+	{
+		std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+		delete vtmf;
+		for (size_t ii = 0; ii < vnicks.size(); ii++)
+			delete ios_out[vnicks[ii]];
+		delete in_pipe, delete out_pipe;
+		delete ballot_tmcg;
+		CloseHandle(gp_handle);
+		return -90;
 	}
+	vtmf->KeyGenerationProtocol_GenerateKey();
+	for (size_t i = 0; i < vnicks.size(); i++)
+	{
+		if (i != pkr_self)
+		{
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*ios_in[vnicks[i]]))
+			{
+				std::cerr << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << 
+					" " << _("for") << " " << vnicks[i] << std::endl;
+				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				delete vtmf;
+				for (size_t ii = 0; ii < vnicks.size(); ii++)
+					delete ios_out[vnicks[ii]];
+				delete in_pipe, delete out_pipe;
+				delete ballot_tmcg;
+				CloseHandle(gp_handle);
+				return -90;
+			}
+		}
+		else
+		{
+			for (size_t j = 0; j < vnicks.size(); j++)
+			{
+				if (j != pkr_self)
+					vtmf->KeyGenerationProtocol_PublishKey(*ios_out[vnicks[j]]);
+			}
+		}
+	}
+	vtmf->KeyGenerationProtocol_Finalize();
 	
 	// create private card for ballot
 	VTMF_Card vote_c;
