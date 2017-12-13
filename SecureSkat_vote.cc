@@ -625,7 +625,7 @@ int ballot_child
 	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 0)
 	{
-		vtmf = new BarnettSmartVTMF_dlog;
+		vtmf = new BarnettSmartVTMF_dlog();
 		for (size_t i = 0; i < vnicks.size(); i++)
 		{
 			if (i != pkr_self)

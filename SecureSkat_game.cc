@@ -1028,135 +1028,107 @@ int skat_game
 	
 	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
-	
-	if (pkr_self == 2)
+#ifndef NDEBUG
+	start_clock();
+#endif
+	switch (pkr_self)
 	{
-#ifndef NDEBUG
-		start_clock();
-#endif
-		
-		vtmf = new BarnettSmartVTMF_dlog();
-		vtmf->PublishGroup(*left);
-		vtmf->PublishGroup(*right);
-		
-		if (!vtmf->CheckGroup())
-		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		
-		vtmf->KeyGenerationProtocol_GenerateKey();
-		
-		vtmf->KeyGenerationProtocol_PublishKey(*left);
-		vtmf->KeyGenerationProtocol_PublishKey(*right);
-		
-		if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
-		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
-		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		
-		vtmf->KeyGenerationProtocol_Finalize();
-		
-#ifndef NDEBUG
-		stop_clock();
-		std::cerr << "KeyGenerationProtocol: " << elapsed_time() << std::endl;
-#endif
-	}
-	else
-	{
-#ifndef NDEBUG
-		start_clock();
-#endif
-		
-		if (pkr_self == 0)
+		case 0:
 			vtmf = new BarnettSmartVTMF_dlog(*right);
-		else
+			break;
+		case 1:
 			vtmf = new BarnettSmartVTMF_dlog(*left);
-		
-		if (!vtmf->CheckGroup())
-		{
-			std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		
-		vtmf->KeyGenerationProtocol_GenerateKey();
-		
-		if (pkr_self == 0)
-		{
-			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
-			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-				delete vtmf;
-				if (pctl)
-					delete out_ctl;
-				delete out_pipe;
-				return 2;
-			}
-			vtmf->KeyGenerationProtocol_PublishKey(*left);
-			vtmf->KeyGenerationProtocol_PublishKey(*right);
-			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
-			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-				delete vtmf;
-				if (pctl)
-					delete out_ctl;
-				delete out_pipe;
-				return 2;
-			}
-		}
-		else
-		{
-			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
-			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-				delete vtmf;
-				if (pctl)
-					delete out_ctl;
-				delete out_pipe;
-				return 2;
-			}
-			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
-			{
-				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
-				delete vtmf;
-				if (pctl)
-					delete out_ctl;
-				delete out_pipe;
-				return 2;
-			}
-			vtmf->KeyGenerationProtocol_PublishKey(*left);
-			vtmf->KeyGenerationProtocol_PublishKey(*right);
-		}
-		
-		vtmf->KeyGenerationProtocol_Finalize();
-		
-#ifndef NDEBUG
-		stop_clock();
-		std::cerr << "KeyGenerationProtocol: " << elapsed_time() << std::endl;
-#endif
+			break;
+		case 2:
+			vtmf = new BarnettSmartVTMF_dlog();
+			vtmf->PublishGroup(*left);
+			vtmf->PublishGroup(*right);
+			break;
 	}
+	if (!vtmf->CheckGroup())
+	{
+		std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+		delete vtmf;
+		if (pctl)
+			delete out_ctl;
+		delete out_pipe;
+		return 2;
+	}
+	vtmf->KeyGenerationProtocol_GenerateKey();
+	switch (pkr_self)
+	{
+		case 0:
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			vtmf->KeyGenerationProtocol_PublishKey(*left);
+			vtmf->KeyGenerationProtocol_PublishKey(*right);
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			break;
+		case 1:
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			vtmf->KeyGenerationProtocol_PublishKey(*left);
+			vtmf->KeyGenerationProtocol_PublishKey(*right);
+			break;
+		case 2:
+			vtmf->KeyGenerationProtocol_PublishKey(*left);
+			vtmf->KeyGenerationProtocol_PublishKey(*right);
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*left))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			if (!vtmf->KeyGenerationProtocol_UpdateKey(*right))
+			{
+				std::cout << ">< " << _("VTMF ERROR") << ": " << _("function KeyGenerationProtocol_UpdateKey() failed") << std::endl;
+				delete vtmf;
+				if (pctl)
+					delete out_ctl;
+				delete out_pipe;
+				return 2;
+			}
+			break;
+	}
+	vtmf->KeyGenerationProtocol_Finalize();
+#ifndef NDEBUG
+	stop_clock();
+	std::cerr << "KeyGenerationProtocol: " << elapsed_time() << std::endl;
+#endif
 	
 	// initialization for Groth's shuffle argument
 	GrothVSSHE *vsshe;
