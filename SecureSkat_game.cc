@@ -1044,6 +1044,8 @@ int skat_game
 			vtmf->PublishGroup(*left);
 			vtmf->PublishGroup(*right);
 			break;
+		default:
+			return 2; // should never happen
 	}
 	if (!vtmf->CheckGroup())
 	{
