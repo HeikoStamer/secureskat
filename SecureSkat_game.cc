@@ -1045,6 +1045,9 @@ int skat_game
 			vtmf->PublishGroup(*right);
 			break;
 		default:
+			if (pctl)
+				delete out_ctl;
+			delete out_pipe;
 			return 2; // should never happen
 	}
 	if (!vtmf->CheckGroup())
@@ -1134,119 +1137,72 @@ int skat_game
 	
 	// initialization for Groth's shuffle argument
 	GrothVSSHE *vsshe;
-	
-	if (pkr_self == 2)
+#ifndef NDEBUG
+	start_clock();
+#endif
+	switch (pkr_self)
 	{
-#ifndef NDEBUG
-		start_clock();
-#endif
-		
-		vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, vtmf->g, vtmf->h);
-		vsshe->PublishGroup(*left);
-		vsshe->PublishGroup(*right);
-		if (!vsshe->CheckGroup())
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->h, vsshe->com->h))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("common public key does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->q, vsshe->com->q))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("subgroup order does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) ||	mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("encryption scheme does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		
-#ifndef NDEBUG
-		stop_clock();
-		std::cerr << "KeyGenerationProtocol2a: " << elapsed_time() << std::endl;
-#endif
-	}
-	else
-	{
-#ifndef NDEBUG
-		start_clock();
-#endif
-		
-		if (pkr_self == 0)
+		case 0:
 			vsshe = new GrothVSSHE(32, *right);
-		else
+			break;
+		case 1:
 			vsshe = new GrothVSSHE(32, *left);
-		if (!vsshe->CheckGroup())
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
-			delete vsshe;
+			break;
+		case 2:
+			vsshe = new GrothVSSHE(32, vtmf->p, vtmf->q, vtmf->k, vtmf->g, vtmf->h);
+			vsshe->PublishGroup(*left);
+			vsshe->PublishGroup(*right);
+			break;
+		default:
 			delete vtmf;
 			if (pctl)
 				delete out_ctl;
 			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->h, vsshe->com->h))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("common public key does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->q, vsshe->com->q))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("subgroup order does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) || mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
-		{
-			std::cout << ">< " << _("VSSHE ERROR") << ": " << _("encryption scheme does not match") << std::endl;
-			delete vsshe;
-			delete vtmf;
-			if (pctl)
-				delete out_ctl;
-			delete out_pipe;
-			return 2;
-		}
-		
-#ifndef NDEBUG
-		stop_clock();
-		std::cerr << "KeyGenerationProtocol2a: " << elapsed_time() << std::endl;
-#endif
+			return 2; // should never happen
+	}
+	if (!vsshe->CheckGroup())
+	{
+		std::cout << ">< " << _("VSSHE ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+		delete vsshe;
+		delete vtmf;
+		if (pctl)
+			delete out_ctl;
+		delete out_pipe;
+		return 2;
+	}
+	if (mpz_cmp(vtmf->h, vsshe->com->h))
+	{
+		std::cout << ">< " << _("VSSHE ERROR") << ": " << _("common public key does not match") << std::endl;
+		delete vsshe;
+		delete vtmf;
+		if (pctl)
+			delete out_ctl;
+		delete out_pipe;
+		return 2;
+	}
+	if (mpz_cmp(vtmf->q, vsshe->com->q))
+	{
+		std::cout << ">< " << _("VSSHE ERROR") << ": " << _("subgroup order does not match") << std::endl;
+		delete vsshe;
+		delete vtmf;
+		if (pctl)
+			delete out_ctl;
+		delete out_pipe;
+		return 2;
+	}
+	if (mpz_cmp(vtmf->p, vsshe->p) || mpz_cmp(vtmf->q, vsshe->q) ||	mpz_cmp(vtmf->g, vsshe->g) || mpz_cmp(vtmf->h, vsshe->h))
+	{
+		std::cout << ">< " << _("VSSHE ERROR") << ": " << _("encryption scheme does not match") << std::endl;
+		delete vsshe;
+		delete vtmf;
+		if (pctl)
+			delete out_ctl;
+		delete out_pipe;
+		return 2;
 	}
 #ifndef NDEBUG
+	stop_clock();
+	std::cerr << "KeyGenerationProtocol2a: " << elapsed_time() << std::endl;
 	start_clock();
 #endif	
 	vsshe->SetupGenerators_publiccoin(vtmf->h);
