@@ -2,22 +2,22 @@
 #
 # This file is part of SecureSkat.
 #
-# LibTMCG is free software; you can redistribute it and/or modify
+# SecureSkat is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser general Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
 #
-# LibTMCG is distributed in the hope that it will be useful,
+# SecureSkat is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public
-# License along with LibTMCG; if not, write to the Free Software
+# License along with SecureSkat; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20171210])
+AC_REVISION([20171213])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.12], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -156,7 +156,8 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([fork dup2 getaddrinfo memset memcpy memcmp memmove select\
  socket strchr strncasecmp strrchr strstr strtol strtoul uname clock stat\
  mkdir getuid getenv strerror snprintf pipe perror waitpid close read write\
- send recv fileno tcgetattr tcsetattr], , AC_MSG_ERROR([some essential C functions are missing]))
+ send recv fileno tcgetattr tcsetattr connect bind listen accept setsockopt\
+ htonl], , AC_MSG_ERROR([some essential C functions are missing]))
 
 ##CXXFLAGS="$CXXFLAGS -Wall -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 ##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"

@@ -626,11 +626,8 @@ int ballot_child
 	if (pkr_self == 0)
 	{
 		vtmf = new BarnettSmartVTMF_dlog();
-		for (size_t i = 0; i < vnicks.size(); i++)
-		{
-			if (i != pkr_self)
-				vtmf->PublishGroup(*ios_out[vnicks[i]]);
-		}
+		for (size_t i = 1; i < vnicks.size(); i++)
+			vtmf->PublishGroup(*ios_out[vnicks[i]]);
 	}
 	else
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);

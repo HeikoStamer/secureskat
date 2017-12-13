@@ -160,7 +160,7 @@ int ConnectToHost
 		}
 	}
 	freeaddrinfo(res);
-	return -3;
+	return -2;
 }
 
 char *stripwhite(char *str)
