@@ -1885,12 +1885,15 @@ void run_irc(const std::string &hostname)
 										{
 											opipestream *npipe = 
 												new opipestream(games_ipipe[games_tnr2pid[tb]]);
-											*npipe << "MSG " << nick << " " << realmsg <<
-											std::endl << std::flush;
+											*npipe << "MSG " << nick << " " << realmsg << std::endl << std::flush;
 											delete npipe;
 										}
 										else
+										{
 											std::cerr << _("TMCG: verify() failed") << std::endl;
+											std::cerr << "MSG: " << realmsg << std::endl;
+											std::cerr << "SIG: " << sig << std::endl;
+										}
 									}
 									else
 										std::cerr << _("TMCG: no public key available") << std::endl;
