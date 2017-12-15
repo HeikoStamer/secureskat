@@ -1883,8 +1883,7 @@ void run_irc(const std::string &hostname)
 									{
 										if (nick_key[nick].verify(realmsg, sig))
 										{
-											opipestream *npipe = 
-												new opipestream(games_ipipe[games_tnr2pid[tb]]);
+											opipestream *npipe = new opipestream(games_ipipe[games_tnr2pid[tb]]);
 											*npipe << "MSG " << nick << " " << realmsg << std::endl << std::flush;
 											delete npipe;
 										}
