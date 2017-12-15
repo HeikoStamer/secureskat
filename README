@@ -165,6 +165,7 @@ Playing SecureSkat over an IRC network
   workstation should be not behind a (paranoid) firewall. Perhaps you can
   convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
+
   However, there is another way to get things work: use TOR! In order to set
   an alternative hostname the environment variable ALTHOST can be used, i.e.,
   onion address of a local hidden service with local port forwarding rules.
@@ -251,6 +252,15 @@ Playing SecureSkat over an IRC network
     HiddenServicePort 7848 127.0.0.1:7848
     HiddenServicePort 7849 127.0.0.1:7849
     [...]
+
+  Additionally, you should have the following line in your torsocks.conf:
+
+    AllowInbound 1
+
+  Last but not least, an IRC server with onion address is required. Then
+  the command line looks like in the following example.
+
+    $ torsocks SecureSkat abcdefg123456.onion
 
 
 Bugs, Contribution, GIT
