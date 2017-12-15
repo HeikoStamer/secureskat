@@ -1262,25 +1262,21 @@ void run_irc(const std::string &hostname)
 		MFD_SET(rnk7774_handle, &rfds);
 		
 		// PKI pipes from childs
-		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin();
-			pi != nick_pipe.end(); pi++)
-				MFD_SET(pi->second, &rfds);
+		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin(); pi != nick_pipe.end(); pi++)
+			MFD_SET(pi->second, &rfds);
 				
 		// RNK pipes from childs
-		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin();
-			pi != rnk_pipe.end(); pi++)
-				MFD_SET(pi->second, &rfds);
+		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin(); pi != rnk_pipe.end(); pi++)
+			MFD_SET(pi->second, &rfds);
 		
 		// RNK pipes from game childs
-		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin();
-			pi != games_rnkpipe.end(); pi++)
-				if (pi->second >= 0)
-					MFD_SET(pi->second, &rfds);
+		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin(); pi != games_rnkpipe.end(); pi++)
+			if (pi->second >= 0)
+				MFD_SET(pi->second, &rfds);
 		
 		// OUT pipes from game childs
-		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin();
-			pi != games_opipe.end(); pi++)
-				MFD_SET(pi->second, &rfds);
+		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin(); pi != games_opipe.end(); pi++)
+			MFD_SET(pi->second, &rfds);
 		
 		// select(2) -- initialize timeout
 		tv.tv_sec = 1L;			// seconds
@@ -1323,8 +1319,7 @@ void run_irc(const std::string &hostname)
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(rnk7773_handle, 
-					(struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(rnk7773_handle, (struct sockaddr*) &client_in, &client_len);
 				
 				if (client_handle < 0)
 				{
@@ -1351,8 +1346,7 @@ void run_irc(const std::string &hostname)
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(pki7771_handle, 
-					(struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(pki7771_handle, (struct sockaddr*) &client_in, &client_len);
 				
 				if (client_handle < 0)
 				{
@@ -1374,8 +1368,7 @@ void run_irc(const std::string &hostname)
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(rnk7774_handle, 
-					(struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(rnk7774_handle, (struct sockaddr*) &client_in, &client_len);
 				
 				// error occured
 				if (client_handle < 0)
@@ -1440,8 +1433,7 @@ void run_irc(const std::string &hostname)
 			// -----------------------------------------------------------------
 			if (FD_ISSET(irc_handle, &rfds))
 			{
-				ssize_t num = read(irc_handle, irc_readbuf + irc_readed, 
-					sizeof(irc_readbuf) - irc_readed);
+				ssize_t num = read(irc_handle, irc_readbuf + irc_readed, sizeof(irc_readbuf) - irc_readed);
 				irc_readed += num;
 				
 				if (num == 0)
