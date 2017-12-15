@@ -406,11 +406,12 @@ int ballot_child
 						memcpy(key2, dv, TMCG_SAEP_S0);
 						gcry_randomize(key1, TMCG_SAEP_S0, GCRY_STRONG_RANDOM);
 						*neighbor << pkr.keys[pkr_idx].encrypt(key1) << std::endl << std::flush;
+						delete neighbor;
+						// create encrypted stream and release keys
 						ios_in[vnicks[pkr_idx]] = new iosecuresocketstream(handle, key1, 16, key2, 16);
 #ifndef NDEBUG
 						std::cerr << "ios_in[" << vnicks[pkr_idx] << "]" << std::endl;
 #endif
-						delete neighbor;
 						delete [] key1;
 						delete [] key2;
 						delete [] dv;						
@@ -429,7 +430,6 @@ int ballot_child
 					}
 				}
 			}
-			CloseHandle(handle);
 		}
 		else if ((ret > 0) && FD_ISSET(ipipe, &rfds))
 		{
@@ -595,7 +595,9 @@ int ballot_child
 						if (!sec.decrypt(dv, tmp))
 						{
 							std::cerr << _("TMCG: decrypt() failed") << std::endl;
-							delete [] key1, delete [] key2, delete [] dv;
+							delete [] key1;
+							delete [] key2;
+							delete [] dv;
 							*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 							delete in_pipe, delete out_pipe;
 							delete ballot_tmcg;
@@ -606,13 +608,15 @@ int ballot_child
 							return -84;
 						}
 						memcpy(key2, dv, TMCG_SAEP_S0);
-						ios_out[vnicks[i]] = 
-							new iosecuresocketstream(handle, key1, 16, key2, 16);
+						delete neighbor;
+						// create encrypted stream and release keys
+						ios_out[vnicks[i]] = new iosecuresocketstream(handle, key1, 16, key2, 16);
 #ifndef NDEBUG
 						std::cerr << "ios_out[" << vnicks[i] << "]" << std::endl;
 #endif
-						delete neighbor, delete [] key1, delete [] key2, delete [] dv;
-						CloseHandle(handle);
+						delete [] key1;
+						delete [] key2;
+						delete [] dv;
 					}
 				}
 				pkr_idx++;
@@ -620,7 +624,7 @@ int ballot_child
 		}
 	} // while
 	delete [] ireadbuf;
-	
+
 	// VTMF initialization
 	BarnettSmartVTMF_dlog *vtmf;
 	if (pkr_self == 0)
@@ -632,10 +636,6 @@ int ballot_child
 	else
 	{
 		vtmf = new BarnettSmartVTMF_dlog(*ios_in[vnicks[0]]);
-		if (!ios_in[vnicks[0]]->good())
-		{
-std::cerr << "BAD!" << std::endl;
-		}
 	}
 	if (!vtmf->CheckGroup())
 	{
@@ -661,7 +661,13 @@ std::cerr << "BAD!" << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 				delete vtmf;
 				for (size_t ii = 0; ii < vnicks.size(); ii++)
-					delete ios_out[vnicks[ii]];
+				{
+					if (ii != pkr_self)
+					{
+						delete ios_in[vnicks[ii]];
+						delete ios_out[vnicks[ii]];
+					}
+				}
 				delete in_pipe, delete out_pipe;
 				delete ballot_tmcg;
 				CloseHandle(gp_handle);
@@ -703,7 +709,13 @@ std::cerr << "BAD!" << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 				delete vtmf;
 				for (size_t ii = 0; ii < vnicks.size(); ii++)
-					delete ios_out[vnicks[ii]];
+				{
+					if (ii != pkr_self)
+					{
+						delete ios_in[vnicks[ii]];
+						delete ios_out[vnicks[ii]];
+					}
+				}
 				delete in_pipe, delete out_pipe;
 				delete ballot_tmcg;
 				CloseHandle(gp_handle);
@@ -746,7 +758,13 @@ std::cerr << "BAD!" << std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 					delete vtmf;
 					for (size_t ii = 0; ii < vnicks.size(); ii++)
-						delete ios_out[vnicks[ii]];
+					{
+						if (ii != pkr_self)
+						{
+							delete ios_in[vnicks[ii]];
+							delete ios_out[vnicks[ii]];
+						}
+					}
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
@@ -759,7 +777,13 @@ std::cerr << "BAD!" << std::endl;
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 				delete vtmf;
 				for (size_t ii = 0; ii < vnicks.size(); ii++)
-					delete ios_out[vnicks[ii]];
+				{
+					if (ii != pkr_self)
+					{
+						delete ios_in[vnicks[ii]];
+						delete ios_out[vnicks[ii]];
+					}
+				}
 				delete in_pipe, delete out_pipe;
 				delete ballot_tmcg;
 				CloseHandle(gp_handle);
@@ -799,7 +823,13 @@ std::cerr << "BAD!" << std::endl;
 					*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 					delete vtmf;
 					for (size_t ii = 0; ii < vnicks.size(); ii++)
-						delete ios_out[vnicks[ii]];
+					{
+						if (ii != pkr_self)
+						{
+							delete ios_in[vnicks[ii]];
+							delete ios_out[vnicks[ii]];
+						}
+					}
 					delete in_pipe, delete out_pipe;
 					delete ballot_tmcg;
 					CloseHandle(gp_handle);
@@ -836,7 +866,13 @@ std::cerr << "BAD!" << std::endl;
 	
 	// exit from room
 	for (size_t ii = 0; ii < vnicks.size(); ii++)
-		delete ios_out[vnicks[ii]];
+	{
+		if (ii != pkr_self)
+		{
+			delete ios_in[vnicks[ii]];
+			delete ios_out[vnicks[ii]];
+		}
+	}
 	CloseHandle(gp_handle);
 	delete vtmf;
 	delete ballot_tmcg;

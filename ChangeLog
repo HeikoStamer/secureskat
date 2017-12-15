@@ -1,4 +1,5 @@
 SecureSkat 2.12:
+    - bugfix: removed wrong CloseHandle() in the ballot capability
     - introducing environment variable ALTHOST to set an alternative hostname
     - increased bit length for generated TMCG/Rabin keys to 2408 bit
     - SecureSkat_random: randomize playing of allowed cards during game
