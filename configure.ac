@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20171213])
+AC_REVISION([20171216])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.12], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
@@ -64,7 +64,7 @@ AC_PROG_MKDIR_P
 
 # Checks for internationalization support.
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.19.8])
+AM_GNU_GETTEXT_VERSION([0.18.3])
 
 # Checks for libraries.
 backup_LDFLAGS="$LDFLAGS"       
