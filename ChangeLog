@@ -1,4 +1,5 @@
 SecureSkat 2.12:
+    - configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.8.
     - bugfix: removed wrong CloseHandle() in the ballot capability
     - introducing environment variable ALTHOST to set an alternative hostname
     - increased bit length for generated TMCG/Rabin keys to 2408 bit
