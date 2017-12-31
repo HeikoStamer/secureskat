@@ -1291,6 +1291,7 @@ int skat_game
 			char *hex_game_digest =	new char[2 * dlen + 1];
 			for (size_t i = 0; i < dlen; i++)
 				snprintf(hex_game_digest + (2 * i), 3, "%02x", (unsigned char)game_digest[i]);
+			delete [] game_digest;
 			
 			// dealing the cards
 			std::cout << "><>< " << _("Dealing the cards.") << " " << _("Please wait") << "." << std::flush;
@@ -1308,7 +1309,6 @@ int skat_game
 			{
 				std::cout << ">< " << _("dealing error") << ": " << _("not enough cards") << std::endl;
 				delete [] hex_game_digest;
-				delete [] game_digest;
 				delete vsshe;
 				delete vtmf;
 				if (pctl)
@@ -1322,7 +1322,6 @@ int skat_game
 			{
 				std::cout << ">< " << _("dealing error") << ": " << _("wrong ZK proof") << std::endl;
 				delete [] hex_game_digest;
-				delete [] game_digest;
 				delete vsshe;
 				delete vtmf;
 				if (pctl)
@@ -1366,7 +1365,6 @@ int skat_game
 				{
 					std::cout << ">< " << _("connection with participating player(s) collapsed") << std::endl;
 					delete [] hex_game_digest;
-					delete [] game_digest;
 					delete vsshe;
 					delete vtmf;
 					if (pctl)
@@ -1398,16 +1396,16 @@ int skat_game
 				
 				ssize_t num = 0;
 				// pipe request
+//FIXME: Was passiert, wenn der Buffer von ipipe und ctl_i ueberfuellt wird?
 				if (FD_ISSET(ipipe, &rfds))
 				{
 					num = read(ipipe, ireadbuf + ireaded, 65536 - ireaded);
-//FIXME: Was passiert, wenn der Buffer von ipipe und ctl_i ueberfuellt wird?
-//std::cerr << "ipipe " << num << std::endl;
+//std::cerr << "ipipe got " << num << std::endl;
 				}
 				else if (pctl && FD_ISSET(ctl_i, &rfds))
 				{
 					num = read(ctl_i, ireadbuf + ireaded, 65536 - ireaded);
-//std::cerr << "ctl_i " << num << std::endl;
+//std::cerr << "ctl_i got " << num << std::endl;
 				}
 				ireaded += num;
 				
@@ -1433,7 +1431,6 @@ int skat_game
 				{
 					std::cout << ">< " << _("connection with participating player(s) collapsed") << std::endl;
 					delete [] hex_game_digest;
-					delete [] game_digest;
 					delete vsshe;
 					delete vtmf;
 					if (pctl)
@@ -1451,7 +1448,6 @@ int skat_game
 				if ((cmd.find("!KICK", 0) == 0) || (cmd.find("!QUIT", 0) == 0))
 				{
 					delete [] hex_game_digest;
-					delete [] game_digest;
 					delete vsshe;
 					delete vtmf;
 					if (pctl)
@@ -1465,7 +1461,6 @@ int skat_game
 					if (std::find(nicks.begin(), nicks.end(), nick) != nicks.end())
 					{
 						delete [] hex_game_digest;
-						delete [] game_digest;
 						delete vsshe;
 						delete vtmf;
 						if (pctl)
@@ -1474,15 +1469,15 @@ int skat_game
 						return 7;
 					}
 				}
-				if (master && started && (cmd.find("!ANNOUNCE", 0) == 0))
+				if (master && started && (cmd.find("!ANNOUNCE") == 0))
 				{
 					*out_pipe << "PRIVMSG " << main_channel << " :" << nr << "|3~" << (rounds - r) << "!" << std::endl << std::flush;
 				}	
-				if (cmd.find("IRC ", 0) == 0)
+				if (cmd.find("IRC ") == 0)
 				{
 					*out_pipe << "PRIVMSG " << main_channel << " :" << cmd.substr(4, cmd.length() - 4) << std::endl << std::flush;
 				}
-				if ((cmd.find("MSG ", 0) == 0) && (cmd.find(" ", 4) != cmd.npos))
+				if ((cmd.find("MSG ") == 0) && (cmd.find(" ", 4) != cmd.npos))
 				{
 					std::string nick = cmd.substr(4, cmd.find(" ", 4) - 4);
 					std::string msg = cmd.substr(cmd.find(" ", 4) + 1, cmd.length() - cmd.find(" ", 4) - 1);
@@ -1509,8 +1504,8 @@ int skat_game
 							break;
 					}
 					
-					if ((msg.find("PASSE", 0) == 0) || (msg.find("passe", 0) == 0) ||
-						(msg.find("PASS", 0) == 0) || (msg.find("pass", 0) == 0))
+					if ((msg.find("PASSE") == 0) || (msg.find("passe") == 0) ||
+						(msg.find("PASS") == 0) || (msg.find("pass") == 0))
 					{
 						if ((who_biding != 100) && (nick == nicks[who_biding]))
 						{
@@ -1556,10 +1551,12 @@ int skat_game
 						else
 							std::cout << ">< " << _("biding error") << ": " << _("pass action incorrect") << std::endl;
 					}
-					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0) ||
-						(msg.find("BID", 0) == 0) || (msg.find("bid", 0) == 0))
+					else if ((msg.find("REIZE") == 0) || (msg.find("reize") == 0) ||
+						(msg.find("BID") == 0) || (msg.find("bid") == 0))
 					{
 						size_t rei = msg.find(" ", 6);
+						if (rei == msg.npos)
+							continue; // ignore bad bid
 						std::string srw = msg.substr(6, rei - 6);
 						size_t irw = atoi(srw.c_str());
 						
@@ -1571,7 +1568,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1585,7 +1581,6 @@ int skat_game
 									if (irw != reiz_wert[reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1599,7 +1594,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1614,7 +1608,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1628,7 +1621,6 @@ int skat_game
 									if (irw != reiz_wert[reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1642,7 +1634,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1656,7 +1647,6 @@ int skat_game
 									if (irw != reiz_wert[reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1670,7 +1660,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1684,7 +1673,6 @@ int skat_game
 									if (irw != reiz_wert[reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1698,7 +1686,6 @@ int skat_game
 									if (irw != reiz_wert[++reiz_counter])
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1710,7 +1697,6 @@ int skat_game
 									break;
 								default: // should never happen
 									delete [] hex_game_digest;
-									delete [] game_digest;
 									delete vsshe;
 									delete vtmf;
 									if (pctl)
@@ -1730,7 +1716,7 @@ int skat_game
 						else
 							std::cout << ">< " << _("biding error") << ": " << _("bid action incorrect") << std::endl;
 					}
-					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
+					else if ((msg.find("HAND") == 0) || (msg.find("hand") == 0))
 					{
 						if ((reiz_status > 100) && (reiz_status < 200))
 						{
@@ -1744,7 +1730,7 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("SKAT", 0) == 0) || (msg.find("skat", 0) == 0))
+					else if ((msg.find("SKAT") == 0) || (msg.find("skat") == 0))
 					{
 						if ((reiz_status > 100) && (reiz_status < 200))
 						{
@@ -1781,8 +1767,8 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("DRUECKE", 0) == 0) || (msg.find("druecke", 0) == 0) ||
-						(msg.find("PUSH", 0) == 0) || (msg.find("push", 0) == 0))
+					else if ((msg.find("DRUECKE") == 0) || (msg.find("druecke") == 0) ||
+						(msg.find("PUSH") == 0) || (msg.find("push") == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
@@ -1804,7 +1790,6 @@ int skat_game
 										if (!left->good())
 										{
 											delete [] hex_game_digest;
-											delete [] game_digest;
 											delete vsshe;
 											delete vtmf;
 											if (pctl)
@@ -1821,7 +1806,6 @@ int skat_game
 										if (!right->good())
 										{
 											delete [] hex_game_digest;
-											delete [] game_digest;
 											delete vsshe;
 											delete vtmf;
 											if (pctl)
@@ -1833,7 +1817,6 @@ int skat_game
 									else
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1846,7 +1829,6 @@ int skat_game
 									if ((!s[spiel_allein].find(c1)) || (!s[spiel_allein].find(c2)))
 									{
 										delete [] hex_game_digest;
-										delete [] game_digest;
 										delete vsshe;
 										delete vtmf;
 										if (pctl)
@@ -1863,8 +1845,8 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("SAGEAN", 0) == 0) || (msg.find("sagean", 0) == 0) ||
-						(msg.find("ANNOUNCE", 0) == 0) || (msg.find("announce", 0) == 0))
+					else if ((msg.find("SAGEAN") == 0) || (msg.find("sagean") == 0) ||
+						(msg.find("ANNOUNCE") == 0) || (msg.find("announce") == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -1905,7 +1887,6 @@ int skat_game
 											std::cout << ">< " << _("card decryption error") << 
 												": " << _("wrong ZK proof") << std::endl;
 											delete [] hex_game_digest;
-											delete [] game_digest;
 											delete vsshe;
 											delete vtmf;
 											if (pctl)
@@ -1939,9 +1920,8 @@ int skat_game
 							}
 						}
 					}	
-					else if ((msg.find("LEGE", 0) == 0) || 
-						(msg.find("lege", 0) == 0) || (msg.find("PLAY", 0) == 0) || 
-						(msg.find("play", 0) == 0))
+					else if ((msg.find("LEGE") == 0) || (msg.find("lege") == 0) ||
+						(msg.find("PLAY") == 0) || (msg.find("play") == 0))
 					{
 						if (nick == nicks[spiel_who[spiel_dran]])
 						{
@@ -1952,7 +1932,6 @@ int skat_game
 								std::cout << ">< " << _("card decryption error") << 
 									": " << _("wrong ZK proof") << std::endl;
 								delete [] hex_game_digest;
-								delete [] game_digest;
 								delete vsshe;
 								delete vtmf;
 								if (pctl)
@@ -2011,7 +1990,7 @@ int skat_game
 						}
 					}
 				}
-				if (cmd.find("CMD ", 0) == 0)
+				if (cmd.find("CMD ") == 0)
 				{
 					std::string msg = cmd.substr(4, cmd.length() - 4);
 //std::cerr << "parse: CMD = " << msg << std::endl;
@@ -2020,8 +1999,8 @@ int skat_game
 					while (msg.find(" ", msg.length() - 1) == (msg.length() - 1))
 						msg = msg.substr(0, (msg.length() - 1));
 					
-					if ((msg.find("BLATT", 0) == 0) || (msg.find("blatt", 0) == 0) || 
-						(msg.find("VIEW", 0) == 0) || (msg.find("view", 0) == 0))
+					if ((msg.find("BLATT") == 0) || (msg.find("blatt") == 0) || 
+						(msg.find("VIEW") == 0) || (msg.find("view") == 0))
 					{
 						skat_blatt((pkr_self + p) % 3, os);
 						if (os_ov.size() > 0)
@@ -2050,8 +2029,8 @@ int skat_game
 							}
 						}
 					}
-					else if ((msg.find("PASSE", 0) == 0) ||	(msg.find("passe", 0) == 0) ||
-						(msg.find("PASS", 0) == 0) || (msg.find("pass", 0) == 0))
+					else if ((msg.find("PASSE") == 0) ||	(msg.find("passe") == 0) ||
+						(msg.find("PASS") == 0) || (msg.find("pass") == 0))
 					{
 						bool pass_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -2121,8 +2100,8 @@ int skat_game
 						else
 							std::cout << ">< " << _("biding error") << ": " << _("passing is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("REIZE", 0) == 0) || (msg.find("reize", 0) == 0) ||
-						(msg.find("BID", 0) == 0) || (msg.find("bid", 0) == 0))
+					else if ((msg.find("REIZE") == 0) || (msg.find("reize") == 0) ||
+						(msg.find("BID") == 0) || (msg.find("bid") == 0))
 					{
 					bool bid_ok = true;
 						switch ((pkr_self + p) % 3)
@@ -2200,7 +2179,7 @@ int skat_game
 						else
 							std::cout << ">< " << _("biding error") << ": " << _("biding is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("HAND", 0) == 0) || (msg.find("hand", 0) == 0))
+					else if ((msg.find("HAND") == 0) || (msg.find("hand") == 0))
 					{
 						if ((reiz_status > 100) && (reiz_status < 200))
 						{
@@ -2220,7 +2199,7 @@ int skat_game
 						else
 							std::cout << ">< " << _("taking the Skat is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("SKAT", 0) == 0) || (msg.find("skat", 0) == 0))
+					else if ((msg.find("SKAT") == 0) || (msg.find("skat") == 0))
 					{
 						if ((reiz_status > 100) && (reiz_status < 200))
 						{
@@ -2236,7 +2215,6 @@ int skat_game
 									std::cout << ">< " << _("card decryption error") << 
 										": " << _("wrong ZK proof") << std::endl;
 									delete [] hex_game_digest;
-									delete [] game_digest;
 									delete vsshe;
 									delete vtmf;
 									if (pctl)
@@ -2260,8 +2238,8 @@ int skat_game
 						else
 							std::cout << ">< " << _("taking the Skat is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("DRUECKE", 0) == 0) || (msg.find("druecke", 0) == 0) ||
-						(msg.find("PUSH", 0) == 0) || (msg.find("push", 0) == 0))
+					else if ((msg.find("DRUECKE") == 0) || (msg.find("druecke") == 0) ||
+						(msg.find("PUSH") == 0) || (msg.find("push") == 0))
 					{
 						if ((reiz_status > 200) && (reiz_status < 300))
 						{
@@ -2331,8 +2309,8 @@ int skat_game
 						else
 							std::cout << ">< " << _("pushing the Skat is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("SAGEAN", 0) == 0) || (msg.find("sagean", 0) == 0) ||
-						(msg.find("ANNOUNCE", 0) == 0) || (msg.find("announce", 0) == 0))
+					else if ((msg.find("SAGEAN") == 0) || (msg.find("sagean") == 0) ||
+						(msg.find("ANNOUNCE") == 0) || (msg.find("announce") == 0))
 					{
 						if ((!hand_spiel && (reiz_status > 300) && (reiz_status < 400))
 							|| (hand_spiel && (reiz_status > 200) && (reiz_status < 300)))
@@ -2340,12 +2318,12 @@ int skat_game
 							if (pkr_self == spiel_allein)
 							{
 								std::string par = "";
-								size_t ei = par.npos, mi = msg.find(" ", 0);
+								size_t ei = par.npos, mi = msg.find(" ");
 								
 								if ((mi != msg.npos) && (msg.length() > mi))
 								{
 									par = msg.substr(mi + 1, msg.length() - (mi + 1));
-									ei = par.find(" ", 0);
+									ei = par.find(" ");
 								}
 								if ((mi != msg.npos) && (par != ""))
 								{
@@ -2417,13 +2395,13 @@ int skat_game
 							std::cout << ">< " << 
 								_("announcing the game is currently not allowed") << std::endl;
 					}
-					else if ((msg.find("LEGE", 0) == 0) || (msg.find("lege", 0) == 0) || 
-						(msg.find("PLAY", 0) == 0) || (msg.find("play", 0) == 0))
+					else if ((msg.find("LEGE") == 0) || (msg.find("lege") == 0) || 
+						(msg.find("PLAY") == 0) || (msg.find("play") == 0))
 					{
 						if ((spiel_status > 0) && (pkr_self == spiel_who[spiel_dran]))
 						{
 							std::string par = "";
-							size_t mi = msg.find(" ", 0);
+							size_t mi = msg.find(" ");
 							
 							if ((mi != msg.npos) && (msg.length() > mi))
 								par = msg.substr(mi + 1, msg.length() - (mi + 1));
@@ -2531,7 +2509,6 @@ int skat_game
 				{
 					std::cout << "><>< " << _("connection to program modules collapsed") << std::endl;
 					delete [] hex_game_digest;
-					delete [] game_digest;
 					delete vsshe;
 					delete vtmf;
 					if (pctl)
@@ -2702,7 +2679,6 @@ int skat_game
 						std::cout << "><>< " << _("player") << " \"" << pkr.keys[i].name << 
 							"\" " << _("has violated the rules.") << std::endl;
 						delete [] hex_game_digest;
-						delete [] game_digest;
 						delete vsshe;
 						delete vtmf;
 						if (pctl)
@@ -2740,7 +2716,6 @@ int skat_game
 				spiel_protokoll << "NONE~0~0~0~0~" << hex_game_digest << "~#";
 			}
 			
-			delete [] game_digest;
 			delete [] hex_game_digest;
 			os.clear();
 			os_ov.clear();
