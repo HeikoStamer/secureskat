@@ -1006,13 +1006,13 @@ int skat_game
 		std::string main_channel, std::string main_channel_underscore
 	)
 {
-	if (!gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO))
+	if (!gcry_md_get_algo_dlen(GCRY_MD_RMD160))
 	{
 		std::cout << ">< " << _("ERROR") << ": " << _("gcry_md_get_algo_dlen() failed") << std::endl;
 		return 1;
 	}
 
-	unsigned int dlen = gcry_md_get_algo_dlen(TMCG_GCRY_MD_ALGO);
+	unsigned int dlen = gcry_md_get_algo_dlen(GCRY_MD_RMD160);
 	opipestream *out_pipe = new opipestream(opipe), *out_ctl = NULL;
 	if (pctl)
 		out_ctl = new opipestream(ctl_o);
@@ -1287,7 +1287,7 @@ int skat_game
 			std::string osttmp = game_stream.str();
 
 			char *game_digest = new char[dlen];
-			gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, game_digest, osttmp.c_str(), osttmp.length());
+			gcry_md_hash_buffer(GCRY_MD_RMD160, game_digest, osttmp.c_str(), osttmp.length());
 			char *hex_game_digest =	new char[2 * dlen + 1];
 			for (size_t i = 0; i < dlen; i++)
 				snprintf(hex_game_digest + (2 * i), 3, "%02x", (unsigned char)game_digest[i]);
@@ -2849,7 +2849,7 @@ int skat_game
 		// compute rnk_id aka hex_rnk_digest
 		std::string osttmp = spiel_protokoll.str();
 		char *rnk_digest = new char[dlen];
-		gcry_md_hash_buffer(TMCG_GCRY_MD_ALGO, rnk_digest, osttmp.c_str(), osttmp.length());
+		gcry_md_hash_buffer(GCRY_MD_RMD160, rnk_digest, osttmp.c_str(), osttmp.length());
 		char *hex_rnk_digest = new char[2 * dlen + 1];
 		for (size_t i = 0; i < dlen; i++)
 			snprintf(hex_rnk_digest + (2 * i), 3, "%02x", (unsigned char)rnk_digest[i]);

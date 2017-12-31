@@ -1,8 +1,10 @@
+SecureSkat 2.13:
+    - bugfix: reduce length of unique game IDs due to restrictive IRC limits
 SecureSkat 2.12:
     - configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.8.
     - bugfix: removed wrong CloseHandle() in the ballot capability
     - introducing environment variable ALTHOST to set an alternative hostname
-    - increased bit length for generated TMCG/Rabin keys to 2408 bit
+    - increased bit length for generated TMCG/Rabin keys to 2048 bit
     - SecureSkat_random: randomize playing of allowed cards during game
     - replaced random() by LibTMCG's function mpz_wrandom_ui()
     - added configure switch --with-gdbm=<path> for non-standard search path

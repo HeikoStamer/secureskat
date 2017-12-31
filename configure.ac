@@ -17,10 +17,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20171220])
+AC_REVISION([20171231])
 AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [2.13], [HeikoStamer@gmx.net], [SecureSkat], [http://savannah.nongnu.org/projects/secureskat])
+AC_INIT([SecureSkat], [2.13], [HeikoStamer@gmx.net], [SecureSkat], [https://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
