@@ -1874,11 +1874,12 @@ void run_irc(const std::string &hostname)
 								irc_parvec[0].length() - strlen(MAIN_CHANNEL_UNDERSCORE));
 							if (games_tnr2pid.find(tb) != games_tnr2pid.end())
 							{
-								size_t tei = irc_parvec[1].find("~~~");
-								if (tei != irc_parvec[1].npos)
+								std::string fullmsg = irc_parvec[1];
+								size_t tei = fullmsg.find("~~~");
+								if (tei != fullmsg.npos)
 								{
-									std::string realmsg = irc_parvec[1].substr(0, tei);
-									std::string sig = irc_parvec[1].substr(tei + 3,	irc_parvec[1].length() - realmsg.length() - 3);
+									std::string realmsg = fullmsg.substr(0, tei);
+									std::string sig = fullmsg.substr(tei + 3, fullmsg.length() - realmsg.length() - 3);
 									if (nick_key.find(nick) != nick_key.end())
 									{
 										if (nick_key[nick].verify(realmsg, sig))
@@ -1958,22 +1959,26 @@ void run_irc(const std::string &hostname)
 						} // chat messages
 						else if (irc_stat && (irc_parvec[0] == MAIN_CHANNEL))
 						{
-							size_t tei = irc_parvec[1].find("~~~");
-							if ((nick.find(public_prefix, 0) == 0) && (nick_key.find(nick) != nick_key.end()) && (tei != irc_parvec[1].npos))
+							std::string fullmsg = irc_parvec[1];
+							size_t tei = fullmsg.find("~~~");
+							if ((nick.find(public_prefix, 0) == 0) && (nick_key.find(nick) != nick_key.end()) && (tei != fullmsg.npos))
 							{
-								std::string realmsg = irc_parvec[1].substr(0, tei);
-								std::string sig = irc_parvec[1].substr(tei + 3, 
-									irc_parvec[1].length() - realmsg.length() - 3);
+								std::string realmsg = fullmsg.substr(0, tei);
+								std::string sig = fullmsg.substr(tei + 3, fullmsg.length() - realmsg.length() - 3);
 								if (nick_key[nick].verify(realmsg, sig))
 								{
 									nick = nick_key[nick].name;
 									std::cout << "<" << nick << "> " << realmsg << std::endl;
 								}
 								else
+								{
 									std::cerr << _("TMCG: verify() failed") << std::endl;
+									std::cerr << "MSG: " << realmsg << std::endl;
+									std::cerr << "SIG: " << sig << std::endl;
+								}
 							}
 							else
-								std::cout << "<?" << nick << "?> " << irc_parvec[1] << std::endl;
+								std::cout << "<?" << nick << "?> " << fullmsg << std::endl;
 						} // other messages
 						else if (irc_stat && ((irc_parvec[0] == pub.keyid(5)) && (nick != pub.keyid(5))))
 						{
