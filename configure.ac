@@ -1,4 +1,4 @@
-# Copyright (C) 2016, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+# Copyright (C) 2016, 2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
 #
 # This file is part of SecureSkat.
 #
@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20171231])
+AC_REVISION([20180106])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.13], [HeikoStamer@gmx.net], [SecureSkat], [https://savannah.nongnu.org/projects/secureskat])

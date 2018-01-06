@@ -1,3 +1,2 @@
-* due to increased key length there is a problem with the limited length (512 chars) of IRC messages
+* due to increased key length there may be an issue with the limited length (512 chars) of IRC messages enforced by the IRC server
 * procedure 'waiting for three players' is rarely unstable
-* Zaurus/zgcc: AC_TYPE_SIGNAL does not work correctly
