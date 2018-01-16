@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20180106])
+AC_REVISION([20180116])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.14], [HeikoStamer@gmx.net], [SecureSkat], [https://savannah.nongnu.org/projects/secureskat])
@@ -113,18 +113,19 @@ AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
 AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
 AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
 
-# Solaris needs -lsocket and -lnsl. Unisys system includes
-# gethostbyname in libsocket but needs libnsl for socket.
-AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_LIB(socket, socket, ac_need_libsocket=1, ac_try_nsl=1)
-if test x$ac_need_libsocket = x1; then
-	LIBS="$LIBS -lsocket"
-fi
-if test x$ac_try_nsl = x1; then
-	AC_CHECK_LIB(nsl, gethostbyname, ac_need_libnsl=1)
-	if test x$ac_need_libnsl = x1
-		then
-			LIBS="$LIBS -lnsl"
+# Solaris and Unisys need -lsocket resp. -lnsl.
+AC_CHECK_FUNC(socket, , ac_try_socket=1)
+if test x$ac_try_socket = x1; then
+	AC_CHECK_LIB(socket, socket, ac_need_libsocket=1, ac_try_nsl=1)
+	if test x$ac_need_libsocket = x1; then
+		LIBS="$LIBS -lsocket"
+	fi
+	if test x$ac_try_nsl = x1; then
+		AC_CHECK_LIB(nsl, socket, ac_need_libnsl=1)
+		if test x$ac_need_libnsl = x1
+			then
+				LIBS="$LIBS -lnsl"
+		fi
 	fi
 fi
 
