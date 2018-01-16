@@ -1,5 +1,5 @@
 SecureSkat 2.14:
-    -
+    - bugfix: include libintl in the library path when building executables
 SecureSkat 2.13:
     - bugfix: reduce length of unique game IDs due to restrictive IRC limits
 SecureSkat 2.12:

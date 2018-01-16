@@ -1,6 +1,6 @@
 # This file is part of SecureSkat.
 #
-# Copyright (C) 2017  Heiko Stamer <HeikoStamer@gmx.net>
+# Copyright (C) 2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
 #
 # SecureSkat is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser general Public License as
@@ -23,7 +23,7 @@ DIST_SUBDIRS = po
 
 EXTRA_DIST = AUTHORS BUGS COPYING FDL INSTALL NEWS README TODO THANKS ChangeLog
 
-LDADD = @LIBGMP_LIBS@ @LIBGCRYPT_LIBS@ @LIBTMCG_LIBS@
+LDADD = @LIBGMP_LIBS@ @LIBGCRYPT_LIBS@ @LIBTMCG_LIBS@ @LTLIBINTL@
 
 bin_PROGRAMS = SecureSkat SecureSkat_random
 
