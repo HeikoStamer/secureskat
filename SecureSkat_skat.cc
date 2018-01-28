@@ -483,6 +483,7 @@ int skat_child
 		
 		if (cmd.find("!KICK", 0) == 0)
 		{
+			CloseHandle(gp_handle);
 			delete gp_tmcg;
 			delete [] ipipe_readbuf;
 			delete in_pipe, delete out_pipe;
@@ -508,6 +509,7 @@ int skat_child
 			if (std::find(vnicks.begin(), vnicks.end(), nick) != vnicks.end())
 			{
 				*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
+				CloseHandle(gp_handle);
 				delete gp_tmcg;
 				delete [] ipipe_readbuf;
 				delete in_pipe, delete out_pipe;
