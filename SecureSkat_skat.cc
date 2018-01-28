@@ -532,7 +532,7 @@ int skat_child
 		}
 	}
 	std::cout << X << _("Table") << " " << nr << " " << _("establishing secure channels") << " ..." << std::endl;
-	int connect_handle, accept_handle, error = 0;
+	int connect_handle = -1, accept_handle = -1, error = 0;
 	iosecuresocketstream *left_neighbor, *right_neighbor;
 	switch (pkr_self)
 	{
@@ -632,8 +632,10 @@ int skat_child
 	
 	// release the game
 	delete left_neighbor, delete right_neighbor;
-	CloseHandle(connect_handle);
-	CloseHandle(accept_handle);
+	if (connect_handle > 0)
+		CloseHandle(connect_handle);
+	if (accept_handle > 0)
+		CloseHandle(accept_handle);
 	if (exit_code != 6)
 		*out_pipe << "PART " << MAIN_CHANNEL_UNDERSCORE << nr << std::endl << std::flush;
 	CloseHandle(gp_handle);
