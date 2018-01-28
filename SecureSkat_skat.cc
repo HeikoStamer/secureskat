@@ -282,6 +282,8 @@ int skat_accept
 int skat_alive
 	(iosecuresocketstream *r, iosecuresocketstream *l)
 {
+	if ((r == NULL) || (l == NULL))
+		return -55;
 	if (!r->good() || !l->good())
 		return -5;
 	return 0;
@@ -533,7 +535,7 @@ int skat_child
 	}
 	std::cout << X << _("Table") << " " << nr << " " << _("establishing secure channels") << " ..." << std::endl;
 	int connect_handle = -1, accept_handle = -1, error = 0;
-	iosecuresocketstream *left_neighbor, *right_neighbor;
+	iosecuresocketstream *left_neighbor = NULL, *right_neighbor = NULL;
 	switch (pkr_self)
 	{
 		case 0:
