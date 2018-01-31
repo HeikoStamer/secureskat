@@ -167,7 +167,7 @@ Playing SecureSkat over an IRC network
   convince your network administrator (e.g. with a bottle of famous German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
 
-  However, there is another way to get things work: use TOR! In order to set
+  However, there is another way to get things work: use Tor! In order to set
   an alternative hostname the environment variable ALTHOST can be used, i.e.,
   onion address of a local hidden service with local port forwarding rules.
   Therefore you have to put the following lines in your torrc file:
