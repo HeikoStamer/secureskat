@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2007, 2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ int skat_connect
 		// send the signature
 		*neighbor << sec.sign(ost.str()) << std::endl << std::flush;
 		// create a fresh nonce
-		nonce_B = mpz_srandom_ui();
+		nonce_B = tmcg_mpz_srandom_ui();
 		// send challenge
 		*neighbor << nonce_B << std::endl << std::flush;
 		// receive the signature
@@ -154,7 +154,7 @@ int skat_accept
 			{
 				iosocketstream *neighbor = new iosocketstream(handle);
 				// create a fresh nonce
-				unsigned long int nonce_A = mpz_srandom_ui(), nonce_B = 0;
+				unsigned long int nonce_A = tmcg_mpz_srandom_ui(), nonce_B = 0;
 				std::ostringstream ost, ost2;
 				std::string tmp;
 				*neighbor << nonce_A << std::endl << std::flush;

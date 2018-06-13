@@ -1,8 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006, 2007, 2009
-                                       2017 Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2002, 2003, 2004, 2006, 2007, 2009,
+               2017, 2018 Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ int BindEmptyPort
 	(int start_port)
 {
 	const int max_ports = 100;
-	int current_port = start_port + (mpz_wrandom_ui() % (max_ports / 4));
+	int current_port = start_port + (tmcg_mpz_wrandom_ui() % (max_ports / 4));
 	while (current_port < (start_port + max_ports))
 	{
 		int sockfd;
@@ -39,7 +39,8 @@ int BindEmptyPort
 			perror("SecureSkat_misc::BindEmptyPort (socket)");
 			return -1;
 		}
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option,
+			sizeof(socket_option)) < 0)
 		{
 			perror("SecureSkat_misc::BindEmptyPort (setsockopt)");
 			if (close(sockfd) < 0)
@@ -84,7 +85,8 @@ int ListenToPort
 		perror("SecureSkat_misc::ListenToPort (socket)");
 		return -1;
 	}
-	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option, sizeof(socket_option)) < 0)
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &socket_option,
+		sizeof(socket_option)) < 0)
 	{
 		perror("SecureSkat_misc::ListenToPort (setsockopt)");
 		if (close(sockfd) < 0)
@@ -140,7 +142,8 @@ int ConnectToHost
 	for (rp = res; rp != NULL; rp = rp->ai_next)
 	{
 		int sockfd;
-		if ((sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
+		if ((sockfd = socket(rp->ai_family, rp->ai_socktype,
+			rp->ai_protocol)) < 0)
 		{
 			perror("SecureSkat_misc::ConnectToHost (socket)");
 			continue; // try next address
@@ -201,3 +204,4 @@ char *elapsed_time
 		(((double) (stop_time - start_time)) / CLOCKS_PER_SEC) * 1000);
 	return time_buffer;
 }
+

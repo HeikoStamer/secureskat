@@ -17,10 +17,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20180116])
+AC_REVISION([20180613])
 AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [2.14], [HeikoStamer@gmx.net], [SecureSkat], [https://savannah.nongnu.org/projects/secureskat])
+AC_INIT([SecureSkat], [2.14], [HeikoStamer@gmx.net], [SecureSkat],
+ [https://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
 AM_INIT_AUTOMAKE
@@ -99,9 +100,9 @@ CPPFLAGS="$backup_CPPFLAGS"
 AC_SUBST(LIBGCRYPT_LIBS)
 AC_SUBST(LIBGCRYPT_CFLAGS)
 
-AM_PATH_LIBTMCG("1.3.8")
+AM_PATH_LIBTMCG("1.3.13")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.3.8 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.3.13 is needed])
 fi
 AC_SUBST(LIBTMCG_LIBS)
 AC_SUBST(LIBTMCG_CFLAGS)
