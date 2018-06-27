@@ -15,6 +15,7 @@ Stuff for 3.x release:
   securesocketstream.hh)
 + use RBC for broadcast on additional communication channels
 + add GNUnet integration as an optional configure feature
++ store secrets e.g. via special subkey in OpenPGP format
 
 Minor stuff that should be done eventually:
 + documentation: manpage and/or texinfo manual (doc subdir)
@@ -23,7 +24,6 @@ Minor stuff that should be done eventually:
 - fix race conditions in parts of the voting system (or remove it completely)
 - fix race conditions in automatic player/table handshake
 - provide nice libpopt/getopt commandline interface
-- store secrets e.g. via subkey in OpenPGP implemenation
 
 Further open tasks to do:
 - [fair ranking system (command /rank)]

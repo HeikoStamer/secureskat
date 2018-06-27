@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecureSkat 2.12\n"
 "Report-Msgid-Bugs-To: HeikoStamer@gmx.net\n"
-"POT-Creation-Date: 2018-01-06 13:15+0100\n"
+"POT-Creation-Date: 2018-06-27 17:37+0200\n"
 "PO-Revision-Date: 2005-06-04 16:58+0200\n"
 "Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
 "Language-Team: German <de@li.org>\n"
@@ -929,15 +929,15 @@ msgstr "Raum ist vollständig belegt"
 msgid "voter was at room creation not present"
 msgstr "Wähler war bei Raumerstellung nicht anwesend"
 
-#: SecureSkat_vote.cc:113 SecureSkat_skat.cc:377
+#: SecureSkat_vote.cc:113 SecureSkat_skat.cc:379
 msgid "key exchange with owner is incomplete"
 msgstr "Schlüsselaustausch mit Eigentümer unvollständig"
 
-#: SecureSkat_vote.cc:129 SecureSkat_skat.cc:393
+#: SecureSkat_vote.cc:129 SecureSkat_skat.cc:395
 msgid "key exchange with"
 msgstr "Schlüsselaustausch mit"
 
-#: SecureSkat_vote.cc:129 SecureSkat_skat.cc:393
+#: SecureSkat_vote.cc:129 SecureSkat_skat.cc:395
 msgid "is incomplete"
 msgstr "unvollständig"
 
@@ -949,11 +949,11 @@ msgstr "Raum"
 msgid "preparing the ballot"
 msgstr "bereitet Abstimmung vor"
 
-#: SecureSkat_vote.cc:207 SecureSkat_skat.cc:471
+#: SecureSkat_vote.cc:207 SecureSkat_skat.cc:473
 msgid "with"
 msgstr "mit"
 
-#: SecureSkat_vote.cc:210 SecureSkat_skat.cc:474
+#: SecureSkat_vote.cc:210 SecureSkat_skat.cc:476
 msgid "ready"
 msgstr "bereit"
 
@@ -985,7 +985,7 @@ msgstr "BALLOT FEHLER: Wert liegt außerhalb des zulässigen Bereichs "
 msgid "try again"
 msgstr "Neu eingeben!"
 
-#: SecureSkat_vote.cc:303 SecureSkat_skat.cc:532
+#: SecureSkat_vote.cc:303 SecureSkat_skat.cc:536
 msgid "establishing secure channels"
 msgstr "richtet sichere Kanäle ein"
 
@@ -1014,40 +1014,40 @@ msgstr "BALLOT FEHLER: fehlerhafter Stapel von "
 msgid "BALLOT RESULT:"
 msgstr "ABSTIMMUNGSERGEBNIS:"
 
-#: SecureSkat_skat.cc:251 SecureSkat_skat.cc:359 SecureSkat_skat.cc:498
+#: SecureSkat_skat.cc:251 SecureSkat_skat.cc:361 SecureSkat_skat.cc:501
 msgid "observers currently not permitted"
 msgstr "Beobachter sind momentan nicht erlaubt"
 
-#: SecureSkat_skat.cc:257 SecureSkat_skat.cc:503
+#: SecureSkat_skat.cc:257 SecureSkat_skat.cc:506
 msgid "table completely occupied"
 msgstr "Tisch ist vollständig besetzt"
 
-#: SecureSkat_skat.cc:373 SecureSkat_skat.cc:388
+#: SecureSkat_skat.cc:375 SecureSkat_skat.cc:390
 msgid "player was at table creation not present"
 msgstr "Spieler war bei Tischerstellung nicht anwesend"
 
-#: SecureSkat_skat.cc:424 SecureSkat_skat.cc:471 SecureSkat_skat.cc:532
-#: SecureSkat_skat.cc:611
+#: SecureSkat_skat.cc:426 SecureSkat_skat.cc:473 SecureSkat_skat.cc:536
+#: SecureSkat_skat.cc:615
 msgid "Table"
 msgstr "Tisch"
 
-#: SecureSkat_skat.cc:424
+#: SecureSkat_skat.cc:426
 msgid "preparing the game"
 msgstr "bereitet sich vor"
 
-#: SecureSkat_skat.cc:428
+#: SecureSkat_skat.cc:430
 msgid "wrong number of players"
 msgstr "falsche Spieleranzahl"
 
-#: SecureSkat_skat.cc:595
+#: SecureSkat_skat.cc:599
 msgid "Execute control process"
 msgstr "Starte Kontrollprozess"
 
-#: SecureSkat_skat.cc:605
+#: SecureSkat_skat.cc:609
 msgid "failed!"
 msgstr "fehlgeschlagen!"
 
-#: SecureSkat_skat.cc:611
+#: SecureSkat_skat.cc:615
 msgid "start the game."
 msgstr "startet die Skatrunde."
 

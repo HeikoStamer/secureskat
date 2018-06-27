@@ -54,7 +54,7 @@ Requirements
 
   SecureSkat was tested (+ successful, - with errors) on following platforms:
 
-  + GNU/Linux (Gentoo Linux)    x86_64      gcc 6.4.0
+  + GNU/Linux (Gentoo Linux)    x86_64      gcc 7.3.0
   + GNU/Linux (Debian 8)        x86_64      gcc 4.9.2
   + GNU/Linux (Ubuntu 16.04.2)	x86_64      gcc 5.4.0
   + OpenBSD 6.1                 amd64       gcc 4.2.1
@@ -98,7 +98,7 @@ Playing SecureSkat over an IRC network
   Dependent on your processor speed the key generation takes a lot of time
   until the success message `PKI: cryptographic key ID5^????? created and
   stored' is printed. ('?' is here a wildcard for some random looking
-  letters and digits as real identity of the generated key)
+  letters and digits as a hopefully unique identity of the generated key)
   
   Later you will be registered at the IRC server with a strange nickname
   like `ID5^z34g0' (based on the key id from your public key). For large
@@ -145,7 +145,7 @@ Playing SecureSkat over an IRC network
   Therefore it binds three TCP ports (free ports up from 7771): on the first
   it exports the public key, on the second it exports a table of stored ranking
   data, and on the third it answers ranking data requests. Checking whether
-  the public key is valid is done with a non-interactive zero knowledge proof
+  the public key is valid is done by a non-interactive zero knowledge proof
   (soundness error probability is currently fixed at 2^{-80}). Hence the
   execution of verification tasks can take a large amount of time and continues
   in background until a success message `PKI identified ID?^????? aka ???...'
@@ -164,13 +164,14 @@ Playing SecureSkat over an IRC network
   of the game a TCP/IP connection with each of your opponents will be
   established. Therefore (and further for the automatic key exchange) your
   workstation should be not behind a (paranoid) firewall. Perhaps you can
-  convince your network administrator (e.g. with a bottle of famous German
+  convince your network administrator (e.g. with a bottle of horrible German
   beer %-) that he permits incoming TCP connections in the range 7771:8000.
 
   However, there is another way to get things work: use Tor! In order to set
   an alternative hostname the environment variable ALTHOST can be used, i.e.,
-  onion address of a local hidden service with local port forwarding rules.
-  Therefore you have to put the following lines in your torrc file:
+  the onion address of a local hidden service with local port forwarding rules
+  will do the job. Therefore you have to put the following lines (redirecting
+  request to the running instance of SecureSkat) in your local torrc file:
 
     HiddenServiceDir /var/lib/tor/secureskat/
     HiddenServicePort 7771 127.0.0.1:7771
@@ -258,8 +259,8 @@ Playing SecureSkat over an IRC network
 
     AllowInbound 1
 
-  Last but not least, an IRC server with onion address is required. Then
-  the command line looks like in the following example.
+  Last but not least, an IRC server with onion address is required. The
+  appropriate command line looks like as in the following example.
 
     $ torsocks SecureSkat abcdefg123456.onion
 
