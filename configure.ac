@@ -20,7 +20,7 @@
 AC_REVISION([20180627])
 AC_PREREQ(2.61)
 
-AC_INIT([SecureSkat], [2.14], [HeikoStamer@gmx.net], [SecureSkat],
+AC_INIT([SecureSkat], [2.15], [HeikoStamer@gmx.net], [SecureSkat],
  [https://savannah.nongnu.org/projects/secureskat])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([SecureSkat.cc])
@@ -161,13 +161,14 @@ AC_CHECK_FUNCS([fork dup2 getaddrinfo memset memcpy memcmp memmove select\
  send recv fileno tcgetattr tcsetattr connect bind listen accept setsockopt\
  htonl], , AC_MSG_ERROR([some essential C functions are missing]))
 
-##CXXFLAGS="$CXXFLAGS -Wall -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+CXXFLAGS="$CXXFLAGS -Wall -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
 
 echo "Now type 'make && make install' to build and install SecureSkat."
+
 
