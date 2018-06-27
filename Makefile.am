@@ -39,6 +39,7 @@ SecureSkat_random_SOURCES = securesocketstream.hh pipestream.hh\
 	socketstream.hh SecureSkat_game.cc SecureSkat_game.hh\
 	SecureSkat_misc.cc SecureSkat_misc.hh SecureSkat_defs.hh\
 	SecureSkat_random.cc
+SecureSkat_random_LDADD = @LIBTMCG_LIBS@
 
 ACLOCAL_AMFLAGS = -I m4
 
