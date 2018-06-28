@@ -2436,7 +2436,7 @@ int main(int argc, char* argv[], char* envp[])
 {
     char *home = NULL, *althost = NULL;
     std::string homedir = "", hostname = "undefined";
-    std::cout << PACKAGE_STRING << ", (c) 2017  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
+    std::cout << PACKAGE_STRING << ", (c) 2018  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
 	
 #ifdef ENABLE_NLS
     // set the locales

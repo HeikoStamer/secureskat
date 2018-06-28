@@ -25,7 +25,7 @@ EXTRA_DIST = AUTHORS BUGS COPYING FDL INSTALL NEWS README TODO THANKS ChangeLog
 
 LDADD = @LIBGMP_LIBS@ @LIBGCRYPT_LIBS@ @LIBTMCG_LIBS@ @LTLIBINTL@ @LIBINTL@
 
-bin_PROGRAMS = SecureSkat SecureSkat_random
+bin_PROGRAMS = SecureSkat SecureSkat_random SecureSkat_ai
 
 SecureSkat_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
 	SecureSkat_misc.cc SecureSkat_pki.cc SecureSkat_rnk.cc\
@@ -41,6 +41,11 @@ SecureSkat_random_SOURCES = SecureSkat_rule.cc SecureSkat_rule.hh\
 	SecureSkat_defs.hh\
 	SecureSkat_random.cc
 SecureSkat_random_LDADD = @LIBTMCG_LIBS@
+
+SecureSkat_ai_SOURCES = SecureSkat_rule.cc SecureSkat_rule.hh\
+	SecureSkat_defs.hh\
+	SecureSkat_ai.cc
+SecureSkat_ai_LDADD = @LIBTMCG_LIBS@
 
 ACLOCAL_AMFLAGS = -I m4
 
