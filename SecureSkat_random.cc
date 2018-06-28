@@ -20,7 +20,7 @@
 *******************************************************************************/
 
 #include "SecureSkat_defs.hh"
-#include "SecureSkat_game.hh"
+#include "SecureSkat_rule.hh"
 
 void random_announce (const std::vector<size_t> &cards)
 {

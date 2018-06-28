@@ -3,6 +3,7 @@ SecureSkat_misc.cc
 SecureSkat_pki.cc
 SecureSkat_rnk.cc
 SecureSkat_irc.cc
+SecureSkat_rule.cc
 SecureSkat_game.cc
 SecureSkat_vote.cc
 SecureSkat_skat.cc

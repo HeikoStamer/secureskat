@@ -1,5 +1,6 @@
 SecureSkat 2.15:
-    - SecureSkat_random: improved error handling
+    - added SecureSkat_rule with some common functions for rules of the game 
+    - SecureSkat_random: improved error handling and code cleanup
 SecureSkat 2.14:
     - reflect API changes from LibTMCG
     - bugfix: include libintl in the library path when building executables

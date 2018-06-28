@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2004, 2005, 2006, 2007, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2004, 2005, 2006, 2007,
+               2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,39 +23,8 @@
 	
 	#include "SecureSkat_defs.hh"
 	#include "SecureSkat_misc.hh"
-	
-	size_t skat_idx
-		(
-			size_t ft[5][18], size_t f, size_t t
-		);
-	
-	size_t skat_spiel2gwert
-		(
-			size_t spiel
-		);
-	
-	size_t skat_spitzen
-		(
-			size_t spiel, SchindelhauerTMCG *tmcg,
-			const TMCG_OpenStack<VTMF_Card> &os
-		);
-	
-	bool skat_rulectl
-		(
-			size_t t, size_t tt, size_t spiel, const std::vector<size_t> &cv
-		);
-	
-	bool skat_rulectl
-		(
-			size_t t, size_t tt, size_t spiel,
-			const TMCG_OpenStack<VTMF_Card> &os
-		);
-	
-	int skat_bstich
-		(
-			const TMCG_OpenStack<VTMF_Card> &os, size_t spiel
-		);
-	
+	#include "SecureSkat_rule.hh"
+		
 	int skat_vkarte
 		(
 			size_t pkr_self, size_t pkr_who, SchindelhauerTMCG *tmcg,
@@ -66,16 +36,6 @@
 		(
 			SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf, const VTMF_Card &c,
 			iosecuresocketstream *right, iosecuresocketstream *left
-		);
-	
-	std::string skat_spiel2string
-		(
-			size_t spiel
-		);
-	
-	int skat_wort2spiel
-		(
-			const std::string &wort
 		);
 	
 	void skat_szeigen
@@ -90,22 +50,7 @@
 			TMCG_OpenStack<VTMF_Card> &os, const TMCG_Stack<VTMF_Card> &sk,
 			iosecuresocketstream *right, iosecuresocketstream *left
 		);
-	
-	int skat_wort2type
-		(
-			const std::string &wort
-		);
-	
-	std::string skat_type2string
-		(
-			size_t type
-		);
-	
-	void skat_blatt
-		(
-			size_t p, const TMCG_OpenStack<VTMF_Card> &os
-		);
-	
+		
 	bool skat_sehen
 		(
 			size_t pkr_self, SchindelhauerTMCG *tmcg, BarnettSmartVTMF_dlog *vtmf,

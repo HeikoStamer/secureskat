@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20180627])
+AC_REVISION([20180628])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.15], [HeikoStamer@gmx.net], [SecureSkat],
