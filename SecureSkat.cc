@@ -2434,169 +2434,185 @@ void done_term(struct termios &old_term)
 
 int main(int argc, char* argv[], char* envp[])
 {
-    char *home = NULL, *althost = NULL;
-    std::string homedir = "", hostname = "undefined";
-    std::cout << PACKAGE_STRING << ", (c) 2018  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" << std::endl;
+	char *home = NULL, *althost = NULL;
+	std::string homedir = "", hostname = "undefined";
+	std::cout << PACKAGE_STRING <<
+		", (c) 2018  Heiko Stamer <HeikoStamer@gmx.net>, License: GPLv2" <<
+		std::endl;
 	
 #ifdef ENABLE_NLS
-    // set the locales
+	// set the locales
 #ifdef HAVE_LC_MESSAGES
-    setlocale(LC_TIME, "");
-    setlocale(LC_MESSAGES, "");
+	setlocale(LC_TIME, "");
+	setlocale(LC_MESSAGES, "");
 #else
-    setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "");
 #endif
-    // enable the native language support
-    bindtextdomain(PACKAGE, LOCALEDIR);
-    textdomain(PACKAGE);
-    std::cout << "++ " << _("Internationalization support") << ": " << LOCALEDIR << std::endl;
+	// enable the native language support
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+	std::cout << "++ " << _("Internationalization support") << ": " <<
+		LOCALEDIR << std::endl;
 #endif
 	
-    // evaluate the environment variable HOME
-    home = getenv("HOME");
-    if (home != NULL)
-        homedir = home, homedir += "/.SecureSkat/";
-    else
-        homedir = "~/.SecureSkat/";
-    std::cout << "++ " << _("PKI/RNK database directory") << ": " << homedir << std::endl;
+	// evaluate the environment variable HOME
+	home = getenv("HOME");
+	if (home != NULL)
+		homedir = home, homedir += "/.SecureSkat/";
+	else
+		homedir = "~/.SecureSkat/";
+	std::cout << "++ " << _("PKI/RNK database directory") << ": " <<
+		homedir << std::endl;
 
-    // evaluate the environment variable ALTHOST
-    althost = getenv("ALTHOST");
-    if (althost != NULL)
-    {
-        hostname = althost;
-        std::cout << "++ " << _("Alternative hostname") << ": " << hostname << std::endl;
-    }
+	// evaluate the environment variable ALTHOST
+	althost = getenv("ALTHOST");
+	if (althost != NULL)
+	{
+		hostname = althost;
+		std::cout << "++ " << _("Alternative hostname") << ": " <<
+			hostname << std::endl;
+	}
     
-    // check existance and permissions of the home directory
-    struct stat stat_buffer;
-    if (stat(homedir.c_str(), &stat_buffer))
-    {
-        if (errno == ENOENT)
-        {
-            // create directory, if it doesn't exist
-            if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
-            {
-                std::cerr << _("Can't create directory!") << " (" << strerror(errno) << ")" << std::endl;
-                return EXIT_FAILURE;
-            }
-        }
-        else
-        {
-            // print error message
-            std::cerr << _("Can't get the status of the directory!") << " (" << strerror(errno) << ")" << std::endl;
-            return EXIT_FAILURE;
-        }
-    }
-    else
-    {
-        if (!S_ISDIR(stat_buffer.st_mode))
-        {
-            std::cerr << _("Path is not a directory!") << std::endl;
-            return EXIT_FAILURE;
-        }
-        if (stat_buffer.st_uid != getuid())
-        {
-            std::cerr << _("Wrong owner of the directory!") << std::endl;
-            return EXIT_FAILURE;
-        }
-        if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) != (S_IRUSR | S_IWUSR | S_IXUSR))
-        {
-            std::cerr << _("Missing permissions for directory!") << std::endl;
-            return EXIT_FAILURE;
-        }
-    }
+	// check existance and permissions of the home directory
+	struct stat stat_buffer;
+	if (stat(homedir.c_str(), &stat_buffer))
+	{
+		if (errno == ENOENT)
+		{
+			// create directory, if it doesn't exist
+			if (mkdir(homedir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR))
+			{
+				std::cerr << _("Can't create directory!") << " (" <<
+					strerror(errno) << ")" << std::endl;
+				return EXIT_FAILURE;
+			}
+		}
+		else
+		{
+			// print error message
+			std::cerr << _("Can't get the status of the directory!") << " (" <<
+				strerror(errno) << ")" << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+	else
+	{
+		if (!S_ISDIR(stat_buffer.st_mode))
+		{
+			std::cerr << _("Path is not a directory!") << std::endl;
+			return EXIT_FAILURE;
+		}
+		if (stat_buffer.st_uid != getuid())
+		{
+			std::cerr << _("Wrong owner of the directory!") << std::endl;
+			return EXIT_FAILURE;
+		}
+		if ((stat_buffer.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR)) !=
+			(S_IRUSR | S_IWUSR | S_IXUSR))
+		{
+			std::cerr << _("Missing permissions for directory!") << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
 	
-    // process the command line arguments
-    if (((argc == 4) && isdigit(argv[2][0])) || ((argc == 3) && isdigit(argv[2][0])) ||	(argc == 2))
-    {
-        struct termios old_term;
-        int irc_port = 0;
+	// process the command line arguments
+	if (((argc == 4) && isdigit(argv[2][0])) ||
+		((argc == 3) && isdigit(argv[2][0])) ||
+		(argc == 2))
+	{
+		struct termios old_term;
+		int irc_port = 0;
 
-        // set the default values
-	irc_port = 6667;
-        game_ctl = "";
-        game_env = NULL;
+		// set the default values
+		irc_port = 6667;
+		game_ctl = "";
+		game_env = NULL;
 
-        // evaluate the provided command switches to override the defaults
-        switch (argc)
-        {
-            case 4:
-                game_ctl = argv[3];
-                game_env = envp;
-		irc_port = atoi(argv[2]);
-		break;
-            case 3:
-                irc_port = atoi(argv[2]);
-		break;
-        }
+		// evaluate the provided command switches to override the defaults
+		switch (argc)
+		{
+			case 4:
+				game_ctl = argv[3];
+				game_env = envp;
+				irc_port = atoi(argv[2]);
+				break;
+			case 3:
+				irc_port = atoi(argv[2]);
+				break;
+		}
 
-        // initialize LibTMCG
-        if (!init_libTMCG())
-        {
-            std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
-            return EXIT_FAILURE;
-        }
-        // display version of LibTMCG
-        std::cout << "++ " << _("Initialization of LibTMCG version") << " " << version_libTMCG() << std::endl;
+		// initialize LibTMCG
+		if (!init_libTMCG())
+		{
+			std::cerr << _("Initialization of LibTMCG failed!") << std::endl;
+			return EXIT_FAILURE;
+		}
+		// display version of LibTMCG
+		std::cout << "++ " << _("Initialization of LibTMCG version") << " " <<
+			version_libTMCG() << std::endl;
 
-        // key management		
-        get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
-        pub = TMCG_PublicKey(sec); // extract the public part of the secret key
-        std::cout << _("Your key fingerprint") << ": " << pub.fingerprint() << std::endl;
-        get_public_keys(homedir + "SecureSkat.pkr", nick_key); // load pub keys
+		// key management		
+		get_secret_key(homedir + "SecureSkat.skr", sec, public_prefix);
+		pub = TMCG_PublicKey(sec); // extract the public part of the secret key
+		std::cout << _("Your key fingerprint") << ": " <<
+			pub.fingerprint() << std::endl;
+		get_public_keys(homedir + "SecureSkat.pkr", nick_key); // load pub keys
 		
-        create_pki(pki7771_port, pki7771_handle);
-        create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
-        load_rnk(homedir + "SecureSkat.rnk", rnk); // load ranking data
+		create_pki(pki7771_port, pki7771_handle);
+		create_rnk(rnk7773_port, rnk7774_port, rnk7773_handle, rnk7774_handle);
+		load_rnk(homedir + "SecureSkat.rnk", rnk); // load ranking data
         
-        // open an IRC connection
-        irc_handle = create_irc(argv[1], irc_port, &irc);
+		// open an IRC connection
+		irc_handle = create_irc(argv[1], irc_port, &irc);
 
-        // install several signal handlers
-        signal(SIGINT, sig_handler_quit);
-        signal(SIGQUIT, sig_handler_quit);
-        signal(SIGTERM, sig_handler_quit);
-        signal(SIGPIPE, sig_handler_pipe);
-        signal(SIGCHLD, sig_handler_chld);
+		// install several signal handlers
+		signal(SIGINT, sig_handler_quit);
+		signal(SIGQUIT, sig_handler_quit);
+		signal(SIGTERM, sig_handler_quit);
+		signal(SIGPIPE, sig_handler_pipe);
+		signal(SIGCHLD, sig_handler_chld);
 #ifdef NOHUP
-        signal(SIGHUP, SIG_IGN);
+		signal(SIGHUP, SIG_IGN);
 #else
-        signal(SIGHUP, sig_handler_quit);
+		signal(SIGHUP, sig_handler_quit);
 #endif
-        signal(SIGUSR1, sig_handler_usr1);
+		signal(SIGUSR1, sig_handler_usr1);
 
-        init_irc(irc, pub.keyid(5));
-        std::cout << _("Usage") << ": " << _("type /help for the command list or read the file README") << std::endl;
+		init_irc(irc, pub.keyid(5));
+		std::cout << _("Usage") << ": " <<
+			_("type /help for the command list or read the file README") <<
+			std::endl;
 #ifndef NOHUP
-        init_term(old_term);
+		init_term(old_term);
 #endif
-        run_irc(hostname); // main loop
+		run_irc(hostname); // main loop
 #ifndef NOHUP
-        done_term(old_term);
+		done_term(old_term);
 #endif
     
-        // ignore the remaining signals
-        signal(SIGINT, SIG_IGN);
-        signal(SIGQUIT, SIG_IGN);
-        signal(SIGTERM, SIG_IGN);
-        signal(SIGCHLD, SIG_IGN);
-        signal(SIGPIPE, SIG_IGN);
-        signal(SIGHUP, SIG_IGN);
+		// ignore the remaining signals
+		signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGTERM, SIG_IGN);
+		signal(SIGCHLD, SIG_IGN);
+		signal(SIGPIPE, SIG_IGN);
+		signal(SIGHUP, SIG_IGN);
 
-        // stop and release everything
-        done_irc(irc);
-        cleanup(); // kill, wait, and reload^Hclear
-        release_irc(irc_handle, irc); // close IRC connection
-        save_rnk(homedir + "SecureSkat.rnk", rnk); // save ranking data
-        release_rnk(rnk7773_handle, rnk7774_handle);
-        release_pki(pki7771_handle);
-        set_public_keys(homedir + "SecureSkat.pkr", nick_key); // save pub keys
+		// stop and release everything
+		done_irc(irc);
+		cleanup(); // kill, wait, and reload^Hclear
+		release_irc(irc_handle, irc); // close IRC connection
+		save_rnk(homedir + "SecureSkat.rnk", rnk); // save ranking data
+		release_rnk(rnk7773_handle, rnk7774_handle);
+		release_pki(pki7771_handle);
+		set_public_keys(homedir + "SecureSkat.pkr", nick_key); // save pub keys
 		
-        return EXIT_SUCCESS;
-    }
+		return EXIT_SUCCESS;
+	}
 
-    // print a short usage message and exit with failure
-    std::cout << _("Usage") << ": " << argv[0] << " IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" << std::endl;
-    return EXIT_FAILURE;
+	// print a short usage message and exit with failure
+	std::cout << _("Usage") << ": " << argv[0] <<
+		" IRC_SERVER<string> [ IRC_PORT<int> [ CTRL_PROGRAM<string> ] ]" <<
+		std::endl;
+	return EXIT_FAILURE;
 }

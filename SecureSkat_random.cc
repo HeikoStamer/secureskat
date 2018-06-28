@@ -304,16 +304,16 @@ void act()
 
 int main (int argc, char **argv)
 {
-    int fd = fileno(stdin); // file descriptor of STDIN
-    fd_set rfds; // set of read descriptors
-    int mfds = 0; // highest-numbered descriptor
-    struct timeval tv; // timeout structure for select(2)
-    char buffer[1024];
-    size_t readed = 0;
+	int fd = fileno(stdin); // file descriptor of STDIN
+	fd_set rfds; // set of read descriptors
+	int mfds = 0; // highest-numbered descriptor
+	struct timeval tv; // timeout structure for select(2)
+	char buffer[1024];
+	size_t readed = 0;
 
-    std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
-    while (1)
-    {
+	std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
+	while (1)
+	{
 		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
 		MFD_SET(fd, &rfds);
@@ -328,19 +328,19 @@ int main (int argc, char **argv)
 		// error occured
 		if ((ret < 0) && (errno != EINTR))
 		{
-		    perror("SecureSkat_random::main (select)");
+			perror("SecureSkat_random::main (select)");
 			return -1;
 		}
 		
 		if ((ret > 0) && FD_ISSET(fd, &rfds))
 		{
-		    ssize_t num = read(fd, buffer + readed, sizeof(buffer) - readed);
+			ssize_t num = read(fd, buffer + readed, sizeof(buffer) - readed);
 			if (num < 0)
 			{
 				perror("SecureSkat_random::main (read)");
 				return -1;
 			}
-		    readed += num;
+			readed += num;
 			process_command(readed, buffer);
 			if (num == 0)
 			{
