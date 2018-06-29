@@ -38,20 +38,15 @@
 		11, 10, 4, 3, 0, 0, 0, 11, 10, 4, 3, 0, 0, 0, 
 		11, 10, 4, 3, 0, 0, 0, 11, 10, 4, 3, 0, 0, 0
 	};
-	
-	size_t skat_idx
-		(
-			size_t ft[5][18], size_t f, size_t t
-		);
-	
+
 	size_t skat_spiel2gwert
 		(
-			size_t spiel
+			const size_t spiel
 		);
 	
 	size_t skat_spitzen
 		(
-			size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
+			const size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
 		);
 	
 	bool skat_rulectl

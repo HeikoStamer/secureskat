@@ -21,33 +21,34 @@
 #include "SecureSkat_defs.hh"
 #include "SecureSkat_rule.hh"
 
-void random_announce (const std::vector<size_t> &cards)
+void announce (const size_t spiel)
 {
-	switch (tmcg_mpz_wrandom_ui() % 6)
+	switch (spiel % 100)
 	{
-		case 0:
-			std::cout << "CMD sagean Ei" << std::endl;
-			break;
-		case 1:
-			std::cout << "CMD sagean Gr" << std::endl;
-			break;
-		case 2:
-			std::cout << "CMD sagean Ro" << std::endl;
-			break;
-		case 3:
+		case 9:
 			std::cout << "CMD sagean Sc" << std::endl;
 			break;
-		case 4:
-			std::cout << "CMD sagean Gd" << std::endl;
+		case 10:
+			std::cout << "CMD sagean Ro" << std::endl;
 			break;
-		case 5:
+		case 11:
+			std::cout << "CMD sagean Gr" << std::endl;
+			break;
+		case 12:
+			std::cout << "CMD sagean Ei" << std::endl;
+			break;
+		case 23:
 			std::cout << "CMD sagean Nu" << std::endl;
+			break;
+		case 24:
+			std::cout << "CMD sagean Gd" << std::endl;
 			break;
 	}
 }
 
-size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100, spiel_status = 0;
-bool reize_dran = false, lege_dran = false, gepasst = false;
+size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
+size_t spiel = 0, reiz_counter = 0;
+bool reize_dran = false, lege_dran = false, gepasst = false, handspiel = false;
 std::vector<std::string> nicks, names;
 std::vector<size_t> cards, ocards, stich;
 
@@ -124,6 +125,8 @@ void process_command (size_t &readed, char *buffer)
 			{
 			    pkr_pos = atoi(par[2].c_str());
 			    reize_dran = (pkr_pos == 1) ? true : false;
+				reiz_counter = 0, spiel = 0;
+				handspiel = false;
 			}
 			if ((par[1] == "RAMSCH") && (par.size() == 2) && (from == pkr_self))
 			{
@@ -153,6 +156,7 @@ void process_command (size_t &readed, char *buffer)
 			}
 			if ((par[1] == "REIZE") && (par.size() == 3))
 			{
+				reiz_counter++;
 				if (from == pkr_self)
 					reize_dran = false;
 				else 
@@ -161,8 +165,11 @@ void process_command (size_t &readed, char *buffer)
 			if ((par[1] == "HAND") && (par.size() == 2) && (from == pkr_spielt))
 			{
 				reize_dran = false;
+				handspiel = true;
 				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
-					random_announce(cards);
+				{
+					announce(24); // FIXME: je nach reizwert und karten
+				}
 			}
 			if ((par[1] == "SKAT") && (par.size() == 2) && (from == pkr_spielt))
 			{
@@ -180,15 +187,18 @@ void process_command (size_t &readed, char *buffer)
 						std::endl << std::flush;
 				}
 			}
-			if ((par[1] == "DRUECKE") && (par.size() == 2) && (from == pkr_spielt))
+			if ((par[1] == "DRUECKE") && (par.size() == 2) &&
+				(from == pkr_spielt))
 			{
 				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
-					random_announce(cards);
+				{
+					announce(24); // FIXME: je nach reizwert und karten
+				}
 			}
 			if ((par[1] == "SAGEAN") && (par.size() == 3) && 
 				(from == pkr_spielt))
 			{
-				spiel_status = atoi(par[2].c_str());
+				spiel = atoi(par[2].c_str());
 				lege_dran = (pkr_pos == 0) ? true : false;
 			}
 			if ((par[1] == "OUVERT") && (par.size() == 3) && 
@@ -238,8 +248,7 @@ void process_command (size_t &readed, char *buffer)
 			{
 				cards.clear(), ocards.clear(), stich.clear();
 				pkr_pos = 100, pkr_spielt = 100;
-				reize_dran = false, lege_dran = false, 
-				gepasst = false;
+				reize_dran = false, lege_dran = false, gepasst = false;
 			}
 			if ((par[1] == "GEWONNEN") && (par.size() == 2))
 			{
@@ -286,7 +295,7 @@ void act()
 			for (std::vector<size_t>::iterator ci = cards.begin();
 				ci != cards.end(); ci++)
 			{
-				if (skat_rulectl(stich[0], *ci, spiel_status, cards))
+				if (skat_rulectl(stich[0], *ci, spiel, cards))
 				{
 					allowed_cards.push_back(*ci);
 				}

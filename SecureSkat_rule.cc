@@ -135,7 +135,7 @@ size_t card_order[][5][18] =
 
 size_t skat_idx
 	(
-		size_t ft[5][18], size_t f, size_t t, size_t s
+		size_t ft[5][18], const size_t f, const size_t t, const size_t s
 	)
 {
 	assert (s < 18);
@@ -148,7 +148,7 @@ size_t skat_idx
 
 size_t skat_spiel2gwert
 	(
-		size_t spiel
+		const size_t spiel
 	)
 {
 	return (spiel % 100);
@@ -156,7 +156,7 @@ size_t skat_spiel2gwert
 
 size_t skat_spiel2twert
 	(
-		size_t spiel
+		const size_t spiel
 	)
 {
 	if (skat_spiel2gwert(spiel) == 9)
@@ -177,7 +177,7 @@ size_t skat_spiel2twert
 
 void init_co
 	(
-		size_t spiel, size_t co[5][18]
+		const size_t spiel, size_t co[5][18]
 	)
 {
 	for (size_t i = 0; i < 5; i++)
@@ -187,7 +187,7 @@ void init_co
 
 size_t skat_spitzen
 	(
-		size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
+		const size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
 	size_t co[5][18], sz_cnt = 0;
