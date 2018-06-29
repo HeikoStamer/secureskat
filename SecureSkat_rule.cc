@@ -187,6 +187,17 @@ void init_co
 
 size_t skat_spitzen
 	(
+		const size_t spiel, const std::vector<size_t> &cv
+	)
+{
+	TMCG_OpenStack<VTMF_Card> os;
+	for (size_t j = 0; j < cv.size(); j++)
+		os.push(cv[j], VTMF_Card());
+	return skat_spitzen(spiel, os);
+}
+
+size_t skat_spitzen
+	(
 		const size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {

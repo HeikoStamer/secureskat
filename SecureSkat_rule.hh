@@ -46,6 +46,11 @@
 	
 	size_t skat_spitzen
 		(
+			const size_t spiel, const std::vector<size_t> &cv
+		);
+
+	size_t skat_spitzen
+		(
 			const size_t spiel, const TMCG_OpenStack<VTMF_Card> &os
 		);
 	
