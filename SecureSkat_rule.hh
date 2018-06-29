@@ -51,23 +51,24 @@
 	
 	bool skat_rulectl
 		(
-			size_t t, size_t tt, size_t spiel, const std::vector<size_t> &cv
+			const size_t t, const size_t tt, const size_t spiel,
+			const std::vector<size_t> &cv
 		);
 	
 	bool skat_rulectl
 		(
-			size_t t, size_t tt, size_t spiel,
+			const size_t t, const size_t tt, const size_t spiel,
 			const TMCG_OpenStack<VTMF_Card> &os
 		);
 	
 	int skat_bstich
 		(
-			const TMCG_OpenStack<VTMF_Card> &os, size_t spiel
+			const TMCG_OpenStack<VTMF_Card> &os, const size_t spiel
 		);
 	
 	std::string skat_spiel2string
 		(
-			size_t spiel
+			const size_t spiel
 		);
 	
 	int skat_wort2spiel
@@ -82,12 +83,12 @@
 	
 	std::string skat_type2string
 		(
-			size_t type
+			const size_t type
 		);
 	
 	void skat_blatt
 		(
-			size_t p, const TMCG_OpenStack<VTMF_Card> &os
+			const size_t p, const TMCG_OpenStack<VTMF_Card> &os
 		);
 
 #endif

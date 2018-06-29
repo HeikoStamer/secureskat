@@ -223,7 +223,8 @@ size_t skat_spitzen
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel, const std::vector<size_t> &cv
+		const size_t t, const size_t tt, const size_t spiel,
+		const std::vector<size_t> &cv
 	)
 {
 	TMCG_OpenStack<VTMF_Card> os;
@@ -234,7 +235,7 @@ bool skat_rulectl
 
 bool skat_rulectl
 	(
-		size_t t, size_t tt, size_t spiel,
+		const size_t t, const size_t tt, const size_t spiel,
 		const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
@@ -284,7 +285,7 @@ bool skat_rulectl
 	
 int skat_bstich
 	(
-		const TMCG_OpenStack<VTMF_Card> &os, size_t spiel
+		const TMCG_OpenStack<VTMF_Card> &os, const size_t spiel
 	)
 {
 	size_t co[5][18];
@@ -338,7 +339,7 @@ int skat_bstich
 
 std::string skat_spiel2string
 	(
-		size_t spiel
+		const size_t spiel
 	)
 {
 	std::string wstr = "";
@@ -463,7 +464,7 @@ int skat_wort2type
 
 std::string skat_type2string
 	(
-		size_t type
+		const size_t type
 	)
 {
 	std::string wstr = "";
@@ -509,7 +510,7 @@ std::string skat_type2string
 
 void skat_blatt
 	(
-		size_t p, const TMCG_OpenStack<VTMF_Card> &os
+		const size_t p, const TMCG_OpenStack<VTMF_Card> &os
 	)
 {
 	std::vector<int> w;
