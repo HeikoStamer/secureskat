@@ -488,7 +488,7 @@ void process_command (size_t &readed, char *buffer)
 					{
 						// TODO
 					}
-					// TODO: decide single suits or bunker points
+					// TODO: decide single suits, blank 10 or bunker points
 					size_t c0 = cards[0], c1 = cards[1];
 					pkt += skat_pktwert[c0];
 					pkt += skat_pktwert[c1];
@@ -519,7 +519,7 @@ void process_command (size_t &readed, char *buffer)
 				trumps = num_trumps(spiel, cards);
 				switch (spiel % 100)
 				{
-					// maximum opponent trumps
+					// calculate maximum opponent trumps
 					case 9:
 					case 10:
 					case 11:
@@ -647,10 +647,15 @@ std::cerr << "///// spiel = " << spiel << " biete = " << biete << std::endl;
 	else if (lege_dran)
 	{
 std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps = " << opp_trumps << " pkt = " << pkt << " opp_pkt = " << opp_pkt << std::endl;
+		assert((cards.size() > 0));
 		lege_dran = false;
-		if ((stich.size() == 0) && (cards.size() > 0))
+		if (stich.size() == 0)
 		{
 			// Anspiel einer Karte
+			if ((spiel % 100) == 23)
+			{
+				// TODO: Lusche aus Reihe spielen
+			}
 			if ((opp_trumps > 0) && (trumps > opp_trumps))
 			{
 				if (high_jacks(cards))
@@ -680,10 +685,6 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 					}
 				}					
 			}
-			if ((spiel % 100) == 23)
-			{
-				// TODO: Lusche spielen
-			}
 
 			size_t idx = tmcg_mpz_wrandom_ui() % cards.size();
 			std::string card = skat_type2string(cards[idx]);
@@ -692,17 +693,18 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 		}
 		else
 		{
-			// Stechen, Übernehmen oder Buttern
 			std::vector<size_t> allowed_cards;
-			for (std::vector<size_t>::iterator ci = cards.begin();
-				ci != cards.end(); ci++)
+			for (size_t i = 0; i < cards.size(); i++)
 			{
-				if (skat_rulectl(stich[0], *ci, spiel, cards))
-				{
-					allowed_cards.push_back(*ci);
-				}
+				if (skat_rulectl(stich[0], cards[i], spiel, cards))
+					allowed_cards.push_back(cards[i]);
 			}
 			assert((allowed_cards.size() > 0));
+			if ((spiel % 100) == 23)
+			{
+				// TODO: wenn möglich drunter bleiben
+			}
+			// Stechen, Übernehmen oder Buttern
 			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
 			std::string card = skat_type2string(allowed_cards[idx]);
 			std::cout << "CMD lege " << 
