@@ -223,7 +223,7 @@ size_t skat_spitzen
 	{
 		for (size_t sz = 0; sz < 11; sz++)
 		{
-			if (!os.find(co[4][sz]))
+			if (!os.find(co[4][sz]) && (co[4][sz] != 99))
 				sz_cnt++;
 			else
 				break;

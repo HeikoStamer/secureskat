@@ -166,6 +166,18 @@ size_t num_suite (const size_t spiel, const std::vector<size_t> &cards)
 	return ns;
 }
 
+size_t num_trumps (const size_t spiel, const std::vector<size_t> &cards)
+{
+	size_t nt = 0;
+	if ((spiel % 100) == 23)
+		nt = 0;
+	else if ((spiel % 100) == 24)
+		nt = num_jacks(cards);
+	else
+		nt = num_jacks(cards) + num_suite(spiel, cards);
+	return nt;
+}
+
 bool full_suite (const std::vector<size_t> &cards)
 {
 	if (std::count(cards.begin(), cards.end(), 4) &&
@@ -219,6 +231,74 @@ bool full_suite (const std::vector<size_t> &cards)
 	return false;
 }
 
+size_t num_lows (const std::vector<size_t> &cards)
+{
+	size_t nl = 0;
+	if (std::count(cards.begin(), cards.end(), 29))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 30))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 31))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 22))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 23))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 24))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 15))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 16))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 17))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 8))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 9))
+		nl++;
+	if (std::count(cards.begin(), cards.end(), 10))
+		nl++;
+	return nl;
+}
+
+bool trump (const size_t spiel, size_t card)
+{
+	switch (spiel % 100)
+	{
+		case 9:
+			if (card < 4)
+				return true;
+			if ((card >= 25) && (card <= 31))
+				return true;
+			break;
+		case 10:
+			if (card < 4)
+				return true;
+			if ((card >= 18) && (card <= 24))
+				return true;
+			break;
+		case 11:
+			if (card < 4)
+				return true;
+			if ((card >= 11) && (card <= 27))
+				return true;
+			break;
+		case 12:
+			if (card < 4)
+				return true;
+			if ((card >= 4) && (card <= 10))
+				return true;
+			break;
+		case 23:
+			return false;
+		case 24:
+			if (card < 4)
+				return true;
+			break;
+	}
+	return false;
+}
+
 size_t eval (const std::vector<size_t> &cards, const bool starts)
 {
 	size_t nj = num_jacks(cards);
@@ -226,29 +306,49 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 	size_t na = num_aces(cards);
 	size_t nt = num_tens(cards);
 	bool fs = full_suite(cards);
-	// evaluate game of Grand
+	size_t nl = num_lows(cards);
+	// evaluate games
 	if (starts)
 	{
-// TODO: hand
+		// Grand
 		if (hj && (na > 2) && (nt > 2))
 			return 24;
 		if (hj && fs)
 			return 24;
+		// Null
+		if (nl > 8)
+			return 23;
 	}
 	else
 	{
-// TODO: hand
+		// Grand
 		if ((nj > 2) && (na > 2) && (nt > 2))
 			return 24;
 		if ((nj > 2) && fs)
 			return 24;
+		// Null
+		if (nl > 7)
+			return 23;
 	}
-	// TODO: other suits and Null
+	// Suits
+	if ((num_trumps(12, cards) > 6) ||
+		((num_trumps(12, cards) > 4) && (na > 2)))
+		return 12;
+	if ((num_trumps(11, cards) > 6) ||
+		((num_trumps(11, cards) > 4) && (na > 2)))
+		return 11;
+	if ((num_trumps(10, cards) > 6) ||
+		((num_trumps(10, cards) > 4) && (na > 2)))
+		return 10;
+	if ((num_trumps(9, cards) > 6) ||
+		((num_trumps(9, cards) > 4) && (na > 2)))
+		return 9;
 	return 0;
 }
 
 size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
 size_t spiel = 0, reiz_counter = 0, biete = 0;
+size_t pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
 bool reize_dran = false, lege_dran = false, gepasst = false, handspiel = false;
 std::vector<std::string> nicks, names;
 std::vector<size_t> cards, ocards, stich;
@@ -276,7 +376,6 @@ void process_command (size_t &readed, char *buffer)
 	    std::string cmd = xtmp;
 	    size_t ei;
 	    std::vector<std::string> par;
-//std::cerr << "parse_random: CMD = " << cmd << std::endl;
 	    // parse params
 	    while ((ei = cmd.find(" ", 0)) != cmd.npos)
 	    {
@@ -327,10 +426,14 @@ void process_command (size_t &readed, char *buffer)
 			    pkr_pos = atoi(par[2].c_str());
 			    reize_dran = (pkr_pos == 1) ? true : false;
 				reiz_counter = 0, spiel = 0;
+				pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
 				handspiel = false;
 				spiel = eval(cards, !pkr_pos);
 				if (spiel)
-					biete = (skat_spitzen(spiel, cards) * (spiel % 100));
+				{
+					size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
+					biete = ((sp + 1) * (spiel % 100));
+				}
 			}
 			if ((par[1] == "RAMSCH") && (par.size() == 2) && (from == pkr_self))
 			{
@@ -346,7 +449,7 @@ void process_command (size_t &readed, char *buffer)
 					pkr_spielt = 2;
 				if (pkr_spielt == pkr_self)
 				{
-					// TODO: decide
+					// TODO: decide what to do
 					if (tmcg_mpz_wrandom_ui() & 1L)
 						std::cout << "CMD skat" << std::endl << std::flush;
 					else
@@ -381,16 +484,24 @@ void process_command (size_t &readed, char *buffer)
 				reize_dran = false;
 				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
 				{
-					// TODO: reevaluate and bunker points
-					std::string card0 = skat_type2string(cards[0]);
-					std::string card1 = skat_type2string(cards[1]);
-					cards.erase(cards.begin());
-					cards.erase(cards.begin());
+					if (eval(cards, !pkr_pos) > spiel)
+					{
+						// TODO
+					}
+					// TODO: decide single suits or bunker points
+					size_t c0 = cards[0], c1 = cards[1];
+					pkt += skat_pktwert[c0];
+					pkt += skat_pktwert[c1];
+					std::string card0 = skat_type2string(c0);
+					std::string card1 = skat_type2string(c1);
+					cards.erase(std::remove(cards.begin(), cards.end(), c0),
+						cards.end());
+					cards.erase(std::remove(cards.begin(), cards.end(), c1),
+						cards.end());
 					std::cout << "CMD druecke " << 
-						card0.substr(0, card0.length() - 1) << 
-							" " << 
-						card1.substr(0, card1.length() - 1) << 
-						std::endl << std::flush;
+						card0.substr(0, card0.length() - 1) << " " << 
+						card1.substr(0, card1.length() - 1) << std::endl <<
+						std::flush;
 				}
 			}
 			if ((par[1] == "DRUECKE") && (par.size() == 2) &&
@@ -405,12 +516,31 @@ void process_command (size_t &readed, char *buffer)
 				(from == pkr_spielt))
 			{
 				spiel = atoi(par[2].c_str());
+				trumps = num_trumps(spiel, cards);
+				switch (spiel % 100)
+				{
+					// maximum opponent trumps
+					case 9:
+					case 10:
+					case 11:
+					case 12:
+						opp_trumps = 11 - trumps;
+						break;
+					case 23:
+						opp_trumps = 0;
+						break;
+					case 24:
+						opp_trumps = 4 - trumps;
+						break;
+				}
 				lege_dran = (pkr_pos == 0) ? true : false;
 			}
 			if ((par[1] == "OUVERT") && (par.size() == 3) && 
 				(from == pkr_spielt))
 			{
 				ocards.push_back(atoi(par[2].c_str()));
+				if (pkr_self != pkr_spielt)
+					opp_trumps = num_trumps(spiel, ocards);
 			}
 			if ((par[1] == "LEGE") && (par.size() == 3))
 			{
@@ -418,38 +548,67 @@ void process_command (size_t &readed, char *buffer)
 				stich.push_back(card);
 				lege_dran = ((stich.size() < 3) && 
 					(((from + 1) % 3) == pkr_self)) ? true : false;
-				// remove played card from my stack
+				// remove played card from my hand
 				if (par[0] == nicks[pkr_self])
 				{
-					for (std::vector<size_t>::iterator ci = 
-						cards.begin(); ci != cards.end(); ci++)
-					{
-						if (card == *ci)
-						{
-							cards.erase(ci);
-							break;
-						}
-					}
+					cards.erase(std::remove(cards.begin(), cards.end(), card),
+						cards.end());
     			}
 				// remove played ouvert card from stack
 				if ((par[0] == nicks[pkr_spielt]) && (ocards.size() > 0))
 				{
-					for (std::vector<size_t>::iterator oci = 
-						ocards.begin(); oci != ocards.end(); oci++)
+					ocards.erase(std::remove(ocards.begin(), ocards.end(),
+						card), ocards.end());
+				}
+				// update trump statistics
+				if (par[0] == nicks[pkr_self])
+					trumps = num_trumps(spiel, cards);
+				else
+				{
+					if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
+						opp_trumps = num_trumps(spiel, ocards);
+					else if (par[0] == nicks[pkr_spielt])
 					{
-						if (card == *oci)
-						{
-							ocards.erase(oci);
-							break;
-	    				}
+						if (trump(spiel, card) && (opp_trumps > 0))
+							opp_trumps--;
 					}
 				}
-				// TODO: count points of stich and parties
 			}
 			if ((par[1] == "BSTICH") && (par.size() == 2))
 			{
+				// update trump statistics
+				if (trump(spiel, stich[0]) && (par[0] == nicks[pkr_self]))
+				{
+					if (!trump(spiel, stich[1]) && !trump(spiel, stich[2]))
+						opp_trumps = 0;
+				}
+				// update point statistics
+				if (par[0] == nicks[pkr_self])
+				{
+					lege_dran = true;
+					for (size_t i = 0; i < stich.size(); i++)
+						pkt += skat_pktwert[stich[i]];
+				}
+				else
+				{
+					lege_dran = false;
+					if (pkr_spielt == pkr_self)
+					{
+						for (size_t i = 0; i < stich.size(); i++)
+							opp_pkt += skat_pktwert[stich[i]];
+					}
+					else if (par[0] == nicks[pkr_spielt])
+					{
+						for (size_t i = 0; i < stich.size(); i++)
+							opp_pkt += skat_pktwert[stich[i]];
+					}
+					else
+					{
+						for (size_t i = 0; i < stich.size(); i++)
+							pkt += skat_pktwert[stich[i]];
+					}
+				}
 				stich.clear();
-				lege_dran = (par[0] == nicks[pkr_self]) ? true : false;
 			}
 			if ((par[1] == "STOP") && (par.size() == 2) && (from == pkr_self))
 			{
@@ -482,6 +641,7 @@ void act()
 {
 	if (reize_dran)
 	{
+std::cerr << "///// spiel = " << spiel << " biete = " << biete << std::endl;
 		if (spiel && (biete > skat_reizwert[reiz_counter]))
 			std::cout << "CMD reize" << std::endl << std::flush;
 		else
@@ -489,9 +649,45 @@ void act()
 	}
 	else if (lege_dran)
 	{
+std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps = " << opp_trumps << " pkt = " << pkt << " opp_pkt = " << opp_pkt << std::endl;
+		lege_dran = false;
 		if ((stich.size() == 0) && (cards.size() > 0))
 		{
-			// Anspiel
+			// Anspiel einer Karte
+			if ((opp_trumps > 0) && (trumps > opp_trumps))
+			{
+				if (high_jacks(cards))
+				{
+					std::cout << "CMD lege GrU" << std::endl << std::flush;
+					return;
+				}
+				else
+				{
+					if (std::count(cards.begin(), cards.end(), 1))
+					{
+						std::cout << "CMD lege GrU" <<
+							std::endl << std::flush;
+						return;
+					}
+					else if (std::count(cards.begin(), cards.end(), 3))
+					{
+						std::cout << "CMD lege ScU" <<
+							std::endl << std::flush;
+						return;
+					}
+					else if (std::count(cards.begin(), cards.end(), 2))
+					{
+						std::cout << "CMD lege RoU" <<
+							std::endl << std::flush;
+						return;
+					}
+				}					
+			}
+			if ((spiel % 100) == 23)
+			{
+				// TODO: Lusche spielen
+			}
+
 			size_t idx = tmcg_mpz_wrandom_ui() % cards.size();
 			std::string card = skat_type2string(cards[idx]);
 			std::cout << "CMD lege " << 
@@ -515,7 +711,6 @@ void act()
 			std::cout << "CMD lege " << 
 				card.substr(0, card.length() - 1) << std::endl << std::flush;
 		}
-		lege_dran = false;
 	}
 }
 
