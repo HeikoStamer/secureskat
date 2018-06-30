@@ -563,15 +563,12 @@ void process_command (size_t &readed, char *buffer)
 				// update trump statistics
 				if (par[0] == nicks[pkr_self])
 					trumps = num_trumps(spiel, cards);
-				else
+				if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
+					opp_trumps = num_trumps(spiel, ocards);
+				else if (par[0] != nicks[pkr_self])
 				{
-					if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
-						opp_trumps = num_trumps(spiel, ocards);
-					else if (par[0] == nicks[pkr_spielt])
-					{
-						if (trump(spiel, card) && (opp_trumps > 0))
-							opp_trumps--;
-					}
+					if (trump(spiel, card) && (opp_trumps > 0))
+						opp_trumps--;
 				}
 			}
 			if ((par[1] == "BSTICH") && (par.size() == 2))
