@@ -46,15 +46,21 @@ void announce (const size_t spiel)
 	}
 }
 
-size_t num_jacks (const std::vector<size_t> &cards)
+size_t jacks (const std::vector<size_t> &cards, std::vector<size_t> &jack_cards)
 {
-	size_t nj = 0;
+	jack_cards.clear();
 	for (size_t i = 0; i < 4; i++)
 	{
 		if (std::count(cards.begin(), cards.end(), i))
-			nj++;
+			jack_cards.push_back(i);
 	}
-	return nj;
+	return jack_cards.size();
+}
+
+size_t num_jacks (const std::vector<size_t> &cards)
+{
+	std::vector<size_t> jc;
+	return jacks(cards, jc);
 }
 
 bool high_jacks (const std::vector<size_t> &cards)
@@ -65,120 +71,146 @@ bool high_jacks (const std::vector<size_t> &cards)
 	return false;
 }
 
+size_t aces (const std::vector<size_t> &cards, std::vector<size_t> &ace_cards)
+{
+	ace_cards.clear();
+	if (std::count(cards.begin(), cards.end(), 4))
+		ace_cards.push_back(4);
+	if (std::count(cards.begin(), cards.end(), 11))
+		ace_cards.push_back(11);
+	if (std::count(cards.begin(), cards.end(), 18))
+		ace_cards.push_back(18);
+	if (std::count(cards.begin(), cards.end(), 25))
+		ace_cards.push_back(25);
+	return ace_cards.size();
+}
+
 size_t num_aces (const std::vector<size_t> &cards)
 {
-	size_t na = 0;
-	if (std::count(cards.begin(), cards.end(), 4))
-		na++;
-	if (std::count(cards.begin(), cards.end(), 11))
-		na++;
-	if (std::count(cards.begin(), cards.end(), 18))
-		na++;
-	if (std::count(cards.begin(), cards.end(), 25))
-		na++;
-	return na;
+	std::vector<size_t> ac;
+	return aces(cards, ac);
+}
+
+size_t tens (const std::vector<size_t> &cards, std::vector<size_t> &ten_cards)
+{
+	ten_cards.clear();
+	if (std::count(cards.begin(), cards.end(), 5))
+		ten_cards.push_back(5);
+	if (std::count(cards.begin(), cards.end(), 12))
+		ten_cards.push_back(12);
+	if (std::count(cards.begin(), cards.end(), 19))
+		ten_cards.push_back(19);
+	if (std::count(cards.begin(), cards.end(), 26))
+		ten_cards.push_back(26);
+	return ten_cards.size();
 }
 
 size_t num_tens (const std::vector<size_t> &cards)
 {
-	size_t nt = 0;
-	if (std::count(cards.begin(), cards.end(), 5))
-		nt++;
-	if (std::count(cards.begin(), cards.end(), 12))
-		nt++;
-	if (std::count(cards.begin(), cards.end(), 19))
-		nt++;
-	if (std::count(cards.begin(), cards.end(), 26))
-		nt++;
-	return nt;
+	std::vector<size_t> tc;
+	return tens(cards, tc);
 }
 
-size_t num_suite (const size_t spiel, const std::vector<size_t> &cards)
+size_t suit (const size_t spiel, const std::vector<size_t> &cards,
+	std::vector<size_t> &suit_cards)
 {
-	size_t ns = 0;
+	suit_cards.clear();
 	switch (spiel % 100)
 	{
 		case 9:
-			if (std::count(cards.begin(), cards.end(), 25))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 26))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 27))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 28))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 29))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 30))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 31))
-				ns++;
+			for (size_t i = 25; i < 32; i++)
+			{
+				if (std::count(cards.begin(), cards.end(), i))
+					suit_cards.push_back(i);
+			}
 			break;
 		case 10:
-			if (std::count(cards.begin(), cards.end(), 18))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 19))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 20))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 21))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 22))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 23))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 24))
-				ns++;
+			for (size_t i = 18; i < 25; i++)
+			{
+				if (std::count(cards.begin(), cards.end(), i))
+					suit_cards.push_back(i);
+			}
 			break;
 		case 11:
-			if (std::count(cards.begin(), cards.end(), 11))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 12))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 13))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 14))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 15))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 16))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 17))
-				ns++;
+			for (size_t i = 11; i < 18; i++)
+			{
+				if (std::count(cards.begin(), cards.end(), i))
+					suit_cards.push_back(i);
+			}
 			break;
 		case 12:
-			if (std::count(cards.begin(), cards.end(), 4))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 5))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 6))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 7))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 8))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 9))
-				ns++;
-			if (std::count(cards.begin(), cards.end(), 10))
-				ns++;
+			for (size_t i = 4; i < 11; i++)
+			{
+				if (std::count(cards.begin(), cards.end(), i))
+					suit_cards.push_back(i);
+			}
 			break;
 	}
-	return ns;
+	return suit_cards.size();
 }
 
-size_t num_trumps (const size_t spiel, const std::vector<size_t> &cards)
+size_t num_suit (const size_t spiel, const std::vector<size_t> &cards)
 {
-	size_t nt = 0;
-	if ((spiel % 100) == 23)
-		nt = 0;
-	else if ((spiel % 100) == 24)
-		nt = num_jacks(cards);
-	else
-		nt = num_jacks(cards) + num_suite(spiel, cards);
-	return nt;
+	std::vector<size_t> sc;
+	return suit(spiel, cards, sc);
 }
 
-bool full_suite (const std::vector<size_t> &cards)
+size_t trump (const size_t spiel, const std::vector<size_t> &cards,
+	std::vector<size_t> &trump_cards)
+{
+	std::vector<size_t> sc, jc;
+	trump_cards.clear();
+	if ((spiel % 100) == 23)
+		return 0;
+	if (jacks(cards, jc) > 0)
+		trump_cards.insert(trump_cards.end(), jc.begin(), jc.end());
+	if (suit(spiel, cards, sc) > 0)
+		trump_cards.insert(trump_cards.end(), sc.begin(), sc.end());
+	return trump_cards.size();
+}
+
+size_t num_trump (const size_t spiel, const std::vector<size_t> &cards)
+{
+	std::vector<size_t> tc;
+	return trump(spiel, cards, tc);
+}
+
+size_t high_suit (const size_t spiel, const std::vector<size_t> &cards,
+	std::vector<size_t> &high_cards)
+{
+	high_cards.clear();
+	if (std::count(cards.begin(), cards.end(), 4) &&
+		std::count(cards.begin(), cards.end(), 5) &&
+		std::count(cards.begin(), cards.end(), 6) && ((spiel % 100) != 12))
+	{
+		high_cards.push_back(4);
+		high_cards.push_back(5);
+	}
+	if (std::count(cards.begin(), cards.end(), 11) &&
+		std::count(cards.begin(), cards.end(), 12) &&
+		std::count(cards.begin(), cards.end(), 13) && ((spiel % 100) != 11))
+	{
+		high_cards.push_back(11);
+		high_cards.push_back(12);
+	}
+	if (std::count(cards.begin(), cards.end(), 18) &&
+		std::count(cards.begin(), cards.end(), 19) &&
+		std::count(cards.begin(), cards.end(), 20) && ((spiel % 100) != 10))
+	{
+		high_cards.push_back(18);
+		high_cards.push_back(19);
+	}
+	if (std::count(cards.begin(), cards.end(), 25) &&
+		std::count(cards.begin(), cards.end(), 26) &&
+		std::count(cards.begin(), cards.end(), 27) && ((spiel % 100) != 9))
+	{
+		high_cards.push_back(25);
+		high_cards.push_back(26);
+	}
+	return high_cards.size();
+}
+
+bool good_suit (const std::vector<size_t> &cards)
 {
 	if (std::count(cards.begin(), cards.end(), 4) &&
 		std::count(cards.begin(), cards.end(), 5) &&
@@ -186,11 +218,11 @@ bool full_suite (const std::vector<size_t> &cards)
 		return true;
 	if (std::count(cards.begin(), cards.end(), 4) &&
 		std::count(cards.begin(), cards.end(), 6) &&
-		(num_suite(12, cards) > 3))
+		(num_suit(12, cards) > 3))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 5) &&
 		std::count(cards.begin(), cards.end(), 6) &&
-		(num_suite(12, cards) > 4))
+		(num_suit(12, cards) > 4))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 11) &&
 		std::count(cards.begin(), cards.end(), 12) &&
@@ -198,11 +230,11 @@ bool full_suite (const std::vector<size_t> &cards)
 		return true;
 	if (std::count(cards.begin(), cards.end(), 11) &&
 		std::count(cards.begin(), cards.end(), 13) &&
-		(num_suite(11, cards) > 3))
+		(num_suit(11, cards) > 3))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 12) &&
 		std::count(cards.begin(), cards.end(), 13) &&
-		(num_suite(11, cards) > 4))
+		(num_suit(11, cards) > 4))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 18) &&
 		std::count(cards.begin(), cards.end(), 19) &&
@@ -210,11 +242,11 @@ bool full_suite (const std::vector<size_t> &cards)
 		return true;
 	if (std::count(cards.begin(), cards.end(), 18) &&
 		std::count(cards.begin(), cards.end(), 20) &&
-		(num_suite(10, cards) > 3))
+		(num_suit(10, cards) > 3))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 19) &&
 		std::count(cards.begin(), cards.end(), 20) &&
-		(num_suite(10, cards) > 4))
+		(num_suit(10, cards) > 4))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 25) &&
 		std::count(cards.begin(), cards.end(), 26) &&
@@ -222,43 +254,71 @@ bool full_suite (const std::vector<size_t> &cards)
 		return true;
 	if (std::count(cards.begin(), cards.end(), 25) &&
 		std::count(cards.begin(), cards.end(), 27) &&
-		(num_suite(9, cards) > 3))
+		(num_suit(9, cards) > 3))
 		return true;
 	if (std::count(cards.begin(), cards.end(), 26) &&
 		std::count(cards.begin(), cards.end(), 27) &&
-		(num_suite(9, cards) > 4))
+		(num_suit(9, cards) > 4))
 		return true;
 	return false;
 }
 
+size_t lows (const std::vector<size_t> &cards, std::vector<size_t> &low_cards)
+{
+	low_cards.clear();
+	for (size_t i = 29; i < 32; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			low_cards.push_back(i);
+	}
+	for (size_t i = 22; i < 25; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			low_cards.push_back(i);
+	}
+	for (size_t i = 15; i < 18; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			low_cards.push_back(i);
+	}
+	for (size_t i = 8; i < 11; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			low_cards.push_back(i);
+	}
+	return low_cards.size();
+}
+
 size_t num_lows (const std::vector<size_t> &cards)
 {
-	size_t nl = 0;
-	if (std::count(cards.begin(), cards.end(), 29))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 30))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 31))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 22))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 23))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 24))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 15))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 16))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 17))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 8))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 9))
-		nl++;
-	if (std::count(cards.begin(), cards.end(), 10))
-		nl++;
-	return nl;
+	std::vector<size_t> lc;
+	return lows(cards, lc);
+}
+
+size_t highs (const std::vector<size_t> &cards, std::vector<size_t> &high_cards)
+{
+	high_cards.clear();
+	for (size_t i = 25; i < 28; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			high_cards.push_back(i);
+	}
+	for (size_t i = 18; i < 21; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			high_cards.push_back(i);
+	}
+	for (size_t i = 11; i < 14; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			high_cards.push_back(i);
+	}
+	for (size_t i = 4; i < 7; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			high_cards.push_back(i);
+	}
+	return high_cards.size();
 }
 
 bool trump (const size_t spiel, size_t card)
@@ -305,7 +365,7 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 	bool hj = high_jacks(cards);
 	size_t na = num_aces(cards);
 	size_t nt = num_tens(cards);
-	bool fs = full_suite(cards);
+	bool gs = good_suit(cards);
 	size_t nl = num_lows(cards);
 	// evaluate games
 	if (starts)
@@ -313,7 +373,7 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 		// Grand
 		if (hj && (na > 2) && (nt > 2))
 			return 24;
-		if (hj && fs)
+		if (hj && gs)
 			return 24;
 		// Null
 		if (nl > 8)
@@ -324,26 +384,132 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 		// Grand
 		if ((nj > 2) && (na > 2) && (nt > 2))
 			return 24;
-		if ((nj > 2) && fs)
+		if ((nj > 2) && gs)
 			return 24;
 		// Null
 		if (nl > 7)
 			return 23;
 	}
-	// Suits
-	if ((num_trumps(12, cards) > 6) ||
-		((num_trumps(12, cards) > 4) && (na > 2)))
+	// Suit
+	if ((num_trump(12, cards) > 6) ||
+		((num_trump(12, cards) > 4) && (na > 2)))
 		return 12;
-	if ((num_trumps(11, cards) > 6) ||
-		((num_trumps(11, cards) > 4) && (na > 2)))
+	if ((num_trump(11, cards) > 6) ||
+		((num_trump(11, cards) > 4) && (na > 2)))
 		return 11;
-	if ((num_trumps(10, cards) > 6) ||
-		((num_trumps(10, cards) > 4) && (na > 2)))
+	if ((num_trump(10, cards) > 6) ||
+		((num_trump(10, cards) > 4) && (na > 2)))
 		return 10;
-	if ((num_trumps(9, cards) > 6) ||
-		((num_trumps(9, cards) > 4) && (na > 2)))
+	if ((num_trump(9, cards) > 6) ||
+		((num_trump(9, cards) > 4) && (na > 2)))
 		return 9;
 	return 0;
+}
+
+size_t blank (const size_t spiel, const std::vector<size_t> &cards,
+	std::vector<size_t> &blank_cards)
+{
+	std::vector<size_t> sc;
+	blank_cards.clear();
+	switch (spiel % 100)
+	{
+		case 9:
+			if ((suit(10, cards, sc) == 1) && (sc[0] != 18))
+				blank_cards.push_back(sc[0]);
+			if ((suit(11, cards, sc) == 1) && (sc[0] != 11))
+				blank_cards.push_back(sc[0]);
+			if ((suit(12, cards, sc) == 1) && (sc[0] != 4))
+				blank_cards.push_back(sc[0]);
+			break;
+		case 10:
+			if ((suit(9, cards, sc) == 1) && (sc[0] != 25))
+				blank_cards.push_back(sc[0]);
+			if ((suit(11, cards, sc) == 1) && (sc[0] != 11))
+				blank_cards.push_back(sc[0]);
+			if ((suit(12, cards, sc) == 1) && (sc[0] != 4))
+				blank_cards.push_back(sc[0]);
+			break;
+		case 11:
+			if ((suit(9, cards, sc) == 1) && (sc[0] != 25))
+				blank_cards.push_back(sc[0]);
+			if ((suit(10, cards, sc) == 1) && (sc[0] != 18))
+				blank_cards.push_back(sc[0]);
+			if ((suit(12, cards, sc) == 1) && (sc[0] != 4))
+				blank_cards.push_back(sc[0]);
+			break;
+		case 12:
+			if ((suit(9, cards, sc) == 1) && (sc[0] != 25))
+				blank_cards.push_back(sc[0]);
+			if ((suit(10, cards, sc) == 1) && (sc[0] != 18))
+				blank_cards.push_back(sc[0]);
+			if ((suit(11, cards, sc) == 1) && (sc[0] != 11))
+				blank_cards.push_back(sc[0]);
+			break;
+		case 24:
+			if ((suit(9, cards, sc) == 1) && (sc[0] != 25))
+				blank_cards.push_back(sc[0]);
+			if ((suit(10, cards, sc) == 1) && (sc[0] != 18))
+				blank_cards.push_back(sc[0]);
+			if ((suit(11, cards, sc) == 1) && (sc[0] != 11))
+				blank_cards.push_back(sc[0]);
+			if ((suit(12, cards, sc) == 1) && (sc[0] != 4))
+				blank_cards.push_back(sc[0]);
+			break;
+	}
+	return blank_cards.size();
+}
+
+size_t rare (const size_t spiel, const std::vector<size_t> &cards,
+	std::vector<size_t> &rare_cards)
+{
+	std::vector<size_t> sc;
+	rare_cards.clear();
+	switch (spiel % 100)
+	{
+		case 9:
+			if ((suit(10, cards, sc) == 2) && (sc[0] != 18))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(11, cards, sc) == 2) && (sc[0] != 11))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(12, cards, sc) == 2) && (sc[0] != 4))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			break;
+		case 10:
+			if ((suit(9, cards, sc) == 2) && (sc[0] != 25))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(11, cards, sc) == 2) && (sc[0] != 11))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(12, cards, sc) == 2) && (sc[0] != 4))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			break;
+		case 11:
+			if ((suit(9, cards, sc) == 2) && (sc[0] != 25))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(10, cards, sc) == 2) && (sc[0] != 18))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(12, cards, sc) == 2) && (sc[0] != 4))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			break;
+		case 12:
+			if ((suit(9, cards, sc) == 2) && (sc[0] != 25))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(10, cards, sc) == 2) && (sc[0] != 18))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(11, cards, sc) == 2) && (sc[0] != 11))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			break;
+		case 24:
+			if ((suit(9, cards, sc) == 2) && (sc[0] != 25))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(10, cards, sc) == 2) && (sc[0] != 18))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(11, cards, sc) == 2) && (sc[0] != 11))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			if ((suit(12, cards, sc) == 2) && (sc[0] != 4))
+				rare_cards.push_back(sc[0]), rare_cards.push_back(sc[1]);
+			break;
+	}
+	return rare_cards.size();
 }
 
 size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
@@ -449,8 +615,18 @@ void process_command (size_t &readed, char *buffer)
 					pkr_spielt = 2;
 				if (pkr_spielt == pkr_self)
 				{
-					// TODO: decide what to do
-					if (tmcg_mpz_wrandom_ui() & 1L)
+					std::vector<size_t> bc, tc, bt(4), rc;
+					std::vector<size_t>::iterator it;
+					blank(spiel, cards, bc);
+					std::sort(bc.begin(), bc.end());
+					tens(cards, tc);
+					std::sort(tc.begin(), tc.end());
+					it = std::set_intersection(bc.begin(), bc.end(),
+						tc.begin(), tc.end(), bt.begin());
+					bt.resize(it - bt.begin());
+					rare(spiel, cards, rc);
+std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc = " << rc.size() << std::endl;
+					if ((bt.size() > 0) || (bc.size() > 1) || (rc.size() == 2))
 						std::cout << "CMD skat" << std::endl << std::flush;
 					else
 						std::cout << "CMD hand" << std::endl << std::flush;
@@ -484,12 +660,70 @@ void process_command (size_t &readed, char *buffer)
 				reize_dran = false;
 				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
 				{
+					size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
 					if (eval(cards, !pkr_pos) > spiel)
+						spiel = eval(cards, !pkr_pos);
+					if ((spiel % 100) == 23)
 					{
-						// TODO
+						// TODO: Nullspiel
 					}
-					// TODO: decide single suits, blank 10 or bunker points
-					size_t c0 = cards[0], c1 = cards[1];
+					else
+					{
+						std::vector<size_t> hs, bc, tc, bt(4), rc;
+						std::vector<size_t>::iterator it;
+						high_suit(spiel, cards, hs);
+						blank(spiel, cards, bc);
+						std::sort(bc.begin(), bc.end());
+						tens(cards, tc);
+						std::sort(tc.begin(), tc.end());
+						it = std::set_intersection(bc.begin(), bc.end(),
+							tc.begin(), tc.end(), bt.begin());
+						bt.resize(it - bt.begin());
+						rare(spiel, cards, rc);
+std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << hs.size() << " rc = " << rc.size() << std::endl;
+						if (bt.size() >= 2)
+						{
+							size_t idx1 = tmcg_mpz_wrandom_ui() % bt.size();
+							c0 = bt[idx1];
+							bt.erase(std::remove(bt.begin(), bt.end(), c0),
+								bt.end());
+							size_t idx2 = tmcg_mpz_wrandom_ui() % bt.size();
+							c1 = bt[idx2];
+						}
+						else if ((bt.size() == 1) && (bc.size() > 0))
+						{
+							c0 = bt[0];
+							size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+							c1 = bc[idx2];
+						}
+						else if ((bt.size() == 0) && (bc.size() >= 2))
+						{
+							size_t idx1 = tmcg_mpz_wrandom_ui() % bc.size();
+							c0 = bc[idx1];
+							bc.erase(std::remove(bc.begin(), bc.end(), c0),
+								bc.end());
+							size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+							c1 = bc[idx2];
+						}
+						else if (hs.size() > 3)
+						{
+							// Bunker
+							size_t idx1 = tmcg_mpz_wrandom_ui() % hs.size();
+							c0 = hs[idx1];
+							hs.erase(std::remove(hs.begin(), hs.end(), c0),
+								hs.end());
+							size_t idx2 = tmcg_mpz_wrandom_ui() % hs.size();
+							c1 = hs[idx2];
+						}
+						else if (rc.size() >= 2)
+						{
+							c0 = rc[0], c1 = rc[1];
+						}
+						else
+						{
+							// TODO: random, but no trump
+						}
+					}
 					pkt += skat_pktwert[c0];
 					pkt += skat_pktwert[c1];
 					std::string card0 = skat_type2string(c0);
@@ -516,7 +750,7 @@ void process_command (size_t &readed, char *buffer)
 				(from == pkr_spielt))
 			{
 				spiel = atoi(par[2].c_str());
-				trumps = num_trumps(spiel, cards);
+				trumps = num_trump(spiel, cards);
 				switch (spiel % 100)
 				{
 					// calculate maximum opponent trumps
@@ -540,7 +774,7 @@ void process_command (size_t &readed, char *buffer)
 			{
 				ocards.push_back(atoi(par[2].c_str()));
 				if (pkr_self != pkr_spielt)
-					opp_trumps = num_trumps(spiel, ocards);
+					opp_trumps = num_trump(spiel, ocards);
 			}
 			if ((par[1] == "LEGE") && (par.size() == 3))
 			{
@@ -562,9 +796,9 @@ void process_command (size_t &readed, char *buffer)
 				}
 				// update trump statistics
 				if (par[0] == nicks[pkr_self])
-					trumps = num_trumps(spiel, cards);
+					trumps = num_trump(spiel, cards);
 				if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
-					opp_trumps = num_trumps(spiel, ocards);
+					opp_trumps = num_trump(spiel, ocards);
 				else if (par[0] != nicks[pkr_self])
 				{
 					if (trump(spiel, card) && (opp_trumps > 0))
@@ -704,7 +938,9 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			{
 				// TODO: wenn möglich drunter bleiben
 			}
-			// Stechen, Übernehmen oder Buttern
+			// TODO: Stechen, Übernehmen oder Buttern
+
+			// fallback: per Zufall spielen
 			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
 			std::string card = skat_type2string(allowed_cards[idx]);
 			std::cout << "CMD lege " << 
