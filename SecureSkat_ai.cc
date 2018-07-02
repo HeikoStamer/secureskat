@@ -367,7 +367,8 @@ bool trump (const size_t spiel, size_t card)
 	return false;
 }
 
-size_t eval (const std::vector<size_t> &cards, const bool starts)
+size_t eval (const std::vector<size_t> &cards, const bool starts,
+	size_t &sicher)
 {
 	size_t nj = num_jacks(cards);
 	bool hj = high_jacks(cards);
@@ -380,47 +381,96 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 	{
 		// Grand
 		if (hj && (na > 2) && (nt > 2))
+		{
+			sicher = 100;
 			return 24;
+		}
 		if (hj && (gs > 1))
+		{
+			sicher = 100;
 			return 24;
+		}
 		if ((nj > 2) && (gs > 1))
+		{
+			sicher = 100;
 			return 24;
+		}
 		if ((nj > 3) && (gs > 0))
+		{
+			sicher = 75;
 			return 24;
+		}
+		if (hj && (gs > 0) && (na >= 2) && (nt >= 2))
+		{
+			sicher = 50;
+			return 24;
+		}
 		// Null
 		if (nl > 8)
+		{
+			sicher = 50;
 			return 23;
+		}
 	}
 	else
 	{
 		// Grand
 		if ((nj > 2) && (na > 2) && (nt > 2))
+		{
+			sicher = 100;
 			return 24;
+		}
 		if ((nj > 2) && (gs > 1))
+		{
+			sicher = 100;
 			return 24;
+		}
 		if ((nj > 3) && (gs > 0))
+		{
+			sicher = 75;
 			return 24;
+		}
+		if ((nj > 2) && (gs > 0) && (na >= 2) && (nt >= 2))
+		{
+			sicher = 75;
+			return 24;
+		}
 		// Null
 		if (nl > 7)
+		{
+			sicher = 50;
 			return 23;
+		}
 	}
 	// Suit
 	if ((num_trump(12, cards) > 6) ||
 		((num_trump(12, cards) > 5) && (na > 1)) ||
 		((num_trump(12, cards) > 4) && (na > 2)))
+	{
+		sicher = 25;
 		return 12;
+	}
 	if ((num_trump(11, cards) > 6) ||
 		((num_trump(11, cards) > 5) && (na > 1)) ||
 		((num_trump(11, cards) > 4) && (na > 2)))
+	{
+		sicher = 25;
 		return 11;
+	}
 	if ((num_trump(10, cards) > 6) ||
 		((num_trump(10, cards) > 5) && (na > 1)) ||
 		((num_trump(10, cards) > 4) && (na > 2)))
+	{
+		sicher = 25;
 		return 10;
+	}
 	if ((num_trump(9, cards) > 6) ||
 		((num_trump(9, cards) > 5) && (na > 1)) ||
 		((num_trump(9, cards) > 4) && (na > 2)))
+	{
+		sicher = 25;
 		return 9;
+	}
 	return 0;
 }
 
@@ -539,7 +589,7 @@ size_t not_null (const std::vector<size_t> &cards,
 }
 
 size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
-size_t spiel = 0, reiz_counter = 0, biete = 0;
+size_t spiel = 0, reiz_counter = 0, biete = 0, sicher = 0;
 size_t pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
 bool reize_dran = false, lege_dran = false, gepasst = false, handspiel = false;
 std::vector<std::string> nicks, names;
@@ -617,10 +667,10 @@ void process_command (size_t &readed, char *buffer)
 			{
 			    pkr_pos = atoi(par[2].c_str());
 			    reize_dran = (pkr_pos == 1) ? true : false;
-				reiz_counter = 0, spiel = 0;
+				reiz_counter = 0, spiel = 0, sicher = 0;
 				pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
 				handspiel = false;
-				spiel = eval(cards, !pkr_pos);
+				spiel = eval(cards, !pkr_pos, sicher);
 				if (spiel)
 				{
 					size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
@@ -697,9 +747,21 @@ std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc =
 				reize_dran = false;
 				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
 				{
+					size_t sicher2 = 0;
+					size_t spiel2 = eval(cards, !pkr_pos, sicher2);
+					if (spiel2 > spiel)
+					{
+						if (sicher2 >= sicher)
+							spiel = spiel2, sicher = sicher2;
+					}
+					else if (sicher2 > sicher)
+					{
+						size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
+						size_t biete2 = ((sp + 1) * (spiel2 % 100));
+						if ((biete2 > biete) || (biete2 >= skat_reizwert[reiz_counter]))
+							spiel = spiel2, sicher = sicher2;
+					}
 					size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
-					if (eval(cards, !pkr_pos) > spiel)
-						spiel = eval(cards, !pkr_pos);
 					if ((spiel % 100) == 23)
 					{
 						std::vector<size_t> nn;
