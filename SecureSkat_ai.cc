@@ -217,57 +217,58 @@ size_t high_suit (const size_t spiel, const std::vector<size_t> &cards,
 	return high_cards.size();
 }
 
-bool good_suit (const std::vector<size_t> &cards)
+size_t good_suit (const std::vector<size_t> &cards)
 {
+	size_t gs = 0;
 	if (std::count(cards.begin(), cards.end(), 4) &&
 		std::count(cards.begin(), cards.end(), 5) &&
 		std::count(cards.begin(), cards.end(), 6))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 4) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 4) &&
 		std::count(cards.begin(), cards.end(), 6) &&
 		(num_suit(12, cards) > 3))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 5) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 5) &&
 		std::count(cards.begin(), cards.end(), 6) &&
 		(num_suit(12, cards) > 4))
-		return true;
+		gs++;
 	if (std::count(cards.begin(), cards.end(), 11) &&
 		std::count(cards.begin(), cards.end(), 12) &&
 		std::count(cards.begin(), cards.end(), 13))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 11) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 11) &&
 		std::count(cards.begin(), cards.end(), 13) &&
 		(num_suit(11, cards) > 3))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 12) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 12) &&
 		std::count(cards.begin(), cards.end(), 13) &&
 		(num_suit(11, cards) > 4))
-		return true;
+		gs++;
 	if (std::count(cards.begin(), cards.end(), 18) &&
 		std::count(cards.begin(), cards.end(), 19) &&
 		std::count(cards.begin(), cards.end(), 20))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 18) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 18) &&
 		std::count(cards.begin(), cards.end(), 20) &&
 		(num_suit(10, cards) > 3))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 19) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 19) &&
 		std::count(cards.begin(), cards.end(), 20) &&
 		(num_suit(10, cards) > 4))
-		return true;
+		gs++;
 	if (std::count(cards.begin(), cards.end(), 25) &&
 		std::count(cards.begin(), cards.end(), 26) &&
 		std::count(cards.begin(), cards.end(), 27))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 25) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 25) &&
 		std::count(cards.begin(), cards.end(), 27) &&
 		(num_suit(9, cards) > 3))
-		return true;
-	if (std::count(cards.begin(), cards.end(), 26) &&
+		gs++;
+	else if (std::count(cards.begin(), cards.end(), 26) &&
 		std::count(cards.begin(), cards.end(), 27) &&
 		(num_suit(9, cards) > 4))
-		return true;
-	return false;
+		gs++;
+	return gs;
 }
 
 size_t lows (const std::vector<size_t> &cards, std::vector<size_t> &low_cards)
@@ -372,15 +373,19 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 	bool hj = high_jacks(cards);
 	size_t na = num_aces(cards);
 	size_t nt = num_tens(cards);
-	bool gs = good_suit(cards);
+	size_t gs = good_suit(cards);
 	size_t nl = num_lows(cards);
-	// evaluate games
+	// evaluate games based on a simple heuristic
 	if (starts)
 	{
 		// Grand
 		if (hj && (na > 2) && (nt > 2))
 			return 24;
-		if (hj && gs)
+		if (hj && (gs > 1))
+			return 24;
+		if ((nj > 2) && (gs > 1))
+			return 24;
+		if ((nj > 3) && (gs > 0))
 			return 24;
 		// Null
 		if (nl > 8)
@@ -391,7 +396,9 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 		// Grand
 		if ((nj > 2) && (na > 2) && (nt > 2))
 			return 24;
-		if ((nj > 2) && gs)
+		if ((nj > 2) && (gs > 1))
+			return 24;
+		if ((nj > 3) && (gs > 0))
 			return 24;
 		// Null
 		if (nl > 7)
@@ -399,15 +406,19 @@ size_t eval (const std::vector<size_t> &cards, const bool starts)
 	}
 	// Suit
 	if ((num_trump(12, cards) > 6) ||
+		((num_trump(12, cards) > 5) && (na > 1)) ||
 		((num_trump(12, cards) > 4) && (na > 2)))
 		return 12;
 	if ((num_trump(11, cards) > 6) ||
+		((num_trump(11, cards) > 5) && (na > 1)) ||
 		((num_trump(11, cards) > 4) && (na > 2)))
 		return 11;
 	if ((num_trump(10, cards) > 6) ||
+		((num_trump(10, cards) > 5) && (na > 1)) ||
 		((num_trump(10, cards) > 4) && (na > 2)))
 		return 10;
 	if ((num_trump(9, cards) > 6) ||
+		((num_trump(9, cards) > 5) && (na > 1)) ||
 		((num_trump(9, cards) > 4) && (na > 2)))
 		return 9;
 	return 0;
@@ -735,7 +746,7 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 						}
 						else if (rc.size() >= 2)
 						{
-							// Farbe entfernen (TODO: random)
+							// Farbe entfernen (TODO: random, if rc > 2)
 							c0 = rc[0], c1 = rc[1];
 						}
 						else if (hs.size() > 3)
@@ -923,9 +934,9 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			// Anspiel einer Karte
 			if ((spiel % 100) == 23)
 			{
-				// TODO: Lusche aus Reihe spielen
+				// TODO: Nullspiel: Lusche aus Reihe spielen
 			}
-			if ((opp_trumps > 0) && (trumps > opp_trumps))
+			else if ((opp_trumps > 0) && (trumps > opp_trumps))
 			{
 				if (high_jacks(cards))
 				{
@@ -960,6 +971,27 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			std::cout << "CMD lege " << 
 				card.substr(0, card.length() - 1) << std::endl << std::flush;
 		}
+		else if (stich.size() == 1)
+		{
+			std::vector<size_t> allowed_cards;
+			for (size_t i = 0; i < cards.size(); i++)
+			{
+				if (skat_rulectl(stich[0], cards[i], spiel, cards))
+					allowed_cards.push_back(cards[i]);
+			}
+			assert((allowed_cards.size() > 0));
+			if ((spiel % 100) == 23)
+			{
+				// TODO: wenn möglich drunter bleiben, sonst wenig höher
+			}
+			// TODO: Stechen, Übernehmen oder Buttern
+
+			// fallback: per Zufall spielen
+			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
+			std::string card = skat_type2string(allowed_cards[idx]);
+			std::cout << "CMD lege " << 
+				card.substr(0, card.length() - 1) << std::endl << std::flush;
+		}
 		else
 		{
 			std::vector<size_t> allowed_cards;
@@ -971,7 +1003,7 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			assert((allowed_cards.size() > 0));
 			if ((spiel % 100) == 23)
 			{
-				// TODO: wenn möglich drunter bleiben
+				// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
 			}
 			// TODO: Stechen, Übernehmen oder Buttern
 
