@@ -71,6 +71,13 @@ bool high_jacks (const std::vector<size_t> &cards)
 	return false;
 }
 
+bool ace (size_t card)
+{
+	if ((card == 4) || (card == 11) || (card == 18) || (card == 25))
+		return true;
+	return false;
+}
+
 size_t aces (const std::vector<size_t> &cards, std::vector<size_t> &ace_cards)
 {
 	ace_cards.clear();
@@ -512,6 +519,14 @@ size_t rare (const size_t spiel, const std::vector<size_t> &cards,
 	return rare_cards.size();
 }
 
+size_t not_null (const std::vector<size_t> &cards,
+	std::vector<size_t> &bad_cards)
+{
+	bad_cards.clear();
+// TODO
+	return bad_cards.size();
+}
+
 size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
 size_t spiel = 0, reiz_counter = 0, biete = 0;
 size_t pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
@@ -615,21 +630,32 @@ void process_command (size_t &readed, char *buffer)
 					pkr_spielt = 2;
 				if (pkr_spielt == pkr_self)
 				{
-					std::vector<size_t> bc, tc, bt(4), rc;
-					std::vector<size_t>::iterator it;
-					blank(spiel, cards, bc);
-					std::sort(bc.begin(), bc.end());
-					tens(cards, tc);
-					std::sort(tc.begin(), tc.end());
-					it = std::set_intersection(bc.begin(), bc.end(),
-						tc.begin(), tc.end(), bt.begin());
-					bt.resize(it - bt.begin());
-					rare(spiel, cards, rc);
-std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc = " << rc.size() << std::endl;
-					if ((bt.size() > 0) || (bc.size() > 1) || (rc.size() == 2))
-						std::cout << "CMD skat" << std::endl << std::flush;
+					if ((spiel % 100) == 23)
+					{
+						// TODO: Nullspiel
+						if (tmcg_mpz_wrandom_ui() % 2)
+							std::cout << "CMD skat" << std::endl << std::flush;
+						else
+							std::cout << "CMD hand" << std::endl << std::flush;
+					}
 					else
-						std::cout << "CMD hand" << std::endl << std::flush;
+					{
+						std::vector<size_t> bc, tc, bt(4), rc;
+						std::vector<size_t>::iterator it;
+						blank(spiel, cards, bc);
+						std::sort(bc.begin(), bc.end());
+						tens(cards, tc);
+						std::sort(tc.begin(), tc.end());
+						it = std::set_intersection(bc.begin(), bc.end(),
+							tc.begin(), tc.end(), bt.begin());
+						bt.resize(it - bt.begin());
+						rare(spiel, cards, rc);
+std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc = " << rc.size() << std::endl;
+						if ((bt.size() > 0) || (bc.size() > 1) || (rc.size() == 2))
+							std::cout << "CMD skat" << std::endl << std::flush;
+						else
+							std::cout << "CMD hand" << std::endl << std::flush;
+					}
 				}
 			}
 			if ((par[1] == "PASSE") && (par.size() == 2))
@@ -665,6 +691,8 @@ std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc =
 						spiel = eval(cards, !pkr_pos);
 					if ((spiel % 100) == 23)
 					{
+						std::vector<size_t> nn;
+						not_null(cards, nn);
 						// TODO: Nullspiel
 					}
 					else
@@ -705,6 +733,11 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 							size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
 							c1 = bc[idx2];
 						}
+						else if (rc.size() >= 2)
+						{
+							// Farbe entfernen (TODO: random)
+							c0 = rc[0], c1 = rc[1];
+						}
 						else if (hs.size() > 3)
 						{
 							// Bunker
@@ -715,13 +748,15 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 							size_t idx2 = tmcg_mpz_wrandom_ui() % hs.size();
 							c1 = hs[idx2];
 						}
-						else if (rc.size() >= 2)
-						{
-							c0 = rc[0], c1 = rc[1];
-						}
 						else
 						{
-							// TODO: random, but no trump
+							while (trump(spiel, c0) || ace(c0) ||
+								trump(spiel, c1) || ace(c1) || (c0 == c1))
+							{
+								size_t i = tmcg_mpz_wrandom_ui() % cards.size();
+								size_t j = tmcg_mpz_wrandom_ui() % cards.size();
+								c0 = cards[i], c1 = cards[j];
+							}
 						}
 					}
 					pkt += skat_pktwert[c0];
