@@ -306,27 +306,33 @@ size_t num_lows (const std::vector<size_t> &cards)
 size_t highs (const std::vector<size_t> &cards, std::vector<size_t> &high_cards)
 {
 	high_cards.clear();
-	for (size_t i = 25; i < 28; i++)
+	for (size_t i = 25; i < 27; i++)
 	{
 		if (std::count(cards.begin(), cards.end(), i))
 			high_cards.push_back(i);
 	}
-	for (size_t i = 18; i < 21; i++)
+	for (size_t i = 18; i < 20; i++)
 	{
 		if (std::count(cards.begin(), cards.end(), i))
 			high_cards.push_back(i);
 	}
-	for (size_t i = 11; i < 14; i++)
+	for (size_t i = 11; i < 13; i++)
 	{
 		if (std::count(cards.begin(), cards.end(), i))
 			high_cards.push_back(i);
 	}
-	for (size_t i = 4; i < 7; i++)
+	for (size_t i = 4; i < 6; i++)
 	{
 		if (std::count(cards.begin(), cards.end(), i))
 			high_cards.push_back(i);
 	}
 	return high_cards.size();
+}
+
+size_t num_highs (const std::vector<size_t> &cards)
+{
+	std::vector<size_t> hc;
+	return highs(cards, hc);
 }
 
 bool trump (const size_t spiel, size_t card)
@@ -594,6 +600,7 @@ size_t pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
 bool reize_dran = false, lege_dran = false, gepasst = false, handspiel = false;
 std::vector<std::string> nicks, names;
 std::vector<size_t> cards, ocards, stich;
+std::vector<std::string> nick_stich;
 
 void process_command (size_t &readed, char *buffer)
 {
@@ -625,348 +632,348 @@ void process_command (size_t &readed, char *buffer)
 			cmd = cmd.substr(ei + 1, cmd.length() - ei - 1);
 	    }
 	    par.push_back(cmd);
-	    if (par.size() >= 2)
-	    {
-			size_t from = 100;
-			for (size_t j = 0; j < nicks.size(); j++)
-			    if (par[0] == nicks[j])
-					from = j;
-						
-			if ((par[1] == "INIT") && (par.size() >= 4) && 
-			    (nicks.size() < 3))
+	    if (par.size() < 2)
+			continue;
+		size_t from = 100;
+		for (size_t j = 0; j < nicks.size(); j++)
+		{
+		    if (par[0] == nicks[j])
+				from = j;
+		}
+		if ((par[1] == "INIT") && (par.size() >= 4) && (nicks.size() < 3))
+		{
+		    if (par[2] == par[0])
+				pkr_self = nicks.size();
+		    nicks.push_back(par[2]);
+		    std::string name;
+		    for (size_t j = 0; j < (par.size() - 3); j++)
+		    {
+				name += par[3 + j];
+				if (j < (par.size() - 4))
+				    name += " ";
+		    }
+		    names.push_back(name);
+		}
+		if ((par[1] == "DONE") && (par.size() == 2) && (from == pkr_self))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "MISCHEN") && (par.size() == 2) && (from == pkr_self))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "GEBEN") && (par.size() == 2) && (from == pkr_self))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "KARTE") && (par.size() == 3) && (from == pkr_self))
+		{
+			cards.push_back(atoi(par[2].c_str()));
+		}
+		if ((par[1] == "START") && (par.size() == 3) && (from == pkr_self))
+		{
+		    pkr_pos = atoi(par[2].c_str());
+		    reize_dran = (pkr_pos == 1) ? true : false;
+			reiz_counter = 0, spiel = 0, sicher = 0;
+			pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
+			handspiel = false;
+			spiel = eval(cards, !pkr_pos, sicher);
+			if (spiel)
 			{
-			    if (par[2] == par[0])
-					pkr_self = nicks.size();
-			    nicks.push_back(par[2]);
-			    std::string name;
-			    for (size_t j = 0; j < (par.size() - 3); j++)
-			    {
-					name += par[3 + j];
-					if (j < (par.size() - 4))
-					    name += " ";
-			    }
-			    names.push_back(name);
+				size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
+				biete = ((sp + 1) * (spiel % 100));
 			}
-			if ((par[1] == "DONE") && (par.size() == 2) && (from == pkr_self))
+		}
+		if ((par[1] == "RAMSCH") && (par.size() == 2) && (from == pkr_self))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "SPIELT") && (par.size() == 2) && (pkr_self != 100))
+		{
+			if (par[0] == nicks[0])
+				pkr_spielt = 0;
+			else if (par[0] == nicks[1])
+				pkr_spielt = 1;
+			else if (par[0] == nicks[2])
+				pkr_spielt = 2;
+			if (pkr_spielt == pkr_self)
 			{
-				// nothing to do
-			}
-			if ((par[1] == "MISCHEN") && (par.size() == 2) && (from == pkr_self))
-			{
-				// nothing to do
-			}
-			if ((par[1] == "GEBEN") && (par.size() == 2) && (from == pkr_self))
-			{
-				// nothing to do
-			}
-			if ((par[1] == "KARTE") && (par.size() == 3) && (from == pkr_self))
-			{
-				cards.push_back(atoi(par[2].c_str()));
-			}
-			if ((par[1] == "START") && (par.size() == 3) && (from == pkr_self))
-			{
-			    pkr_pos = atoi(par[2].c_str());
-			    reize_dran = (pkr_pos == 1) ? true : false;
-				reiz_counter = 0, spiel = 0, sicher = 0;
-				pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
-				handspiel = false;
-				spiel = eval(cards, !pkr_pos, sicher);
-				if (spiel)
+				if ((spiel % 100) == 23)
 				{
-					size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
-					biete = ((sp + 1) * (spiel % 100));
-				}
-			}
-			if ((par[1] == "RAMSCH") && (par.size() == 2) && (from == pkr_self))
-			{
-				// nothing to do
-			}
-			if ((par[1] == "SPIELT") && (par.size() == 2) && (pkr_self != 100))
-			{
-				if (par[0] == nicks[0])
-					pkr_spielt = 0;
-				else if (par[0] == nicks[1])
-					pkr_spielt = 1;
-				else if (par[0] == nicks[2])
-					pkr_spielt = 2;
-				if (pkr_spielt == pkr_self)
-				{
-					if ((spiel % 100) == 23)
-					{
-						// TODO: Nullspiel
-						if (tmcg_mpz_wrandom_ui() % 2)
-							std::cout << "CMD skat" << std::endl << std::flush;
-						else
-							std::cout << "CMD hand" << std::endl << std::flush;
-					}
+					// TODO: Nullspiel: entscheide ob Handspiel
+					if (tmcg_mpz_wrandom_ui() % 2)
+						std::cout << "CMD skat" << std::endl << std::flush;
 					else
-					{
-						std::vector<size_t> bc, tc, bt(4), rc;
-						std::vector<size_t>::iterator it;
-						blank(spiel, cards, bc);
-						std::sort(bc.begin(), bc.end());
-						tens(cards, tc);
-						std::sort(tc.begin(), tc.end());
-						it = std::set_intersection(bc.begin(), bc.end(),
-							tc.begin(), tc.end(), bt.begin());
-						bt.resize(it - bt.begin());
-						rare(spiel, cards, rc);
-std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc = " << rc.size() << std::endl;
-						if ((bt.size() > 0) || (bc.size() > 1) || (rc.size() == 2))
-							std::cout << "CMD skat" << std::endl << std::flush;
-						else
-							std::cout << "CMD hand" << std::endl << std::flush;
-					}
-				}
-			}
-			if ((par[1] == "PASSE") && (par.size() == 2))
-			{
-				if (from == pkr_self)
-					gepasst = true;
-				reize_dran = (!gepasst) ? true : false;
-			}
-			if ((par[1] == "REIZE") && (par.size() == 3))
-			{
-				reiz_counter++;
-				if (from == pkr_self)
-					reize_dran = false;
-				else 
-					reize_dran = (!gepasst) ? true : false;
-			}
-			if ((par[1] == "HAND") && (par.size() == 2) && (from == pkr_spielt))
-			{
-				reize_dran = false;
-				handspiel = true;
-				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
-				{
-					announce(spiel);
-				}
-			}
-			if ((par[1] == "SKAT") && (par.size() == 2) && (from == pkr_spielt))
-			{
-				reize_dran = false;
-				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
-				{
-					size_t sicher2 = 0;
-					size_t spiel2 = eval(cards, !pkr_pos, sicher2);
-					if (spiel2 > spiel)
-					{
-						if (sicher2 >= sicher)
-							spiel = spiel2, sicher = sicher2;
-					}
-					else if (sicher2 > sicher)
-					{
-						size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
-						size_t biete2 = ((sp + 1) * (spiel2 % 100));
-						if ((biete2 > biete) || (biete2 >= skat_reizwert[reiz_counter]))
-							spiel = spiel2, sicher = sicher2;
-					}
-					size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
-					if ((spiel % 100) == 23)
-					{
-						std::vector<size_t> nn;
-						not_null(cards, nn);
-						// TODO: Nullspiel
-					}
-					else
-					{
-						std::vector<size_t> hs, bc, tc, bt(4), rc;
-						std::vector<size_t>::iterator it;
-						high_suit(spiel, cards, hs);
-						blank(spiel, cards, bc);
-						std::sort(bc.begin(), bc.end());
-						tens(cards, tc);
-						std::sort(tc.begin(), tc.end());
-						it = std::set_intersection(bc.begin(), bc.end(),
-							tc.begin(), tc.end(), bt.begin());
-						bt.resize(it - bt.begin());
-						rare(spiel, cards, rc);
-std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << hs.size() << " rc = " << rc.size() << std::endl;
-						if (bt.size() >= 2)
-						{
-							size_t idx1 = tmcg_mpz_wrandom_ui() % bt.size();
-							c0 = bt[idx1];
-							bt.erase(std::remove(bt.begin(), bt.end(), c0),
-								bt.end());
-							size_t idx2 = tmcg_mpz_wrandom_ui() % bt.size();
-							c1 = bt[idx2];
-						}
-						else if ((bt.size() == 1) && (bc.size() > 0))
-						{
-							c0 = bt[0];
-							size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
-							c1 = bc[idx2];
-						}
-						else if ((bt.size() == 0) && (bc.size() >= 2))
-						{
-							size_t idx1 = tmcg_mpz_wrandom_ui() % bc.size();
-							c0 = bc[idx1];
-							bc.erase(std::remove(bc.begin(), bc.end(), c0),
-								bc.end());
-							size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
-							c1 = bc[idx2];
-						}
-						else if (rc.size() >= 2)
-						{
-							// Farbe entfernen (TODO: random, if rc > 2)
-							c0 = rc[0], c1 = rc[1];
-						}
-						else if (hs.size() > 3)
-						{
-							// Bunker
-							size_t idx1 = tmcg_mpz_wrandom_ui() % hs.size();
-							c0 = hs[idx1];
-							hs.erase(std::remove(hs.begin(), hs.end(), c0),
-								hs.end());
-							size_t idx2 = tmcg_mpz_wrandom_ui() % hs.size();
-							c1 = hs[idx2];
-						}
-						else
-						{
-							while (trump(spiel, c0) || ace(c0) ||
-								trump(spiel, c1) || ace(c1) || (c0 == c1))
-							{
-								size_t i = tmcg_mpz_wrandom_ui() % cards.size();
-								size_t j = tmcg_mpz_wrandom_ui() % cards.size();
-								c0 = cards[i], c1 = cards[j];
-							}
-						}
-					}
-					pkt += skat_pktwert[c0];
-					pkt += skat_pktwert[c1];
-					std::string card0 = skat_type2string(c0);
-					std::string card1 = skat_type2string(c1);
-					cards.erase(std::remove(cards.begin(), cards.end(), c0),
-						cards.end());
-					cards.erase(std::remove(cards.begin(), cards.end(), c1),
-						cards.end());
-					std::cout << "CMD druecke " << 
-						card0.substr(0, card0.length() - 1) << " " << 
-						card1.substr(0, card1.length() - 1) << std::endl <<
-						std::flush;
-				}
-			}
-			if ((par[1] == "DRUECKE") && (par.size() == 2) &&
-				(from == pkr_spielt))
-			{
-				if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
-				{
-					announce(spiel);
-				}
-			}
-			if ((par[1] == "SAGEAN") && (par.size() == 3) && 
-				(from == pkr_spielt))
-			{
-				spiel = atoi(par[2].c_str());
-				trumps = num_trump(spiel, cards);
-				switch (spiel % 100)
-				{
-					// calculate maximum opponent trumps
-					case 9:
-					case 10:
-					case 11:
-					case 12:
-						opp_trumps = 11 - trumps;
-						break;
-					case 23:
-						opp_trumps = 0;
-						break;
-					case 24:
-						opp_trumps = 4 - trumps;
-						break;
-				}
-				lege_dran = (pkr_pos == 0) ? true : false;
-			}
-			if ((par[1] == "OUVERT") && (par.size() == 3) && 
-				(from == pkr_spielt))
-			{
-				ocards.push_back(atoi(par[2].c_str()));
-				if (pkr_self != pkr_spielt)
-					opp_trumps = num_trump(spiel, ocards);
-			}
-			if ((par[1] == "LEGE") && (par.size() == 3))
-			{
-				size_t card = atoi(par[2].c_str());
-				stich.push_back(card);
-				lege_dran = ((stich.size() < 3) && 
-					(((from + 1) % 3) == pkr_self)) ? true : false;
-				// remove played card from my hand
-				if (par[0] == nicks[pkr_self])
-				{
-					cards.erase(std::remove(cards.begin(), cards.end(), card),
-						cards.end());
-    			}
-				// remove played ouvert card from stack
-				if ((par[0] == nicks[pkr_spielt]) && (ocards.size() > 0))
-				{
-					ocards.erase(std::remove(ocards.begin(), ocards.end(),
-						card), ocards.end());
-				}
-				// update trump statistics
-				if (par[0] == nicks[pkr_self])
-					trumps = num_trump(spiel, cards);
-				if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
-					opp_trumps = num_trump(spiel, ocards);
-				else if (par[0] != nicks[pkr_self])
-				{
-					if (trump(spiel, card) && (opp_trumps > 0))
-						opp_trumps--;
-				}
-			}
-			if ((par[1] == "BSTICH") && (par.size() == 2))
-			{
-				// update trump statistics
-				if (trump(spiel, stich[0]) && (par[0] == nicks[pkr_self]))
-				{
-					if (!trump(spiel, stich[1]) && !trump(spiel, stich[2]))
-						opp_trumps = 0;
-				}
-				// update point statistics
-				if (par[0] == nicks[pkr_self])
-				{
-					lege_dran = true;
-					for (size_t i = 0; i < stich.size(); i++)
-						pkt += skat_pktwert[stich[i]];
+						std::cout << "CMD hand" << std::endl << std::flush;
 				}
 				else
 				{
-					lege_dran = false;
-					if (pkr_spielt == pkr_self)
+					std::vector<size_t> bc, tc, bt(4), rc;
+					std::vector<size_t>::iterator it;
+					blank(spiel, cards, bc);
+					std::sort(bc.begin(), bc.end());
+					tens(cards, tc);
+					std::sort(tc.begin(), tc.end());
+					it = std::set_intersection(bc.begin(), bc.end(),
+						tc.begin(), tc.end(), bt.begin());
+					bt.resize(it - bt.begin());
+					rare(spiel, cards, rc);
+std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc = " << rc.size() << std::endl;
+					if ((bt.size() > 0) || (bc.size() > 1) || (rc.size() == 2))
+						std::cout << "CMD skat" << std::endl << std::flush;
+					else
+						std::cout << "CMD hand" << std::endl << std::flush;
+				}
+			}
+		}
+		if ((par[1] == "PASSE") && (par.size() == 2))
+		{
+			if (from == pkr_self)
+				gepasst = true;
+			reize_dran = (!gepasst) ? true : false;
+		}
+		if ((par[1] == "REIZE") && (par.size() == 3))
+		{
+			reiz_counter++;
+			if (from == pkr_self)
+				reize_dran = false;
+			else 
+				reize_dran = (!gepasst) ? true : false;
+		}
+		if ((par[1] == "HAND") && (par.size() == 2) && (from == pkr_spielt))
+		{
+			reize_dran = false;
+			handspiel = true;
+			if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
+			{
+				announce(spiel);
+			}
+		}
+		if ((par[1] == "SKAT") && (par.size() == 2) && (from == pkr_spielt))
+		{
+			reize_dran = false;
+			if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
+			{
+				size_t sicher2 = 0;
+				size_t spiel2 = eval(cards, !pkr_pos, sicher2);
+				if (spiel2 > spiel)
+				{
+					if (sicher2 >= sicher)
+						spiel = spiel2, sicher = sicher2;
+				}
+				else if (sicher2 > sicher)
+				{
+					size_t sp = skat_spitzen(24, cards); // nur Buben als Spitze
+					size_t biete2 = ((sp + 1) * (spiel2 % 100));
+					if ((biete2 > biete) || (biete2 >= skat_reizwert[reiz_counter]))
+						spiel = spiel2, sicher = sicher2;
+				}
+				size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
+				if ((spiel % 100) == 23)
+				{
+					std::vector<size_t> nn;
+					not_null(cards, nn);
+					// TODO: Nullspiel
+				}
+				else
+				{
+					std::vector<size_t> hs, bc, tc, bt(4), rc;
+					std::vector<size_t>::iterator it;
+					high_suit(spiel, cards, hs);
+					blank(spiel, cards, bc);
+					std::sort(bc.begin(), bc.end());
+					tens(cards, tc);
+					std::sort(tc.begin(), tc.end());
+					it = std::set_intersection(bc.begin(), bc.end(),
+						tc.begin(), tc.end(), bt.begin());
+					bt.resize(it - bt.begin());
+					rare(spiel, cards, rc);
+std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << hs.size() << " rc = " << rc.size() << std::endl;
+					if (bt.size() >= 2)
 					{
-						for (size_t i = 0; i < stich.size(); i++)
-							opp_pkt += skat_pktwert[stich[i]];
+						// mindestens zwei blanke Zehnen
+						size_t idx1 = tmcg_mpz_wrandom_ui() % bt.size();
+						c0 = bt[idx1];
+						bt.erase(std::remove(bt.begin(), bt.end(), c0),
+							bt.end());
+						size_t idx2 = tmcg_mpz_wrandom_ui() % bt.size();
+						c1 = bt[idx2];
 					}
-					else if (par[0] == nicks[pkr_spielt])
+					else if ((bt.size() == 1) && (bc.size() > 0))
 					{
-						for (size_t i = 0; i < stich.size(); i++)
-							opp_pkt += skat_pktwert[stich[i]];
+						// eine blanke Zehn und weitere blanke Karten
+						c0 = bt[0];
+						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+						c1 = bc[idx2];
+					}
+					else if ((bt.size() == 0) && (bc.size() >= 2))
+					{
+						// keine blanke Zehn aber mind. zwei blanke Karten
+						size_t idx1 = tmcg_mpz_wrandom_ui() % bc.size();
+						c0 = bc[idx1];
+						bc.erase(std::remove(bc.begin(), bc.end(), c0),
+							bc.end());
+						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+						c1 = bc[idx2];
+					}
+					else if (rc.size() >= 2)
+					{
+						// blanke Farbe entfernen (TODO: random, if rc > 2)
+						c0 = rc[0], c1 = rc[1];
+					}
+					else if (hs.size() > 3)
+					{
+						// Asse und/oder Zehnen bunkern
+						size_t idx1 = tmcg_mpz_wrandom_ui() % hs.size();
+						c0 = hs[idx1];
+						hs.erase(std::remove(hs.begin(), hs.end(), c0),
+							hs.end());
+						size_t idx2 = tmcg_mpz_wrandom_ui() % hs.size();
+						c1 = hs[idx2];
 					}
 					else
 					{
-						for (size_t i = 0; i < stich.size(); i++)
-							pkt += skat_pktwert[stich[i]];
+						// zufällige Karte (kein Trumpf, kein Ass)
+						while (trump(spiel, c0) || ace(c0) ||
+							trump(spiel, c1) || ace(c1) || (c0 == c1))
+						{
+							size_t i = tmcg_mpz_wrandom_ui() % cards.size();
+							size_t j = tmcg_mpz_wrandom_ui() % cards.size();
+							c0 = cards[i], c1 = cards[j];
+						}
 					}
 				}
-				stich.clear();
+				pkt += skat_pktwert[c0];
+				pkt += skat_pktwert[c1];
+				std::string card0 = skat_type2string(c0);
+				std::string card1 = skat_type2string(c1);
+				cards.erase(std::remove(cards.begin(), cards.end(), c0),
+					cards.end());
+				cards.erase(std::remove(cards.begin(), cards.end(), c1),
+					cards.end());
+				std::cout << "CMD druecke " << 
+					card0.substr(0, card0.length() - 1) << " " << 
+					card1.substr(0, card1.length() - 1) << std::endl <<
+					std::flush;
 			}
-			if ((par[1] == "STOP") && (par.size() == 2) && (from == pkr_self))
+		}
+		if ((par[1] == "DRUECKE") && (par.size() == 2) && (from == pkr_spielt))
+		{
+			if ((from == pkr_spielt) && (pkr_spielt == pkr_self))
 			{
-				cards.clear(), ocards.clear(), stich.clear();
-				pkr_pos = 100, pkr_spielt = 100, biete = 0, spiel = 0;
-				reize_dran = false, lege_dran = false, gepasst = false;
+				announce(spiel);
 			}
-			if ((par[1] == "GEWONNEN") && (par.size() == 2))
+		}
+		if ((par[1] == "SAGEAN") && (par.size() == 3) && (from == pkr_spielt))
+		{
+			spiel = atoi(par[2].c_str());
+			trumps = num_trump(spiel, cards);
+			switch (spiel % 100)
 			{
-				// nothing to do
+				// calculate maximum opponent trumps
+				case 9:
+				case 10:
+				case 11:
+				case 12:
+					opp_trumps = 11 - trumps;
+					break;
+				case 23:
+					opp_trumps = 0;
+					break;
+				case 24:
+					opp_trumps = 4 - trumps;
+					break;
 			}
-			if ((par[1] == "VERLOREN") && (par.size() == 2))
+			lege_dran = (pkr_pos == 0) ? true : false;
+		}
+		if ((par[1] == "OUVERT") && (par.size() == 3) && (from == pkr_spielt))
+		{
+			ocards.push_back(atoi(par[2].c_str()));
+			if (pkr_self != pkr_spielt)
+				opp_trumps = num_trump(spiel, ocards);
+		}
+		if ((par[1] == "LEGE") && (par.size() == 3))
+		{
+			size_t card = atoi(par[2].c_str());
+			stich.push_back(card), nick_stich.push_back(par[0]);
+			lege_dran = ((stich.size() < 3) && 
+				(((from + 1) % 3) == pkr_self)) ? true : false;
+			// remove played card from my hand
+			if (par[0] == nicks[pkr_self])
 			{
-				// nothing to do
-			}
-			if ((par[1] == "PROTO") && (par.size() == 3))
+				cards.erase(std::remove(cards.begin(), cards.end(), card),
+					cards.end());
+   			}
+			// remove played ouvert card from stack
+			if ((par[0] == nicks[pkr_spielt]) && (ocards.size() > 0))
 			{
-				// nothing to do
+				ocards.erase(std::remove(ocards.begin(), ocards.end(),
+					card), ocards.end());
 			}
+			// update trump statistics
+			if (par[0] == nicks[pkr_self])
+				trumps = num_trump(spiel, cards);
+			if ((pkr_self != pkr_spielt) && (ocards.size() > 0))
+				opp_trumps = num_trump(spiel, ocards);
+			else if (par[0] != nicks[pkr_self])
+			{
+				if (trump(spiel, card) && (opp_trumps > 0))
+					opp_trumps--;
+			}
+		}
+		if ((par[1] == "BSTICH") && (par.size() == 2))
+		{
+			// update trump statistics
+			if (trump(spiel, stich[0]) && (par[0] == nicks[pkr_self]))
+			{
+				if (!trump(spiel, stich[1]) && !trump(spiel, stich[2]))
+					opp_trumps = 0;
+			}
+			// update point statistics
+			if (par[0] == nicks[pkr_self])
+			{
+				lege_dran = true;
+				for (size_t i = 0; i < stich.size(); i++)
+					pkt += skat_pktwert[stich[i]];
+			}
+			else
+			{
+				lege_dran = false;
+				if (pkr_spielt == pkr_self)
+				{
+					for (size_t i = 0; i < stich.size(); i++)
+						opp_pkt += skat_pktwert[stich[i]];
+				}
+				else if (par[0] == nicks[pkr_spielt])
+				{
+					for (size_t i = 0; i < stich.size(); i++)
+						opp_pkt += skat_pktwert[stich[i]];
+				}
+				else
+				{
+					for (size_t i = 0; i < stich.size(); i++)
+						pkt += skat_pktwert[stich[i]];
+				}
+			}
+			stich.clear(), nick_stich.clear();
+		}
+		if ((par[1] == "STOP") && (par.size() == 2) && (from == pkr_self))
+		{
+			cards.clear(), ocards.clear(), stich.clear(), nick_stich.clear();
+			pkr_pos = 100, pkr_spielt = 100, biete = 0, spiel = 0;
+			reize_dran = false, lege_dran = false, gepasst = false;
+		}
+		if ((par[1] == "GEWONNEN") && (par.size() == 2))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "VERLOREN") && (par.size() == 2))
+		{
+			// nothing to do
+		}
+		if ((par[1] == "PROTO") && (par.size() == 3))
+		{
+			// nothing to do
 		}
 	} // end 2nd while
 	char ytmp[BUFFER_SIZE];
@@ -996,33 +1003,41 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			// Anspiel einer Karte
 			if ((spiel % 100) == 23)
 			{
-				// TODO: Nullspiel: Lusche aus Reihe spielen
+				// TODO: Nullspiel: Lusche aus sicherer Reihe spielen
 			}
 			else if ((opp_trumps > 0) && (trumps > opp_trumps))
 			{
-				if (high_jacks(cards))
+				// Trumpf ziehen
+				if (high_jacks(cards) && (pkr_spielt == pkr_self))
 				{
 					std::cout << "CMD lege GrU" << std::endl << std::flush;
 					return;
 				}
+				else if (high_jacks(cards) && (pkr_spielt != pkr_self))
+				{
+					std::cout << "CMD lege EiU" << std::endl << std::flush;
+					return;
+				}
 				else
 				{
-					if (std::count(cards.begin(), cards.end(), 1))
+					if (std::count(cards.begin(), cards.end(), 0))
 					{
-						std::cout << "CMD lege GrU" <<
-							std::endl << std::flush;
+						std::cout << "CMD lege EiU" << std::endl << std::flush;
 						return;
 					}
-					else if (std::count(cards.begin(), cards.end(), 3))
+					else if (std::count(cards.begin(), cards.end(), 1))
 					{
-						std::cout << "CMD lege ScU" <<
-							std::endl << std::flush;
+						std::cout << "CMD lege GrU" << std::endl << std::flush;
 						return;
 					}
 					else if (std::count(cards.begin(), cards.end(), 2))
 					{
-						std::cout << "CMD lege RoU" <<
-							std::endl << std::flush;
+						std::cout << "CMD lege RoU" << std::endl << std::flush;
+						return;
+					}
+					else if (std::count(cards.begin(), cards.end(), 3))
+					{
+						std::cout << "CMD lege ScU" << std::endl << std::flush;
 						return;
 					}
 				}					
@@ -1046,7 +1061,54 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 			{
 				// TODO: wenn möglich drunter bleiben, sonst wenig höher
 			}
-			// TODO: Stechen, Übernehmen oder Buttern
+			else if (trump(spiel, stich[0]) &&
+				(nick_stich[0] == nicks[pkr_spielt]))
+			{
+				// Trumpf angespielt von Gegner
+				// höherer Trumpf vorhanden? dann Übernehmen
+			}
+			else if (trump(spiel, stich[0]) && (pkr_spielt != pkr_self) &&
+				(nick_stich[0] != nicks[pkr_spielt]))
+			{
+				// Trumpf angespielt von Mitspieler (ungewöhnlich)
+				// falls Ass oder Zehn, mit Buben sichern
+			}
+			else if (trump(spiel, stich[0]) && (pkr_spielt == pkr_self) &&
+				(nick_stich[0] != nicks[pkr_spielt]))
+			{
+				// Trumpf angespielt von Gegner (ungewöhnlich)
+				// Übernehmen mit Bube
+				if (std::count(cards.begin(), cards.end(), 3))
+				{
+					std::cout << "CMD lege ScU" << std::endl << std::flush;
+					return;
+				}
+				else if (std::count(cards.begin(), cards.end(), 2))
+				{
+					std::cout << "CMD lege RoU" << std::endl << std::flush;
+					return;
+				}
+				// TODO: kein Ass, keine Zehn
+			}
+			else if (nick_stich[0] == nicks[pkr_spielt])
+			{
+				// Farbe angespielt von Gegner: Stechen, Übernehmen oder Buttern
+			}
+			else if ((nick_stich[0] != nicks[pkr_spielt]) &&
+				(pkr_spielt != pkr_self))
+			{
+				// Farbe angespielt von Mitspieler, versuche zu übernehmen
+			}
+			else if ((nick_stich[0] != nicks[pkr_spielt]) &&
+				(pkr_spielt == pkr_self))
+			{
+				// Farbe angespielt von Gegner: Stechen oder Abwerfen
+			}
+			else
+			{
+std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
+				// should not happen
+			}
 
 			// fallback: per Zufall spielen
 			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
@@ -1090,11 +1152,11 @@ int main (int argc, char **argv)
 	std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
 	while (1)
 	{
-		// select(2) -- initialize file descriptors
+		// initialize file descriptors for select(2)
 		FD_ZERO(&rfds);
 		MFD_SET(fd, &rfds);
 
-		// select(2) -- initialize timeout
+		// initialize timeout for select(2)
 		tv.tv_sec = 1L; // seconds
 		tv.tv_usec = 0L; // microseconds
 
@@ -1120,7 +1182,7 @@ int main (int argc, char **argv)
 			process_command(readed, buffer);
 			if (num == 0)
 			{
-				// if parent process is dead, block child in this loop
+				// if pipe to parent process broken, block child in this loop
 				while (1)
 					sleep(100);
 			}
