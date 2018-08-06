@@ -40,12 +40,12 @@ SecureSkat_SOURCES = securesocketstream.hh pipestream.hh socketstream.hh\
 SecureSkat_random_SOURCES = SecureSkat_rule.cc SecureSkat_rule.hh\
 	SecureSkat_defs.hh\
 	SecureSkat_random.cc
-SecureSkat_random_LDADD = @LIBTMCG_LIBS@
+SecureSkat_random_LDADD = @LIBTMCG_LIBS@ @LTLIBINTL@ @LIBINTL@
 
 SecureSkat_ai_SOURCES = SecureSkat_rule.cc SecureSkat_rule.hh\
 	SecureSkat_defs.hh\
 	SecureSkat_ai.cc
-SecureSkat_ai_LDADD = @LIBTMCG_LIBS@
+SecureSkat_ai_LDADD = @LIBTMCG_LIBS@ @LTLIBINTL@ @LIBINTL@
 
 ACLOCAL_AMFLAGS = -I m4
 
