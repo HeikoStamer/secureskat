@@ -1059,7 +1059,7 @@ std::cerr << "ballot_child() = " << ret << std::endl;
 							" " << _("failed") << std::endl;
 					}
 				}
-				catch (std::ofstream::failure e)
+				catch (std::ofstream::failure& e)
 				{
 					std::cout << X << _("writing file") << " " << cmd_argv[1] << 
 						" " << _("failed") << ": " << e.what() << std::endl;
@@ -1121,7 +1121,7 @@ std::cerr << "ballot_child() = " << ret << std::endl;
 								" " << _("failed") << std::endl;
 						}
 					}
-					catch (std::ifstream::failure e)
+					catch (std::ifstream::failure& e)
 					{
 						std::cout << X << _("reading file") << " " << cmd_argv[1] << 
 							" " << _("failed") << ": " << e.what() << std::endl;
