@@ -1,8 +1,8 @@
 SecureSkat 2.15:
-    - added program SecureSkat_ai
+    - added program SecureSkat_ai (simple computer player based on heuristic)
     - added SecureSkat_rule with some common functions for rules of the game 
     - SecureSkat_random: improved error handling and code cleanup
-	- SecureSkat: fixes exception handler of export/import command
+    - SecureSkat: fixes exception handler of export/import command
 SecureSkat 2.14:
     - reflect API changes from LibTMCG
     - bugfix: include libintl in the library path when building executables
@@ -65,4 +65,4 @@ SecureSkat 2.4:
       These problems are issues of the library LibTMCG. We announce them
       here to reach all affected users of LibTMCG resp. SecureSkat.
 SecureSkat 2.3:
-    - initial GNU/Savannah release (former name openSkat, included LibTMCG)
+    - initial nonGNU/Savannah release (former name openSkat, included LibTMCG)
