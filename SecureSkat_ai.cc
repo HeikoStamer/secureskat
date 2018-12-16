@@ -1149,6 +1149,12 @@ int main (int argc, char **argv)
 	char buffer[1024];
 	size_t readed = 0;
 
+	// initialize LibTMCG
+	if (!init_libTMCG())
+	{
+		std::cerr << "Initialization of LibTMCG failed!" << std::endl;
+		return EXIT_FAILURE;
+	}
 	std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
 	while (1)
 	{
