@@ -803,6 +803,8 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 					{
 						// eine blanke Zehn und weitere blanke Karten
 						c0 = bt[0];
+						bt.erase(std::remove(bt.begin(), bt.end(), c0),
+							bt.end());
 						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
 						c1 = bc[idx2];
 					}

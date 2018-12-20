@@ -1732,7 +1732,8 @@ int skat_game
 										int tt1 = skat_wort2type(cc1), tt2 = skat_wort2type(cc2);
 										if ((tt1 != -1) && (tt2 != -1))
 										{
-											if (os.find(tt1) && os.find(tt2))
+											if ((os.find(tt1) && os.find(tt2)) &&
+												(tt1 != tt2))
 											{
 												sk.clear();
 												os.move(tt1, sk), os.move(tt2, sk);
