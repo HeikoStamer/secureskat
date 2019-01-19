@@ -1,4 +1,4 @@
-# Copyright (C) 2016, 2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
+# Copyright (C) 2016, 2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 #
 # This file is part of SecureSkat.
 #
@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20180628])
+AC_REVISION([20190119])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.15], [HeikoStamer@gmx.net], [SecureSkat],
@@ -100,9 +100,9 @@ CPPFLAGS="$backup_CPPFLAGS"
 AC_SUBST(LIBGCRYPT_LIBS)
 AC_SUBST(LIBGCRYPT_CFLAGS)
 
-AM_PATH_LIBTMCG("1.3.13")
+AM_PATH_LIBTMCG("1.3.17")
 if test "x$LIBTMCG_LIBS" = "x"; then
-	AC_MSG_ERROR([libTMCG >= 1.3.13 is needed])
+	AC_MSG_ERROR([libTMCG >= 1.3.17 is needed])
 fi
 AC_SUBST(LIBTMCG_LIBS)
 AC_SUBST(LIBTMCG_CFLAGS)
@@ -161,10 +161,10 @@ AC_CHECK_FUNCS([fork dup2 getaddrinfo memset memcpy memcmp memmove select\
  send recv fileno tcgetattr tcsetattr connect bind listen accept setsockopt\
  htonl], , AC_MSG_ERROR([some essential C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-##CXXFLAGS="$CXXFLAGS -Wall -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##CXXFLAGS="$CXXFLAGS -Wall -Wextra -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
