@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 2002, 2003, 2004, 2005, 2007,
-               2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
+               2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 void random_announce (const std::vector<size_t> &cards)
 {
-	switch (tmcg_mpz_wrandom_ui() % 6)
+	switch ((tmcg_mpz_wrandom_ui() + cards.size()) % 6)
 	{
 		case 0:
 			std::cout << "CMD sagean Ei" << std::endl;
@@ -317,7 +317,8 @@ int main (int argc, char **argv)
 		std::cerr << "Initialization of LibTMCG failed!" << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
+	if (argc > 0)
+		std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
 	while (1)
 	{
 		// select(2) -- initialize file descriptors

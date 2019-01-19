@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 2004, 2005, 2006, 2007,
-               2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
+               2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@
 	
 	bool skat_geben
 		(
-			SchindelhauerTMCG *tmcg, TMCG_Stack<VTMF_Card> &d_mix,
+			TMCG_Stack<VTMF_Card> &d_mix,
 			TMCG_Stack<VTMF_Card> &s0, TMCG_Stack<VTMF_Card> &s1,
 			TMCG_Stack<VTMF_Card> &s2, TMCG_Stack<VTMF_Card> &sk
 		);

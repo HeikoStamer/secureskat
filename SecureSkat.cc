@@ -1,8 +1,8 @@
 /*******************************************************************************
    SecureSkat.cc, Secure Peer-to-Peer Implementation of the Card Game "Skat"
 
- Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2016, 2017
-               Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009,
+               2016, 2017, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,6 +46,9 @@ RETSIGTYPE sig_handler_quit(int sig)
 // This is the signal handler called when receiving SIGPIPE.
 RETSIGTYPE sig_handler_pipe(int sig)
 {
+#ifndef NDEBUG
+    std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
+#endif
 }
 
 // We do a lot of 'signal magic' such that SecureSkat appears to be single
@@ -78,6 +81,9 @@ std::map<pid_t, std::string> nick_host;
 RETSIGTYPE sig_handler_usr1(int sig)
 {
     sigset_t sigset;
+#ifndef NDEBUG
+    std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
+#endif
 
     // block SIGCHLD temporarily
     if (sigemptyset(&sigset) < 0)
@@ -201,6 +207,9 @@ RETSIGTYPE sig_handler_usr1(int sig)
 RETSIGTYPE sig_handler_chld(int sig)
 {
     sigchld_critical = 1;   // enter critical section
+#ifndef NDEBUG
+    std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;
+#endif
     
     // look for died children (zombies) and evaluate their exit code
     std::pair<pid_t, int> chld_stat;
@@ -213,7 +222,7 @@ RETSIGTYPE sig_handler_chld(int sig)
 
 // -----------------------------------------------------------------------------
 
-// Global variables are extremely ugly, however, they still necessary :-(
+// Global variables are extremely ugly, however, they required for KISS here :-(
 std::string game_ctl;           // name and path of the game control program
 char **game_env;                // pointer to the pointer of the environment
 TMCG_SecretKey sec;             // secret key of the player

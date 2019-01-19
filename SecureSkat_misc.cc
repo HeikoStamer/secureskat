@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 2002, 2003, 2004, 2006, 2007, 2009,
-               2017, 2018 Heiko Stamer <HeikoStamer@gmx.net>
+               2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@ int BindEmptyPort
 	{
 		int sockfd;
 		long socket_option = 1;
-		struct sockaddr_in sin = { 0 };
+		struct sockaddr_in sin;
+		memset(&sin, 0, sizeof(sin));
 		sin.sin_port = htons(current_port);
 		sin.sin_family = AF_INET;
 		sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -76,7 +77,8 @@ int ListenToPort
 {
 	int sockfd;
 	long socket_option = 1;
-	struct sockaddr_in sin = { 0 };
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
 	sin.sin_port = htons(port);
 	sin.sin_family = AF_INET;
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -124,7 +126,7 @@ int CloseHandle
 int ConnectToHost
 	(const char *host, uint16_t port)
 {
-	struct addrinfo hints = { 0 }, *res, *rp;
+	struct addrinfo hints = { 0, 0, 0, 0, 0, 0, 0, 0 }, *res, *rp;
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICSERV | AI_ADDRCONFIG;

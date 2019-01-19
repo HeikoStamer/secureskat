@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2018  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -590,7 +590,10 @@ size_t not_null (const std::vector<size_t> &cards,
 	std::vector<size_t> &bad_cards)
 {
 	bad_cards.clear();
+	if (cards.size() > 0)
+	{
 // TODO
+	}
 	return bad_cards.size();
 }
 
@@ -1157,7 +1160,8 @@ int main (int argc, char **argv)
 		std::cerr << "Initialization of LibTMCG failed!" << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
+	if (argc > 0)
+		std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
 	while (1)
 	{
 		// initialize file descriptors for select(2)
