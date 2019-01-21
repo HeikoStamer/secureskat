@@ -47,7 +47,8 @@ RETSIGTYPE sig_handler_quit(int sig)
 RETSIGTYPE sig_handler_pipe(int sig)
 {
 #ifndef NDEBUG
-    std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
+	if (sig != SIGPIPE)
+    	std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
 #endif
 }
 
