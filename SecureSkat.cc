@@ -344,17 +344,19 @@ void pipe_irc(const std::string &irc_message)
 void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 {
 	std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed
-	for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin(); pi != read_pipe.end(); pi++)
+	for (std::map<pid_t, int>::const_iterator pi = read_pipe.begin();
+		pi != read_pipe.end(); ++pi)
 	{
 		int fd = pi->second;    // file descriptor of the pipe
 		size_t rbs = 65536;     // size of the read buffer
 		if ((fd >= 0) && FD_ISSET(fd, &rfds))
 		{
-			if (readbuf.find(fd) == readbuf.end())
+			if (readbuf.count(fd) == 0)
 			{
+std::cerr << "alloc for pid = " << pi->first << " and fd = " << fd << std::endl;
 				// allocate a new read buffer for the pipe, if not exists
 				readbuf[fd] = new char[rbs];
-				// read buffer offset
+				// initialize read buffer offset
 				readed[fd] = 0;
 			}
 			// read data from pipe
@@ -365,6 +367,16 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				readed[fd] += num;
 				if (num == 0)
 					del_pipe.push_back(pi->first); // close this pipe later
+			}
+			else
+			{
+				std::cerr << _("read buffer for PID") << " " << pi->first <<
+					" " << _("exceeded") << std::endl;
+				char *tmp = new char[rbs]; // allocate temporary buffer
+				num = read(fd, tmp, rbs);
+				if (num == 0)
+					del_pipe.push_back(pi->first); // close this pipe later
+				delete [] tmp;
 			}
 			// process data
 			if (readed[fd] > 0)
@@ -451,12 +463,13 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 	for (size_t i = 0; i < del_pipe.size(); i++)
 	{
 		int fd = read_pipe[del_pipe[i]]; // file descriptor of the pipe
-		if (close(fd) < 0)
-			perror("read_after_select (close)");
+std::cerr << "free for pid = " << del_pipe[i] << " and fd = " << fd << std::endl;
 		delete [] readbuf[fd];
 		readbuf.erase(fd);
 		readed.erase(fd);
 		read_pipe.erase(del_pipe[i]);
+		if (close(fd) < 0)
+			perror("read_after_select (close)");
 	}
 	del_pipe.clear();
 }
@@ -1274,21 +1287,33 @@ void run_irc(const std::string &hostname)
 		MFD_SET(rnk7774_handle, &rfds);
 		
 		// PKI pipes from childs
-		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin(); pi != nick_pipe.end(); pi++)
+		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin();
+			pi != nick_pipe.end(); ++pi)
+		{
 			MFD_SET(pi->second, &rfds);
+		}
 				
 		// RNK pipes from childs
-		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin(); pi != rnk_pipe.end(); pi++)
+		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin();
+			pi != rnk_pipe.end(); ++pi)
+		{
 			MFD_SET(pi->second, &rfds);
+		}
 		
 		// RNK pipes from game childs
-		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin(); pi != games_rnkpipe.end(); pi++)
+		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin();
+			pi != games_rnkpipe.end(); ++pi)
+		{
 			if (pi->second >= 0)
 				MFD_SET(pi->second, &rfds);
+		}
 		
 		// OUT pipes from game childs
-		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin(); pi != games_opipe.end(); pi++)
+		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin();
+			pi != games_opipe.end(); ++pi)
+		{
 			MFD_SET(pi->second, &rfds);
+		}
 		
 		// select(2) -- initialize timeout
 		tv.tv_sec = 1L;			// seconds
@@ -2375,7 +2400,8 @@ void run_irc(const std::string &hostname)
         std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
 
     // free the previously allocated memory (read buffers)
-    for (std::map<int, char*>::const_iterator rbi = readbuf.begin(); rbi != readbuf.end(); rbi++)
+    for (std::map<int, char*>::const_iterator rbi = readbuf.begin();
+		rbi != readbuf.end(); ++rbi)
     {
         delete [] rbi->second;
     }
