@@ -82,7 +82,8 @@ RETSIGTYPE sig_handler_usr1(int sig)
 {
     sigset_t sigset;
 #ifndef NDEBUG
-    std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
+	if (sig != SIGUSR1)
+    	std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
 #endif
 
     // block SIGCHLD temporarily
@@ -208,7 +209,8 @@ RETSIGTYPE sig_handler_chld(int sig)
 {
     sigchld_critical = 1;   // enter critical section
 #ifndef NDEBUG
-    std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;
+	if (sig != SIGCHLD)
+    	std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;
 #endif
     
     // look for died children (zombies) and evaluate their exit code
