@@ -353,7 +353,6 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 		{
 			if (readbuf.count(fd) == 0)
 			{
-std::cerr << "alloc for pid = " << pi->first << " and fd = " << fd << std::endl;
 				// allocate a new read buffer for the pipe, if not exists
 				readbuf[fd] = new char[rbs];
 				// initialize read buffer offset
@@ -463,7 +462,6 @@ std::cerr << "alloc for pid = " << pi->first << " and fd = " << fd << std::endl;
 	for (size_t i = 0; i < del_pipe.size(); i++)
 	{
 		int fd = read_pipe[del_pipe[i]]; // file descriptor of the pipe
-std::cerr << "free for pid = " << del_pipe[i] << " and fd = " << fd << std::endl;
 		delete [] readbuf[fd];
 		readbuf.erase(fd);
 		readed.erase(fd);
