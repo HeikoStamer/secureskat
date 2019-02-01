@@ -117,14 +117,23 @@ RETSIGTYPE sig_handler_usr1(int sig)
             {
                 // print success resp. error message
                 if (WEXITSTATUS(status) == 0)
-                    std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("succeeded properly") << std::endl;
-                else
-                    std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
+				{
+                    std::cerr << ">< " << _("Session") << " \"" << tnr <<
+						"\" " << _("succeeded properly") << std::endl;
+				}                
+				else
+				{
+                    std::cerr << ">< " << _("Session") << " \"" << tnr <<
+						"\" " << _("failed. Error code") << ": WEXITSTATUS " <<
+						WEXITSTATUS(status) << std::endl;
+				}
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " <<
+					_("failed. Error code") << ": WTERMSIG " <<
+					WTERMSIG(status) << std::endl;
             }
             // remove associated data
             games_tnr2pid.erase(tnr);
@@ -133,7 +142,8 @@ RETSIGTYPE sig_handler_usr1(int sig)
         else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) != rnkrpl_pid.end())
         {
             // print success message
-            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("succeeded properly") << std::endl;
+            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+				_("succeeded properly") << std::endl;
             // remove associated data
             rnkrpl_pid.remove(chld_pid);
         }
@@ -142,12 +152,16 @@ RETSIGTYPE sig_handler_usr1(int sig)
             if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
             {
                 // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+					_("failed. Error code") << ": WEXITSTATUS " <<
+					WEXITSTATUS(status) << std::endl;
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+					_("failed. Error code") << ": WTERMSIG " <<
+					WTERMSIG(status) << std::endl;
             }
             // remove associated data
             rnk_pids.remove(chld_pid);
@@ -160,12 +174,16 @@ RETSIGTYPE sig_handler_usr1(int sig)
             if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
             {
                 // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << " " << _("failed. Error code") << ": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
+                std::cerr << ">< " << "PKI " << chld_pid << "/" <<
+					nick_nick[chld_pid] << " " << _("failed. Error code") <<
+					": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
             }
             if (WIFSIGNALED(status))
             {
                 // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" << nick_nick[chld_pid] << " " << _("failed. Error code") << ": WTERMSIG " << WTERMSIG(status) << std::endl;
+                std::cerr << ">< " << "PKI " << chld_pid << "/" <<
+					nick_nick[chld_pid] << " " << _("failed. Error code") <<
+					": WTERMSIG " << WTERMSIG(status) << std::endl;
             }
             // remove a bad nick (i.e. DoS attack on PKI) from the players list
             if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
@@ -195,7 +213,8 @@ RETSIGTYPE sig_handler_usr1(int sig)
         else
         {
 #ifndef NDEBUG
-            std::cerr << "sig_handler_usr1(): unknown child with PID " << chld_pid << std::endl;
+            std::cerr << "sig_handler_usr1(): unknown child with PID " <<
+				chld_pid << std::endl;
 #endif
         }
     } // end of while body
@@ -282,9 +301,9 @@ void pipe_irc(const std::string &irc_message)
                     *irc << "PRIVMSG " << ni->first << " :" << irc_parvec[1] << 
                         std::endl << std::flush;
                 }
-                // Additionally, send the announcement to the main channel,
-		// because some IRC servers (e.g. freenode.net) may block
-                // private messages of unregistered users.
+				// Additionally, send the announcement to the main channel,
+				// because some IRC servers (e.g. freenode.net) may block
+				// private messages of unregistered users.
                 *irc << "PRIVMSG " << MAIN_CHANNEL << " :" << irc_parvec[1] << 
                     "~+~" << std::endl << std::flush;
 										
@@ -430,12 +449,15 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 							TMCG_PublicKey apkey;
 							if (!apkey.import(pki2))
 							{
-								std::cerr << _("TMCG: public key corrupted") << std::endl;
+								std::cerr << _("TMCG: public key corrupted") <<
+									std::endl;
 							}
 							else if (pki1 != apkey.keyid(5))
 							{
-								std::cerr << _("TMCG: wrong public key") << std::endl;
-								std::cerr << pki1 << " vs. " << apkey.keyid(5) << std::endl;
+								std::cerr << _("TMCG: wrong public key") <<
+									std::endl;
+								std::cerr << pki1 << " vs. " <<
+									apkey.keyid(5) << std::endl;
 							}
 							else
 							{
@@ -743,8 +765,9 @@ static void process_line(char *line)
 					}
 				}
 			}
-			std::cout << prt_counter_valid << " " << _("out of") << " " << prt_counter <<
-				" " << _("game protocols are valid") << "." << std::endl;
+			std::cout << prt_counter_valid << " " << _("out of") << " " <<
+				prt_counter << " " << _("game protocols are valid") << "." <<
+				std::endl;
 			// Berechnen der Leistungspunkte (Erweitertes Seeger-System)
 			for (size_t j = 0; j < 3; j++)
 			{
@@ -1333,28 +1356,29 @@ void run_irc(const std::string &hostname)
 		if (ret > 0)
 		{
 			// RNK pipes from children
-			// ----------------------------------------------------------------------
+			// -----------------------
 			read_after_select(rfds, rnk_pipe, 1);
 			
 			// RNK pipes from game children
-			// ----------------------------------------------------------------------
+			// ----------------------------
 			read_after_select(rfds, games_rnkpipe, 1);
 			
 			// OUT pipes from game children
-			// ----------------------------------------------------------------------
+			// ----------------------------
 			read_after_select(rfds, games_opipe, 2);
 						
 			// PKI pipes from children
-			// ----------------------------------------------------------------------
+			// -----------------------
 			read_after_select(rfds, nick_pipe, 3);
 			
 			// RNK (export rank list on port 7773)
-			// ----------------------------------------------------------------------
+			// -----------------------------------
 			if (FD_ISSET(rnk7773_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(rnk7773_handle, (struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(rnk7773_handle,
+					(struct sockaddr*) &client_in, &client_len);
 				
 				if (client_handle < 0)
 				{
@@ -1376,12 +1400,13 @@ void run_irc(const std::string &hostname)
 			}
 			
 			// PKI (export public key on port 7771)
-			// -----------------------------------------------------------------
+			// ------------------------------------
 			if (FD_ISSET(pki7771_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(pki7771_handle, (struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(pki7771_handle,
+					(struct sockaddr*) &client_in, &client_len);
 				
 				if (client_handle < 0)
 				{
@@ -1398,12 +1423,13 @@ void run_irc(const std::string &hostname)
 			}
 			
 			// RNK (get rank entry on port 7774)
-			// -----------------------------------------------------------------
+			// ---------------------------------
 			if (FD_ISSET(rnk7774_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
-				int client_handle = accept(rnk7774_handle, (struct sockaddr*) &client_in, &client_len);
+				int client_handle = accept(rnk7774_handle,
+					(struct sockaddr*) &client_in, &client_len);
 				
 				// error occured
 				if (client_handle < 0)
@@ -1457,7 +1483,7 @@ void run_irc(const std::string &hostname)
 			
 #ifndef NOHUP
 			// read from stdin
-			// -----------------------------------------------------------------
+			// ---------------
 			if (FD_ISSET(fileno(stdin), &rfds))
 			{
 				rl_callback_read_char();
@@ -1465,10 +1491,11 @@ void run_irc(const std::string &hostname)
 #endif
 			
 			// read from IRC connection
-			// -----------------------------------------------------------------
+			// ------------------------
 			if (FD_ISSET(irc_handle, &rfds))
 			{
-				ssize_t num = read(irc_handle, irc_readbuf + irc_readed, sizeof(irc_readbuf) - irc_readed);
+				ssize_t num = read(irc_handle, irc_readbuf + irc_readed,
+					sizeof(irc_readbuf) - irc_readed);
 				irc_readed += num;
 				
 				if (num == 0)
