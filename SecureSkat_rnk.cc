@@ -1,7 +1,8 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2002, 2003, 2004, 2006, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2002, 2003, 2004, 2006,
+               2017, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +25,8 @@ void load_rnk
 	(const std::string &filename, std::map<std::string, std::string> &rnk)
 {
 	datum key, nextkey, data;
-	GDBM_FILE rnk_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
+	GDBM_FILE rnk_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT,
+		S_IRUSR | S_IWUSR, 0);
 	if (rnk_db != NULL)
 	{
 		key = gdbm_firstkey(rnk_db);
@@ -41,7 +43,8 @@ void load_rnk
 	}
 	else
 	{
-		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) << std::endl;
+		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) <<
+			std::endl;
 		perror("SecureSkat_rnk::load_rnk (gdbm_open)");
 		exit(-1);
 	}
@@ -51,7 +54,8 @@ void save_rnk
 	(const std::string &filename, std::map<std::string, std::string> rnk)
 {
 	datum key, data;
-	GDBM_FILE rnk_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT, S_IRUSR | S_IWUSR, 0);
+	GDBM_FILE rnk_db = gdbm_open((char*)filename.c_str(), 0, GDBM_WRCREAT,
+		S_IRUSR | S_IWUSR, 0);
 	if (rnk_db != NULL)
 	{	
 		for (std::map<std::string, std::string>::iterator pi = rnk.begin();
@@ -71,7 +75,8 @@ void save_rnk
 	}
 	else
 	{
-		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) << std::endl;
+		std::cerr << _("GDBM ERROR") << ": " << gdbm_strerror(gdbm_errno) <<
+			std::endl;
 		perror("SecureSkat_rnk::save_rnk (gdbm_open)");
 		exit(-1);
 	}
@@ -79,12 +84,13 @@ void save_rnk
 
 void create_rnk
 	(int &rnk7773_port, int &rnk7774_port,
-	int &rnk7773_handle, int &rnk7774_handle)
+	 int &rnk7773_handle, int &rnk7774_handle)
 {
 	rnk7773_port = BindEmptyPort(7771);
 	if (rnk7773_port < 0)
 	{
-		std::cerr << "SecureSkat_rnk::create_rnk: BindEmptyPort(7771) failed" << std::endl;
+		std::cerr << "SecureSkat_rnk::create_rnk: BindEmptyPort(7771) failed" <<
+			std::endl;
 		exit(-1);
 	}
 	if ((rnk7773_handle = ListenToPort(rnk7773_port)) < 0)
@@ -92,7 +98,8 @@ void create_rnk
 	rnk7774_port = BindEmptyPort(7771);
 	if (rnk7774_port < 0)
 	{
-		std::cerr << "SecureSkat_rnk::create_rnk: BindEmptyPort(7771) failed" << std::endl;
+		std::cerr << "SecureSkat_rnk::create_rnk: BindEmptyPort(7771) failed" <<
+			std::endl;
 		exit(-1);
 	}
 	if ((rnk7774_handle = ListenToPort(rnk7774_port)) < 0)
