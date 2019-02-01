@@ -2210,7 +2210,7 @@ void run_irc(const std::string &hostname)
 			{
 				std::string nick = ni->first, host = ni->second;
 				
-				// RNK (obtain ranking data from other players)
+				// RNK (obtain ranking data from other players by gossip)
 				if (nick_rcnt.find(nick) == nick_rcnt.end())
 					nick_rcnt[nick] = RNK_TIMEOUT;
 				else
@@ -2245,7 +2245,8 @@ void run_irc(const std::string &hostname)
 							std::vector<std::string> rnk_idlist;
 							
 							// create TCP/IP connection
-							int nick_handle = ConnectToHost(host.c_str(), nick_p7773[nick]);
+							int nick_handle = ConnectToHost(host.c_str(),
+								nick_p7773[nick]);
 							if (nick_handle < 0)
 							{
 								std::cerr << "run_irc [RNK/child] (ConnectToHost)" << std::endl;
@@ -2257,13 +2258,16 @@ void run_irc(const std::string &hostname)
 							char *tmp = new char[RNK_SIZE];
 							if (tmp == NULL)
 							{
-								std::cerr << _("RNK ERROR: out of memory") << std::endl;
+								std::cerr << _("RNK ERROR: out of memory") <<
+									std::endl;
 								exit(-1);
 							}
-							nrnk->getline(tmp, RNK_SIZE);
+							memset(tmp, 0, RNK_SIZE);
+							nrnk->getline(tmp, (RNK_SIZE - 1));
 							rnk_idsize = strtoul(tmp, NULL, 10);
 							for (size_t i = 0; i < rnk_idsize; i++)
 							{
+								memset(tmp, 0, RNK_SIZE);
 								nrnk->getline(tmp, RNK_SIZE);
 								if (rnk.find(tmp) == rnk.end())
 									rnk_idlist.push_back(tmp);
@@ -2288,6 +2292,7 @@ void run_irc(const std::string &hostname)
 								
 								// get RNK data and send it to parent
 								*nrpl << *ri << std::endl << std::flush;
+								memset(tmp, 0, RNK_SIZE);
 								nrpl->getline(tmp, RNK_SIZE);
 								*npipe << *ri << std::endl << std::flush;
 								*npipe << tmp << std::endl << std::flush;
