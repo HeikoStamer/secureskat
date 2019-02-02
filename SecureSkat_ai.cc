@@ -271,17 +271,6 @@ size_t good_suit (const std::vector<size_t> &cards)
 	return gs;
 }
 
-bool low (size_t card)
-{
-	if ((card == 8) || (card == 9) || (card == 10) || (card == 15) ||
-		(card == 16) || (card == 17) || (card == 22) || (card == 23) ||
-		(card == 24) || (card == 29) || (card == 30) || (card == 31))
-	{
-		return true;
-	}
-	return false;
-}
-
 size_t lows (const std::vector<size_t> &cards, std::vector<size_t> &low_cards)
 {
 	low_cards.clear();
@@ -312,6 +301,16 @@ size_t num_lows (const std::vector<size_t> &cards)
 {
 	std::vector<size_t> lc;
 	return lows(cards, lc);
+}
+
+bool vlow (size_t card)
+{
+	if ((card == 9) || (card == 10) || (card == 16) || (card == 17) ||
+		(card == 23) || (card == 24) || (card == 30) || (card == 31))
+	{
+		return true;
+	}
+	return false;
 }
 
 size_t vlows (const std::vector<size_t> &cards, std::vector<size_t> &vlow_cards)
@@ -867,7 +866,7 @@ std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc =
 					if ((biete2 > biete) || (biete2 >= skat_reizwert[reiz_counter]))
 						spiel = spiel2, sicher = sicher2;
 				}
-				size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
+				size_t c0 = cards[0], c1 = cards[1]; // fallback: first 2 cards
 				if ((spiel % 100) == 23)
 				{
 					std::vector<size_t> nn, bc;
@@ -900,8 +899,8 @@ std::cerr << "///// nn = " << nn.size() << " bc = " << bc.size() << std::endl;
 					}
 					else
 					{
-						// zufällige Karte (keine Lusche)
-						while (low(c0) || low(c1) || (c0 == c1))
+						// zufällige Karte (keine niedrige Lusche)
+						while (vlow(c0) || vlow(c1) || (c0 == c1))
 						{
 							size_t i = tmcg_mpz_wrandom_ui() % cards.size();
 							size_t j = tmcg_mpz_wrandom_ui() % cards.size();
