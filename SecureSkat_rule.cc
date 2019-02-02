@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2018  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -141,8 +141,10 @@ size_t skat_idx
 	assert (s < 18);
 	assert (f < 5);
 	for (size_t i = s; i < 18; i++)
+	{
 		if (t == ft[f][i])
 			return i;
+	}
 	return 99;
 }
 
@@ -258,7 +260,7 @@ bool skat_rulectl
 	else if (skat_spiel2gwert(spiel) == 24)
 		to = 4;	// Grand: 4 Truempfe
 	else
-		to = 11;	// Farbspiele: 11 Truempfe
+		to = 11; // Farbspiele: 11 Truempfe
 
 	if (skat_idx(co, 4, t, 0) != 99)
 	{
@@ -266,8 +268,10 @@ bool skat_rulectl
 		if (skat_idx(co, 4, tt, 0) == 99)
 		{
 			for (size_t i = 0; i < os.size(); i++)
+			{
 				if (skat_idx(co, 4, os[i].first, 0) < 99)
-						return false;
+					return false;
+			}
 			return true;
 		}
 		return true;
@@ -283,8 +287,10 @@ bool skat_rulectl
 				if (skat_idx(co, i, tt, to) == 99)
 				{
 					for (size_t j = 0; j < os.size(); j++)
+					{
 						if (skat_idx(co, i, os[j].first, to) < 99)
 							return false;
+					}
 					return true;
 				}
 				return true;

@@ -673,6 +673,113 @@ size_t not_null (const std::vector<size_t> &cards,
 	return bad_cards.size();
 }
 
+bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
+{
+	if (base == 0)
+	{
+		return false;
+	}
+	else if (base == 1)
+	{
+		if (std::count(cards.begin(), cards.end(), 0))
+		{
+			beyond = 0;
+			return true;
+		}
+		else
+			return false;
+	}
+	else if (base == 2)
+	{
+		if (std::count(cards.begin(), cards.end(), 1))
+		{
+			beyond = 1;
+			return true;
+		}
+		else if (std::count(cards.begin(), cards.end(), 0))
+		{
+			beyond = 0;
+			return true;
+		}
+		else
+			return false;
+	}
+	else if (base == 3)
+	{
+		if (std::count(cards.begin(), cards.end(), 2))
+		{
+			beyond = 2;
+			return true;
+		}
+		else if (std::count(cards.begin(), cards.end(), 1))
+		{
+			beyond = 1;
+			return true;
+		}
+		else if (std::count(cards.begin(), cards.end(), 0))
+		{
+			beyond = 0;
+			return true;
+		}
+		else
+			return false;
+	}
+	else
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			if ((base >= (4 + (i * 7))) && (base <= (10 + (i * 7))))
+			{
+				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				{
+					// 10
+					if (5 + (i * 7) < base)
+					{
+						beyond = 5 + (i * 7);
+						return true;
+					}
+				}
+				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				{
+					// O
+					if (7 + (i * 7) < base)
+					{
+						beyond = 7 + (i * 7);
+						return true;
+					}
+				}
+				if (std::count(cards.begin(), cards.end(), 6 + (i * 7)))
+				{
+					// K
+					if (6 + (i * 7) < base)
+					{
+						beyond = 6 + (i * 7);
+						return true;
+					}
+				}
+				if (std::count(cards.begin(), cards.end(), 4 + (i * 7)))
+				{
+					// A
+					if (4 + (i * 7) < base)
+					{
+						beyond = 4 + (i * 7);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+}
+
+size_t value (const std::vector<size_t> &cards)
+{
+	size_t value = 0;
+	for (size_t i = 0; i < cards.size(); i++)
+		value += skat_pktwert[cards[i]];
+	return value;
+}
+
 size_t pkr_self = 100, pkr_pos = 100, pkr_spielt = 100;
 size_t spiel = 0, reiz_counter = 0, biete = 0, sicher = 0;
 size_t pkt = 0, opp_pkt = 0, trumps = 0, opp_trumps = 0;
@@ -883,7 +990,7 @@ std::cerr << "///// nn = " << nn.size() << " bc = " << bc.size() << std::endl;
 					}
 					else
 					{
-						// zufällige Karte (keine niedrige Lusche)
+						// zufällige Karte (keine niedrige Lusche druecken!)
 						while (vlow(c0) || vlow(c1) || (c0 == c1))
 						{
 							size_t i = tmcg_mpz_wrandom_ui() % cards.size();
@@ -952,7 +1059,7 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 					}
 					else
 					{
-						// zufällige Karte (kein Trumpf, kein Ass)
+						// zufällige Karte (kein Trumpf, kein Ass druecken)
 						while (trump(spiel, c0) || ace(c0) ||
 							trump(spiel, c1) || ace(c1) || (c0 == c1))
 						{
@@ -1115,7 +1222,7 @@ std::cerr << "///// spiel = " << spiel << " biete = " << biete << std::endl;
 	else if (lege_dran)
 	{
 std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps = " << opp_trumps << " pkt = " << pkt << " opp_pkt = " << opp_pkt << std::endl;
-std::cerr << "///// stich.size() = " << stich.size() << std::endl;
+std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(stich) << std::endl;
 		assert((cards.size() > 0));
 		lege_dran = false;
 		if (stich.size() == 0)
@@ -1190,65 +1297,111 @@ std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 				// Mittelhand
 				if ((spiel % 100) == 23)
 				{
-					// TODO: wenn möglich drunter bleiben, sonst wenig höher
+					// TODO: wenn möglich knapp drunter bleiben, sonst wenig höher oder Abwerfen
 				}
-				else if (trump(spiel, stich[0]) &&
-					(nick_stich[0] == nicks[pkr_spielt]))
+				else if (trump(spiel, stich[0]))
 				{
-					// Trumpf angespielt von Gegner
-					// höherer Trumpf vorhanden? dann Übernehmen
-				}
-				else if (trump(spiel, stich[0]) && (pkr_spielt != pkr_self) &&
-					(nick_stich[0] != nicks[pkr_spielt]))
-				{
-					// Trumpf angespielt von Mitspieler (ungewöhnlich)
-					// falls Ass oder Zehn, mit Buben sichern
-				}
-				else if (trump(spiel, stich[0]) && (pkr_spielt == pkr_self) &&
-					(nick_stich[0] != nicks[pkr_spielt]))
-				{
-					// Trumpf angespielt von Gegner (ungewöhnlich)
-					// Übernehmen mit Bube
-					if (std::count(cards.begin(), cards.end(), 3))
+					if (nick_stich[0] == nicks[pkr_spielt])
 					{
-						std::cout << "CMD lege ScU" << std::endl << std::flush;
-						return;
+						// Trumpf angespielt vom spielenden Gegner
+						// höherer Trumpf vorhanden? dann knapp Übernehmen
+						size_t c;
+						if (beyond(stich[0], allowed_cards, c))
+						{
+							std::string card = skat_type2string(c);
+							std::cout << "CMD lege " <<
+								card.substr(0, card.length() - 1) <<
+								std::endl << std::flush;
+							return;
+						}
 					}
-					else if (std::count(cards.begin(), cards.end(), 2))
+					else
 					{
-						std::cout << "CMD lege RoU" << std::endl << std::flush;
-						return;
+						if (pkr_spielt == pkr_self)
+						{
+							// Trumpf angespielt vom Gegner (ungewöhnlich)
+							// Übernehmen mit kleinem Bube
+							if (std::count(cards.begin(), cards.end(), 3))
+							{
+								std::cout << "CMD lege ScU" << std::endl << std::flush;
+								return;
+							}
+							else if (std::count(cards.begin(), cards.end(), 2))
+							{
+								std::cout << "CMD lege RoU" << std::endl << std::flush;
+								return;
+							}
+						}
+						else
+						{
+							// Trumpf angespielt von Mitspieler (ungewöhnlich)
+							// falls Ass oder Zehn, mit Buben flankieren
+							if (ace(stich[0]) || ten(stich[0]))
+							{
+								if (std::count(cards.begin(), cards.end(), 0))
+								{
+									std::cout << "CMD lege EiU" << std::endl << std::flush;
+									return;
+								}
+								else if (std::count(cards.begin(), cards.end(), 1))
+								{
+									std::cout << "CMD lege GrU" << std::endl << std::flush;
+									return;
+								}
+								else if (std::count(cards.begin(), cards.end(), 2))
+								{
+									std::cout << "CMD lege RoU" << std::endl << std::flush;
+									return;
+								}
+								else if (std::count(cards.begin(), cards.end(), 3))
+								{
+									std::cout << "CMD lege ScU" << std::endl << std::flush;
+									return;
+								}
+							}
+						}
 					}
-					// TODO: kein Ass, keine Zehn
-				}
-				else if (nick_stich[0] == nicks[pkr_spielt])
-				{
-					// Farbe angespielt von Gegner: Stechen, Übernehmen, Buttern
-				}
-				else if ((nick_stich[0] != nicks[pkr_spielt]) &&
-					(pkr_spielt != pkr_self))
-				{
-					// Farbe angespielt von Mitspieler, versuche zu übernehmen
-				}
-				else if ((nick_stich[0] != nicks[pkr_spielt]) &&
-					(pkr_spielt == pkr_self))
-				{
-					// Farbe angespielt von Gegner: Stechen oder Abwerfen
 				}
 				else
 				{
-std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
-					// should not happen
+					if (nick_stich[0] == nicks[pkr_spielt])
+					{
+						// Farbe angespielt vom Gegner: Stechen, Übernehmen, Buttern
+						// höhere Karte vorhanden? dann knapp Übernehmen
+						size_t c;
+						if (beyond(stich[0], allowed_cards, c))
+						{
+							std::string card = skat_type2string(c);
+							std::cout << "CMD lege " <<
+								card.substr(0, card.length() - 1) <<
+								std::endl << std::flush;
+							return;
+						}
+					}
+					else
+					{
+						if (pkr_spielt == pkr_self)
+						{
+							// Farbe angespielt von Gegner: Übernehmen bzw. Stechen oder Abwerfen
+						}
+						else
+						{
+							// Farbe angespielt von Mitspieler, versuche zu Übernehmen
+						}
+					}
 				}
 			}
-			else if (stich.size() == 2)
+			else
 			{
 				// Hinterhand
 				if ((spiel % 100) == 23)
 				{
 					// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
 				}
-				// TODO: Stechen, Übernehmen oder Buttern
+				else
+				{
+					// TODO: Stechen, Übernehmen oder Buttern
+				}
 			}
 
 			// fallback: per Zufall spielen
@@ -1256,11 +1409,6 @@ std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
 			std::string card = skat_type2string(allowed_cards[idx]);
 			std::cout << "CMD lege " << 
 				card.substr(0, card.length() - 1) << std::endl << std::flush;
-		}
-		else
-		{
-std::cerr << "////// SHOULD NEVER HAPPEN 2" << std::endl;
-			// should not happen
 		}
 	}
 }
