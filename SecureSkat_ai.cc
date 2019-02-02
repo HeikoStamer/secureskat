@@ -1001,6 +1001,7 @@ std::cerr << "///// spiel = " << spiel << " biete = " << biete << std::endl;
 	else if (lege_dran)
 	{
 std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps = " << opp_trumps << " pkt = " << pkt << " opp_pkt = " << opp_pkt << std::endl;
+std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 		assert((cards.size() > 0));
 		lege_dran = false;
 		if (stich.size() == 0)
@@ -1048,12 +1049,13 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 				}					
 			}
 
+			// fallback: per Zufall spielen
 			size_t idx = tmcg_mpz_wrandom_ui() % cards.size();
 			std::string card = skat_type2string(cards[idx]);
 			std::cout << "CMD lege " << 
 				card.substr(0, card.length() - 1) << std::endl << std::flush;
 		}
-		else if (stich.size() == 1)
+		else if ((stich.size() == 1) || (stich.size() == 2))
 		{
 			std::vector<size_t> allowed_cards;
 			for (size_t i = 0; i < cards.size(); i++)
@@ -1062,57 +1064,69 @@ std::cerr << "///// spiel = " << spiel << " trumps = " << trumps << " opp_trumps
 					allowed_cards.push_back(cards[i]);
 			}
 			assert((allowed_cards.size() > 0));
-			if ((spiel % 100) == 23)
+
+			if (stich.size() == 1)
 			{
-				// TODO: wenn möglich drunter bleiben, sonst wenig höher
-			}
-			else if (trump(spiel, stich[0]) &&
-				(nick_stich[0] == nicks[pkr_spielt]))
-			{
-				// Trumpf angespielt von Gegner
-				// höherer Trumpf vorhanden? dann Übernehmen
-			}
-			else if (trump(spiel, stich[0]) && (pkr_spielt != pkr_self) &&
-				(nick_stich[0] != nicks[pkr_spielt]))
-			{
-				// Trumpf angespielt von Mitspieler (ungewöhnlich)
-				// falls Ass oder Zehn, mit Buben sichern
-			}
-			else if (trump(spiel, stich[0]) && (pkr_spielt == pkr_self) &&
-				(nick_stich[0] != nicks[pkr_spielt]))
-			{
-				// Trumpf angespielt von Gegner (ungewöhnlich)
-				// Übernehmen mit Bube
-				if (std::count(cards.begin(), cards.end(), 3))
+				if ((spiel % 100) == 23)
 				{
-					std::cout << "CMD lege ScU" << std::endl << std::flush;
-					return;
+					// TODO: wenn möglich drunter bleiben, sonst wenig höher
 				}
-				else if (std::count(cards.begin(), cards.end(), 2))
+				else if (trump(spiel, stich[0]) &&
+					(nick_stich[0] == nicks[pkr_spielt]))
 				{
-					std::cout << "CMD lege RoU" << std::endl << std::flush;
-					return;
+					// Trumpf angespielt von Gegner
+					// höherer Trumpf vorhanden? dann Übernehmen
 				}
-				// TODO: kein Ass, keine Zehn
-			}
-			else if (nick_stich[0] == nicks[pkr_spielt])
-			{
-				// Farbe angespielt von Gegner: Stechen, Übernehmen oder Buttern
-			}
-			else if ((nick_stich[0] != nicks[pkr_spielt]) &&
-				(pkr_spielt != pkr_self))
-			{
-				// Farbe angespielt von Mitspieler, versuche zu übernehmen
-			}
-			else if ((nick_stich[0] != nicks[pkr_spielt]) &&
-				(pkr_spielt == pkr_self))
-			{
-				// Farbe angespielt von Gegner: Stechen oder Abwerfen
-			}
-			else
-			{
+				else if (trump(spiel, stich[0]) && (pkr_spielt != pkr_self) &&
+					(nick_stich[0] != nicks[pkr_spielt]))
+				{
+					// Trumpf angespielt von Mitspieler (ungewöhnlich)
+					// falls Ass oder Zehn, mit Buben sichern
+				}
+				else if (trump(spiel, stich[0]) && (pkr_spielt == pkr_self) &&
+					(nick_stich[0] != nicks[pkr_spielt]))
+				{
+					// Trumpf angespielt von Gegner (ungewöhnlich)
+					// Übernehmen mit Bube
+					if (std::count(cards.begin(), cards.end(), 3))
+					{
+						std::cout << "CMD lege ScU" << std::endl << std::flush;
+						return;
+					}
+					else if (std::count(cards.begin(), cards.end(), 2))
+					{
+						std::cout << "CMD lege RoU" << std::endl << std::flush;
+						return;
+					}
+					// TODO: kein Ass, keine Zehn
+				}
+				else if (nick_stich[0] == nicks[pkr_spielt])
+				{
+					// Farbe angespielt von Gegner: Stechen, Übernehmen oder Buttern
+				}
+				else if ((nick_stich[0] != nicks[pkr_spielt]) &&
+					(pkr_spielt != pkr_self))
+				{
+					// Farbe angespielt von Mitspieler, versuche zu übernehmen
+				}
+				else if ((nick_stich[0] != nicks[pkr_spielt]) &&
+					(pkr_spielt == pkr_self))
+				{
+					// Farbe angespielt von Gegner: Stechen oder Abwerfen
+				}
+				else
+				{
 std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
-				// should not happen
+					// should not happen
+				}
+			}
+			else if (stich.size() == 2)
+			{
+				if ((spiel % 100) == 23)
+				{
+					// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
+				}
+				// TODO: Stechen, Übernehmen oder Buttern
 			}
 
 			// fallback: per Zufall spielen
@@ -1123,24 +1137,8 @@ std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
 		}
 		else
 		{
-			std::vector<size_t> allowed_cards;
-			for (size_t i = 0; i < cards.size(); i++)
-			{
-				if (skat_rulectl(stich[0], cards[i], spiel, cards))
-					allowed_cards.push_back(cards[i]);
-			}
-			assert((allowed_cards.size() > 0));
-			if ((spiel % 100) == 23)
-			{
-				// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
-			}
-			// TODO: Stechen, Übernehmen oder Buttern
-
-			// fallback: per Zufall spielen
-			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
-			std::string card = skat_type2string(allowed_cards[idx]);
-			std::cout << "CMD lege " << 
-				card.substr(0, card.length() - 1) << std::endl << std::flush;
+std::cerr << "////// SHOULD NEVER HAPPEN 2" << std::endl;
+			// should not happen
 		}
 	}
 }
