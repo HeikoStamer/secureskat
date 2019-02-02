@@ -2262,9 +2262,10 @@ void run_irc(const std::string &hostname)
 									std::endl;
 								exit(-1);
 							}
-							memset(tmp, 0, RNK_SIZE);
-							nrnk->getline(tmp, (RNK_SIZE - 1));
-							rnk_idsize = strtoul(tmp, NULL, 10);
+							char num[7];
+							memset(num, 0, sizeof(num));
+							nrnk->getline(num, sizeof(num) - 1);
+							rnk_idsize = strtoul(num, NULL, 10);
 							for (size_t i = 0; i < rnk_idsize; i++)
 							{
 								memset(tmp, 0, RNK_SIZE);
