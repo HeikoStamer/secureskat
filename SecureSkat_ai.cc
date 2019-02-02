@@ -314,6 +314,38 @@ size_t num_lows (const std::vector<size_t> &cards)
 	return lows(cards, lc);
 }
 
+size_t vlows (const std::vector<size_t> &cards, std::vector<size_t> &vlow_cards)
+{
+	vlow_cards.clear();
+	for (size_t i = 30; i < 32; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			vlow_cards.push_back(i);
+	}
+	for (size_t i = 23; i < 25; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			vlow_cards.push_back(i);
+	}
+	for (size_t i = 16; i < 18; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			vlow_cards.push_back(i);
+	}
+	for (size_t i = 9; i < 11; i++)
+	{
+		if (std::count(cards.begin(), cards.end(), i))
+			vlow_cards.push_back(i);
+	}
+	return vlow_cards.size();
+}
+
+size_t num_vlows (const std::vector<size_t> &cards)
+{
+	std::vector<size_t> vlc;
+	return vlows(cards, vlc);
+}
+
 size_t highs (const std::vector<size_t> &cards, std::vector<size_t> &high_cards)
 {
 	high_cards.clear();
@@ -393,6 +425,7 @@ size_t eval (const std::vector<size_t> &cards, const bool starts,
 	size_t nt = num_tens(cards);
 	size_t gs = good_suit(cards);
 	size_t nl = num_lows(cards);
+	size_t nv = num_vlows(cards);
 	// evaluate games based on a simple heuristic
 	if (starts)
 	{
@@ -423,7 +456,7 @@ size_t eval (const std::vector<size_t> &cards, const bool starts,
 			return 24;
 		}
 		// Null
-		if (nl > 8)
+		if ((nv > 7) || (nl > 8))
 		{
 			sicher = 50;
 			return 23;
@@ -453,7 +486,7 @@ size_t eval (const std::vector<size_t> &cards, const bool starts,
 			return 24;
 		}
 		// Null
-		if (nl > 7)
+		if ((nv > 6) || (nl > 7))
 		{
 			sicher = 50;
 			return 23;
@@ -613,7 +646,46 @@ size_t not_null (const std::vector<size_t> &cards,
 	bad_cards.clear();
 	if (cards.size() > 0)
 	{
-// TODO
+		for (size_t i = 0; i < 4; i++)
+		{
+			bool lowrow = false;
+			// 7, 8, 9
+			if (std::count(cards.begin(), cards.end(), (i * 7) + 6 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 5 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 4 + 4))
+			{
+				lowrow = true;
+			}
+			// 7, 8, 10
+			if (std::count(cards.begin(), cards.end(), (i * 7) + 6 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 5 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 1 + 4))
+			{
+				lowrow = true;
+			}
+			// 7, 8, U
+			if (std::count(cards.begin(), cards.end(), (i * 7) + 6 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 5 + 4) &&
+				std::count(cards.begin(), cards.end(), i))
+			{
+				lowrow = true;
+			}
+			// 7, 9, 10
+			if (std::count(cards.begin(), cards.end(), (i * 7) + 6 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 4 + 4) &&
+				std::count(cards.begin(), cards.end(), (i * 7) + 1 + 4))
+			{
+				lowrow = true;
+			}
+			if (!lowrow)
+			{
+				size_t spiel = 12 - i; // betrachtete Farbe ohne Absicherung
+				std::vector<size_t> sc;
+				suit(spiel, cards, sc);
+				for (size_t j = 0; j < sc.size(); j++)
+					bad_cards.push_back(sc[j]);
+			}
+		}
 	}
 	return bad_cards.size();
 }
