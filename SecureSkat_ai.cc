@@ -46,13 +46,20 @@ void announce (const size_t spiel)
 	}
 }
 
+bool jack (size_t card)
+{
+	if ((card == 0) || (card == 1) || (card == 2) || (card == 3))
+		return true;
+	return false;
+}
+
 size_t jacks (const std::vector<size_t> &cards, std::vector<size_t> &jack_cards)
 {
 	jack_cards.clear();
-	for (size_t i = 0; i < 4; i++)
+	for (size_t i = 0; i < cards.size(); i++)
 	{
-		if (std::count(cards.begin(), cards.end(), i))
-			jack_cards.push_back(i);
+		if (jack(cards[i]))
+			jack_cards.push_back(cards[i]);
 	}
 	return jack_cards.size();
 }
@@ -81,14 +88,11 @@ bool ace (size_t card)
 size_t aces (const std::vector<size_t> &cards, std::vector<size_t> &ace_cards)
 {
 	ace_cards.clear();
-	if (std::count(cards.begin(), cards.end(), 4))
-		ace_cards.push_back(4);
-	if (std::count(cards.begin(), cards.end(), 11))
-		ace_cards.push_back(11);
-	if (std::count(cards.begin(), cards.end(), 18))
-		ace_cards.push_back(18);
-	if (std::count(cards.begin(), cards.end(), 25))
-		ace_cards.push_back(25);
+	for (size_t i = 0; i < cards.size(); i++)
+	{
+		if (ace(cards[i]))
+			ace_cards.push_back(cards[i]);
+	}
 	return ace_cards.size();
 }
 
@@ -98,17 +102,21 @@ size_t num_aces (const std::vector<size_t> &cards)
 	return aces(cards, ac);
 }
 
+bool ten (size_t card)
+{
+	if ((card == 5) || (card == 12) || (card == 19) || (card == 26))
+		return true;
+	return false;
+}
+
 size_t tens (const std::vector<size_t> &cards, std::vector<size_t> &ten_cards)
 {
 	ten_cards.clear();
-	if (std::count(cards.begin(), cards.end(), 5))
-		ten_cards.push_back(5);
-	if (std::count(cards.begin(), cards.end(), 12))
-		ten_cards.push_back(12);
-	if (std::count(cards.begin(), cards.end(), 19))
-		ten_cards.push_back(19);
-	if (std::count(cards.begin(), cards.end(), 26))
-		ten_cards.push_back(26);
+	for (size_t i = 0; i < cards.size(); i++)
+	{
+		if (ten(cards[i]))
+			ten_cards.push_back(cards[i]);
+	}
 	return ten_cards.size();
 }
 
@@ -271,28 +279,24 @@ size_t good_suit (const std::vector<size_t> &cards)
 	return gs;
 }
 
+bool low (size_t card)
+{
+	if ((card == 8) || (card == 9) || (card == 10) || (card == 15) || 
+		(card == 16) || (card == 17) || (card == 22) ||	(card == 23) ||
+		(card == 24) || (card == 29) || (card == 30) || (card == 31))
+	{
+		return true;
+	}
+	return false;
+}
+
 size_t lows (const std::vector<size_t> &cards, std::vector<size_t> &low_cards)
 {
 	low_cards.clear();
-	for (size_t i = 29; i < 32; i++)
+	for (size_t i = 0; i < cards.size(); i++)
 	{
-		if (std::count(cards.begin(), cards.end(), i))
-			low_cards.push_back(i);
-	}
-	for (size_t i = 22; i < 25; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			low_cards.push_back(i);
-	}
-	for (size_t i = 15; i < 18; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			low_cards.push_back(i);
-	}
-	for (size_t i = 8; i < 11; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			low_cards.push_back(i);
+		if (low(cards[i]))
+			low_cards.push_back(cards[i]);
 	}
 	return low_cards.size();
 }
@@ -316,25 +320,10 @@ bool vlow (size_t card)
 size_t vlows (const std::vector<size_t> &cards, std::vector<size_t> &vlow_cards)
 {
 	vlow_cards.clear();
-	for (size_t i = 30; i < 32; i++)
+	for (size_t i = 0; i < cards.size(); i++)
 	{
-		if (std::count(cards.begin(), cards.end(), i))
-			vlow_cards.push_back(i);
-	}
-	for (size_t i = 23; i < 25; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			vlow_cards.push_back(i);
-	}
-	for (size_t i = 16; i < 18; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			vlow_cards.push_back(i);
-	}
-	for (size_t i = 9; i < 11; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			vlow_cards.push_back(i);
+		if (vlow(cards[i]))
+			vlow_cards.push_back(cards[i]);
 	}
 	return vlow_cards.size();
 }
@@ -345,28 +334,23 @@ size_t num_vlows (const std::vector<size_t> &cards)
 	return vlows(cards, vlc);
 }
 
+bool high (size_t card)
+{
+	if ((card == 4) || (card == 5) || (card == 11) || (card == 12) ||
+		(card == 18) || (card == 19) || (card == 25) || (card == 26))
+	{
+		return true;
+	}
+	return false;
+}
+
 size_t highs (const std::vector<size_t> &cards, std::vector<size_t> &high_cards)
 {
 	high_cards.clear();
-	for (size_t i = 25; i < 27; i++)
+	for (size_t i = 0; i < cards.size(); i++)
 	{
-		if (std::count(cards.begin(), cards.end(), i))
-			high_cards.push_back(i);
-	}
-	for (size_t i = 18; i < 20; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			high_cards.push_back(i);
-	}
-	for (size_t i = 11; i < 13; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			high_cards.push_back(i);
-	}
-	for (size_t i = 4; i < 6; i++)
-	{
-		if (std::count(cards.begin(), cards.end(), i))
-			high_cards.push_back(i);
+		if (high(cards[i]))
+			high_cards.push_back(cards[i]);
 	}
 	return high_cards.size();
 }
