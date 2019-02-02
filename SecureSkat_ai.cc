@@ -1006,14 +1006,14 @@ std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 		lege_dran = false;
 		if (stich.size() == 0)
 		{
-			// Anspiel einer Karte
+			// Vorderhand: Anspiel einer Karte
 			if ((spiel % 100) == 23)
 			{
 				// TODO: Nullspiel: Lusche aus sicherer Reihe spielen
 			}
 			else if ((opp_trumps > 0) && (trumps > opp_trumps))
 			{
-				// Trumpf ziehen
+				// Heuristik: Trumpf ziehen
 				if (high_jacks(cards) && (pkr_spielt == pkr_self))
 				{
 					std::cout << "CMD lege GrU" << std::endl << std::flush;
@@ -1046,8 +1046,14 @@ std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 						std::cout << "CMD lege ScU" << std::endl << std::flush;
 						return;
 					}
+					else
+					{
+						// TODO: falls alle Buben raus, Trumpf Ass usw. spielen
+						// TODO: sonst Trumpf Lusche anspielen
+					}
 				}					
 			}
+			// TODO: Lange Farbe spielen, beginnend bei Ass usw.
 
 			// fallback: per Zufall spielen
 			size_t idx = tmcg_mpz_wrandom_ui() % cards.size();
@@ -1067,6 +1073,7 @@ std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 
 			if (stich.size() == 1)
 			{
+				// Mittelhand
 				if ((spiel % 100) == 23)
 				{
 					// TODO: wenn möglich drunter bleiben, sonst wenig höher
@@ -1102,7 +1109,7 @@ std::cerr << "///// stich.size() = " << stich.size() << std::endl;
 				}
 				else if (nick_stich[0] == nicks[pkr_spielt])
 				{
-					// Farbe angespielt von Gegner: Stechen, Übernehmen oder Buttern
+					// Farbe angespielt von Gegner: Stechen, Übernehmen, Buttern
 				}
 				else if ((nick_stich[0] != nicks[pkr_spielt]) &&
 					(pkr_spielt != pkr_self))
@@ -1122,6 +1129,7 @@ std::cerr << "////// SHOULD NEVER HAPPEN" << std::endl;
 			}
 			else if (stich.size() == 2)
 			{
+				// Hinterhand
 				if ((spiel % 100) == 23)
 				{
 					// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
@@ -1159,7 +1167,7 @@ int main (int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	if (argc > 0)
-		std::cout << argv[0] << " (c) 2018 <HeikoStamer@gmx.net> " << std::endl;
+		std::cout << argv[0] << " (c) 2019 <HeikoStamer@gmx.net> " << std::endl;
 	while (1)
 	{
 		// initialize file descriptors for select(2)
