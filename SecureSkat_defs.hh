@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2009, 2016, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2007, 2009, 2016, 2017, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -105,18 +105,18 @@
     #define MFD_SET(fd, where) { FD_SET(fd, where);\
                 mfds = (fd > mfds) ? fd : mfds; }
 
-    // define different sizes (in characters)
+    // define some sizes (in characters)
     #define KEY_SIZE                    1000000L
     #define RNK_SIZE                    1000000L
 
-    // define different timeouts (in seconds)
+    // define some timeouts (in seconds)
     #define PKI_TIMEOUT                 1500
     #define RNK_TIMEOUT                 500
     #define ANNOUNCE_TIMEOUT            5
     #define CLEAR_TIMEOUT               30
     #define AUTOJOIN_TIMEOUT            75
 
-    // define different limits (number of child processes)
+    // define some limits (number of child processes)
     #define PKI_CHILDS                  10
     #define RNK_CHILDS                  5
 
