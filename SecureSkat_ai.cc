@@ -271,6 +271,17 @@ size_t good_suit (const std::vector<size_t> &cards)
 	return gs;
 }
 
+bool low (size_t card)
+{
+	if ((card == 8) || (card == 9) || (card == 10) || (card == 15) ||
+		(card == 16) || (card == 17) || (card == 22) || (card == 23) ||
+		(card == 24) || (card == 29) || (card == 30) || (card == 31))
+	{
+		return true;
+	}
+	return false;
+}
+
 size_t lows (const std::vector<size_t> &cards, std::vector<size_t> &low_cards)
 {
 	low_cards.clear();
@@ -774,9 +785,44 @@ std::cerr << "///// hand? bt = " << bt.size() << " bc = " << bc.size() << " rc =
 				size_t c0 = cards[0], c1 = cards[1]; // fallback: first two
 				if ((spiel % 100) == 23)
 				{
-					std::vector<size_t> nn;
+					std::vector<size_t> nn, bc;
 					not_null(cards, nn);
-					// TODO: Nullspiel
+					blank(spiel, cards, bc);
+std::cerr << "///// nn = " << nn.size() << " bc = " << bc.size() << std::endl;
+					if (nn.size() >= 2)
+					{
+						size_t idx1 = tmcg_mpz_wrandom_ui() % nn.size();
+						c0 = nn[idx1];
+						nn.erase(std::remove(nn.begin(), nn.end(), c0),
+							nn.end());
+						size_t idx2 = tmcg_mpz_wrandom_ui() % nn.size();
+						c1 = nn[idx2];
+					}
+					else if ((nn.size() == 1) && (bc.size() > 0))
+					{
+						c0 = nn[0];
+						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+						c1 = bc[idx2];
+					}
+					else if ((nn.size() == 0) && (bc.size() >= 2))
+					{
+						size_t idx1 = tmcg_mpz_wrandom_ui() % bc.size();
+						c0 = bc[idx1];
+						bc.erase(std::remove(bc.begin(), bc.end(), c0),
+							bc.end());
+						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
+						c1 = bc[idx2];
+					}
+					else
+					{
+						// zufällige Karte (keine Lusche)
+						while (low(c0) || low(c1) || (c0 == c1))
+						{
+							size_t i = tmcg_mpz_wrandom_ui() % cards.size();
+							size_t j = tmcg_mpz_wrandom_ui() % cards.size();
+							c0 = cards[i], c1 = cards[j];
+						}
+					}
 				}
 				else
 				{
