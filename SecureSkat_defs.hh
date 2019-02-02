@@ -124,4 +124,10 @@
     #define MAIN_CHANNEL                "#openSkat"
     #define MAIN_CHANNEL_UNDERSCORE     "#openSkat_"
 
+	// define some types
+	typedef std::list<pid_t>::const_iterator l_ci_pid_t;
+	typedef std::map<pid_t, std::string>::const_iterator m_ci_pid_t;
+	typedef std::map<std::string, std::string>::const_iterator m_ci_string;
+	typedef std::vector<std::string>::const_iterator v_ci_string;
+
 #endif

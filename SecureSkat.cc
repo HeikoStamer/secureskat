@@ -294,8 +294,8 @@ void pipe_irc(const std::string &irc_message)
             }
             else if (irc_parvec[0] == MAIN_CHANNEL)
             {
-                for (std::map<std::string, std::string>::const_iterator ni = 
-                    nick_players.begin(); ni != nick_players.end(); ni++)
+                for (m_ci_string ni = nick_players.begin();
+					ni != nick_players.end(); ++ni)
                 {
                     // First of all, send the announcement to each player.
                     *irc << "PRIVMSG " << ni->first << " :" << irc_parvec[1] << 
@@ -530,8 +530,8 @@ static void process_line(char *line)
 		}
 		else if ((cmd_argv[0] == "players") || (cmd_argv[0] == "spieler"))
 		{
-			for (std::map<std::string, std::string>::const_iterator ni = 
-				nick_players.begin(); ni != nick_players.end(); ni++)
+			for (m_ci_string ni = nick_players.begin();
+				ni != nick_players.end(); ++ni)
 			{
 				std::string nick = ni->first, host = ni->second;
 				std::string name = "?", email = "?", type = "?", fp = "?";
@@ -603,8 +603,7 @@ static void process_line(char *line)
 			// temporarily add the own public key
 			nick_key[pub.keyid(5)] = pub;
 			// parse the obtained RNK data
-			for (std::map<std::string, std::string>::const_iterator ri = 
-				rnk.begin(); ri != rnk.end(); ri++)
+			for (m_ci_string ri = rnk.begin(); ri != rnk.end(); ri++)
 			{
 				std::string tk_sig1, tk_sig2, tk_sig3;
 				std::string tk_header, tk_table;
@@ -2190,23 +2189,24 @@ void run_irc(const std::string &hostname)
 			}
 			
 			// send SIGQUIT to all PKI processes -- PKI TIMEMOUT exceeded
-			for (std::list<pid_t>::const_iterator pidi = nick_pids.begin(); pidi != nick_pids.end(); pidi++)
+			for (l_ci_pid_t p = nick_pids.begin(); p != nick_pids.end(); ++p)
 			{
-				if (nick_ncnt[nick_nick[*pidi]] > PKI_TIMEOUT)
-					if (kill(*pidi, SIGQUIT) < 0)
+				if (nick_ncnt[nick_nick[*p]] > PKI_TIMEOUT)
+					if (kill(*p, SIGQUIT) < 0)
 						perror("run_irc (kill)");
 			}
 			
 			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT exceeded
-			for (std::list<pid_t>::const_iterator pidi = rnk_pids.begin(); pidi != rnk_pids.end(); pidi++)
+			for (l_ci_pid_t p = rnk_pids.begin(); p != rnk_pids.end(); ++p)
 			{
-				if (nick_rnkcnt[rnk_nick[*pidi]] > RNK_TIMEOUT)
-					if (kill(*pidi, SIGQUIT) < 0)
+				if (nick_rnkcnt[rnk_nick[*p]] > RNK_TIMEOUT)
+					if (kill(*p, SIGQUIT) < 0)
 						perror("run_irc (kill)");
 			}
 			
 			// start RNK or PKI processes
-			for (std::map<std::string, std::string>::const_iterator ni = nick_players.begin(); ni != nick_players.end(); ni++)
+			for (m_ci_string ni = nick_players.begin();
+				ni != nick_players.end(); ++ni)
 			{
 				std::string nick = ni->first, host = ni->second;
 				
@@ -2220,6 +2220,7 @@ void run_irc(const std::string &hostname)
 				if ((nick_rcnt[nick] > RNK_TIMEOUT) &&
 					(nick_rnkcnt.find(nick) == nick_rnkcnt.end()))
 				{
+					// start RNK gossip
 					nick_rcnt[nick] = 0;
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
@@ -2241,8 +2242,6 @@ void run_irc(const std::string &hostname)
 								exit(-1);
 							}
 							opipestream *npipe = new opipestream(fd_pipe[1]);
-							size_t rnk_idsize = 0;
-							std::vector<std::string> rnk_idlist;
 							
 							// create TCP/IP connection
 							int nick_handle = ConnectToHost(host.c_str(),
@@ -2265,7 +2264,8 @@ void run_irc(const std::string &hostname)
 							char num[7];
 							memset(num, 0, sizeof(num));
 							nrnk->getline(num, sizeof(num) - 1);
-							rnk_idsize = strtoul(num, NULL, 10);
+							size_t rnk_idsize = strtoul(num, NULL, 10);
+							std::vector<std::string> rnk_idlist;
 							for (size_t i = 0; i < rnk_idsize; i++)
 							{
 								memset(tmp, 0, RNK_SIZE);
@@ -2279,8 +2279,9 @@ void run_irc(const std::string &hostname)
 							if (close(nick_handle) < 0)
 								perror("run_irc [RNK/child] (close)");
 							
-							// iterate RNK list
-							for (std::vector<std::string>::const_iterator ri = rnk_idlist.begin(); ri != rnk_idlist.end(); ri++)
+							// iterate through unknown entries of RNK list
+							for (v_ci_string ri = rnk_idlist.begin();
+								ri != rnk_idlist.end(); ++ri)
 							{
 								// create TCP/IP connection
 								int rhd = ConnectToHost(host.c_str(), nick_p7774[nick]);
@@ -2291,7 +2292,7 @@ void run_irc(const std::string &hostname)
 								}
 								iosocketstream *nrpl = new iosocketstream(rhd);
 								
-								// get RNK data and send it to parent
+								// get RNK data and send it to storing parent
 								*nrpl << *ri << std::endl << std::flush;
 								memset(tmp, 0, RNK_SIZE);
 								nrpl->getline(tmp, RNK_SIZE);
@@ -2326,7 +2327,8 @@ void run_irc(const std::string &hostname)
 				}
 				
 				// PKI (obtain and verify public keys of other players)
-				if ((nick_key.find(nick) == nick_key.end()) && (std::find(nick_ninf.begin(), nick_ninf.end(), nick) == nick_ninf.end()))
+				if ((nick_key.find(nick) == nick_key.end()) &&
+					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) == nick_ninf.end()))
 				{
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
@@ -2365,6 +2367,7 @@ void run_irc(const std::string &hostname)
 								std::cerr << _("PKI ERROR: out of memory") << std::endl;
 								exit(-1);
 							}
+							memset(tmp, 0, KEY_SIZE);
 							nkey->getline(tmp, KEY_SIZE);
 							public_key = tmp;
 							
@@ -2378,21 +2381,24 @@ void run_irc(const std::string &hostname)
 							TMCG_PublicKey pkey;
 							if (!pkey.import(public_key))
 							{
-								std::cerr << _("TMCG: public key corrupted") << std::endl;
+								std::cerr << _("TMCG: public key corrupted") <<
+									std::endl;
 								exit(-2);
 							}
 							
 							// check the keyID
 							if (nick != pkey.keyid(5))
 							{
-								std::cerr << _("TMCG: wrong public key") << std::endl;
+								std::cerr << _("TMCG: wrong public key") <<
+									std::endl;
 								exit(-3);
 							}
 							
 							// check the self-signature and NIZK
 							if (!pkey.check())
 							{
-								std::cerr << _("TMCG: invalid public key") << std::endl;
+								std::cerr << _("TMCG: invalid public key") <<
+									std::endl;
 								exit(-4);
 							}
 							
@@ -2441,26 +2447,26 @@ void run_irc(const std::string &hostname)
 void cleanup()
 {
     // send SIGQUIT to all child processes and wait for them
-    for (std::map<pid_t, std::string>::const_iterator pidi = games_pid2tnr.begin(); pidi != games_pid2tnr.end(); pidi++)
+    for (m_ci_pid_t p = games_pid2tnr.begin(); p != games_pid2tnr.end(); ++p)
     {
-        if (kill(pidi->first, SIGQUIT) < 0)
+        if (kill(p->first, SIGQUIT) < 0)
             perror("cleanup (kill)");
-        waitpid(pidi->first, NULL, 0);
+        waitpid(p->first, NULL, 0);
     }
     games_pid2tnr.clear(), games_tnr2pid.clear();
-    for (std::list<pid_t>::const_iterator pidi = nick_pids.begin(); pidi != nick_pids.end(); pidi++)
+    for (l_ci_pid_t p = nick_pids.begin(); p != nick_pids.end(); ++p)
     {
-        if (kill(*pidi, SIGQUIT) < 0)
+        if (kill(*p, SIGQUIT) < 0)
             perror("cleanup (kill)");
-        waitpid(*pidi, NULL, 0);
+        waitpid(*p, NULL, 0);
     }
     nick_pids.clear(), nick_nick.clear(), nick_host.clear();
     nick_ninf.clear(), nick_ncnt.clear(), nick_players.clear();
-    for (std::list<pid_t>::const_iterator pidi = rnkrpl_pid.begin(); pidi != rnkrpl_pid.end(); pidi++)
+    for (l_ci_pid_t p = rnkrpl_pid.begin(); p != rnkrpl_pid.end(); ++p)
     {
-        if (kill(*pidi, SIGQUIT) < 0)
+        if (kill(*p, SIGQUIT) < 0)
             perror("cleanup (kill)");
-        waitpid(*pidi, NULL, 0);
+        waitpid(*p, NULL, 0);
     }
     rnkrpl_pid.clear();
 }
