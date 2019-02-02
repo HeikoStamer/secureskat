@@ -530,6 +530,16 @@ size_t blank (const size_t spiel, const std::vector<size_t> &cards,
 			if ((suit(11, cards, sc) == 1) && (sc[0] != 11))
 				blank_cards.push_back(sc[0]);
 			break;
+		case 23:
+			if ((suit(9, cards, sc) == 1))
+				blank_cards.push_back(sc[0]);
+			if ((suit(10, cards, sc) == 1))
+				blank_cards.push_back(sc[0]);
+			if ((suit(11, cards, sc) == 1))
+				blank_cards.push_back(sc[0]);
+			if ((suit(12, cards, sc) == 1))
+				blank_cards.push_back(sc[0]);
+			break;
 		case 24:
 			if ((suit(9, cards, sc) == 1) && (sc[0] != 25))
 				blank_cards.push_back(sc[0]);
@@ -714,8 +724,11 @@ void process_command (size_t &readed, char *buffer)
 			{
 				if ((spiel % 100) == 23)
 				{
-					// TODO: Nullspiel: entscheide ob Handspiel
-					if (tmcg_mpz_wrandom_ui() % 2)
+					std::vector<size_t> nn, bc;
+					not_null(cards, nn);
+					blank(spiel, cards, bc);
+std::cerr << "///// hand? nn = " << nn.size() << " bc = " << bc.size() << std::endl;
+					if ((nn.size() > 0) || (bc.size() > 1))
 						std::cout << "CMD skat" << std::endl << std::flush;
 					else
 						std::cout << "CMD hand" << std::endl << std::flush;
