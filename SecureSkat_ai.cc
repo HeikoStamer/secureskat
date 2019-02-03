@@ -46,7 +46,28 @@ void announce (const size_t spiel)
 	}
 }
 
-bool jack (size_t card)
+bool same_suit (const size_t c1, const size_t c2)
+{
+	for (size_t i = 0; i < 4; i++)
+	{
+		if ((c1 >= (4 + (i * 7))) && (c1 <= (10 + (i * 7))) &&
+			(c2 >= (4 + (i * 7))) && (c2 <= (10 + (i * 7))))
+		{
+			return true;
+		}
+		else if ((c1 == i) && (c2 >= (4 + (i * 7))) && (c2 <= (10 + (i * 7))))
+		{
+			return true;
+		}
+		else if ((c1 >= (4 + (i * 7))) && (c1 <= (10 + (i * 7))) && (c2 == i))
+		{
+			return true;
+		}
+	}
+	return false;
+} 
+
+bool jack (const size_t card)
 {
 	if ((card == 0) || (card == 1) || (card == 2) || (card == 3))
 		return true;
@@ -361,7 +382,7 @@ size_t num_highs (const std::vector<size_t> &cards)
 	return highs(cards, hc);
 }
 
-bool trump (const size_t spiel, size_t card)
+bool trump (const size_t spiel, const size_t card)
 {
 	switch (spiel % 100)
 	{
@@ -673,7 +694,7 @@ size_t not_null (const std::vector<size_t> &cards,
 	return bad_cards.size();
 }
 
-bool beyond (size_t base, const std::vector<size_t> &cards, size_t &result)
+bool beyond (const size_t base, const std::vector<size_t> &cards, size_t &result)
 {
 std::cerr << "///// beyond() called" << std::endl;
 	if (base == 0)
@@ -769,8 +790,267 @@ std::cerr << "///// beyond() called" << std::endl;
 				}
 			}
 		}
-		return false;
 	}
+	return false;
+}
+
+bool below (const size_t base, const std::vector<size_t> &cards, size_t &result)
+{
+std::cerr << "///// below() called" << std::endl;
+	for (size_t i = 0; i < 4; i++)
+	{
+		if ((base >= (4 + (i * 7))) && (base <= (10 + (i * 7))))
+		{
+			// base == A
+			if (base == (4 + (i * 7)))
+			{
+				// K
+				if (std::count(cards.begin(), cards.end(), 6 + (i * 7)))
+				{
+					result = 6 + (i * 7);
+					return true;
+				}
+				// O
+				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				{
+					result = 7 + (i * 7);
+					return true;
+				}
+				// U
+				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				{
+					result = 0;
+					return true;
+				}
+				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				{
+					result = 1;
+					return true;
+				}
+				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				{
+					result = 2;
+					return true;
+				}
+				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				{
+					result = 3;
+					return true;
+				}
+				// 10
+				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				{
+					result = 5 + (i * 7);
+					return true;
+				}
+				// 9
+				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				{
+					result = 8 + (i * 7);
+					return true;
+				}
+				// 8
+				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				{
+					result = 9 + (i * 7);
+					return true;
+				}
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+			// base == K
+			if (base == (6 + (i * 7)))
+			{
+				// O
+				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				{
+					result = 7 + (i * 7);
+					return true;
+				}
+				// U
+				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				{
+					result = 0;
+					return true;
+				}
+				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				{
+					result = 1;
+					return true;
+				}
+				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				{
+					result = 2;
+					return true;
+				}
+				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				{
+					result = 3;
+					return true;
+				}
+				// 10
+				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				{
+					result = 5 + (i * 7);
+					return true;
+				}
+				// 9
+				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				{
+					result = 8 + (i * 7);
+					return true;
+				}
+				// 8
+				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				{
+					result = 9 + (i * 7);
+					return true;
+				}
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+			// base == O
+			if (base == (7 + (i * 7)))
+			{
+				// U
+				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				{
+					result = 0;
+					return true;
+				}
+				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				{
+					result = 1;
+					return true;
+				}
+				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				{
+					result = 2;
+					return true;
+				}
+				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				{
+					result = 3;
+					return true;
+				}
+				// 10
+				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				{
+					result = 5 + (i * 7);
+					return true;
+				}
+				// 9
+				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				{
+					result = 8 + (i * 7);
+					return true;
+				}
+				// 8
+				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				{
+					result = 9 + (i * 7);
+					return true;
+				}
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+			// base == 10
+			if (base == (5 + (i * 7)))
+			{
+				// 9
+				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				{
+					result = 8 + (i * 7);
+					return true;
+				}
+				// 8
+				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				{
+					result = 9 + (i * 7);
+					return true;
+				}
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+			// base == 9
+			if (base == (8 + (i * 7)))
+			{
+				// 8
+				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				{
+					result = 9 + (i * 7);
+					return true;
+				}
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+			// base == 8
+			if (base == (9 + (i * 7)))
+			{
+				// 7
+				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				{
+					result = 10 + (i * 7);
+					return true;
+				}
+				return false;
+			}
+		}
+		else if (base == i)
+		{
+			// 10
+			if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+			{
+				result = 5 + (i * 7);
+				return true;
+			}
+			// 9
+			if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+			{
+				result = 8 + (i * 7);
+				return true;
+			}
+			// 8
+			if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+			{
+				result = 9 + (i * 7);
+				return true;
+			}
+			// 7
+			if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+			{
+				result = 10 + (i * 7);
+				return true;
+			}
+			return false;
+		}
+	}
+	return false;
 }
 
 size_t value (const std::vector<size_t> &cards)
@@ -1320,7 +1600,18 @@ std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(sti
 				// Mittelhand
 				if ((spiel % 100) == 23)
 				{
-					// TODO: wenn möglich knapp drunter bleiben, sonst wenig höher oder Abwerfen
+					// wenn möglich in der Farbe knapp drunter bleiben
+					size_t c;
+					if (below(stich[0], allowed_cards, c))
+					{
+std::cerr << "------ below c = " << c << std::endl;
+						std::string card = skat_type2string(c);
+						std::cout << "CMD lege " <<
+							card.substr(0, card.length() - 1) <<
+							std::endl << std::flush;
+						return;
+					}
+					// TODO: sonst wenig höher oder (blanke Farben) abwerfen
 				}
 				else if (trump(spiel, stich[0]))
 				{
@@ -1421,7 +1712,31 @@ std::cerr << "++++++ beyond c = " << c << std::endl;
 				// Hinterhand
 				if ((spiel % 100) == 23)
 				{
-					// TODO: höchste Karte kleiner als bereits im Stich; Abwerfen
+					// höchste Karte im Stich bestimmen
+					size_t s = stich[0];
+					if (same_suit(s, stich[1]))
+					{
+						if (((stich[1] >= 4) && (stich[1] < s)) ||
+							((stich[1] == 0) && (s >= 8)) ||
+							((stich[1] == 1) && (s >= 15)) ||
+							((stich[1] == 2) && (s >= 22)) ||
+							((stich[1] == 3) && (s >= 29)))
+						{
+							s = stich[1];
+						}
+					}
+					// wenn möglich in der Farbe knapp drunter bleiben
+					size_t c;
+					if (below(s, allowed_cards, c))
+					{
+std::cerr << "------ below c = " << c << std::endl;
+						std::string card = skat_type2string(c);
+						std::cout << "CMD lege " <<
+							card.substr(0, card.length() - 1) <<
+							std::endl << std::flush;
+						return;
+					}
+					// TODO: strategisch Abwerfen (z.B. blanke Farben ohne 7)
 				}
 				else
 				{
