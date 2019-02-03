@@ -673,8 +673,9 @@ size_t not_null (const std::vector<size_t> &cards,
 	return bad_cards.size();
 }
 
-bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
+bool beyond (size_t base, const std::vector<size_t> &cards, size_t &result)
 {
+std::cerr << "///// beyond() called" << std::endl;
 	if (base == 0)
 	{
 		return false;
@@ -683,7 +684,7 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 	{
 		if (std::count(cards.begin(), cards.end(), 0))
 		{
-			beyond = 0;
+			result = 0;
 			return true;
 		}
 		else
@@ -693,12 +694,12 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 	{
 		if (std::count(cards.begin(), cards.end(), 1))
 		{
-			beyond = 1;
+			result = 1;
 			return true;
 		}
 		else if (std::count(cards.begin(), cards.end(), 0))
 		{
-			beyond = 0;
+			result = 0;
 			return true;
 		}
 		else
@@ -708,17 +709,17 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 	{
 		if (std::count(cards.begin(), cards.end(), 2))
 		{
-			beyond = 2;
+			result = 2;
 			return true;
 		}
 		else if (std::count(cards.begin(), cards.end(), 1))
 		{
-			beyond = 1;
+			result = 1;
 			return true;
 		}
 		else if (std::count(cards.begin(), cards.end(), 0))
 		{
-			beyond = 0;
+			result = 0;
 			return true;
 		}
 		else
@@ -735,7 +736,7 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 					// 10
 					if (5 + (i * 7) < base)
 					{
-						beyond = 5 + (i * 7);
+						result = 5 + (i * 7);
 						return true;
 					}
 				}
@@ -744,7 +745,7 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 					// O
 					if (7 + (i * 7) < base)
 					{
-						beyond = 7 + (i * 7);
+						result = 7 + (i * 7);
 						return true;
 					}
 				}
@@ -753,7 +754,7 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 					// K
 					if (6 + (i * 7) < base)
 					{
-						beyond = 6 + (i * 7);
+						result = 6 + (i * 7);
 						return true;
 					}
 				}
@@ -762,7 +763,7 @@ bool beyond (size_t base, const std::vector<size_t> &cards, size_t &beyond)
 					// A
 					if (4 + (i * 7) < base)
 					{
-						beyond = 4 + (i * 7);
+						result = 4 + (i * 7);
 						return true;
 					}
 				}
@@ -1011,6 +1012,12 @@ std::cerr << "///// nn = " << nn.size() << " bc = " << bc.size() << std::endl;
 					it = std::set_intersection(bc.begin(), bc.end(),
 						tc.begin(), tc.end(), bt.begin());
 					bt.resize(it - bt.begin());
+					for (size_t i = 0; i < bt.size(); i++)
+					{
+						// Entferne blanke Zehnen aus Menge bc 
+						if (std::count(bc.begin(), bc.end(), bt[i]))
+							std::remove(bc.begin(), bc.end(), bt[i]);
+					}
 					rare(spiel, cards, rc);
 std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << hs.size() << " rc = " << rc.size() << std::endl;
 					if (bt.size() >= 2)
@@ -1031,6 +1038,19 @@ std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << 
 							bt.end());
 						size_t idx2 = tmcg_mpz_wrandom_ui() % bc.size();
 						c1 = bc[idx2];
+					}
+					else if ((bt.size() == 1) && (bc.size() == 0))
+					{
+						// eine blanke Zehn und keine weiteren blanken Karten
+						c0 = bt[0];
+						bt.erase(std::remove(bt.begin(), bt.end(), c0),
+							bt.end());
+						// zufällige Karte (kein Trumpf, kein Ass druecken)
+						while (trump(spiel, c1) || ace(c1) || (c0 == c1))
+						{
+							size_t j = tmcg_mpz_wrandom_ui() % cards.size();
+							c1 = cards[j];
+						}
 					}
 					else if ((bt.size() == 0) && (bc.size() >= 2))
 					{
@@ -1308,6 +1328,7 @@ std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(sti
 						size_t c;
 						if (beyond(stich[0], allowed_cards, c))
 						{
+std::cerr << "++++++ beyond c = " << c << std::endl;
 							std::string card = skat_type2string(c);
 							std::cout << "CMD lege " <<
 								card.substr(0, card.length() - 1) <<
@@ -1371,6 +1392,7 @@ std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(sti
 						size_t c;
 						if (beyond(stich[0], allowed_cards, c))
 						{
+std::cerr << "++++++ beyond c = " << c << std::endl;
 							std::string card = skat_type2string(c);
 							std::cout << "CMD lege " <<
 								card.substr(0, card.length() - 1) <<
@@ -1404,6 +1426,7 @@ std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(sti
 				}
 			}
 
+std::cerr << "///// fallback ac.size() = " << allowed_cards.size() << std::endl;
 			// fallback: per Zufall spielen
 			size_t idx = tmcg_mpz_wrandom_ui() % allowed_cards.size();
 			std::string card = skat_type2string(allowed_cards[idx]);
@@ -1430,6 +1453,18 @@ int main (int argc, char **argv)
 	}
 	if (argc > 0)
 		std::cout << argv[0] << " (c) 2019 <HeikoStamer@gmx.net> " << std::endl;
+/*
+size_t bey, base = 26;
+std::vector<size_t> ac;
+ac.push_back(25);
+ac.push_back(28);
+if (beyond(base, ac, bey))
+{
+	std::cerr << "beyond = " << bey << std::endl;
+}
+else
+	std::cerr << "no beyond" << std::endl;
+*/
 	while (1)
 	{
 		// initialize file descriptors for select(2)
