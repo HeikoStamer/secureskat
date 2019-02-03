@@ -401,7 +401,7 @@ bool trump (const size_t spiel, const size_t card)
 		case 11:
 			if (card < 4)
 				return true;
-			if ((card >= 11) && (card <= 27))
+			if ((card >= 11) && (card <= 17))
 				return true;
 			break;
 		case 12:
@@ -1615,6 +1615,7 @@ std::cerr << "------ below c = " << c << std::endl;
 				}
 				else if (trump(spiel, stich[0]))
 				{
+std::cerr << "????? trump played" << std::endl;
 					if (nick_stich[0] == nicks[pkr_spielt])
 					{
 						// Trumpf angespielt vom spielenden Gegner
@@ -1635,7 +1636,7 @@ std::cerr << "++++++ beyond c = " << c << std::endl;
 						if (pkr_spielt == pkr_self)
 						{
 							// Trumpf angespielt vom Gegner (ungewöhnlich)
-							// Übernehmen mit kleinem Bube
+							// Übernehmen mit kleinem Bube, falls möglich
 							if (std::count(cards.begin(), cards.end(), 3))
 							{
 								std::cout << "CMD lege ScU" << std::endl << std::flush;
@@ -1679,6 +1680,7 @@ std::cerr << "++++++ beyond c = " << c << std::endl;
 				}
 				else
 				{
+std::cerr << "????? non-trump played" << std::endl;
 					if (nick_stich[0] == nicks[pkr_spielt])
 					{
 						// Farbe angespielt vom Gegner: Stechen, Übernehmen, Buttern
