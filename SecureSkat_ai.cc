@@ -1014,9 +1014,12 @@ std::cerr << "///// nn = " << nn.size() << " bc = " << bc.size() << std::endl;
 					bt.resize(it - bt.begin());
 					for (size_t i = 0; i < bt.size(); i++)
 					{
-						// Entferne blanke Zehnen aus Menge bc 
+						// Entferne blanke Zehnen aus Menge bc (Doppelungen)
 						if (std::count(bc.begin(), bc.end(), bt[i]))
-							std::remove(bc.begin(), bc.end(), bt[i]);
+						{
+							bc.erase(std::remove(bc.begin(), bc.end(), bt[i]),
+								bc.end());
+						}
 					}
 					rare(spiel, cards, rc);
 std::cerr << "///// bt = " << bt.size() << " bc = " << bc.size() << " hs = " << hs.size() << " rc = " << rc.size() << std::endl;
