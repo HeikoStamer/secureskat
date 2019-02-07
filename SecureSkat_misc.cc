@@ -127,7 +127,7 @@ int ConnectToHost
 	(const char *host, uint16_t port)
 {
 	struct addrinfo hints = { 0, 0, 0, 0, 0, 0, 0, 0 }, *res, *rp;
-	hints.ai_family = AF_INET;
+	hints.ai_family = AF_UNSPEC; //AF_INET; FIXME: resolving IPv4-only does not work
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICSERV | AI_ADDRCONFIG;
 	std::stringstream ports;
@@ -165,6 +165,7 @@ int ConnectToHost
 		}
 	}
 	freeaddrinfo(res);
+	perror("SecureSkat_misc::ConnectToHost (connect)");					
 	return -2;
 }
 
