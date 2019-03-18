@@ -323,7 +323,7 @@ int main (int argc, char **argv)
 	{
 		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
-		MFD_SET(fd, &rfds);
+		MFD_SET(fd, &rfds); // file descriptor value of STDIN is < FD_SETSIZE
 
 		// select(2) -- initialize timeout
 		tv.tv_sec = 1L; // seconds

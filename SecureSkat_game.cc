@@ -847,8 +847,9 @@ int skat_game
 				
 				// select(2) -- initialize file descriptors
 				FD_ZERO(&rfds);
-				MFD_SET(ipipe, &rfds);
-				if (pctl)
+				if (ipipe < FD_SETSIZE)
+					MFD_SET(ipipe, &rfds);
+				if (pctl && (ctl_i < FD_SETSIZE))
 					MFD_SET(ctl_i, &rfds);
 				
 				// select(2)

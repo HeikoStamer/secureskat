@@ -1301,30 +1301,36 @@ void run_irc(const std::string &hostname)
 #ifndef NOHUP
 		MFD_SET(fileno(stdin), &rfds);
 #endif
-		MFD_SET(irc_handle, &rfds);
-		MFD_SET(pki7771_handle, &rfds);
-		MFD_SET(rnk7773_handle, &rfds);
-		MFD_SET(rnk7774_handle, &rfds);
+		if (irc_handle < FD_SETSIZE)
+			MFD_SET(irc_handle, &rfds);
+		if (pki7771_handle < FD_SETSIZE)
+			MFD_SET(pki7771_handle, &rfds);
+		if (rnk7773_handle < FD_SETSIZE)
+			MFD_SET(rnk7773_handle, &rfds);
+		if (rnk7774_handle < FD_SETSIZE)
+			MFD_SET(rnk7774_handle, &rfds);
 		
 		// PKI pipes from childs
 		for (std::map<pid_t, int>::const_iterator pi = nick_pipe.begin();
 			pi != nick_pipe.end(); ++pi)
 		{
-			MFD_SET(pi->second, &rfds);
+			if (pi->second < FD_SETSIZE)
+				MFD_SET(pi->second, &rfds);
 		}
 				
 		// RNK pipes from childs
 		for (std::map<pid_t, int>::const_iterator pi = rnk_pipe.begin();
 			pi != rnk_pipe.end(); ++pi)
 		{
-			MFD_SET(pi->second, &rfds);
+			if (pi->second < FD_SETSIZE)
+				MFD_SET(pi->second, &rfds);
 		}
 		
 		// RNK pipes from game childs
 		for (std::map<pid_t, int>::const_iterator pi = games_rnkpipe.begin();
 			pi != games_rnkpipe.end(); ++pi)
 		{
-			if (pi->second >= 0)
+			if ((pi->second >= 0) && (pi->second < FD_SETSIZE))
 				MFD_SET(pi->second, &rfds);
 		}
 		
@@ -1332,7 +1338,8 @@ void run_irc(const std::string &hostname)
 		for (std::map<pid_t, int>::const_iterator pi = games_opipe.begin();
 			pi != games_opipe.end(); ++pi)
 		{
-			MFD_SET(pi->second, &rfds);
+			if (pi->second < FD_SETSIZE)
+				MFD_SET(pi->second, &rfds);
 		}
 		
 		// select(2) -- initialize timeout

@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2007, 2017, 2018  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2007, 2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -130,8 +130,10 @@ int skat_accept
 	{
 		// select(2) -- initialize file descriptors
 		FD_ZERO(&rfds);
-		MFD_SET(gp_handle, &rfds);
-		MFD_SET(ipipe, &rfds);
+		if (gp_handle < FD_SETSIZE)
+			MFD_SET(gp_handle, &rfds);
+		if (ipipe < FD_SETSIZE)
+			MFD_SET(ipipe, &rfds);
 		// select(2)
 		int ret = select(mfds + 1, &rfds, NULL, NULL, NULL);
 		// error occured

@@ -1789,7 +1789,7 @@ else
 	{
 		// initialize file descriptors for select(2)
 		FD_ZERO(&rfds);
-		MFD_SET(fd, &rfds);
+		MFD_SET(fd, &rfds); // file descriptor value of STDIN is < FD_SETSIZE
 
 		// initialize timeout for select(2)
 		tv.tv_sec = 1L; // seconds
