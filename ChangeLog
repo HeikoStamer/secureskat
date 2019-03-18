@@ -4,6 +4,7 @@ SecureSkat 2.15:
     - SecureSkat_random: improved error handling and code cleanup
     - SecureSkat: fixes exception handler of export/import command
     - bugfix: don't allow to put the same card type twice into the Skat
+    - SecureSkat_misc: fixes invalid argument (long->int) of setsockopt()
 SecureSkat 2.14:
     - reflect API changes from LibTMCG
     - bugfix: include libintl in the library path when building executables

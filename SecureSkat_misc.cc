@@ -29,7 +29,7 @@ int BindEmptyPort
 	while (current_port < (start_port + max_ports))
 	{
 		int sockfd;
-		long socket_option = 1;
+		int socket_option = 1;
 		struct sockaddr_in sin;
 		memset(&sin, 0, sizeof(sin));
 		sin.sin_port = htons(current_port);
@@ -76,7 +76,7 @@ int ListenToPort
 	(int port)
 {
 	int sockfd;
-	long socket_option = 1;
+	int socket_option = 1;
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_port = htons(port);
