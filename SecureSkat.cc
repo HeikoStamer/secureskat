@@ -384,10 +384,13 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
 				if (num <= 0)
 				{
-					std::cerr << _("read error for PID") << " " << pi->first <<
-						" " << _("encountered") << " [errno=" << errno << "]" <<
-						std::endl;
-					del_pipe.push_back(pi->first); // close this pipe later
+					if (errno != EINTR)
+					{
+						std::cerr << _("read error for PID") << " " <<
+							pi->first << " " << _("encountered") <<
+							" [errno=" << errno << "]" << std::endl;
+						del_pipe.push_back(pi->first); // close this pipe later
+					}
 				}
 				else
 					readed[fd] += num;
@@ -1510,9 +1513,12 @@ void run_irc(const std::string &hostname)
 					sizeof(irc_readbuf) - irc_readed);
 				if (num <= 0)
 				{
-					std::cerr << _("IRC ERROR: connection with server collapsed") <<
-						" [errno=" << errno << "]" << std::endl;
-					break;
+					if (errno != EINTR)
+					{
+						std::cerr << _("IRC ERROR: connection with server collapsed") <<
+							" [errno=" << errno << "]" << std::endl;
+						break;
+					}
 				}
 				irc_readed += num;
 						

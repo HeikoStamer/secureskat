@@ -1,4 +1,5 @@
 SecureSkat 2.15:
+    - bugfix: check the returned errno for EINTR (Interrupted system call)
     - bugfix: added some missing error handlers for read()
     - added program SecureSkat_ai (simple computer player based on heuristic)
     - added SecureSkat_rule with some common functions for rules of the game 
