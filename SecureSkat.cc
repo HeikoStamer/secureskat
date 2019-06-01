@@ -386,9 +386,10 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 				{
 					if (errno != EINTR)
 					{
-						std::cerr << _("read error for PID") << " " <<
-							pi->first << " " << _("encountered") <<
-							" [errno=" << errno << "]" << std::endl;
+						if (num < 0)
+							std::cerr << _("read error for PID") << " " <<
+								pi->first << " " << _("encountered") <<
+								" [errno=" << errno << "]" << std::endl;
 						del_pipe.push_back(pi->first); // close this pipe later
 					}
 				}
