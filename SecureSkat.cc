@@ -382,9 +382,15 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 			if ((rbs - readed[fd]) > 0)
 			{
 				num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
-				readed[fd] += num;
-				if (num == 0)
+				if (num <= 0)
+				{
+					std::cerr << _("read error for PID") << " " << pi->first <<
+						" " << _("encountered") << " [errno=" << errno << "]" <<
+						std::endl;
 					del_pipe.push_back(pi->first); // close this pipe later
+				}
+				else
+					readed[fd] += num;
 			}
 			else
 			{
@@ -392,7 +398,7 @@ void read_after_select(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 					" " << _("exceeded") << std::endl;
 				char *tmp = new char[rbs]; // allocate temporary buffer
 				num = read(fd, tmp, rbs);
-				if (num == 0)
+				if (num <= 0)
 					del_pipe.push_back(pi->first); // close this pipe later
 				delete [] tmp;
 			}
@@ -1502,14 +1508,14 @@ void run_irc(const std::string &hostname)
 			{
 				ssize_t num = read(irc_handle, irc_readbuf + irc_readed,
 					sizeof(irc_readbuf) - irc_readed);
-				irc_readed += num;
-				
-				if (num == 0)
+				if (num <= 0)
 				{
-					std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
+					std::cerr << _("IRC ERROR: connection with server collapsed") <<
+						" [errno=" << errno << "]" << std::endl;
 					break;
 				}
-				
+				irc_readed += num;
+						
 				if (irc_readed > 0)
 				{
 					std::vector<int> pos_delim;

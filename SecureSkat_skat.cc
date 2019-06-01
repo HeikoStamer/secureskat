@@ -222,7 +222,14 @@ int skat_accept
 		if ((ret > 0) && FD_ISSET(ipipe, &rfds))
 		{
 			ssize_t num = read(ipipe, ireadbuf + ireaded, 65536 - ireaded);
-			ireaded += num;
+			if (num <= 0)
+			{
+				std::cerr << _("read error in skat_accept() encountered") <<
+					" [errno=" << errno << "]" << std::endl;
+				break;
+			}
+			else
+				ireaded += num;
 			if (ireaded > 0)
 			{
 				std::vector<int> pos_delim;

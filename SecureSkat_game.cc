@@ -877,7 +877,14 @@ int skat_game
 					num = read(ctl_i, ireadbuf + ireaded, 65536 - ireaded);
 //std::cerr << "ctl_i got " << num << std::endl;
 				}
-				ireaded += num;
+				if (num <= 0)
+				{
+					std::cerr << _("read error in skat_game() encountered") <<
+						" [errno=" << errno << "]" << std::endl;
+					break;
+				}
+				else
+					ireaded += num;
 				
 				if (ireaded > 0)
 				{

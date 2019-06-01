@@ -1,4 +1,5 @@
 SecureSkat 2.15:
+    - bugfix: added some missing error handlers for read()
     - added program SecureSkat_ai (simple computer player based on heuristic)
     - added SecureSkat_rule with some common functions for rules of the game 
     - SecureSkat_random: improved error handling and code cleanup
