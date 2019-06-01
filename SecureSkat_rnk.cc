@@ -59,7 +59,7 @@ void save_rnk
 	if (rnk_db != NULL)
 	{	
 		for (std::map<std::string, std::string>::iterator pi = rnk.begin();
-			pi != rnk.end(); pi++)
+			pi != rnk.end(); ++pi)
 		{
 			std::string rnk_id = pi->first, rnk_data = pi->second;
 			key.dptr = (char*)rnk_id.c_str();

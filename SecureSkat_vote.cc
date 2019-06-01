@@ -182,7 +182,7 @@ int ballot_child
 	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
-	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); pi != gp_nick.end(); pi++, pkr_i++)
+	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); pi != gp_nick.end(); ++pi, pkr_i++)
 	{
 		vnicks.push_back(*pi);
 		if (*pi == pub.keyid(5))

@@ -55,7 +55,7 @@ std::vector<size_t> cards, ocards, stich;
 void process_command (size_t &readed, char *buffer)
 {
 	const size_t BUFFER_SIZE = 65536;
-	if ((readed <= 0) || (readed > BUFFER_SIZE))
+	if ((readed == 0) || (readed > BUFFER_SIZE))
 		return;
 	// detect line endings
 	std::vector<size_t> pos_delim;
@@ -207,7 +207,7 @@ void process_command (size_t &readed, char *buffer)
 				if (par[0] == nicks[pkr_self])
 				{
 					for (std::vector<size_t>::iterator ci = 
-						cards.begin(); ci != cards.end(); ci++)
+						cards.begin(); ci != cards.end(); ++ci)
 					{
 						if (card == *ci)
 						{
@@ -220,7 +220,7 @@ void process_command (size_t &readed, char *buffer)
 				if ((par[0] == nicks[pkr_spielt]) && (ocards.size() > 0))
 				{
 					for (std::vector<size_t>::iterator oci = 
-						ocards.begin(); oci != ocards.end(); oci++)
+						ocards.begin(); oci != ocards.end(); ++oci)
 					{
 						if (card == *oci)
 						{
@@ -285,7 +285,7 @@ void act()
 		{
 			std::vector<size_t> allowed_cards;
 			for (std::vector<size_t>::iterator ci = cards.begin();
-				ci != cards.end(); ci++)
+				ci != cards.end(); ++ci)
 			{
 				if (skat_rulectl(stich[0], *ci, spiel_status, cards))
 				{

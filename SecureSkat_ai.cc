@@ -683,9 +683,9 @@ size_t not_null (const std::vector<size_t> &cards,
 			}
 			if (!lowrow)
 			{
-				size_t spiel = 12 - i; // betrachtete Farbe ohne Absicherung
+				size_t fspiel = 12 - i; // betrachtete Farbe ohne Absicherung
 				std::vector<size_t> sc;
-				suit(spiel, cards, sc);
+				suit(fspiel, cards, sc);
 				for (size_t j = 0; j < sc.size(); j++)
 					bad_cards.push_back(sc[j]);
 			}
@@ -1072,7 +1072,7 @@ std::vector<std::string> nick_stich;
 void process_command (size_t &readed, char *buffer)
 {
 	const size_t BUFFER_SIZE = 65536;
-	if ((readed <= 0) || (readed > BUFFER_SIZE))
+	if ((readed == 0) || (readed > BUFFER_SIZE))
 		return;
 	// detect line endings
 	std::vector<size_t> pos_delim;

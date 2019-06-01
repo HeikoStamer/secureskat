@@ -58,7 +58,7 @@ int skat_connect
 	std::string tmp = "";
 	
 	// authenticate connection: receive the nonce
-	unsigned long int nonce_A = 0, nonce_B = 0;
+	unsigned long int nonce_A = 0;
 	*neighbor >> nonce_A;
 	neighbor->ignore(1, '\n');
 	if (neighbor->good())
@@ -68,7 +68,7 @@ int skat_connect
 		// send the signature
 		*neighbor << sec.sign(ost.str()) << std::endl << std::flush;
 		// create a fresh nonce
-		nonce_B = tmcg_mpz_srandom_ui();
+		unsigned long int nonce_B = tmcg_mpz_srandom_ui();
 		// send challenge
 		*neighbor << nonce_B << std::endl << std::flush;
 		// receive the signature
@@ -156,7 +156,7 @@ int skat_accept
 			{
 				iosocketstream *neighbor = new iosocketstream(handle);
 				// create a fresh nonce
-				unsigned long int nonce_A = tmcg_mpz_srandom_ui(), nonce_B = 0;
+				unsigned long int nonce_A = tmcg_mpz_srandom_ui();
 				std::ostringstream ost, ost2;
 				std::string tmp;
 				*neighbor << nonce_A << std::endl << std::flush;
@@ -173,6 +173,7 @@ int skat_accept
 				}
 				else
 				{
+					unsigned long int nonce_B = 0;
 					// receive the nonce and reply
 					*neighbor >> nonce_B;
 					neighbor->ignore(1, '\n');
@@ -447,7 +448,7 @@ int skat_child
 	std::vector<std::string> vnicks;
 	size_t pkr_i = 0, pkr_self = 0;
 	gp_nick.sort();
-	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); pi != gp_nick.end(); pi++)
+	for (std::list<std::string>::const_iterator pi = gp_nick.begin(); pi != gp_nick.end(); ++pi)
 	{
 		vnicks.push_back(*pi);
 		if (*pi == pub.keyid(5))

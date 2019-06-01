@@ -534,9 +534,10 @@ void skat_blatt
 	for (size_t i = 0; i < os.size(); i++)
 		w.push_back(os[i].first);
 	if (p != 99)
+	{
 		std::sort(w.begin(), w.end());
-	if (p != 99)
 		std::cout << "><><>< ";
+	}
 	if (p == 0)
 		std::cout << "VH: ";
 	if (p == 1)
@@ -545,7 +546,7 @@ void skat_blatt
 		std::cout << "HH: ";
 	if (p == 10)
 		std::cout << _("revealed cards") << ": ";
-	for (std::vector<int>::const_iterator wi = w.begin(); wi != w.end(); wi++)
+	for (std::vector<int>::const_iterator wi = w.begin(); wi != w.end(); ++wi)
 		std::cout << skat_type2string(*wi);
 	if (p != 99)
 		std::cout << std::endl;

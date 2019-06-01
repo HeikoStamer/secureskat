@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 2002, 2003, 2004, 2006, 2007
-                                       2017  Heiko Stamer <HeikoStamer@gmx.net>
+               2017, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -339,7 +339,7 @@ void set_public_keys
 		exit(-1);
 	}
 	for (std::map<std::string, TMCG_PublicKey>::const_iterator
-		pi = keys.begin(); pi != keys.end(); pi++)
+		pi = keys.begin(); pi != keys.end(); ++pi)
 	{
 		key.dptr = (char*)(pi->first).c_str();
 		key.dsize = (pi->first).length() + 1;
