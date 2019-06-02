@@ -29,20 +29,16 @@ int skat_vkarte
 	)
 {
 	assert(pkr_self != pkr_who);
-	
 #ifndef NDEBUG
 	start_clock();
 #endif
-	
-	int type = -1;
-	VTMF_Card c;
-	
 	try
 	{
 		if (((pkr_self == 0) && (pkr_who == 1)) || 
 			((pkr_self == 1) && (pkr_who == 2)) || 
 			((pkr_self == 2) && (pkr_who == 0)))
 		{
+			VTMF_Card c;
 			*left >> c;
 			if (!left->good())
 				throw -1;
@@ -51,24 +47,28 @@ int skat_vkarte
 			tmcg->TMCG_SelfCardSecret(c, vtmf);
 			if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 				throw -1;
-			
 			if ((pkr_self == 0) && (pkr_who == 1))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 			if ((pkr_self == 1) && (pkr_who == 2))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 					throw -1;
+			}
 			if ((pkr_self == 2) && (pkr_who == 0))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 					throw -1;
+			}
 			if ((pkr_self == 0) && (pkr_who == 1))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 					throw -1;
+			}
 			if ((pkr_self == 1) && (pkr_who == 2))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
 			if ((pkr_self == 2) && (pkr_who == 0))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *right, *right);
-			
-			type = tmcg->TMCG_TypeOfCard(c, vtmf);
+			int type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
 				s.remove(c);
 			throw type;
@@ -77,6 +77,7 @@ int skat_vkarte
 			((pkr_self == 1) && (pkr_who == 0)) || 
 			((pkr_self == 2) && (pkr_who == 1)))
 		{
+			VTMF_Card c;
 			*right >> c;
 			if (!right->good())
 				throw -1;
@@ -85,24 +86,28 @@ int skat_vkarte
 			tmcg->TMCG_SelfCardSecret(c, vtmf);
 			if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *right, *right))
 				throw -1;
-			
 			if ((pkr_self == 0) && (pkr_who == 2))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 			if ((pkr_self == 1) && (pkr_who == 0))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
 			if ((pkr_self == 2) && (pkr_who == 1))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 					throw -1;
+			}
 			if ((pkr_self == 0) && (pkr_who == 2))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 					throw -1;
+			}
 			if ((pkr_self == 1) && (pkr_who == 0))
+			{
 				if (!tmcg->TMCG_VerifyCardSecret(c, vtmf, *left, *left))
 					throw -1;
+			}
 			if ((pkr_self == 2) && (pkr_who == 1))
 				tmcg->TMCG_ProveCardSecret(c, vtmf, *left, *left);
-			
-			type = tmcg->TMCG_TypeOfCard(c, vtmf);
+			int type = tmcg->TMCG_TypeOfCard(c, vtmf);
 			if (rmv)
 				s.remove(c);
 			throw type;
@@ -128,7 +133,6 @@ void skat_okarte
 #ifndef NDEBUG
 	start_clock();
 #endif
-	
 	// use the non-interactiveness of the proof (only VTMF!)
 	std::stringstream proof;
 	tmcg->TMCG_ProveCardSecret(c, vtmf, proof, proof);
@@ -136,7 +140,6 @@ void skat_okarte
 	*right << proof.str() << std::flush;
 	*left << c << std::endl << std::flush;
 	*left << proof.str() << std::flush;
-	
 #ifndef NDEBUG
 	stop_clock();
 	std::cerr << elapsed_time() << std::flush;
@@ -471,13 +474,14 @@ int skat_game
 		TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
 		iosecuresocketstream *right, iosecuresocketstream *left,
 		const std::vector<std::string> &nicks, int hpipe, bool pctl,
-		char *ireadbuf, int &ireaded,
+		char *ireadbuf, size_t &ireaded,
 		std::string main_channel, std::string main_channel_underscore
 	)
 {
 	if (!gcry_md_get_algo_dlen(GCRY_MD_RMD160))
 	{
-		std::cout << ">< " << _("ERROR") << ": " << _("gcry_md_get_algo_dlen() failed") << std::endl;
+		std::cout << ">< " << _("ERROR") << ": " <<
+			_("gcry_md_get_algo_dlen() failed") << std::endl;
 		return 1;
 	}
 
@@ -491,7 +495,8 @@ int skat_game
 	for (size_t i = 0; pctl && (i < 3); i++)
 	{
 		std::ostringstream ost;
-		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " << pkr.keys[i].name << std::endl;
+		ost << nicks[pkr_self] << " INIT " << nicks[i] << " " <<
+			pkr.keys[i].name << std::endl;
 		*out_ctl << ost.str() << std::flush;
 	}
 	
@@ -521,7 +526,8 @@ int skat_game
 	}
 	if (!vtmf->CheckGroup())
 	{
-		std::cout << ">< " << _("VTMF ERROR") << ": " << _("function CheckGroup() failed") << std::endl;
+		std::cout << ">< " << _("VTMF ERROR") << ": " <<
+			_("function CheckGroup() failed") << std::endl;
 		delete vtmf;
 		if (pctl)
 			delete out_ctl;
@@ -714,7 +720,8 @@ int skat_game
 #ifndef NDEBUG
 			start_clock();
 #endif
-			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss, d_mix[0], d_mix[1], d_mix[2], right, left))
+			if (!skat_mischen(pkr_self, tmcg, vtmf, d2, ss, d_mix[0], d_mix[1],
+				d_mix[2], right, left))
 			{
 				std::cout << ">< " << _("shuffling error") << ": " << _("bad stack format") << std::endl;
 				delete vsshe;
@@ -732,7 +739,8 @@ int skat_game
 #ifndef NDEBUG
 			start_clock();
 #endif
-			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss, d_mix[0], d_mix[1], d_mix[2], right, left))
+			if (!skat_mischen_beweis(pkr_self, tmcg, vtmf, vsshe, d2, ss,
+				d_mix[0], d_mix[1], d_mix[2], right, left))
 			{
 				std::cout << ">< " << _("shuffling error") << ": " << _("wrong ZK proof") << std::endl;
 				delete vsshe;
@@ -756,7 +764,8 @@ int skat_game
 			std::string osttmp = game_stream.str();
 
 			char *game_digest = new char[dlen];
-			gcry_md_hash_buffer(GCRY_MD_RMD160, game_digest, osttmp.c_str(), osttmp.length());
+			gcry_md_hash_buffer(GCRY_MD_RMD160, game_digest, osttmp.c_str(),
+				osttmp.length());
 			char *hex_game_digest =	new char[2 * dlen + 1];
 			for (size_t i = 0; i < dlen; i++)
 				snprintf(hex_game_digest + (2 * i), 3, "%02x", (unsigned char)game_digest[i]);
@@ -787,7 +796,8 @@ int skat_game
 			}
 			std::cout << "." << std::flush;
 			TMCG_OpenStack<VTMF_Card> os, os_ov, os_sp, os_st, os_pkt[3], os_rc[3];
-			if (!skat_sehen(pkr_self, tmcg, vtmf, os, s[0], s[1], s[2], right, left))
+			if (!skat_sehen(pkr_self, tmcg, vtmf, os, s[0], s[1], s[2],
+				right, left))
 			{
 				std::cout << ">< " << _("dealing error") << ": " << _("wrong ZK proof") << std::endl;
 				delete [] hex_game_digest;
@@ -842,8 +852,11 @@ int skat_game
 					return 5;
 				}
 				
-				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh, reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
+				if (!game_helper_1(reiz_status, spiel_allein, vh, mh, hh,
+					reiz_counter, pkr_self, nicks, pkr, pctl, out_ctl))
+				{
 					break;
+				}
 				
 				// select(2) -- initialize file descriptors
 				FD_ZERO(&rfds);
@@ -889,11 +902,13 @@ int skat_game
 				if (ireaded > 0)
 				{
 					bool got_break = false;
-					std::vector<int> pos_delim;
-					int cnt_delim = 0, cnt_pos = 0, pos = 0;
-					for (int i = 0; i < ireaded; i++)
+					std::vector<size_t> pos_delim;
+					size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+					for (size_t i = 0; i < ireaded; i++)
+					{
 						if (ireadbuf[i] == '\n')
 							cnt_delim++, pos_delim.push_back(i);
+					}
 					while (cnt_delim >= 1)
 					{
 						char xtmp[65536];
@@ -902,7 +917,7 @@ int skat_game
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string cmd = xtmp;
 						// do operation
-						// ---------------------------------------------------------------
+						// ------------
 				
 				if (!left->good() || !right->good())
 				{
@@ -2010,8 +2025,10 @@ int skat_game
 				// Augen der Gegenpartei zaehlen
 				size_t pkt_allein = 0, pkt_gegner = 0; 
 				for (size_t i = 0; i < 3; i++)
+				{
 					for (size_t j = 0; (i != spiel_allein) && (j < os_pkt[i].size()); j++)
 						pkt_gegner += skat_pktwert[os_pkt[i][j].first];
+				}
 				pkt_allein = 120 - pkt_gegner;
 				std::cout << "><><>< " << _("card points") << " " <<
 					_("playing party") << " (" << pkr.keys[spiel_allein].name << "): " << 
@@ -2040,7 +2057,9 @@ int skat_game
 					{
 						if (!skat_rulectl(os_st[j].first,
 							os_rc[i][j].first, spiel_status, gps))
-								rules_ok[i] = false;
+						{
+							rules_ok[i] = false;
+						}
 						gps.remove(os_rc[i][j].first);
 					}
 				}
@@ -2184,8 +2203,10 @@ int skat_game
 					skat_reizwert[reiz_counter] << "~" << hex_game_digest << "~";
 				spiel_protokoll << einzel_protokoll.str() << "#";
 				if (pctl)
+				{
 					*out_ctl << nicks[spiel_allein] << " PROTO " <<
 						einzel_protokoll.str() << std::endl << std::flush;
+				}
 			}
 			else
 			{	
@@ -2341,9 +2362,10 @@ int skat_game
 	delete vsshe;
 	delete vtmf;
 	if (pctl)
+	{
 		*out_ctl << nicks[pkr_self] << " DONE" << std::endl << std::flush;
-	if (pctl)
 		delete out_ctl;
+	}
 	delete out_pipe;
 	return 0;
 }

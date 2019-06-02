@@ -586,7 +586,7 @@ bool irc_process
 			nick_p7771.erase(nick), nick_p7772.erase(nick);
 			nick_p7773.erase(nick), nick_p7774.erase(nick);
 			for (m_ci_string_pid_t gi = games_tnr2pid.begin();
-				gi != games_tnr2pid.end(); gi++)
+				gi != games_tnr2pid.end(); ++gi)
 			{
 				opipestream *npipe = 
 					new opipestream(games_ipipe[gi->second]);

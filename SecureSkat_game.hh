@@ -93,7 +93,7 @@
 			TMCG_PublicKeyRing &pkr, const TMCG_SecretKey &sec,
 			iosecuresocketstream *right, iosecuresocketstream *left,
 			const std::vector<std::string> &nicks, int hpipe, bool pctl,
-			char *ireadbuf, int &ireaded,
+			char *ireadbuf, size_t &ireaded,
 			std::string main_channel, std::string main_channel_underscore
 		);
 #endif

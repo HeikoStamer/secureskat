@@ -257,7 +257,7 @@ char **game_env;                // pointer to the pointer of the environment
 TMCG_SecretKey sec;             // secret key of the player
 TMCG_PublicKey pub;             // public key of the player
 std::map<int, char*> readbuf;   // map of pointers to allocated read buffers
-std::map<int, ssize_t> readed;  // map of counters of those read buffers
+std::map<int, size_t> readed;   // map of counters of those read buffers
 
 std::string secret_key, public_prefix;
 std::map<std::string, TMCG_PublicKey> nick_key;
@@ -336,9 +336,9 @@ void read_after_select
 			// process data
 			if (readed[fd] > 0)
 			{
-				std::vector<int> pos_delim; // positions of line delimiters
-				int cnt_delim = 0, cnt_pos = 0, pos = 0;
-				for (int i = 0; i < readed[fd]; i++)
+				std::vector<size_t> pos_delim; // positions of line delimiters
+				size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+				for (size_t i = 0; i < readed[fd]; i++)
 				{
 					if (readbuf[fd][i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
@@ -1328,7 +1328,7 @@ void run_irc
 	int mfds = 0;                   // highest-numbered descriptor
 	struct timeval tv;              // timeout structure for select(2)
 	char irc_readbuf[32768];        // read buffer
-	int irc_readed = 0;             // read pointer
+	size_t irc_readed = 0;          // read pointer
 	unsigned long ann_counter = 0;  // announcement counter
 	unsigned long clr_counter = 0;  // clear tables counter
 #ifdef AUTOJOIN
@@ -1487,7 +1487,6 @@ void run_irc
 								new iosocketstream(client_handle);
 							char *tmp = new char[100000L];
 							client_ios->getline(tmp, 100000L);
-							
 							if (rnk.find(tmp) != rnk.end())
 							{
 								*client_ios << rnk[tmp] << std::endl <<
@@ -1536,9 +1535,9 @@ void run_irc
 						
 				if (irc_readed > 0)
 				{
-					std::vector<int> pos_delim;
-					int cnt_delim = 0, cnt_pos = 0, pos = 0;
-					for (int i = 0; i < irc_readed; i++)
+					std::vector<size_t> pos_delim;
+					size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+					for (size_t i = 0; i < irc_readed; i++)
 					{
 						if (irc_readbuf[i] == '\n')
 							cnt_delim++, pos_delim.push_back(i);
@@ -1554,7 +1553,6 @@ void run_irc
 							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string irc_reply = tmp;
-
 						if (!irc_process(irc, irc_reply, entry_ok, first_entry,
 							irc_quit, irc_stat, pub.keyid(5), public_prefix,
 							games_tnr2pid, games_ipipe, nick_key, nick_players,
@@ -1789,7 +1787,7 @@ void run_irc
 									perror("run_irc [RNK/child] (close)");
 								exit(-1);
 							}
-							char num[7];
+							char num[32];
 							memset(num, 0, sizeof(num));
 							n->getline(num, sizeof(num) - 1);
 							size_t rnk_idsize = strtoul(num, NULL, 10);

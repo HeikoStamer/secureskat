@@ -66,7 +66,10 @@ int ballot_child
 	gp_nick.push_back(pub.keyid(5));
 	gp_name[pub.keyid(5)] = pub.name;
 	if (neu)
-		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|1~" << -b << "!" << std::endl << std::flush;
+	{
+		*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|1~" <<
+			-b << "!" << std::endl << std::flush;
+	}
 	
 	// wait for voters
 	while (1)
@@ -83,7 +86,8 @@ int ballot_child
 		}
 		if (neu && (cmd.find("!ANNOUNCE", 0) == 0))
 		{
-			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << gp_nick.size() << "~" << -b << "!" << std::endl << std::flush;
+			*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" <<
+				gp_nick.size() << "~" << -b << "!" << std::endl << std::flush;
 		}
 		if (neu && (cmd.find("JOIN ", 0) == 0))
 		{
@@ -94,9 +98,11 @@ int ballot_child
 				{
 					if (gp_nick.size() < TMCG_MAX_PLAYERS)
 					{
-						gp_nick.push_back(nick), gp_name[nick] = nick_key[nick].name;
-						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" << nr << "|" << 
-							gp_nick.size() << "~" << b << "!" << std::endl << std::flush;
+						gp_nick.push_back(nick);
+						gp_name[nick] = nick_key[nick].name;
+						*out_pipe << "PRIVMSG " << MAIN_CHANNEL << " :" <<
+							nr << "|" << gp_nick.size() << "~" << b << "!" <<
+							std::endl << std::flush;
 					}
 					else
 						*out_pipe << "KICK " << MAIN_CHANNEL_UNDERSCORE << nr << " " << 
@@ -307,7 +313,7 @@ int ballot_child
 	int mfds = 0;				// highest-numbered descriptor
 	struct timeval tv;			// timeout structure
 	char *ireadbuf = new char[65536];
-	int ireaded = 0;
+	size_t ireaded = 0;
 	size_t pkr_idx = 0;
 	std::map<std::string, iosecuresocketstream*> ios_in, ios_out;
 	while (pkr_idx < gp_nick.size())
@@ -446,11 +452,13 @@ int ballot_child
 				ireaded += num;
 			if (ireaded > 0)
 			{
-				std::vector<int> pos_delim;
-				int cnt_delim = 0, cnt_pos = 0, pos = 0;
-				for (int i = 0; i < ireaded; i++)
+				std::vector<size_t> pos_delim;
+				size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+				for (size_t i = 0; i < ireaded; i++)
+				{
 					if (ireadbuf[i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
+				}
 				while (cnt_delim >= 1)
 				{
 					char tmp[65536];

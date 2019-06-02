@@ -121,7 +121,7 @@ int skat_accept
 	(opipestream *out_pipe, int ipipe, const std::string &nr, int r,
 	int pkr_self, int pkr_idx, iosecuresocketstream *&secure, int &handle,
 	const std::vector<std::string> &vnicks, TMCG_PublicKeyRing &pkr,
-	int gp_handle, bool neu, char *ireadbuf, int &ireaded)
+	int gp_handle, bool neu, char *ireadbuf, size_t &ireaded)
 {
 	fd_set rfds;	// set of read descriptors
 	int mfds = 0;	// highest-numbered descriptor
@@ -137,8 +137,10 @@ int skat_accept
 		int ret = select(mfds + 1, &rfds, NULL, NULL, NULL);
 		// error occured
 		if (ret < 0)
+		{
 			if (errno != EINTR)
 				perror("skat_accept (select)");
+		}
 		
 		// connection request
 		if ((ret > 0) && FD_ISSET(gp_handle, &rfds))
@@ -232,11 +234,13 @@ int skat_accept
 				ireaded += num;
 			if (ireaded > 0)
 			{
-				std::vector<int> pos_delim;
-				int cnt_delim = 0, cnt_pos = 0, pos = 0;
-				for (int i = 0; i < ireaded; i++)
+				std::vector<size_t> pos_delim;
+				size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+				for (size_t i = 0; i < ireaded; i++)
+				{
 					if (ireadbuf[i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
+				}
 				while (cnt_delim >= 1)
 				{
 					char tmp[65536];
@@ -321,7 +325,7 @@ int skat_child
 	std::list<std::string> gp_nick;
 	std::map<std::string, std::string> gp_name;
 	char *ipipe_readbuf = new char[65536];
-	int ipipe_readed = 0;
+	size_t ipipe_readed = 0;
 	gp_nick.push_back(pub.keyid(5));
 	gp_name[pub.keyid(5)] = pub.name;
 	
@@ -625,9 +629,11 @@ int skat_child
 	if (neu)
 	{
 		// set topic
-		*out_pipe << "TOPIC " << MAIN_CHANNEL_UNDERSCORE << nr << " :" << PACKAGE_STRING << std::endl << std::flush;
+		*out_pipe << "TOPIC " << MAIN_CHANNEL_UNDERSCORE << nr <<
+			" :" << PACKAGE_STRING << std::endl << std::flush;
 	}
-	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i, gp_tmcg, pkr, sec, right_neighbor, left_neighbor, vnicks, hpipe, pctl,
+	int exit_code = skat_game(nr, r, pkr_self, neu, opipe, ipipe, ctl_o, ctl_i,
+		gp_tmcg, pkr, sec, right_neighbor, left_neighbor, vnicks, hpipe, pctl,
 		ipipe_readbuf, ipipe_readed, MAIN_CHANNEL, MAIN_CHANNEL_UNDERSCORE);
 	
 	// stop gui or ai (control program)
