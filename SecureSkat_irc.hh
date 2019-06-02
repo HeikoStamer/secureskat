@@ -1,7 +1,7 @@
 /*******************************************************************************
    This file is part of SecureSkat.
 
- Copyright (C) 2009, 2017  Heiko Stamer <HeikoStamer@gmx.net>
+ Copyright (C) 2009, 2017, 2019  Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,6 +38,34 @@
 		(std::string input, std::vector<std::string> &v);
 	bool irc_command_cmp
 		(const std::string &input, const std::string &cmd);
+	void pipe_irc
+		(iosocketstream *irc, const std::string &irc_message,
+		 const TMCG_SecretKey &sec, const std::string &keyid,
+		 const std::map<std::string, std::string> &nick_players,
+		 std::list<std::string> &tables,
+		 std::map<std::string, int> &tables_r,
+		 std::map<std::string, int> &tables_p,
+		 std::map<std::string, std::string> &tables_u,
+		 std::map<std::string, std::string> &tables_o);
+	bool irc_process
+		(iosocketstream *irc, const std::string &irc_reply, bool &entry_ok,
+		 bool &first_entry, volatile sig_atomic_t &irc_quit, bool &irc_stat,
+		 const std::string &keyid, const std::string &public_prefix,
+		 std::map<std::string, pid_t> &games_tnr2pid,
+		 std::map<pid_t, int> &games_ipipe,
+		 std::map<std::string, TMCG_PublicKey> &nick_key,
+		 std::map<std::string, std::string> &nick_players,
+		 std::map<std::string, int> &nick_sl,
+		 std::map<std::string, int> &nick_p7771,
+		 std::map<std::string, int> &nick_p7772,
+		 std::map<std::string, int> &nick_p7773,
+		 std::map<std::string, int> &nick_p7774,
+		 std::map<std::string, std::string> &nick_package,
+		 std::list<std::string> &tables,
+		 std::map<std::string, int> &tables_r,
+		 std::map<std::string, int> &tables_p,
+		 std::map<std::string, std::string> &tables_u,
+		 std::map<std::string, std::string> &tables_o);
 	void done_irc
 		(iosocketstream *irc);
 	void release_irc

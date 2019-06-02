@@ -41,7 +41,6 @@ extern TMCG_SecretKey sec;
 extern TMCG_PublicKey pub;
 extern std::map<std::string, TMCG_PublicKey> nick_key;
 extern std::map<std::string, std::string> nick_players;
-extern std::string X;
 extern std::string game_ctl;
 extern char **game_env;
 
