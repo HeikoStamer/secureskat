@@ -256,7 +256,7 @@ std::string game_ctl;           // name and path of the game control program
 char **game_env;                // pointer to the pointer of the environment
 TMCG_SecretKey sec;             // secret key of the player
 TMCG_PublicKey pub;             // public key of the player
-std::map<int, char*> readbuf;   // map of pointers to some read buffers
+std::map<int, char*> readbuf;   // map of pointers to allocated read buffers
 std::map<int, ssize_t> readed;  // map of counters of those read buffers
 
 std::string secret_key, public_prefix;
@@ -286,33 +286,36 @@ iosocketstream *irc; // TCP/IP stream to IRC server
 void read_after_select
 	(fd_set rfds, std::map<pid_t, int> &read_pipe, int what)
 {
-	std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed
+	std::vector<pid_t> del_pipe; // PIDs of pipes that should be closed later
 	for (m_ci_pid_t_int pi = read_pipe.begin(); pi != read_pipe.end(); ++pi)
 	{
-		int fd = pi->second;    // file descriptor of the pipe
+		int fd = pi->second; // file descriptor of the pipe
 		if ((fd >= 0) && FD_ISSET(fd, &rfds))
 		{
-			size_t rbs = 65536;     // size of the read buffer
+			size_t rbs = 65536; // size of the read buffer
 			if (readbuf.count(fd) == 0)
 			{
-				// allocate a new read buffer for the pipe, if not exists
+				// allocate a new read buffer for the pipe, if not exists yet
 				readbuf[fd] = new char[rbs];
 				// initialize read buffer offset
 				readed[fd] = 0;
 			}
 			// read data from pipe
 			ssize_t num = 0;
-			if ((rbs - readed[fd]) > 0)
+			size_t max_read = rbs - readed[fd];
+			if (max_read > 0)
 			{
-				num = read(fd, readbuf[fd] + readed[fd], rbs - readed[fd]);
+				num = read(fd, readbuf[fd] + readed[fd], max_read);
 				if (num <= 0)
 				{
 					if (errno != EINTR)
 					{
 						if (num < 0)
+						{
 							std::cerr << _("read error for PID") << " " <<
 								pi->first << " " << _("encountered") <<
 								" [errno=" << errno << "]" << std::endl;
+						}
 						del_pipe.push_back(pi->first); // close this pipe later
 					}
 				}
@@ -323,6 +326,7 @@ void read_after_select
 			{
 				std::cerr << _("read buffer for PID") << " " << pi->first <<
 					" " << _("exceeded") << std::endl;
+				// consume some data from pipe without buffering FIXME: why?
 				char *tmp = new char[rbs]; // allocate temporary buffer
 				num = read(fd, tmp, rbs);
 				if (num <= 0)
@@ -335,8 +339,10 @@ void read_after_select
 				std::vector<int> pos_delim; // positions of line delimiters
 				int cnt_delim = 0, cnt_pos = 0, pos = 0;
 				for (int i = 0; i < readed[fd]; i++)
+				{
 					if (readbuf[fd][i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
+				}
 				char *tmp = new char[rbs]; // allocate a buffer of size rbs
 				switch (what)
 				{
