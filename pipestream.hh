@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 1999, 2000 Kevin Birch <kbirch@pobox.com>,
-               2002, 2004, 2017 Heiko Stamer <HeikoStamer@gmx.net>
+               2002, 2004, 2017, 2019 Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 /*!
  * @module pipestream
- * @author Kevin Birch <kbirch@pobox.com>, Heiko Stamer <stamer@gaos.org>
+ * @author Kevin Birch <kbirch@pobox.com>, Heiko Stamer <heikostamer@gmx.net>
  * @version 1.0, 01/15/00
  * This C++ class is designed to allow the use of BSD-style
  * pipe descriptors by applications that use iostreams.
@@ -266,7 +266,6 @@ argument
          * @param iPipe an open pipe
          */
     iopipestream(int iPipe) : std::iostream(&buf), buf(iPipe) {}
-
 };
 
 #endif

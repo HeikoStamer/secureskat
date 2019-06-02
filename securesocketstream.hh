@@ -2,7 +2,7 @@
    This file is part of SecureSkat.
 
  Copyright (C) 1999, 2000 Kevin Birch <kbirch@pobox.com>,
-               2002, 2004, 2017 Heiko Stamer <HeikoStamer@gmx.net>
+               2002, 2004, 2017, 2019 Heiko Stamer <HeikoStamer@gmx.net>
 
    SecureSkat is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 /*!
  * @module securesocketstream
- * @author Kevin Birch <kbirch@pobox.com>, Heiko Stamer <stamer@gaos.org>
+ * @author Kevin Birch <kbirch@pobox.com>, Heiko Stamer <heikostamer@gmx.net>
  * @version 1.0, 11/05/02
  * This C++ class is designed to allow the use of BSD-style socket 
  * descriptors (with encryption/compression) by iostream applications.
@@ -260,7 +260,7 @@ template <class traits = securesocketbuf_traits>
 		}
 		
 		/*! @method sync
-		 * called by std::strambuf when the endl or flush operators are used
+		 * called by std::streambuf when the endl or flush operators are used
 		 * @return -1 if the write buffer flush failed
 		 */
 		virtual int sync()

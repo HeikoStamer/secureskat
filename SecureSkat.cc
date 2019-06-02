@@ -38,10 +38,10 @@ RETSIGTYPE sig_handler_quit
 	(int sig)
 {
 #ifndef NDEBUG
-    std::cerr << "sig_handler_quit(): got signal " << sig << std::endl;
+	std::cerr << "sig_handler_quit(): got signal " << sig << std::endl;
 #endif
-    // set the 'quit flag'
-    irc_quit = 1;
+	// set the 'quit flag'
+	irc_quit = 1;
 }
 
 // This is the signal handler called when receiving SIGPIPE. It does nothing.
@@ -50,7 +50,7 @@ RETSIGTYPE sig_handler_pipe
 {
 #ifndef NDEBUG
 	if (sig != SIGPIPE)
-    	std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
+		std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
 #endif
 }
 
@@ -85,166 +85,168 @@ std::map<pid_t, std::string> nick_host;
 RETSIGTYPE sig_handler_usr1
 	(int sig)
 {
-    sigset_t sigset;
+	sigset_t sigset;
 #ifndef NDEBUG
 	if (sig != SIGUSR1)
-    	std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
+		std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
 #endif
-
-    // block SIGCHLD temporarily
-    if (sigemptyset(&sigset) < 0)
-        perror("sig_handler_usr1 (sigemptyset)");
-    if (sigaddset(&sigset, SIGCHLD) < 0)
-        perror("sig_handler_usr1 (sigaddset)");
-    if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
-        perror("sig_handler_usr1 (sigprocmask)");
 	
-    // wait until the critical section of the SIGCHLD handler is safe
-    while (sigchld_critical)
-        usleep(100);
+	// block SIGCHLD temporarily
+	if (sigemptyset(&sigset) < 0)
+		perror("sig_handler_usr1 (sigemptyset)");
+	if (sigaddset(&sigset, SIGCHLD) < 0)
+		perror("sig_handler_usr1 (sigaddset)");
+	if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
+		perror("sig_handler_usr1 (sigprocmask)");
 	
-    // process all data updates sequentially
-    while (!usr1_stat.empty())
-    {
-        std::pair <pid_t, int> chld_stat = usr1_stat.front();
-        pid_t chld_pid = chld_stat.first;
-        int status = chld_stat.second;
+	// wait until the critical section of the SIGCHLD handler is safe
+	while (sigchld_critical)
+		usleep(100);
+	
+	// process all data updates sequentially
+	while (!usr1_stat.empty())
+	{
+		std::pair <pid_t, int> chld_stat = usr1_stat.front();
+		pid_t chld_pid = chld_stat.first;
+		int status = chld_stat.second;
 		
-        // remove current entry from queue
-        usr1_stat.pop_front();
-	
-        // process current entry, if PID is found
-        if (games_pid2tnr.find(chld_pid) != games_pid2tnr.end())
-        {
-            std::string tnr = games_pid2tnr[chld_pid];
-            if (WIFEXITED(status))
-            {
-                // print success resp. error message
-                if (WEXITSTATUS(status) == 0)
+		// remove current entry from queue
+		usr1_stat.pop_front();
+		
+		// process current entry, if PID is found
+		if (games_pid2tnr.find(chld_pid) != games_pid2tnr.end())
+		{
+			std::string tnr = games_pid2tnr[chld_pid];
+			if (WIFEXITED(status))
+			{
+				// print success resp. error message
+				if (WEXITSTATUS(status) == 0)
 				{
-                    std::cerr << ">< " << _("Session") << " \"" << tnr <<
+					std::cerr << ">< " << _("Session") << " \"" << tnr <<
 						"\" " << _("succeeded properly") << std::endl;
 				}                
 				else
 				{
-                    std::cerr << ">< " << _("Session") << " \"" << tnr <<
+					std::cerr << ">< " << _("Session") << " \"" << tnr <<
 						"\" " << _("failed. Error code") << ": WEXITSTATUS " <<
 						WEXITSTATUS(status) << std::endl;
 				}
-            }
-            if (WIFSIGNALED(status))
-            {
-                // print error message
-                std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " <<
+			}
+			if (WIFSIGNALED(status))
+			{
+				// print error message
+				std::cerr << ">< " << _("Session") << " \"" << tnr << "\" " <<
 					_("failed. Error code") << ": WTERMSIG " <<
 					WTERMSIG(status) << std::endl;
-            }
-            // remove associated data
-            games_tnr2pid.erase(tnr);
-            games_pid2tnr.erase(chld_pid);
-        }
-        else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) != rnkrpl_pid.end())
-        {
-            // print success message
-            std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+			}
+			// remove associated data
+			games_tnr2pid.erase(tnr);
+			games_pid2tnr.erase(chld_pid);
+		}
+		else if (std::find(rnkrpl_pid.begin(), rnkrpl_pid.end(), chld_pid) !=
+			rnkrpl_pid.end())
+		{
+			// print success message
+			std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
 				_("succeeded properly") << std::endl;
-            // remove associated data
-            rnkrpl_pid.remove(chld_pid);
-        }
-        else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) != rnk_pids.end())
-        {
-            if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
-            {
-                // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+			// remove associated data
+			rnkrpl_pid.remove(chld_pid);
+		}
+		else if (std::find(rnk_pids.begin(), rnk_pids.end(), chld_pid) !=
+			rnk_pids.end())
+		{
+			if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
+			{
+				// print error message
+				std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
 					_("failed. Error code") << ": WEXITSTATUS " <<
 					WEXITSTATUS(status) << std::endl;
-            }
-            if (WIFSIGNALED(status))
-            {
-                // print error message
-                std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
+			}
+			if (WIFSIGNALED(status))
+			{
+				// print error message
+				std::cerr << ">< " << "RNK (pid = " << chld_pid << ") " <<
 					_("failed. Error code") << ": WTERMSIG " <<
 					WTERMSIG(status) << std::endl;
-            }
-            // remove associated data
-            rnk_pids.remove(chld_pid);
-            nick_rnkcnt.erase(rnk_nick[chld_pid]);
-            nick_rnkpid.erase(rnk_nick[chld_pid]);
-            rnk_nick.erase(chld_pid);
-        }
-        else if (nick_nick.find(chld_pid) != nick_nick.end())
-        {
-            if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
-            {
-                // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" <<
+			}
+			// remove associated data
+			rnk_pids.remove(chld_pid);
+			nick_rnkcnt.erase(rnk_nick[chld_pid]);
+			nick_rnkpid.erase(rnk_nick[chld_pid]);
+			rnk_nick.erase(chld_pid);
+		}
+		else if (nick_nick.find(chld_pid) != nick_nick.end())
+		{
+			if (WIFEXITED(status) && (WEXITSTATUS(status) != 0))
+			{
+				// print error message
+				std::cerr << ">< " << "PKI " << chld_pid << "/" <<
 					nick_nick[chld_pid] << " " << _("failed. Error code") <<
 					": WEXITSTATUS " << WEXITSTATUS(status) << std::endl;
-            }
-            if (WIFSIGNALED(status))
-            {
-                // print error message
-                std::cerr << ">< " << "PKI " << chld_pid << "/" <<
+			}
+			if (WIFSIGNALED(status))
+			{
+				// print error message
+				std::cerr << ">< " << "PKI " << chld_pid << "/" <<
 					nick_nick[chld_pid] << " " << _("failed. Error code") <<
 					": WTERMSIG " << WTERMSIG(status) << std::endl;
-            }
-            // remove a bad nick (i.e. DoS attack on PKI) from the players list
-            if (bad_nick.find(nick_nick[chld_pid]) == bad_nick.end())
-                bad_nick[nick_nick[chld_pid]] = 1;
-            else if (bad_nick[nick_nick[chld_pid]] <= 3)
-                bad_nick[nick_nick[chld_pid]] += 1;
-            else if (bad_nick[nick_nick[chld_pid]] > 3)
-            {
-                if (nick_players.find(nick_nick[chld_pid]) != nick_players.end())
-                {
-                    nick_players.erase(nick_nick[chld_pid]);
-                    nick_package.erase(nick_nick[chld_pid]);
-                    nick_p7771.erase(nick_nick[chld_pid]);
-                    nick_p7772.erase(nick_nick[chld_pid]);
-                    nick_p7773.erase(nick_nick[chld_pid]);
-                    nick_p7774.erase(nick_nick[chld_pid]);
-                    nick_sl.erase(nick_nick[chld_pid]);
-                }
-            }
-            // remove associated data		
-            nick_ncnt.erase(nick_nick[chld_pid]);
-            nick_ninf.remove(nick_nick[chld_pid]);
-            nick_pids.remove(chld_pid);
-            nick_nick.erase(chld_pid);
-            nick_host.erase(chld_pid);
-        }
-        else
-        {
+			}
+			// remove a bad nick (i.e. DoS attack on PKI) from the players list
+			std::string nn = nick_nick[chld_pid];
+			if (bad_nick.find(nn) == bad_nick.end())
+				bad_nick[nn] = 0; // initialize counter
+			if (bad_nick[nn] <= 3)
+			{
+				bad_nick[nn] += 1; // increase counter
+			}
+			else
+			{
+				nick_players.erase(nn);
+				nick_package.erase(nn);
+				nick_p7771.erase(nn);
+				nick_p7772.erase(nn);
+				nick_p7773.erase(nn);
+				nick_p7774.erase(nn);
+				nick_sl.erase(nn);
+			}
+			// remove associated data		
+			nick_ncnt.erase(nn);
+			nick_ninf.remove(nn);
+			nick_pids.remove(chld_pid);
+			nick_nick.erase(chld_pid);
+			nick_host.erase(chld_pid);
+		}
+		else
+		{
 #ifndef NDEBUG
-            std::cerr << "sig_handler_usr1(): unknown child with PID " <<
+			std::cerr << "sig_handler_usr1(): unknown child with PID " <<
 				chld_pid << std::endl;
 #endif
-        }
-    } // end of while body
+		}
+	} // end of while body
 	
-    // unblock SIGCHLD
-    if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) < 0)
-        perror("sig_handler_usr1 (sigprocmask)");
+	// unblock SIGCHLD
+	if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) < 0)
+		perror("sig_handler_usr1 (sigprocmask)");
 }
 
 // This is the signal handler called when receiving SIGCHLD. Here is the grave.
 RETSIGTYPE sig_handler_chld
 	(int sig)
 {
-    sigchld_critical = 1;   // enter critical section
+	sigchld_critical = 1;   // enter critical section
 #ifndef NDEBUG
 	if (sig != SIGCHLD)
-    	std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;
+		std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;
 #endif
     
-    // look for died children (zombies) and evaluate their exit code
-    std::pair<pid_t, int> chld_stat;
-    int status;
-    chld_stat.first = wait(&status), chld_stat.second = status;
-    usr1_stat.push_back(chld_stat);
+	// look for died children (zombies) and evaluate their exit code
+	std::pair<pid_t, int> chld_stat;
+	int status;
+	chld_stat.first = wait(&status), chld_stat.second = status;
+	usr1_stat.push_back(chld_stat);
 	
-    sigchld_critical = 0;   // leave critical section
+	sigchld_critical = 0;   // leave critical section
 }
 
 // -----------------------------------------------------------------------------
@@ -288,9 +290,9 @@ void read_after_select
 	for (m_ci_pid_t_int pi = read_pipe.begin(); pi != read_pipe.end(); ++pi)
 	{
 		int fd = pi->second;    // file descriptor of the pipe
-		size_t rbs = 65536;     // size of the read buffer
 		if ((fd >= 0) && FD_ISSET(fd, &rfds))
 		{
+			size_t rbs = 65536;     // size of the read buffer
 			if (readbuf.count(fd) == 0)
 			{
 				// allocate a new read buffer for the pipe, if not exists
@@ -534,8 +536,8 @@ static void process_line
 		}
 		else if ((cmd_argv[0] == "rank") || (cmd_argv[0] == "rang"))
 		{
-			std::list<std::string> rnk_nicktab, rnk_ranktab;
-			std::map<std::string, long> rnk_nickpkt, pkt[3], gws[3], vls[3];
+			std::list<std::string> rnk_nicktab;
+			std::map<std::string, long> pkt[3], gws[3], vls[3];
 			size_t prt_counter = 0, prt_counter_valid = 0;
             
 			// temporarily add the own public key
@@ -546,95 +548,94 @@ static void process_line
 				std::string tk_sig1, tk_sig2, tk_sig3;
 				std::string tk_header, tk_table;
 				std::string tk_game[3], tk_nick[3];
-				std::string s = ri->second;
+				std::string so = ri->second;
 				size_t ei;
-				
 				prt_counter++;
 				// header
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_header = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_header = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// table
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_table = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_table = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// nick1
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_nick[0] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_nick[0] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// nick2
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_nick[1] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_nick[1] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// nick3
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_nick[2] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_nick[2] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// game1
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_game[0] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_game[0] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// game2
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_game[1] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_game[1] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// game3
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_game[2] = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_game[2] = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// sig1
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_sig1 = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_sig1 = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// sig2
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_sig2 = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_sig2 = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
 				// sig3
-				if ((ei = s.find("#", 0)) != s.npos)
+				if ((ei = so.find("#", 0)) != so.npos)
 				{
-					tk_sig3 = s.substr(0, ei);
-					s = s.substr(ei + 1, s.length() - ei - 1);
+					tk_sig3 = so.substr(0, ei);
+					so = so.substr(ei + 1, so.length() - ei - 1);
 				}
 				else
 					continue;
@@ -672,8 +673,7 @@ static void process_line
 				for (size_t j = 0; j < 3; j++)
 				{
 					std::vector<std::string> gp_par;
-					size_t ei;
-					// parse game
+					// parse a single game
 					while ((ei = tk_game[j].find("~", 0)) != tk_game[j].npos)
 					{
 						gp_par.push_back(tk_game[j].substr(0, ei));
@@ -781,8 +781,8 @@ static void process_line
 					int r = atoi(trr.c_str());
 					if (r > 0)
 					{
-						int rnk_pipe[2], in_pipe[2], out_pipe[2];
-						if ((pipe(rnk_pipe) < 0) || (pipe(in_pipe) < 0) ||
+						int r_pipe[2], in_pipe[2], out_pipe[2];
+						if ((pipe(r_pipe) < 0) || (pipe(in_pipe) < 0) ||
 							(pipe(out_pipe) < 0))
 						{
 							perror("run_irc (pipe)");
@@ -798,16 +798,16 @@ static void process_line
 								/* BEGIN child code (game process) */
 								signal(SIGQUIT, SIG_DFL);
 								signal(SIGTERM, SIG_DFL);
-								if ((close(rnk_pipe[0]) < 0) || 
+								if ((close(r_pipe[0]) < 0) || 
 									(close(out_pipe[0]) < 0) ||
 									(close(in_pipe[1]) < 0))
 								{
 									perror("run_irc (close)");
 								}
 								int ret = skat_child(tnr, r, true, in_pipe[0],
-									out_pipe[1], rnk_pipe[1], pub.keyid(5));
+									out_pipe[1], r_pipe[1], pub.keyid(5));
 								sleep(1);
-								if ((close(rnk_pipe[1]) < 0) || 
+								if ((close(r_pipe[1]) < 0) || 
 									(close(out_pipe[1]) < 0) ||
 									(close(in_pipe[0]) < 0))
 								{
@@ -818,7 +818,7 @@ static void process_line
 							}
 							else
 							{
-								if ((close(rnk_pipe[1]) < 0) || 
+								if ((close(r_pipe[1]) < 0) || 
 									(close(out_pipe[1]) < 0) ||
 									(close(in_pipe[0]) < 0))
 								{
@@ -826,7 +826,7 @@ static void process_line
 								}
 								games_pid2tnr[game_pid] = tnr;
 								games_tnr2pid[tnr] = game_pid;
-								games_rnkpipe[game_pid] = rnk_pipe[0];
+								games_rnkpipe[game_pid] = r_pipe[0];
 								games_opipe[game_pid] = out_pipe[0];
 								games_ipipe[game_pid] = in_pipe[1];
 								join_irc(irc, tnr); // join that table
@@ -855,8 +855,8 @@ static void process_line
 					{
 						if (games_tnr2pid.find(tnr) == games_tnr2pid.end())
 						{
-							int rnk_pipe[2], in_pipe[2], out_pipe[2];
-							if ((pipe(rnk_pipe) < 0) || (pipe(in_pipe) < 0) ||
+							int r_pipe[2], in_pipe[2], out_pipe[2];
+							if ((pipe(r_pipe) < 0) || (pipe(in_pipe) < 0) ||
 								(pipe(out_pipe) < 0))
 							{
 								perror("run_irc (pipe)");
@@ -872,7 +872,7 @@ static void process_line
 									/* BEGIN child code (game process) */
 									signal(SIGQUIT, SIG_DFL);
 									signal(SIGTERM, SIG_DFL);
-									if ((close(rnk_pipe[0]) < 0) || 
+									if ((close(r_pipe[0]) < 0) || 
 										(close(out_pipe[0]) < 0) ||
 										(close(in_pipe[1]) < 0))
 									{
@@ -880,9 +880,9 @@ static void process_line
 									}
 									int ret = skat_child(tnr, tables_r[tnr],
 										false, in_pipe[0], out_pipe[1],
-										rnk_pipe[1], tables_o[tnr]);
+										r_pipe[1], tables_o[tnr]);
 									sleep(1);
-									if ((close(rnk_pipe[1]) < 0) || 
+									if ((close(r_pipe[1]) < 0) || 
 										(close(out_pipe[1]) < 0) ||
 										(close(in_pipe[0]) < 0))
 									{
@@ -893,7 +893,7 @@ static void process_line
 								}
 								else
 								{
-									if ((close(rnk_pipe[1]) < 0) || 
+									if ((close(r_pipe[1]) < 0) || 
 										(close(out_pipe[1]) < 0) ||
 										(close(in_pipe[0]) < 0))
 									{
@@ -901,7 +901,7 @@ static void process_line
 									}
 									games_pid2tnr[game_pid] = tnr;
 									games_tnr2pid[tnr] = game_pid;
-									games_rnkpipe[game_pid] = rnk_pipe[0];
+									games_rnkpipe[game_pid] = r_pipe[0];
 									games_opipe[game_pid] = out_pipe[0];
 									games_ipipe[game_pid] = in_pipe[1];
 									join_irc(irc, tnr); // join that table
