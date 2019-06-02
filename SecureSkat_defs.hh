@@ -126,9 +126,12 @@
 
 	// define some types
 	typedef std::list<pid_t>::const_iterator l_ci_pid_t;
+	typedef std::list<std::string>::const_iterator l_ci_string;
 	typedef std::map<pid_t, std::string>::const_iterator m_ci_pid_t;
+	typedef std::map<pid_t, int>::const_iterator m_ci_pid_t_int;
 	typedef std::map<std::string, std::string>::const_iterator m_ci_string;
 	typedef std::map<std::string, pid_t>::const_iterator m_ci_string_pid_t;
+	typedef std::map<std::string, long>::const_iterator m_ci_string_long;
 	typedef std::vector<std::string>::const_iterator v_ci_string;
 
 	// define some symbols

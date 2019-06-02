@@ -41,6 +41,20 @@ void init_irc
 	*irc << "NICK " << nickname << std::endl << std::flush;
 }
 
+void join_irc
+	(iosocketstream *irc, const std::string &c)
+{
+	// join an IRC channel that represents an unique table for playing
+	*irc << "JOIN " << MAIN_CHANNEL_UNDERSCORE << c << std::endl << std::flush;
+}
+
+void who_irc
+	(iosocketstream *irc, const std::string &c)
+{
+	// request status of an IRC channel that is used for playing
+	*irc << "WHO " << MAIN_CHANNEL_UNDERSCORE << c << std::endl << std::flush;
+}
+
 // strip leading spaces (0x20) from the input
 void irc_strip
 	(std::string &input)
@@ -795,6 +809,7 @@ bool irc_process
 					}	
 					else
 					{
+						// check ownership
 						if (nick == tables_o[tm1])
 						{
 							if (tm2 == "0")

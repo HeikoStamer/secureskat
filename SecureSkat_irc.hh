@@ -28,6 +28,10 @@
 		(const std::string &server, short int port, iosocketstream **irc);
 	void init_irc
 		(iosocketstream *irc, const std::string &nickname);
+	void join_irc
+		(iosocketstream *irc, const std::string &c);
+	void who_irc
+		(iosocketstream *irc, const std::string &c);
 	std::string irc_prefix
 		(const std::string &input);
 	std::string irc_command
