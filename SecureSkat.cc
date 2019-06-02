@@ -257,7 +257,7 @@ TMCG_PublicKey pub;             // public key of the player
 std::map<int, char*> readbuf;   // map of pointers to some read buffers
 std::map<int, ssize_t> readed;  // map of counters of those read buffers
 
-std::string secret_key, public_key, public_prefix;
+std::string secret_key, public_prefix;
 std::map<std::string, TMCG_PublicKey> nick_key;
 std::list<std::string> tables;
 std::map<std::string, int> tables_r, tables_p;
@@ -1519,7 +1519,8 @@ void run_irc
 				{
 					if (errno != EINTR)
 					{
-						std::cerr << _("IRC ERROR: connection with server collapsed") <<
+						std::cerr <<
+							_("IRC ERROR: connection with server collapsed") <<
 							" [errno=" << errno << "]" << std::endl;
 						break;
 					}
@@ -1543,7 +1544,8 @@ void run_irc
 					{
 						char tmp[65536];
 						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, irc_readbuf + cnt_pos, pos_delim[pos] - cnt_pos);
+						memcpy(tmp, irc_readbuf + cnt_pos,
+							pos_delim[pos] - cnt_pos);
 						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 						std::string irc_reply = tmp;
 
@@ -1572,7 +1574,8 @@ void run_irc
 			// We use signal blocking for serializing access (a serious hack!).
 			raise(SIGUSR1);
 			
-			// re-install signal handlers (some unices do not restore them properly)
+			// re-install signal handlers, because some unices do not restore
+			// them properly
 			signal(SIGINT, sig_handler_quit);
 			signal(SIGQUIT, sig_handler_quit);
 			signal(SIGTERM, sig_handler_quit);
@@ -1588,20 +1591,30 @@ void run_irc
 			// do other delayed stuff, i.e., register at IRC server and join
 			if (first_command)
 			{
+				// create basic information record of this instance
 				char ptmp[1024];
 				if (hostname == "undefined")
-					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/", pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
+				{
+					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/",
+						pki7771_port, 0, rnk7773_port, rnk7774_port, 80);
+				}
 				else
-					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/%s*", pki7771_port, 0, rnk7773_port, rnk7774_port, 80, hostname.c_str());
+				{
+					snprintf(ptmp, sizeof(ptmp), "|%d~%d!%d#%d?%d/%s*",
+						pki7771_port, 0, rnk7773_port, rnk7774_port, 80,
+						hostname.c_str());
+				}
 				std::string uname = pub.keyid(5);
-				// create a "unique" username based on the nickname
+				// create a somehow "unique" username based on the nickname
 				if (uname.length() > 4)
 				{
 					std::string uname2 = "os"; // prefix
 					for (size_t ic = 4; ic < uname.length(); ic++)
 					{
 						if (islower(uname[ic]))
+						{
 							uname2 += uname[ic];
+						}
 						else if (isdigit(uname[ic]))
 						{
 							uname2 += "d"; // sign for decimal digit
@@ -1617,11 +1630,14 @@ void run_irc
 				}
 				else
 					uname = "unknown";
-				*irc << "USER " << uname << " 0 0 :" << PACKAGE_STRING << ptmp << std::endl << std::flush;
+				// register the instance at IRC server
+				*irc << "USER " << uname << " 0 0 :" << PACKAGE_STRING <<
+					ptmp << std::endl << std::flush;
 				first_command = false;
 			}
 			else if (first_entry)
 			{
+				// join the main channel and request status
 				*irc << "JOIN " << MAIN_CHANNEL << std::endl << std::flush;
 				*irc << "WHO " << MAIN_CHANNEL << std::endl << std::flush;
 				first_entry = false;
@@ -1632,20 +1648,21 @@ void run_irc
 				// timer: autojoin to known tables each AUTOJOIN_TIMEOUT seconds
 				if (atj_counter >= AUTOJOIN_TIMEOUT)
 				{
-					for (std::list<std::string>::const_iterator ti = tables.begin(); ti != tables.end(); ti++)
+					for (l_ci_string t = tables.begin(); t != tables.end(); ++t)
 					{
-						// if not joined in a game, do AUTOJOIN (greedy behaviour)
-						if (games_tnr2pid.find(*ti) == games_tnr2pid.end())
+						// if not already joined, do AUTOJOIN (greedy behaviour)
+						if (games_tnr2pid.find(*t) == games_tnr2pid.end())
 						{
 							char *command = (char*)malloc(500);
 							if (command == NULL)
 							{
-								std::cerr << _("MALLOC ERROR: out of memory") << std::endl;
+								std::cerr << _("MALLOC ERROR: out of memory") <<
+									std::endl;
 								exit(-1);
 							}
 							memset(command, 0, 500);
 							strncat(command, "/skat ", 25);
-							strncat(command, ti->c_str(), 475);
+							strncat(command, t->c_str(), 475);
 							process_line(command);
 							// free(command) is already done by process_line()
 						}
@@ -1667,7 +1684,8 @@ void run_irc
 				// timer: announce own tables every ANNOUNCE_TIMEOUT seconds
 				if (ann_counter >= ANNOUNCE_TIMEOUT)
 				{
-					for (std::map<pid_t, int>::const_iterator pi = games_ipipe.begin(); pi != games_ipipe.end(); ++pi)
+					for (m_ci_pid_t_int pi = games_ipipe.begin();
+						pi != games_ipipe.end(); ++pi)
 					{
 						opipestream *npipe = new opipestream(pi->second);
 						*npipe << "!ANNOUNCE" << std::endl << std::flush;
@@ -1683,16 +1701,20 @@ void run_irc
 			for (l_ci_pid_t p = nick_pids.begin(); p != nick_pids.end(); ++p)
 			{
 				if (nick_ncnt[nick_nick[*p]] > PKI_TIMEOUT)
+				{
 					if (kill(*p, SIGQUIT) < 0)
 						perror("run_irc (kill)");
+				}
 			}
 			
 			// send SIGQUIT to all RNK processes -- RNK TIMEMOUT exceeded
 			for (l_ci_pid_t p = rnk_pids.begin(); p != rnk_pids.end(); ++p)
 			{
 				if (nick_rnkcnt[rnk_nick[*p]] > RNK_TIMEOUT)
+				{
 					if (kill(*p, SIGQUIT) < 0)
 						perror("run_irc (kill)");
+				}
 			}
 			
 			// start RNK or PKI processes
@@ -1700,7 +1722,6 @@ void run_irc
 				ni != nick_players.end(); ++ni)
 			{
 				std::string nick = ni->first, host = ni->second;
-				
 				// RNK (obtain ranking data from other players by gossip)
 				if (nick_rcnt.find(nick) == nick_rcnt.end())
 					nick_rcnt[nick] = RNK_TIMEOUT;
@@ -1715,94 +1736,106 @@ void run_irc
 					nick_rcnt[nick] = 0;
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
+					{
 						perror("run_irc (pipe)");
+					}
 					else if ((rnk_pid = fork()) < 0)
+					{
 						perror("run_irc (fork)");
+					}
 					else
 					{
 						if (rnk_pid == 0)
 						{
+							/* BEGIN child code (ranking data gossip) */
 							signal(SIGQUIT, SIG_DFL);
 							signal(SIGTERM, SIG_DFL);
-							
-							// begin -- child code
 							sleep(1);
 							if (close(fd_pipe[0]) < 0)
 							{
-								perror("run_irc [child] (close)");
+								perror("run_irc [RNK/child] (close)");
 								exit(-1);
 							}
 							opipestream *npipe = new opipestream(fd_pipe[1]);
-							
-							// create TCP/IP connection
+							// create TCP/IP connection to p7773
 							int nick_handle = ConnectToHost(host.c_str(),
 								nick_p7773[nick]);
 							if (nick_handle < 0)
 							{
-								std::cerr << "run_irc [RNK/child] (ConnectToHost)" << std::endl;
+								std::cerr << "run_irc [RNK/child]" << 
+									" (ConnectToHost)" << std::endl;
+								*npipe << "EOF" << std::endl << std::flush;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [RNK/child] (close)");
 								exit(-1);
 							}
-							iosocketstream *nrnk = new iosocketstream(nick_handle);
-							
+							iosocketstream *n = new iosocketstream(nick_handle);
 							// get RNK list
 							char *tmp = new char[RNK_SIZE];
 							if (tmp == NULL)
 							{
 								std::cerr << _("RNK ERROR: out of memory") <<
 									std::endl;
+								*npipe << "EOF" << std::endl << std::flush;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [RNK/child] (close)");
 								exit(-1);
 							}
 							char num[7];
 							memset(num, 0, sizeof(num));
-							nrnk->getline(num, sizeof(num) - 1);
+							n->getline(num, sizeof(num) - 1);
 							size_t rnk_idsize = strtoul(num, NULL, 10);
 							std::vector<std::string> rnk_idlist;
 							for (size_t i = 0; i < rnk_idsize; i++)
 							{
 								memset(tmp, 0, RNK_SIZE);
-								nrnk->getline(tmp, RNK_SIZE);
+								n->getline(tmp, RNK_SIZE);
 								if (rnk.find(tmp) == rnk.end())
 									rnk_idlist.push_back(tmp);
 							}
-							
 							// close TCP/IP connection
-							delete nrnk;
+							delete n;
 							if (close(nick_handle) < 0)
 								perror("run_irc [RNK/child] (close)");
-							
 							// iterate through unknown entries of RNK list
 							for (v_ci_string ri = rnk_idlist.begin();
 								ri != rnk_idlist.end(); ++ri)
 							{
-								// create TCP/IP connection
-								int rhd = ConnectToHost(host.c_str(), nick_p7774[nick]);
+								// create TCP/IP connection to p7774
+								int rhd = ConnectToHost(host.c_str(),
+									nick_p7774[nick]);
 								if (rhd < 0)
 								{
-									std::cerr << "run_irc [RNK2/child] (ConnectToHost)" << std::endl;
+									std::cerr << "run_irc [RNK/child]" <<
+										" (ConnectToHost)" << std::endl;
+									delete [] tmp;
+									*npipe << "EOF" << std::endl << std::flush;
+									delete npipe;
+									if (close(fd_pipe[1]) < 0)
+										perror("run_irc [RNK/child] (close)");
 									exit(-1);
 								}
 								iosocketstream *nrpl = new iosocketstream(rhd);
-								
 								// get RNK data and send it to storing parent
 								*nrpl << *ri << std::endl << std::flush;
 								memset(tmp, 0, RNK_SIZE);
 								nrpl->getline(tmp, RNK_SIZE);
 								*npipe << *ri << std::endl << std::flush;
 								*npipe << tmp << std::endl << std::flush;
-								
 								// close TCP/IP connection
 								delete nrpl;
 								if (close(rhd) < 0)
-									perror("run_irc [RNK2/child] (close)");
+									perror("run_irc [RNK/child] (close)");
 							}
 							*npipe << "EOF" << std::endl << std::flush;
-							delete npipe;
 							delete [] tmp;
+							delete npipe;
 							if (close(fd_pipe[1]) < 0)
 								perror("run_irc (close)");
-							
 							exit(0);
-							// end -- child code
+							/* END child code (ranking data gossip) */
 						}
 						else
 						{
@@ -1816,92 +1849,105 @@ void run_irc
 						}
 					}
 				}
-				
 				// PKI (obtain and verify public keys of other players)
 				if ((nick_key.find(nick) == nick_key.end()) &&
-					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) == nick_ninf.end()))
+					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) ==
+					nick_ninf.end()))
 				{
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
+					{
 						perror("run_irc (pipe)");
+					}
 					if ((nick_pid = fork()) < 0)
+					{
 						perror("run_irc (fork)");
+					}
 					else
 					{
 						if (nick_pid == 0)
 						{
+							/* BEGIN child code (public key exchange) */
 							signal(SIGQUIT, SIG_DFL);
 							signal(SIGTERM, SIG_DFL);
-							
-							// begin -- child code
 							sleep(1);
 							if (close(fd_pipe[0]) < 0)
 							{
-								perror("run_irc [child] (close)");
+								perror("run_irc [PKI/child] (close)");
 								exit(-1);
 							}
 							opipestream *npipe = new opipestream(fd_pipe[1]);
-							
 							// create the TCP/IP connection
-							int nick_handle = ConnectToHost(host.c_str(), nick_p7771[nick]);
+							int nick_handle = ConnectToHost(host.c_str(),
+								nick_p7771[nick]);
 							if (nick_handle < 0)
 							{
-								std::cerr << "run_irc [PKI/child] (ConnectToHost)" << std::endl;
+								std::cerr << "run_irc [PKI/child]" <<
+									" (ConnectToHost)" << std::endl;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [PKI/child] (close)");
 								exit(-1);
 							}
-							iosocketstream *nkey = new iosocketstream(nick_handle);
-							
+							iosocketstream *n = new iosocketstream(nick_handle);
 							// get the public key
 							char *tmp = new char[KEY_SIZE];
 							if (tmp == NULL)
 							{
-								std::cerr << _("PKI ERROR: out of memory") << std::endl;
+								std::cerr << _("PKI ERROR: out of memory") <<
+									std::endl;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [PKI/child] (close)");
 								exit(-1);
 							}
 							memset(tmp, 0, KEY_SIZE);
-							nkey->getline(tmp, KEY_SIZE);
-							public_key = tmp;
-							
+							n->getline(tmp, KEY_SIZE);
+							std::string public_key = tmp;
 							// close the TCP/IP connection
-							delete nkey;
+							delete n;
 							delete [] tmp;
 							if (close(nick_handle) < 0)
 								perror("run_irc [PKI/child] (close)");
-							
 							// import the public key
 							TMCG_PublicKey pkey;
 							if (!pkey.import(public_key))
 							{
 								std::cerr << _("TMCG: public key corrupted") <<
 									std::endl;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [PKI/child] (close)");
 								exit(-2);
 							}
-							
 							// check the keyID
 							if (nick != pkey.keyid(5))
 							{
 								std::cerr << _("TMCG: wrong public key") <<
 									std::endl;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [PKI/child] (close)");
 								exit(-3);
 							}
-							
 							// check the self-signature and NIZK
 							if (!pkey.check())
 							{
 								std::cerr << _("TMCG: invalid public key") <<
 									std::endl;
+								delete npipe;
+								if (close(fd_pipe[1]) < 0)
+									perror("run_irc [PKI/child] (close)");
 								exit(-4);
 							}
-							
 							// send the valid public key to our parent
 							*npipe << nick << std::endl << std::flush;
 							*npipe << public_key << std::endl << std::flush;
-							
 							delete npipe;
 							if (close(fd_pipe[1]) < 0)
 								perror("run_irc [child] (close)");
 							exit(0);
-							// end -- child code
+							/* END child code (public key exchange) */
 						}
 						else
 						{
@@ -1916,26 +1962,29 @@ void run_irc
 						}
 					}
 				}
-				else if (std::find(nick_ninf.begin(), nick_ninf.end(), nick) != nick_ninf.end())
+				else if (std::find(nick_ninf.begin(), nick_ninf.end(), nick) !=
+					nick_ninf.end())
 				{
 					nick_ncnt[nick] += 1;
 				}
 			}
 		}
 	}
+
     // check whether the IRC connection still exists
     if (!irc->good())
-        std::cerr << _("IRC ERROR: connection with server collapsed") << std::endl;
+	{
+        std::cerr << _("IRC ERROR: connection with server collapsed") <<
+			std::endl;
+	}
 
     // free the previously allocated memory (read buffers)
-    for (std::map<int, char*>::const_iterator rbi = readbuf.begin();
-		rbi != readbuf.end(); ++rbi)
-    {
-        delete [] rbi->second;
-    }
+    for (m_ci_int rbi = readbuf.begin(); rbi != readbuf.end(); ++rbi)
+		delete [] rbi->second;
 }
 
-void cleanup()
+void cleanup
+	()
 {
     // send SIGQUIT to all child processes and wait for them
     for (m_ci_pid_t p = games_pid2tnr.begin(); p != games_pid2tnr.end(); ++p)
@@ -1962,7 +2011,8 @@ void cleanup()
     rnkrpl_pid.clear();
 }
 
-void init_term(struct termios &old_term)
+void init_term
+	(struct termios &old_term)
 {
     struct termios new_term;
     
@@ -1989,7 +2039,8 @@ void init_term(struct termios &old_term)
 #endif
 }
 
-void done_term(struct termios &old_term)
+void done_term
+	(struct termios &old_term)
 {
     // remove readline callback handler
     rl_callback_handler_remove();
@@ -1998,7 +2049,8 @@ void done_term(struct termios &old_term)
         perror("done_term (tcsetattr)");
 }
 
-int main(int argc, char* argv[], char* envp[])
+int main
+	(int argc, char* argv[], char* envp[])
 {
 	char *home = NULL, *althost = NULL;
 	std::string homedir = "", hostname = "undefined";
