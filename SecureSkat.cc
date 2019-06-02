@@ -1524,7 +1524,8 @@ void run_irc
 						break;
 					}
 				}
-				irc_readed += num;
+				else
+					irc_readed += num;
 						
 				if (irc_readed > 0)
 				{
