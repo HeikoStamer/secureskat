@@ -93,9 +93,8 @@ size_t num_jacks (const std::vector<size_t> &cards)
 
 bool high_jacks (const std::vector<size_t> &cards)
 {
-	size_t jc = 0, js = 1;
-	if (std::count(cards.begin(), cards.end(), jc) &&
-		std::count(cards.begin(), cards.end(), js))
+	if (std::count(cards.begin(), cards.end(), (size_t)0) &&
+		std::count(cards.begin(), cards.end(), (size_t)1))
 	{
 		return true;
 	}
@@ -218,30 +217,30 @@ size_t high_suit (const size_t spiel, const std::vector<size_t> &cards,
 	std::vector<size_t> &high_cards)
 {
 	high_cards.clear();
-	if (std::count(cards.begin(), cards.end(), 4) &&
-		std::count(cards.begin(), cards.end(), 5) &&
-		std::count(cards.begin(), cards.end(), 6) && ((spiel % 100) != 12))
+	if (std::count(cards.begin(), cards.end(), (size_t)4) &&
+		std::count(cards.begin(), cards.end(), (size_t)5) &&
+		std::count(cards.begin(), cards.end(), (size_t)6) && ((spiel % 100) != 12))
 	{
 		high_cards.push_back(4);
 		high_cards.push_back(5);
 	}
-	if (std::count(cards.begin(), cards.end(), 11) &&
-		std::count(cards.begin(), cards.end(), 12) &&
-		std::count(cards.begin(), cards.end(), 13) && ((spiel % 100) != 11))
+	if (std::count(cards.begin(), cards.end(), (size_t)11) &&
+		std::count(cards.begin(), cards.end(), (size_t)12) &&
+		std::count(cards.begin(), cards.end(), (size_t)13) && ((spiel % 100) != 11))
 	{
 		high_cards.push_back(11);
 		high_cards.push_back(12);
 	}
-	if (std::count(cards.begin(), cards.end(), 18) &&
-		std::count(cards.begin(), cards.end(), 19) &&
-		std::count(cards.begin(), cards.end(), 20) && ((spiel % 100) != 10))
+	if (std::count(cards.begin(), cards.end(), (size_t)18) &&
+		std::count(cards.begin(), cards.end(), (size_t)19) &&
+		std::count(cards.begin(), cards.end(), (size_t)20) && ((spiel % 100) != 10))
 	{
 		high_cards.push_back(18);
 		high_cards.push_back(19);
 	}
-	if (std::count(cards.begin(), cards.end(), 25) &&
-		std::count(cards.begin(), cards.end(), 26) &&
-		std::count(cards.begin(), cards.end(), 27) && ((spiel % 100) != 9))
+	if (std::count(cards.begin(), cards.end(), (size_t)25) &&
+		std::count(cards.begin(), cards.end(), (size_t)26) &&
+		std::count(cards.begin(), cards.end(), (size_t)27) && ((spiel % 100) != 9))
 	{
 		high_cards.push_back(25);
 		high_cards.push_back(26);
@@ -252,52 +251,52 @@ size_t high_suit (const size_t spiel, const std::vector<size_t> &cards,
 size_t good_suit (const std::vector<size_t> &cards)
 {
 	size_t gs = 0;
-	if (std::count(cards.begin(), cards.end(), 4) &&
-		std::count(cards.begin(), cards.end(), 5) &&
-		std::count(cards.begin(), cards.end(), 6))
+	if (std::count(cards.begin(), cards.end(), (size_t)4) &&
+		std::count(cards.begin(), cards.end(), (size_t)5) &&
+		std::count(cards.begin(), cards.end(), (size_t)6))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 4) &&
-		std::count(cards.begin(), cards.end(), 6) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)4) &&
+		std::count(cards.begin(), cards.end(), (size_t)6) &&
 		(num_suit(12, cards) > 3))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 5) &&
-		std::count(cards.begin(), cards.end(), 6) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)5) &&
+		std::count(cards.begin(), cards.end(), (size_t)6) &&
 		(num_suit(12, cards) > 4))
 		gs++;
-	if (std::count(cards.begin(), cards.end(), 11) &&
-		std::count(cards.begin(), cards.end(), 12) &&
-		std::count(cards.begin(), cards.end(), 13))
+	if (std::count(cards.begin(), cards.end(), (size_t)11) &&
+		std::count(cards.begin(), cards.end(), (size_t)12) &&
+		std::count(cards.begin(), cards.end(), (size_t)13))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 11) &&
-		std::count(cards.begin(), cards.end(), 13) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)11) &&
+		std::count(cards.begin(), cards.end(), (size_t)13) &&
 		(num_suit(11, cards) > 3))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 12) &&
-		std::count(cards.begin(), cards.end(), 13) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)12) &&
+		std::count(cards.begin(), cards.end(), (size_t)13) &&
 		(num_suit(11, cards) > 4))
 		gs++;
-	if (std::count(cards.begin(), cards.end(), 18) &&
-		std::count(cards.begin(), cards.end(), 19) &&
-		std::count(cards.begin(), cards.end(), 20))
+	if (std::count(cards.begin(), cards.end(), (size_t)18) &&
+		std::count(cards.begin(), cards.end(), (size_t)19) &&
+		std::count(cards.begin(), cards.end(), (size_t)20))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 18) &&
-		std::count(cards.begin(), cards.end(), 20) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)18) &&
+		std::count(cards.begin(), cards.end(), (size_t)20) &&
 		(num_suit(10, cards) > 3))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 19) &&
-		std::count(cards.begin(), cards.end(), 20) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)19) &&
+		std::count(cards.begin(), cards.end(), (size_t)20) &&
 		(num_suit(10, cards) > 4))
 		gs++;
-	if (std::count(cards.begin(), cards.end(), 25) &&
-		std::count(cards.begin(), cards.end(), 26) &&
-		std::count(cards.begin(), cards.end(), 27))
+	if (std::count(cards.begin(), cards.end(), (size_t)25) &&
+		std::count(cards.begin(), cards.end(), (size_t)26) &&
+		std::count(cards.begin(), cards.end(), (size_t)27))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 25) &&
-		std::count(cards.begin(), cards.end(), 27) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)25) &&
+		std::count(cards.begin(), cards.end(), (size_t)27) &&
 		(num_suit(9, cards) > 3))
 		gs++;
-	else if (std::count(cards.begin(), cards.end(), 26) &&
-		std::count(cards.begin(), cards.end(), 27) &&
+	else if (std::count(cards.begin(), cards.end(), (size_t)26) &&
+		std::count(cards.begin(), cards.end(), (size_t)27) &&
 		(num_suit(9, cards) > 4))
 		gs++;
 	return gs;
@@ -706,7 +705,7 @@ std::cerr << "///// beyond() called" << std::endl;
 	}
 	else if (base == 1)
 	{
-		if (std::count(cards.begin(), cards.end(), 0))
+		if (std::count(cards.begin(), cards.end(), (size_t)0))
 		{
 			result = 0;
 			return true;
@@ -716,12 +715,12 @@ std::cerr << "///// beyond() called" << std::endl;
 	}
 	else if (base == 2)
 	{
-		if (std::count(cards.begin(), cards.end(), 1))
+		if (std::count(cards.begin(), cards.end(), (size_t)1))
 		{
 			result = 1;
 			return true;
 		}
-		else if (std::count(cards.begin(), cards.end(), 0))
+		else if (std::count(cards.begin(), cards.end(), (size_t)0))
 		{
 			result = 0;
 			return true;
@@ -731,17 +730,17 @@ std::cerr << "///// beyond() called" << std::endl;
 	}
 	else if (base == 3)
 	{
-		if (std::count(cards.begin(), cards.end(), 2))
+		if (std::count(cards.begin(), cards.end(), (size_t)2))
 		{
 			result = 2;
 			return true;
 		}
-		else if (std::count(cards.begin(), cards.end(), 1))
+		else if (std::count(cards.begin(), cards.end(), (size_t)1))
 		{
 			result = 1;
 			return true;
 		}
-		else if (std::count(cards.begin(), cards.end(), 0))
+		else if (std::count(cards.begin(), cards.end(), (size_t)0))
 		{
 			result = 0;
 			return true;
@@ -755,7 +754,7 @@ std::cerr << "///// beyond() called" << std::endl;
 		{
 			if ((base >= (4 + (i * 7))) && (base <= (10 + (i * 7))))
 			{
-				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)5 + (i * 7)))
 				{
 					// 10
 					if (5 + (i * 7) < base)
@@ -764,7 +763,7 @@ std::cerr << "///// beyond() called" << std::endl;
 						return true;
 					}
 				}
-				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)7 + (i * 7)))
 				{
 					// O
 					if (7 + (i * 7) < base)
@@ -773,7 +772,7 @@ std::cerr << "///// beyond() called" << std::endl;
 						return true;
 					}
 				}
-				if (std::count(cards.begin(), cards.end(), 6 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)6 + (i * 7)))
 				{
 					// K
 					if (6 + (i * 7) < base)
@@ -782,7 +781,7 @@ std::cerr << "///// beyond() called" << std::endl;
 						return true;
 					}
 				}
-				if (std::count(cards.begin(), cards.end(), 4 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)4 + (i * 7)))
 				{
 					// A
 					if (4 + (i * 7) < base)
@@ -808,58 +807,58 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (4 + (i * 7)))
 			{
 				// K
-				if (std::count(cards.begin(), cards.end(), 6 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)6 + (i * 7)))
 				{
 					result = 6 + (i * 7);
 					return true;
 				}
 				// O
-				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)7 + (i * 7)))
 				{
 					result = 7 + (i * 7);
 					return true;
 				}
 				// U
-				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				if ((i == 0) && std::count(cards.begin(), cards.end(), (size_t)0))
 				{
 					result = 0;
 					return true;
 				}
-				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				if ((i == 1) && std::count(cards.begin(), cards.end(), (size_t)1))
 				{
 					result = 1;
 					return true;
 				}
-				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				if ((i == 2) && std::count(cards.begin(), cards.end(), (size_t)2))
 				{
 					result = 2;
 					return true;
 				}
-				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				if ((i == 3) && std::count(cards.begin(), cards.end(), (size_t)3))
 				{
 					result = 3;
 					return true;
 				}
 				// 10
-				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)5 + (i * 7)))
 				{
 					result = 5 + (i * 7);
 					return true;
 				}
 				// 9
-				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)8 + (i * 7)))
 				{
 					result = 8 + (i * 7);
 					return true;
 				}
 				// 8
-				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 				{
 					result = 9 + (i * 7);
 					return true;
 				}
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -870,52 +869,52 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (6 + (i * 7)))
 			{
 				// O
-				if (std::count(cards.begin(), cards.end(), 7 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)7 + (i * 7)))
 				{
 					result = 7 + (i * 7);
 					return true;
 				}
 				// U
-				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				if ((i == 0) && std::count(cards.begin(), cards.end(), (size_t)0))
 				{
 					result = 0;
 					return true;
 				}
-				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				if ((i == 1) && std::count(cards.begin(), cards.end(), (size_t)1))
 				{
 					result = 1;
 					return true;
 				}
-				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				if ((i == 2) && std::count(cards.begin(), cards.end(), (size_t)2))
 				{
 					result = 2;
 					return true;
 				}
-				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				if ((i == 3) && std::count(cards.begin(), cards.end(), (size_t)3))
 				{
 					result = 3;
 					return true;
 				}
 				// 10
-				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)5 + (i * 7)))
 				{
 					result = 5 + (i * 7);
 					return true;
 				}
 				// 9
-				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)8 + (i * 7)))
 				{
 					result = 8 + (i * 7);
 					return true;
 				}
 				// 8
-				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 				{
 					result = 9 + (i * 7);
 					return true;
 				}
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -926,46 +925,46 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (7 + (i * 7)))
 			{
 				// U
-				if ((i == 0) && std::count(cards.begin(), cards.end(), 0))
+				if ((i == 0) && std::count(cards.begin(), cards.end(), (size_t)0))
 				{
 					result = 0;
 					return true;
 				}
-				if ((i == 1) && std::count(cards.begin(), cards.end(), 1))
+				if ((i == 1) && std::count(cards.begin(), cards.end(), (size_t)1))
 				{
 					result = 1;
 					return true;
 				}
-				if ((i == 2) && std::count(cards.begin(), cards.end(), 2))
+				if ((i == 2) && std::count(cards.begin(), cards.end(), (size_t)2))
 				{
 					result = 2;
 					return true;
 				}
-				if ((i == 3) && std::count(cards.begin(), cards.end(), 3))
+				if ((i == 3) && std::count(cards.begin(), cards.end(), (size_t)3))
 				{
 					result = 3;
 					return true;
 				}
 				// 10
-				if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)5 + (i * 7)))
 				{
 					result = 5 + (i * 7);
 					return true;
 				}
 				// 9
-				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)8 + (i * 7)))
 				{
 					result = 8 + (i * 7);
 					return true;
 				}
 				// 8
-				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 				{
 					result = 9 + (i * 7);
 					return true;
 				}
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -976,19 +975,19 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (5 + (i * 7)))
 			{
 				// 9
-				if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)8 + (i * 7)))
 				{
 					result = 8 + (i * 7);
 					return true;
 				}
 				// 8
-				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 				{
 					result = 9 + (i * 7);
 					return true;
 				}
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -999,13 +998,13 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (8 + (i * 7)))
 			{
 				// 8
-				if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 				{
 					result = 9 + (i * 7);
 					return true;
 				}
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -1016,7 +1015,7 @@ std::cerr << "///// below() called" << std::endl;
 			if (base == (9 + (i * 7)))
 			{
 				// 7
-				if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+				if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 				{
 					result = 10 + (i * 7);
 					return true;
@@ -1027,25 +1026,25 @@ std::cerr << "///// below() called" << std::endl;
 		else if (base == i)
 		{
 			// 10
-			if (std::count(cards.begin(), cards.end(), 5 + (i * 7)))
+			if (std::count(cards.begin(), cards.end(), (size_t)5 + (i * 7)))
 			{
 				result = 5 + (i * 7);
 				return true;
 			}
 			// 9
-			if (std::count(cards.begin(), cards.end(), 8 + (i * 7)))
+			if (std::count(cards.begin(), cards.end(), (size_t)8 + (i * 7)))
 			{
 				result = 8 + (i * 7);
 				return true;
 			}
 			// 8
-			if (std::count(cards.begin(), cards.end(), 9 + (i * 7)))
+			if (std::count(cards.begin(), cards.end(), (size_t)9 + (i * 7)))
 			{
 				result = 9 + (i * 7);
 				return true;
 			}
 			// 7
-			if (std::count(cards.begin(), cards.end(), 10 + (i * 7)))
+			if (std::count(cards.begin(), cards.end(), (size_t)10 + (i * 7)))
 			{
 				result = 10 + (i * 7);
 				return true;
@@ -1553,22 +1552,22 @@ std::cerr << "///// stich.size() = " << stich.size() << " value = " << value(sti
 				}
 				else
 				{
-					if (std::count(cards.begin(), cards.end(), 0))
+					if (std::count(cards.begin(), cards.end(), (size_t)0))
 					{
 						std::cout << "CMD lege EiU" << std::endl << std::flush;
 						return;
 					}
-					else if (std::count(cards.begin(), cards.end(), 1))
+					else if (std::count(cards.begin(), cards.end(), (size_t)1))
 					{
 						std::cout << "CMD lege GrU" << std::endl << std::flush;
 						return;
 					}
-					else if (std::count(cards.begin(), cards.end(), 2))
+					else if (std::count(cards.begin(), cards.end(), (size_t)2))
 					{
 						std::cout << "CMD lege RoU" << std::endl << std::flush;
 						return;
 					}
-					else if (std::count(cards.begin(), cards.end(), 3))
+					else if (std::count(cards.begin(), cards.end(), (size_t)3))
 					{
 						std::cout << "CMD lege ScU" << std::endl << std::flush;
 						return;
@@ -1640,12 +1639,12 @@ std::cerr << "++++++ beyond c = " << c << std::endl;
 						{
 							// Trumpf angespielt vom Gegner (ungewöhnlich)
 							// Übernehmen mit kleinem Bube, falls möglich
-							if (std::count(cards.begin(), cards.end(), 3))
+							if (std::count(cards.begin(), cards.end(), (size_t)3))
 							{
 								std::cout << "CMD lege ScU" << std::endl << std::flush;
 								return;
 							}
-							else if (std::count(cards.begin(), cards.end(), 2))
+							else if (std::count(cards.begin(), cards.end(), (size_t)2))
 							{
 								std::cout << "CMD lege RoU" << std::endl << std::flush;
 								return;
@@ -1657,22 +1656,22 @@ std::cerr << "++++++ beyond c = " << c << std::endl;
 							// falls Ass oder Zehn, mit Buben flankieren
 							if (ace(stich[0]) || ten(stich[0]))
 							{
-								if (std::count(cards.begin(), cards.end(), 0))
+								if (std::count(cards.begin(), cards.end(), (size_t)0))
 								{
 									std::cout << "CMD lege EiU" << std::endl << std::flush;
 									return;
 								}
-								else if (std::count(cards.begin(), cards.end(), 1))
+								else if (std::count(cards.begin(), cards.end(), (size_t)1))
 								{
 									std::cout << "CMD lege GrU" << std::endl << std::flush;
 									return;
 								}
-								else if (std::count(cards.begin(), cards.end(), 2))
+								else if (std::count(cards.begin(), cards.end(), (size_t)2))
 								{
 									std::cout << "CMD lege RoU" << std::endl << std::flush;
 									return;
 								}
-								else if (std::count(cards.begin(), cards.end(), 3))
+								else if (std::count(cards.begin(), cards.end(), (size_t)3))
 								{
 									std::cout << "CMD lege ScU" << std::endl << std::flush;
 									return;
