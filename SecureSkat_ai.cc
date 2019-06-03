@@ -93,9 +93,12 @@ size_t num_jacks (const std::vector<size_t> &cards)
 
 bool high_jacks (const std::vector<size_t> &cards)
 {
-	if (std::count(cards.begin(), cards.end(), 0) &&
-		std::count(cards.begin(), cards.end(), 1))
+	size_t jc = 0, js = 1;
+	if (std::count(cards.begin(), cards.end(), jc) &&
+		std::count(cards.begin(), cards.end(), js))
+	{
 		return true;
+	}
 	return false;
 }
 
