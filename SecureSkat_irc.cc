@@ -663,6 +663,7 @@ bool irc_process
 						nick_p7774[irc_parvec[5]] = p7774;
 						nick_sl[irc_parvec[5]] = sl;
 #ifndef NDEBUG
+std::cerr << "tmp (IRC realname) = " << tmp << std::endl;
 std::cerr << "ahostname = " << ahostname << std::endl;
 #endif
 						if (ahostname == "undefined")

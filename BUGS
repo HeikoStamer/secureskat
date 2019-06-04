@@ -1,4 +1,5 @@
 * most versions of SecureSkat are not compatible to each other
 * due to increased key length there may be an issue with the limited
   length (512 chars) of IRC messages enforced by the IRC server
+* long onion addresses fail due to limited length of fields in IRC USER-message
 * procedure 'waiting for three players' is rarely unstable
