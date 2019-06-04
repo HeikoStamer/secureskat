@@ -73,7 +73,7 @@ std::map<std::string, int> bad_nick;            // map: nick name => PKI attemps
 std::list<pid_t> nick_pids;                     // list: PIDs of PKI requests
 
 // TODO: put all those player data into a single access structure
-std::map<std::string, std::string> nick_players;
+std::map<std::string, std::string> nick_players; // map: nick name => hostname 
 std::map<std::string, std::string> nick_package;
 std::map<std::string, int> nick_p7771, nick_p7772, nick_p7773, nick_p7774;
 std::map<std::string, int> nick_sl;
