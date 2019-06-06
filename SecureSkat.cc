@@ -302,6 +302,9 @@ void read_after_select
 				// initialize read buffer offset
 				readed[fd] = 0;
 			}
+#ifndef NDEBUG
+std::cerr << "read_after_select() started [what=" << what << ",readed=" << readed[fd] << "]" << std::endl;
+#endif
 			// read data from pipe
 			ssize_t num = 0;
 			size_t max_read = rbs - readed[fd];
@@ -345,6 +348,9 @@ void read_after_select
 					if (readbuf[fd][i] == '\n')
 						cnt_delim++, pos_delim.push_back(i);
 				}
+#ifndef NDEBUG
+std::cerr << "read_after_select() work [what=" << what << ",readed=" << readed[fd] << ",cnt_delim=" << cnt_delim << "]" << std::endl;
+#endif
 				char *tmp = new char[rbs]; // allocate a buffer of size rbs
 				switch (what)
 				{
@@ -363,6 +369,15 @@ void read_after_select
 							std::string rnk2 = tmp;
 							// do operation
 							rnk[rnk1] = rnk2;
+						}
+						if (cnt_delim == 1)
+						{
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							std::string unk = tmp;
+							if (unk == "EOF")
+								--cnt_delim, cnt_pos = pos_delim[pos] + 1;
 						}
 						break;
 					case 2: // IRC output from game childs
@@ -414,6 +429,15 @@ void read_after_select
 									">" << std::endl;
 								nick_key[pki1] = apkey;
 							}
+						}
+						if (cnt_delim == 1)
+						{
+							std::memset(tmp, 0, rbs);
+							std::memcpy(tmp, readbuf[fd] + cnt_pos,
+								pos_delim[pos] - cnt_pos);
+							std::string unk = tmp;
+							if (unk == "EOF")
+								--cnt_delim, cnt_pos = pos_delim[pos] + 1;
 						}
 						break;
 					default:
@@ -1435,7 +1459,12 @@ void run_irc
 				break;
 			}
 			else
+			{
+#ifndef NDEBUG
+std::cerr << "select() returned with EINTR" << std::endl;
+#endif
 				continue;
+			}
 		}
 		
 		// anything happend in any descriptor set
@@ -1452,6 +1481,9 @@ void run_irc
 			// output: RNK (export rank list on port 7773)
 			if (FD_ISSET(rnk7773_handle, &rfds))
 			{
+#ifndef NDEBUG
+std::cerr << "RNK(list) output started" << std::endl;
+#endif
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
 				int client_handle = accept(rnk7773_handle,
@@ -1474,6 +1506,9 @@ void run_irc
 			// output: PKI (export public key on port 7771)
 			if (FD_ISSET(pki7771_handle, &rfds))
 			{
+#ifndef NDEBUG
+std::cerr << "PKI(key) output started" << std::endl;
+#endif
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
 				int client_handle = accept(pki7771_handle,
@@ -1494,6 +1529,9 @@ void run_irc
 			// output: RNK (get rank entry on port 7774)
 			if (FD_ISSET(rnk7774_handle, &rfds))
 			{
+#ifndef NDEBUG
+std::cerr << "RNK(entry) output started" << std::endl;
+#endif
 				struct sockaddr_in client_in;
 				socklen_t client_len = sizeof(client_in);
 				int client_handle = accept(rnk7774_handle,
@@ -1579,6 +1617,9 @@ void run_irc
 		// input: process from IRC connection			
 		if (irc_readed > 0)
 		{
+#ifndef NDEBUG
+std::cerr << "irc_process() started [irc_readed=" << irc_readed << "]" << std::endl;
+#endif
 			std::vector<size_t> pos_delim;
 			size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
 			for (size_t i = 0; i < irc_readed; i++)
@@ -1779,7 +1820,7 @@ void run_irc
 					(nick_rnkcnt.find(nick) == nick_rnkcnt.end()))
 				{
 #ifndef NDEBUG
-std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
+std::cerr << "RNK gossip started [nick=" << nick << ",rcnt=" << nick_rcnt[nick] << ",rnkcnt=" << nick_rnkcnt[nick] << "]" << std::endl;
 #endif
 					// start RNK gossip
 					nick_rcnt[nick] = 0;
@@ -1813,7 +1854,6 @@ std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
 							{
 								std::cerr << "run_irc [RNK/child]" << 
 									" (ConnectToHost)" << std::endl;
-								*npipe << "EOF" << std::endl << std::flush;
 								delete npipe;
 								if (close(fd_pipe[1]) < 0)
 									perror("run_irc [RNK/child] (close)");
@@ -1826,7 +1866,6 @@ std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
 							{
 								std::cerr << _("RNK ERROR: out of memory") <<
 									std::endl;
-								*npipe << "EOF" << std::endl << std::flush;
 								delete npipe;
 								if (close(fd_pipe[1]) < 0)
 									perror("run_irc [RNK/child] (close)");
@@ -1860,7 +1899,6 @@ std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
 									std::cerr << "run_irc [RNK/child]" <<
 										" (ConnectToHost)" << std::endl;
 									delete [] tmp;
-									*npipe << "EOF" << std::endl << std::flush;
 									delete npipe;
 									if (close(fd_pipe[1]) < 0)
 										perror("run_irc [RNK/child] (close)");
@@ -1879,6 +1917,9 @@ std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
 									perror("run_irc [RNK/child] (close)");
 							}
 							*npipe << "EOF" << std::endl << std::flush;
+#ifndef NDEBUG
+std::cerr << "RNK gossip ended [nick=" << nick << "]" << std::endl;
+#endif
 							delete [] tmp;
 							delete npipe;
 							if (close(fd_pipe[1]) < 0)
