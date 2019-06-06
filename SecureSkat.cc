@@ -377,7 +377,10 @@ std::cerr << "read_after_select() work [what=" << what << ",readed=" << readed[f
 								pos_delim[pos] - cnt_pos);
 							std::string unk = tmp;
 							if (unk == "EOF")
+							{
 								--cnt_delim, cnt_pos = pos_delim[pos] + 1;
+								del_pipe.push_back(pi->first); // close pipe
+							}
 						}
 						break;
 					case 2: // IRC output from game childs
@@ -437,7 +440,10 @@ std::cerr << "read_after_select() work [what=" << what << ",readed=" << readed[f
 								pos_delim[pos] - cnt_pos);
 							std::string unk = tmp;
 							if (unk == "EOF")
+							{
 								--cnt_delim, cnt_pos = pos_delim[pos] + 1;
+								del_pipe.push_back(pi->first); // close pipe
+							}
 						}
 						break;
 					default:
@@ -450,6 +456,9 @@ std::cerr << "read_after_select() work [what=" << what << ",readed=" << readed[f
 				delete [] tmp;
 			}
 		}
+#ifndef NDEBUG
+std::cerr << "read_after_select() ended [what=" << what << ",readed=" << readed[fd] << ",del_pipe.size()=" << del_pipe.size() << "]" << std::endl;
+#endif
 	}
 	// close dead pipes
 	for (size_t i = 0; i < del_pipe.size(); i++)
