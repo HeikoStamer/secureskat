@@ -1343,42 +1343,72 @@ void run_irc
 		MFD_SET(fileno(stdin), &rfds);
 #endif
 		if (irc_handle < FD_SETSIZE)
+		{
 			MFD_SET(irc_handle, &rfds);
+		}
+		else
+			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		if (pki7771_handle < FD_SETSIZE)
+		{
 			MFD_SET(pki7771_handle, &rfds);
+		}
+		else
+			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		if (rnk7773_handle < FD_SETSIZE)
+		{
 			MFD_SET(rnk7773_handle, &rfds);
+		}
+		else
+			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		if (rnk7774_handle < FD_SETSIZE)
+		{
 			MFD_SET(rnk7774_handle, &rfds);
-		
+		}
+		else
+			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		// PKI pipes from childs
 		for (m_ci_pid_t_int pi = nick_pipe.begin();	pi != nick_pipe.end(); ++pi)
 		{
 			if (pi->second < FD_SETSIZE)
+			{
 				MFD_SET(pi->second, &rfds);
+			}
+			else
+				std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		}
-				
 		// RNK pipes from childs
 		for (m_ci_pid_t_int pi = rnk_pipe.begin(); pi != rnk_pipe.end(); ++pi)
 		{
 			if (pi->second < FD_SETSIZE)
+			{
 				MFD_SET(pi->second, &rfds);
+			}
+			else
+				std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		}
-		
 		// RNK pipes from game childs
 		for (m_ci_pid_t_int pi = games_rnkpipe.begin();
 			pi != games_rnkpipe.end(); ++pi)
 		{
-			if ((pi->second >= 0) && (pi->second < FD_SETSIZE))
+			if (pi->second < 0)
+				continue;
+			if (pi->second < FD_SETSIZE)
+			{
 				MFD_SET(pi->second, &rfds);
+			}
+			else
+				std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		}
-		
 		// OUT pipes from game childs
 		for (m_ci_pid_t_int pi = games_opipe.begin();
 			pi != games_opipe.end(); ++pi)
 		{
 			if (pi->second < FD_SETSIZE)
+			{
 				MFD_SET(pi->second, &rfds);
+			}
+			else
+				std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 		}
 		
 		// select(2) -- initialize timeout
@@ -1400,15 +1430,15 @@ void run_irc
 		// anything happend in any descriptor set
 		if (ret > 0)
 		{
-			// RNK pipes from children
+			// input: RNK pipes from children
 			read_after_select(rfds, rnk_pipe, 1);
-			// RNK pipes from game children
+			// input: RNK pipes from game children
 			read_after_select(rfds, games_rnkpipe, 1);
-			// OUT pipes from game children
+			// input: OUT pipes from game children
 			read_after_select(rfds, games_opipe, 2);
-			// PKI pipes from children
+			// input: PKI pipes from children
 			read_after_select(rfds, nick_pipe, 3);
-			// RNK (export rank list on port 7773)
+			// output: RNK (export rank list on port 7773)
 			if (FD_ISSET(rnk7773_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1430,7 +1460,7 @@ void run_irc
 						perror("run_irc (close)");
 				}
 			}
-			// PKI (export public key on port 7771)
+			// output: PKI (export public key on port 7771)
 			if (FD_ISSET(pki7771_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1450,7 +1480,7 @@ void run_irc
 						perror("run_irc (close)");
 				}
 			}
-			// RNK (get rank entry on port 7774)
+			// output: RNK (get rank entry on port 7774)
 			if (FD_ISSET(rnk7774_handle, &rfds))
 			{
 				struct sockaddr_in client_in;
@@ -1509,13 +1539,13 @@ void run_irc
 			}
 			
 #ifndef NOHUP
-			// read from stdin
+			// input: read from stdin
 			if (FD_ISSET(fileno(stdin), &rfds))
 			{
 				rl_callback_read_char();
 			}
 #endif
-			// read from IRC connection
+			// input: read from IRC connection
 			if (FD_ISSET(irc_handle, &rfds))
 			{
 				ssize_t num = read(irc_handle, irc_readbuf + irc_readed,
@@ -1532,44 +1562,45 @@ void run_irc
 				}
 				else
 					irc_readed += num;
-						
-				if (irc_readed > 0)
+			}
+		}
+
+		// input: process from IRC connection			
+		if (irc_readed > 0)
+		{
+			std::vector<size_t> pos_delim;
+			size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
+			for (size_t i = 0; i < irc_readed; i++)
+			{
+				if (irc_readbuf[i] == '\n')
+					cnt_delim++, pos_delim.push_back(i);
+				if (irc_readbuf[i] == '\015')
+					irc_readbuf[i] = '\n', cnt_delim++, 
+				pos_delim.push_back(i);
+			}
+			while (cnt_delim >= 1)
+			{
+				char tmp[65536];
+				memset(tmp, 0, sizeof(tmp));
+				memcpy(tmp, irc_readbuf + cnt_pos,
+					pos_delim[pos] - cnt_pos);
+				--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
+				std::string irc_reply = tmp;
+				if (!irc_process(irc, irc_reply, entry_ok, first_entry,
+					irc_quit, irc_stat, pub.keyid(5), public_prefix,
+					games_tnr2pid, games_ipipe, nick_key, nick_players,
+					nick_sl, nick_p7771, nick_p7772, nick_p7773,
+					nick_p7774, nick_package, tables, tables_r,
+					tables_p, tables_u, tables_o))
 				{
-					std::vector<size_t> pos_delim;
-					size_t cnt_delim = 0, cnt_pos = 0, pos = 0;
-					for (size_t i = 0; i < irc_readed; i++)
-					{
-						if (irc_readbuf[i] == '\n')
-							cnt_delim++, pos_delim.push_back(i);
-						if (irc_readbuf[i] == '\015')
-							irc_readbuf[i] = '\n', cnt_delim++, 
-						pos_delim.push_back(i);
-					}
-					while (cnt_delim >= 1)
-					{
-						char tmp[65536];
-						memset(tmp, 0, sizeof(tmp));
-						memcpy(tmp, irc_readbuf + cnt_pos,
-							pos_delim[pos] - cnt_pos);
-						--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
-						std::string irc_reply = tmp;
-						if (!irc_process(irc, irc_reply, entry_ok, first_entry,
-							irc_quit, irc_stat, pub.keyid(5), public_prefix,
-							games_tnr2pid, games_ipipe, nick_key, nick_players,
-							nick_sl, nick_p7771, nick_p7772, nick_p7773,
-							nick_p7774, nick_package, tables, tables_r,
-							tables_p, tables_u, tables_o))
-						{
-							break;
-						}
-					}
-					char tmp[65536];
-					memset(tmp, 0, sizeof(tmp));
-					irc_readed -= cnt_pos;
-					memcpy(tmp, irc_readbuf + cnt_pos, irc_readed);
-					memcpy(irc_readbuf, tmp, irc_readed);
+					break;
 				}
 			}
+			char tmp[65536];
+			memset(tmp, 0, sizeof(tmp));
+			irc_readed -= cnt_pos;
+			memcpy(tmp, irc_readbuf + cnt_pos, irc_readed);
+			memcpy(irc_readbuf, tmp, irc_readed);
 		}
 		
 		// the timeout occured
