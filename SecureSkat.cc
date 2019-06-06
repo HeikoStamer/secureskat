@@ -290,7 +290,9 @@ void read_after_select
 	for (m_ci_pid_t_int pi = read_pipe.begin(); pi != read_pipe.end(); ++pi)
 	{
 		int fd = pi->second; // file descriptor of the pipe
-		if ((fd >= 0) && FD_ISSET(fd, &rfds))
+		if (fd < 0)
+			continue;
+		if (FD_ISSET(fd, &rfds))
 		{
 			size_t rbs = 65536; // size of the read buffer
 			if (readbuf.count(fd) == 0)
@@ -424,6 +426,8 @@ void read_after_select
 				delete [] tmp;
 			}
 		}
+		else
+			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 	}
 	// close dead pipes
 	for (size_t i = 0; i < del_pipe.size(); i++)
@@ -1776,6 +1780,9 @@ void run_irc
 				if ((nick_rcnt[nick] > RNK_TIMEOUT) &&
 					(nick_rnkcnt.find(nick) == nick_rnkcnt.end()))
 				{
+#ifndef NDEBUG
+std::cerr << "RNK gossip started [nick=" << nick << "]" << std::endl;
+#endif
 					// start RNK gossip
 					nick_rcnt[nick] = 0;
 					int fd_pipe[2];
@@ -1898,6 +1905,9 @@ void run_irc
 					(std::find(nick_ninf.begin(), nick_ninf.end(), nick) ==
 					nick_ninf.end()))
 				{
+#ifndef NDEBUG
+std::cerr << "PKI key exchange started [nick=" << nick << "]" << std::endl;
+#endif
 					int fd_pipe[2];
 					if (pipe(fd_pipe) < 0)
 					{
