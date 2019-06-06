@@ -426,8 +426,6 @@ void read_after_select
 				delete [] tmp;
 			}
 		}
-		else
-			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
 	}
 	// close dead pipes
 	for (size_t i = 0; i < del_pipe.size(); i++)
