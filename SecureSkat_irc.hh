@@ -53,8 +53,8 @@
 		 std::map<std::string, std::string> &tables_o);
 	bool irc_process
 		(iosocketstream *irc, const std::string &irc_reply, bool &entry_ok,
-		 bool &first_entry, volatile sig_atomic_t &irc_quit, bool &irc_stat,
-		 const std::string &keyid, const std::string &public_prefix,
+		 bool &first_entry, bool &irc_stat, const std::string &keyid,
+		 const std::string &public_prefix,
 		 std::map<std::string, pid_t> &games_tnr2pid,
 		 std::map<pid_t, int> &games_ipipe,
 		 std::map<std::string, TMCG_PublicKey> &nick_key,

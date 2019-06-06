@@ -1347,7 +1347,10 @@ void run_irc
 			MFD_SET(irc_handle, &rfds);
 		}
 		else
+		{
 			std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
+			break;
+		}
 		if (pki7771_handle < FD_SETSIZE)
 		{
 			MFD_SET(pki7771_handle, &rfds);
@@ -1408,7 +1411,10 @@ void run_irc
 				MFD_SET(pi->second, &rfds);
 			}
 			else
+			{
 				std::cerr << _("ERROR: FD_SETSIZE exceeded") << std::endl;
+				irc_quit = 1; // simple 'break' does not help here
+			}
 		}
 		
 		// select(2) -- initialize timeout
@@ -1422,7 +1428,10 @@ void run_irc
 		if (ret < 0)
 		{
 			if (errno != EINTR)
+			{
 				perror("run_irc (select)");
+				break;
+			}
 			else
 				continue;
 		}
@@ -1587,12 +1596,12 @@ void run_irc
 				--cnt_delim, cnt_pos = pos_delim[pos] + 1, pos++;
 				std::string irc_reply = tmp;
 				if (!irc_process(irc, irc_reply, entry_ok, first_entry,
-					irc_quit, irc_stat, pub.keyid(5), public_prefix,
-					games_tnr2pid, games_ipipe, nick_key, nick_players,
-					nick_sl, nick_p7771, nick_p7772, nick_p7773,
-					nick_p7774, nick_package, tables, tables_r,
-					tables_p, tables_u, tables_o))
+					irc_stat, pub.keyid(5), public_prefix, games_tnr2pid,
+					games_ipipe, nick_key, nick_players, nick_sl, nick_p7771,
+					nick_p7772, nick_p7773, nick_p7774,	nick_package,
+					tables, tables_r, tables_p, tables_u, tables_o))
 				{
+					irc_quit = 1;
 					break;
 				}
 			}
@@ -1693,7 +1702,7 @@ void run_irc
 							{
 								std::cerr << _("MALLOC ERROR: out of memory") <<
 									std::endl;
-								exit(-1);
+								irc_quit = 1;
 							}
 							memset(command, 0, 500);
 							strncat(command, "/skat ", 25);

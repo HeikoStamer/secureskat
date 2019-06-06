@@ -266,8 +266,8 @@ void pipe_irc
 
 bool irc_process
 	(iosocketstream *irc, const std::string &irc_reply, bool &entry_ok,
-	 bool &first_entry, volatile sig_atomic_t &irc_quit, bool &irc_stat,
-	 const std::string &keyid, const std::string &public_prefix,
+	 bool &first_entry, bool &irc_stat, const std::string &keyid,
+	 const std::string &public_prefix,
 	 std::map<std::string, pid_t> &games_tnr2pid,
 	 std::map<pid_t, int> &games_ipipe,
 	 std::map<std::string, TMCG_PublicKey> &nick_key,
@@ -316,7 +316,6 @@ bool irc_process
 	{
 		std::cerr << _("IRC ERROR: not registered at IRC server") << std::endl;
 		std::cerr << irc_reply << std::endl;
-		irc_quit = 1;
 		return false;
 	}
 	else if (irc_command_cmp(irc_reply, "JOIN"))
@@ -479,7 +478,6 @@ bool irc_process
 						std::cout << X << _("reason") << ": " <<
 							irc_parvec[2] << std::endl;
 					}
-					irc_quit = 1;
 					return false;
 				}
 				else if (irc_parvec[1].find(public_prefix, 0) == 0)
