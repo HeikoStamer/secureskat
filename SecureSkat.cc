@@ -311,18 +311,18 @@ std::cerr << "read_after_select() started [what=" << what << ",readed=" << reade
 			if (max_read > 0)
 			{
 				num = read(fd, readbuf[fd] + readed[fd], max_read);
-				if (num <= 0)
+				if (num < 0)
 				{
-					if (errno != EINTR)
-					{
-						if (num < 0)
-						{
-							std::cerr << _("read error for PID") << " " <<
-								pi->first << " " << _("encountered") <<
-								" [errno=" << errno << "]" << std::endl;
-						}
-						del_pipe.push_back(pi->first); // close this pipe later
-					}
+					if ((errno == EAGAIN) || (errno == EINTR))
+						continue;
+					std::cerr << _("read error for PID") << " " << pi->first <<
+						" " << _("encountered") << " [errno=" << errno << "]" <<
+						std::endl;
+					del_pipe.push_back(pi->first); // close this pipe later
+				}
+				else if (num == 0)
+				{
+					del_pipe.push_back(pi->first); // got EOF, close this pipe
 				}
 				else
 					readed[fd] += num;
@@ -1608,15 +1608,21 @@ std::cerr << "RNK(entry) output started" << std::endl;
 			{
 				ssize_t num = read(irc_handle, irc_readbuf + irc_readed,
 					sizeof(irc_readbuf) - irc_readed);
-				if (num <= 0)
+				if (num < 0)
 				{
-					if (errno != EINTR)
-					{
-						std::cerr <<
-							_("IRC ERROR: connection with server collapsed") <<
-							" [errno=" << errno << "]" << std::endl;
-						break;
-					}
+					if ((errno == EAGAIN) || (errno == EINTR))
+						continue;
+					std::cerr <<
+						_("IRC ERROR: connection with server collapsed") <<
+						" [errno=" << errno << "]" << std::endl;
+					break;
+				}
+				else if (num == 0)
+				{
+					std::cerr <<
+						_("IRC ERROR: connection with server collapsed") <<
+						" [errno=" << errno << "]" << std::endl;
+					break;
 				}
 				else
 					irc_readed += num;
