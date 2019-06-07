@@ -1462,7 +1462,7 @@ void run_irc
 		// error occured
 		if (ret < 0)
 		{
-			if (errno != EINTR)
+			if ((errno != EINTR) && (errno != EAGAIN))
 			{
 				perror("run_irc (select)");
 				break;
@@ -1470,7 +1470,7 @@ void run_irc
 			else
 			{
 #ifndef NDEBUG
-std::cerr << "select() returned with EINTR" << std::endl;
+std::cerr << "select() returned with EINTR or EAGAIN" << std::endl;
 #endif
 				continue;
 			}
