@@ -1511,6 +1511,9 @@ std::cerr << "RNK(list) output started" << std::endl;
 					if (close(client_handle) < 0)
 						perror("run_irc (close)");
 				}
+#ifndef NDEBUG
+std::cerr << "RNK(list) output ended" << std::endl;
+#endif
 			}
 			// output: PKI (export public key on port 7771)
 			if (FD_ISSET(pki7771_handle, &rfds))
@@ -1534,6 +1537,9 @@ std::cerr << "PKI(key) output started" << std::endl;
 					if (close(client_handle) < 0)
 						perror("run_irc (close)");
 				}
+#ifndef NDEBUG
+std::cerr << "PKI(key) output ended" << std::endl;
+#endif
 			}
 			// output: RNK (get rank entry on port 7774)
 			if (FD_ISSET(rnk7774_handle, &rfds))
@@ -1583,6 +1589,9 @@ std::cerr << "RNK(entry) output started" << std::endl;
 							else
 								*client_ios << std::endl << std::flush;
 							delete client_ios, delete [] tmp;
+#ifndef NDEBUG
+std::cerr << "RNK(entry) output ended" << std::endl;
+#endif
 							exit(0);
 							/* END child code (ranking data) */
 						}
