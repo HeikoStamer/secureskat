@@ -7,6 +7,8 @@ no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included
 in the sources of this package and additionally can be obtained from Internet
 <https://www.gnu.org/licenses>.
 
+SecureSkat 2.16:
+	-
 SecureSkat 2.15:
     - bugfix: check the returned errno EINTR/EAGAIN (Interrupted system call)
     - bugfix: added some missing error handlers for read() calls
