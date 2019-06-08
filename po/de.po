@@ -1,15 +1,15 @@
 # German translations for SecureSkat package
 # German messages for SecureSkat.
-# Copyright (C) 2005, 2006, 2009, 2017 Heiko Stamer <HeikoStamer@gmx.net>
+# Copyright (C) 2005, 2006, 2009, 2017, 2019 Heiko Stamer <HeikoStamer@gmx.net>
 # This file is distributed under the same license as the SecureSkat package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SecureSkat 2.12\n"
+"Project-Id-Version: SecureSkat 2.16\n"
 "Report-Msgid-Bugs-To: HeikoStamer@gmx.net\n"
 "POT-Creation-Date: 2019-06-08 10:59+0200\n"
-"PO-Revision-Date: 2005-06-04 16:58+0200\n"
-"Last-Translator: Heiko Stamer <stamer@gaos.org>\n"
+"PO-Revision-Date: 2019-06-08 11:58+0200\n"
+"Last-Translator: Heiko Stamer <HeikoStamer@gmx.net>\n"
 "Language-Team: German <de@li.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -32,19 +32,19 @@ msgstr "fehlgeschlagen. Fehlerstatus"
 
 #: SecureSkat.cc:330
 msgid "read error for PID"
-msgstr ""
+msgstr "Lesefehler für PID"
 
 #: SecureSkat.cc:331
 msgid "encountered"
-msgstr ""
+msgstr "aufgetreten"
 
 #: SecureSkat.cc:344
 msgid "read buffer for PID"
-msgstr ""
+msgstr "Lesepuffer für PID"
 
 #: SecureSkat.cc:345
 msgid "exceeded"
-msgstr ""
+msgstr "überschritten"
 
 #: SecureSkat.cc:429 SecureSkat.cc:1208 SecureSkat.cc:2045
 msgid "TMCG: public key corrupted"
@@ -386,7 +386,7 @@ msgstr "unbekanntes Kommando"
 #: SecureSkat.cc:1398 SecureSkat.cc:1406 SecureSkat.cc:1412 SecureSkat.cc:1418
 #: SecureSkat.cc:1427 SecureSkat.cc:1437 SecureSkat.cc:1450 SecureSkat.cc:1462
 msgid "ERROR: FD_SETSIZE exceeded"
-msgstr ""
+msgstr "FEHLER: FD_SETSIZE überschritten"
 
 #: SecureSkat.cc:1637 SecureSkat.cc:1644 SecureSkat.cc:2106
 msgid "IRC ERROR: connection with server collapsed"
@@ -736,7 +736,7 @@ msgstr "Verbindung mit Spielpartner(n) zusammengebrochen"
 
 #: SecureSkat_game.cc:895
 msgid "read error in skat_game() encountered"
-msgstr ""
+msgstr "Lesefehler in skat_game() aufgetreten"
 
 #: SecureSkat_game.cc:1038 SecureSkat_game.cc:1584
 msgid "passes at"
@@ -1023,7 +1023,7 @@ msgstr "TMCG: decrypt() [Entschlüsselung] fehlgeschlagen"
 
 #: SecureSkat_vote.cc:450
 msgid "read error in ballot_child() encountered"
-msgstr ""
+msgstr "Lesefehler in ballot_child() aufgetreten"
 
 #: SecureSkat_vote.cc:679
 msgid "for"
@@ -1047,7 +1047,7 @@ msgstr "ABSTIMMUNGSERGEBNIS:"
 
 #: SecureSkat_skat.cc:232
 msgid "read error in skat_accept() encountered"
-msgstr ""
+msgstr "Lesefehler in skat_accept() aufgetreten"
 
 #: SecureSkat_skat.cc:267 SecureSkat_skat.cc:377 SecureSkat_skat.cc:517
 msgid "observers currently not permitted"
