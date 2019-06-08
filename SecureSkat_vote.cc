@@ -22,6 +22,9 @@
 
 RETSIGTYPE sig_handler_ballot_quit(int sig)
 {
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	std::cerr << "signal_handler_ballot_quit: got signal " << sig << std::endl;
 #endif

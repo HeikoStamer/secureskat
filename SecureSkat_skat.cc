@@ -24,6 +24,9 @@ int ctl_pid = 0; // PID of the running control program
 
 RETSIGTYPE sig_handler_skat_quit(int sig)
 {
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	std::cerr << "sig_handler_skat_quit: got signal " << sig << std::endl;
 #endif

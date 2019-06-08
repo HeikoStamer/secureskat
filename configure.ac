@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 # Process this file with autoconf to produce a configure script.
-AC_REVISION([20190119])
+AC_REVISION([20190608])
 AC_PREREQ(2.61)
 
 AC_INIT([SecureSkat], [2.15], [HeikoStamer@gmx.net], [SecureSkat],
@@ -72,9 +72,9 @@ backup_LDFLAGS="$LDFLAGS"
 backup_CPPLAGS="$CPPFLAGS"
 AC_ARG_WITH(gmp, [AS_HELP_STRING([--with-gmp=<path>], [prefix of libgmp installation e.g. /usr/local])],\
  [GMP_PREFIX="$with_gmp" LDFLAGS="-L${with_gmp}/lib $backup_LDFLAGS" CPPFLAGS="-I${with_gmp}/include $backup_CPPFLAGS"],\
- [AC_CHECK_LIB(gmp, __gmpz_init, [LIBS=""], AC_MSG_ERROR([libgmp is needed; maybe you want to call configure with the --with-gmp=<path> option]))])
-AC_CHECK_LIB(gmp, __gmpz_import, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
-AC_CHECK_LIB(gmp, __gmpz_export, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is needed]))
+ [AC_CHECK_LIB(gmp, __gmpz_init, [LIBS=""], AC_MSG_ERROR([libgmp is required; maybe you want to call configure with the --with-gmp=<path> option]))])
+AC_CHECK_LIB(gmp, __gmpz_import, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is required]))
+AC_CHECK_LIB(gmp, __gmpz_export, [LIBS=""], AC_MSG_ERROR([libgmp >= 4.2 is required]))
 AC_CHECK_HEADERS([gmp.h], , AC_MSG_ERROR([libgmp headers are missing]))
 if test "x$GMP_PREFIX" != x ; then
         LIBGMP_LIBS=" -L${GMP_PREFIX}/lib"
@@ -107,12 +107,10 @@ fi
 AC_SUBST(LIBTMCG_LIBS)
 AC_SUBST(LIBTMCG_CFLAGS)
 
-AC_ARG_WITH(gdbm, [AS_HELP_STRING([--with-gdbm=<path>], [prefix of libgdbm installation e.g. /usr/local])],\
- [LDFLAGS="-L${with_gdbm}/lib $LDFLAGS" CPPFLAGS="-I${with_gdbm}/include $CPPFLAGS"], [])
-AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is needed; maybe you want to call configure with the --with-gdbm=<path> option]))
-AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is needed]))
-AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is needed]))
-AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is needed]))
+AC_CHECK_LIB(gdbm, gdbm_open, , AC_MSG_ERROR([libgdbm is required]))
+AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([libncurses is required]))
+AC_CHECK_LIB(readline, rl_callback_handler_install, , AC_MSG_ERROR([libreadline is required]))
+AC_CHECK_LIB(z, zlibVersion, , AC_MSG_ERROR([zlib is required]))
 
 # Solaris and Unisys need -lsocket resp. -lnsl.
 AC_CHECK_FUNC(socket, , ac_try_socket=1)
@@ -161,10 +159,10 @@ AC_CHECK_FUNCS([fork dup2 getaddrinfo memset memcpy memcmp memmove select\
  send recv fileno tcgetattr tcsetattr connect bind listen accept setsockopt\
  htonl], , AC_MSG_ERROR([some essential C functions are missing]))
 
-CXXFLAGS="$CXXFLAGS -Wall -Wextra -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
-echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
+##CXXFLAGS="$CXXFLAGS -Wall -Wextra -g3 $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+##echo ">>>>>>>>>>>>>>>>>>> DEBUG MODE <<<<<<<<<<<<<<<<<<<<<<<"
 
-##CXXFLAGS="$CXXFLAGS -Wall -Wextra -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -D NDEBUG $LIBGMP_CFLAGS $LIBGCRYPT_CFLAGS $LIBTMCG_CFLAGS"
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT

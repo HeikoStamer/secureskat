@@ -1,11 +1,12 @@
 Copyright (C)  2002, 2003, 2004, 2005, 2006, 2007, 2009,
                2015, 2016, 2017, 2018, 2019  Heiko Stamer <HeikoStamer@gmx.net>
-  Permission is granted to copy, distribute and/or modify this document
-  under the terms of the GNU Free Documentation License, Version 1.3
-  or any later version published by the Free Software Foundation;
-  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
-  Texts. A copy of the license is included in the section entitled "GNU
-  Free Documentation License".
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant Sections,
+no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included
+in the sources of this package and additionally can be obtained from Internet
+<https://www.gnu.org/licenses>.
 
 Introduction
 ------------
@@ -18,11 +19,11 @@ Introduction
   Furthermore, SecureSkat provides electronic voting capabilities based
   on a simple playing card encoding.
 
-  LibTMCG provides functions for creating secure and fair online card games
-  without depending on a trusted third-party (TTP). The corresponding
+  LibTMCG provides interfaces for creating secure and verifiable online card
+  games without depending on a trusted third-party (TTP). The corresponding
   cryptographic problem, actually called "Mental Poker", has been studied
   since 1979 (Shamir, Rivest, and Adleman) by many authors.
-                      (see http://www.nongnu.org/libtmcg for more details)
+                      (see https://www.nongnu.org/libtmcg for more details)
 
 
 Requirements
@@ -78,7 +79,7 @@ Playing SecureSkat over an IRC network
     <CTRL_PROGRAM> is an interface control program, e.g. SecureSkat_random.
     (Note: Please give always the full path to the binary file here!)
 
-  The last two arguments are optional. In this case, IRC port number
+  The last two arguments are optional. In that case, IRC port number
   is set to 6667 and no interface control program will be used.
   Currently, only one control program is included in this distribution:
   
@@ -105,11 +106,11 @@ Playing SecureSkat over an IRC network
   please generate a fresh key by deleting the database 'SecureSkat.skr'
   and restart again.
   
-  Now you will be joined to channel #openSkat (The old program name was
-  kept to provide backward compatibility with older versions.) and you can
-  chat with other players simply by typing lines of text. Commands are
+  Now you will be joined automatically to channel #openSkat (The former program
+  name was kept to provide backward compatibility with older versions.) and you
+  can chat with other players simply by typing lines of text. Commands are
   strings, wherein the first letter is a '/' (slash). For example, '/help'
-  prints a short help screen:
+  prints a short help screen (example follows):
 
     /quit               quits SecureSkat
     /on                 turns the output of IRC channel #openSkat on
@@ -146,13 +147,13 @@ Playing SecureSkat over an IRC network
   data, and on the third it answers ranking data requests. Checking whether
   the public key is valid is done by a non-interactive zero knowledge proof
   (soundness error probability is currently fixed at 2^{-80}). Hence the
-  execution of verification tasks can take a large amount of time and continues
+  execution of verification tasks can take some amount of time and continues
   in background until a success message `PKI identified ID?^????? aka ???...'
   ('?' is here again a wildcard) appears. Sometimes the background process is
   aborted with an appropriate error message. Well, if anything went wrong you
   may have to exchange the keys manually. Then please use the commands
-  '/export <file name>' resp. '/import <file name>' and file a bug report in
-  such a rare case.
+  '/export <file name>' resp. '/import <file name>' to help yourself and file
+  a bug report in such a rare case.
 
   After a successful key exchange you can start playing Skat by joining
   existing tables ('/skat <table identifier>') or by creating new tables
@@ -160,11 +161,10 @@ Playing SecureSkat over an IRC network
   both cases you have to wait for other participants. The command '/tables'
   prints a short list of all existing tables and '/players' a list of the
   registered players, respectively. During the actual session initialization
-  of the game a TCP/IP connection with each of your opponents will be
-  established. Therefore (and further for the automatic key exchange) your
-  workstation should be not behind a (paranoid) firewall. Perhaps you can
-  convince your network administrator (e.g. with a bottle of horrible German
-  beer %-) that he permits incoming TCP connections in the range 7771:8000.
+  of the game (i.e. for each table) a TCP/IP connection with each of your
+  opponents will be established. Therefore (and further for the automatic key
+  exchange and ranking data gossip) your workstation's firewall or router
+  must permit incoming TCP connections in the port range 7771 to 7930.
 
   However, there is another way to get things work: use Tor! In order to set
   an alternative hostname the environment variable ALTHOST can be used, i.e.,
@@ -252,9 +252,89 @@ Playing SecureSkat over an IRC network
     HiddenServicePort 7847 127.0.0.1:7847
     HiddenServicePort 7848 127.0.0.1:7848
     HiddenServicePort 7849 127.0.0.1:7849
-    [...]
+    HiddenServicePort 7850 127.0.0.1:7850
+    HiddenServicePort 7851 127.0.0.1:7851
+    HiddenServicePort 7852 127.0.0.1:7852
+    HiddenServicePort 7853 127.0.0.1:7853
+    HiddenServicePort 7854 127.0.0.1:7854
+    HiddenServicePort 7855 127.0.0.1:7855
+    HiddenServicePort 7856 127.0.0.1:7856
+    HiddenServicePort 7857 127.0.0.1:7857
+    HiddenServicePort 7858 127.0.0.1:7858
+    HiddenServicePort 7859 127.0.0.1:7859
+    HiddenServicePort 7860 127.0.0.1:7860
+    HiddenServicePort 7861 127.0.0.1:7861
+    HiddenServicePort 7862 127.0.0.1:7862
+    HiddenServicePort 7863 127.0.0.1:7863
+    HiddenServicePort 7864 127.0.0.1:7864
+    HiddenServicePort 7865 127.0.0.1:7865
+    HiddenServicePort 7866 127.0.0.1:7866
+    HiddenServicePort 7867 127.0.0.1:7867
+    HiddenServicePort 7868 127.0.0.1:7868
+    HiddenServicePort 7869 127.0.0.1:7869
+    HiddenServicePort 7870 127.0.0.1:7870
+    HiddenServicePort 7871 127.0.0.1:7871
+    HiddenServicePort 7872 127.0.0.1:7872
+    HiddenServicePort 7873 127.0.0.1:7873
+    HiddenServicePort 7874 127.0.0.1:7874
+    HiddenServicePort 7875 127.0.0.1:7875
+    HiddenServicePort 7876 127.0.0.1:7876
+    HiddenServicePort 7877 127.0.0.1:7877
+    HiddenServicePort 7878 127.0.0.1:7878
+    HiddenServicePort 7879 127.0.0.1:7879
+    HiddenServicePort 7880 127.0.0.1:7880
+    HiddenServicePort 7881 127.0.0.1:7881
+    HiddenServicePort 7882 127.0.0.1:7882
+    HiddenServicePort 7883 127.0.0.1:7883
+    HiddenServicePort 7884 127.0.0.1:7884
+    HiddenServicePort 7885 127.0.0.1:7885
+    HiddenServicePort 7886 127.0.0.1:7886
+    HiddenServicePort 7887 127.0.0.1:7887
+    HiddenServicePort 7888 127.0.0.1:7888
+    HiddenServicePort 7889 127.0.0.1:7889
+    HiddenServicePort 7890 127.0.0.1:7890
+    HiddenServicePort 7891 127.0.0.1:7891
+    HiddenServicePort 7892 127.0.0.1:7892
+    HiddenServicePort 7893 127.0.0.1:7893
+    HiddenServicePort 7894 127.0.0.1:7894
+    HiddenServicePort 7895 127.0.0.1:7895
+    HiddenServicePort 7896 127.0.0.1:7896
+    HiddenServicePort 7897 127.0.0.1:7897
+    HiddenServicePort 7898 127.0.0.1:7898
+    HiddenServicePort 7899 127.0.0.1:7899
+    HiddenServicePort 7900 127.0.0.1:7900
+    HiddenServicePort 7901 127.0.0.1:7901
+    HiddenServicePort 7902 127.0.0.1:7902
+    HiddenServicePort 7903 127.0.0.1:7903
+    HiddenServicePort 7904 127.0.0.1:7904
+    HiddenServicePort 7905 127.0.0.1:7905
+    HiddenServicePort 7906 127.0.0.1:7906
+    HiddenServicePort 7907 127.0.0.1:7907
+    HiddenServicePort 7908 127.0.0.1:7908
+    HiddenServicePort 7909 127.0.0.1:7909
+    HiddenServicePort 7910 127.0.0.1:7910
+    HiddenServicePort 7911 127.0.0.1:7911
+    HiddenServicePort 7912 127.0.0.1:7912
+    HiddenServicePort 7913 127.0.0.1:7913
+    HiddenServicePort 7914 127.0.0.1:7914
+    HiddenServicePort 7915 127.0.0.1:7915
+    HiddenServicePort 7916 127.0.0.1:7916
+    HiddenServicePort 7917 127.0.0.1:7917
+    HiddenServicePort 7918 127.0.0.1:7918
+    HiddenServicePort 7919 127.0.0.1:7919
+    HiddenServicePort 7920 127.0.0.1:7920
+    HiddenServicePort 7921 127.0.0.1:7921
+    HiddenServicePort 7922 127.0.0.1:7922
+    HiddenServicePort 7923 127.0.0.1:7923
+    HiddenServicePort 7924 127.0.0.1:7924
+    HiddenServicePort 7925 127.0.0.1:7925
+    HiddenServicePort 7926 127.0.0.1:7926
+    HiddenServicePort 7927 127.0.0.1:7927
+    HiddenServicePort 7928 127.0.0.1:7928
+    HiddenServicePort 7929 127.0.0.1:7929
+    HiddenServicePort 7930 127.0.0.1:7930
 
-  Additionally, you should have the following line in your torsocks.conf:
+  You must have the following line in your torsocks.conf file activated:
 
     AllowInbound 1
 

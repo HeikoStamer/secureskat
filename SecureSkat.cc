@@ -37,6 +37,9 @@ volatile sig_atomic_t irc_quit = 0, sigchld_critical = 0; // atomic flags
 RETSIGTYPE sig_handler_quit
 	(int sig)
 {
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	std::cerr << "sig_handler_quit(): got signal " << sig << std::endl;
 #endif
@@ -48,6 +51,9 @@ RETSIGTYPE sig_handler_quit
 RETSIGTYPE sig_handler_pipe
 	(int sig)
 {
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	if (sig != SIGPIPE)
 		std::cerr << "sig_handler_pipe(): got signal " << sig << std::endl;
@@ -86,6 +92,9 @@ RETSIGTYPE sig_handler_usr1
 	(int sig)
 {
 	sigset_t sigset;
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	if (sig != SIGUSR1)
 		std::cerr << "sig_handler_usr1(): got signal " << sig << std::endl;
@@ -235,6 +244,9 @@ RETSIGTYPE sig_handler_chld
 	(int sig)
 {
 	sigchld_critical = 1;   // enter critical section
+	// two lines of dummy code follow to avoid compiler warnings
+	if (sig == 0)
+		sig = 0;
 #ifndef NDEBUG
 	if (sig != SIGCHLD)
 		std::cerr << "sig_handler_chld(): got signal " << sig << std::endl;

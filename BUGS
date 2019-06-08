@@ -1,7 +1,16 @@
+Copyright (C)  2019 Heiko Stamer <HeikoStamer@gmx.net>
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant Sections,
+no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included
+in the sources of this package and additionally can be obtained from Internet
+<https://www.gnu.org/licenses>.
+
 * most different versions of SecureSkat are not compatible to each other
 * due to increased key length there may be an issue with the limited
   length (512 chars) of IRC messages enforced by some IRC servers
 * long onion addresses (63 chars) may fail due to limited length (64 chars) of
   'real name' field in the initial IRC USER-message (37 out of 64 chars are
   already used for other client information) enforced by some IRC servers
-* procedure 'waiting for three players' is rarely unstable
+* procedure 'waiting for three players' of table preparation is rarely unstable
