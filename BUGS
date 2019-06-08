@@ -1,10 +1,5 @@
-* there is still a problem with a crazy loop (num==0) consuming CPU cycles:
-read_after_select() started [what=2,readed=0]
-read_after_select() ended [what=2,readed=0,del_pipe.size()=0]
-read_after_select() started [what=1,readed=0]
-read_after_select() ended [what=1,readed=0,del_pipe.size()=0]
-* most versions of SecureSkat are not compatible to each other
-* due to increased key length there can be an issue with the limited
+* most different versions of SecureSkat are not compatible to each other
+* due to increased key length there may be an issue with the limited
   length (512 chars) of IRC messages enforced by some IRC servers
 * long onion addresses (63 chars) may fail due to limited length (64 chars) of
   'real name' field in the initial IRC USER-message (37 out of 64 chars are
